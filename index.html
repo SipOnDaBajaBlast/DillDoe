@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DILL DOH |GAMES</title>
+    <title>DILL DOH | GAMES</title>
     <!-- Sharp Metal & Grunge Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,9 +36,44 @@
             overflow: hidden;
             font-family: 'Permanent Marker', cursive, sans-serif;
             transition: opacity 0.5s ease;
+            position: relative;
         }
 
-        /* --- SIMPLIFIED LOADING SCREEN --- */
+        /* --- BACKGROUND CAT IMAGES --- */
+        .bg-cat {
+            position: absolute;
+            z-index: 1;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* Dancing Kitten - Bottom Left */
+        .bg-cat-kitten {
+            bottom: 0;
+            left: 20px;
+            width: 250px;
+            max-width: 30vw;
+            opacity: 0.85;
+            filter: drop-shadow(2px 4px 10px rgba(0,0,0,0.7));
+        }
+
+        /* Nyan Cat - Top Right */
+        .bg-cat-nyan {
+            top: 15%;
+            right: 30px;
+            width: 280px;
+            max-width: 35vw;
+            opacity: 0.85;
+            filter: drop-shadow(0px 0px 12px rgba(255, 255, 255, 0.2));
+            animation: float-cat 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes float-cat {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-15px) rotate(3deg); }
+        }
+
+        /* --- LOADING SCREEN --- */
         #loader-wrapper {
             position: fixed;
             top: 0;
@@ -54,7 +89,6 @@
             transition: opacity 0.6s ease, visibility 0.6s ease;
         }
 
-        /* Ripped Loading Banner */
         .loader-box {
             padding: 20px 40px;
             background-color: var(--card-bg);
@@ -88,10 +122,11 @@
             opacity: 0;
         }
 
-        /* --- HEADER & SHARP METAL TITLE --- */
+        /* --- HEADER & TITLE --- */
         header {
             margin-top: 10vh;
             text-align: center;
+            z-index: 2;
         }
 
         .metal-title {
@@ -100,8 +135,8 @@
             letter-spacing: 5px;
             text-transform: uppercase;
             color: var(--text-white);
-            /* Clean Metal Gradient Effect */
             background: linear-gradient(180deg, #ffffff 0%, #a3a3a3 50%, #3a3a3a 51%, #757575 100%);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(4px 4px 0px #000);
@@ -116,12 +151,13 @@
             text-transform: uppercase;
         }
 
-        /* --- MAIN & RIPPED BUTTON --- */
+        /* --- MAIN & BUTTON --- */
         main {
             display: flex;
             justify-content: center;
             align-items: center;
             flex-grow: 1;
+            z-index: 2;
         }
 
         .ripped-container {
@@ -129,20 +165,17 @@
             transform: rotate(-2deg);
         }
 
-        /* Start Button with Ripped / Torn Edges */
         .start-btn {
             display: inline-block;
             padding: 22px 70px;
             font-family: 'Permanent Marker', cursive;
             font-size: 2.8rem;
             text-transform: uppercase;
-            color: #121212;
             background-color: var(--paper-brown);
             color: #f1f1f1;
             text-decoration: none;
             cursor: pointer;
             border: none;
-            /* Jagged Ripped Edges */
             clip-path: polygon(
                 0% 10%, 8% 0%, 18% 8%, 28% 1%, 38% 9%, 48% 2%, 58% 10%, 68% 1%, 78% 8%, 88% 0%, 100% 9%,
                 97% 35%, 100% 65%, 96% 90%, 
@@ -162,7 +195,6 @@
             transform: scale(0.95);
         }
 
-        /* Clear Tape Accent */
         .tape {
             position: absolute;
             top: -12px;
@@ -178,10 +210,15 @@
 
         footer {
             margin-bottom: 25px;
+            z-index: 2;
         }
     </style>
 </head>
 <body>
+
+    <!-- BACKGROUND CAT IMAGES -->
+    <img src="https://png.pngtree.com/png-vector/20240917/ourmid/pngtree-funny-kitten-cat-standing-or-dancing-isolated-png-image_13844217.png" alt="Dancing Kitten" class="bg-cat bg-cat-kitten">
+    <img src="https://wallpapers.com/images/featured/nyan-cat-png-az8jeatasi3z7yda.png" alt="Nyan Cat" class="bg-cat bg-cat-nyan">
 
     <!-- LOADING SCREEN -->
     <div id="loader-wrapper">
@@ -190,31 +227,29 @@
         </div>
     </div>
 
-    <!-- SHARP METAL HEADER -->
+    <!-- HEADER -->
     <header>
-        <h1 class="metal-title">DILL DOH |UNBLOCKED GAMES</h1>
+        <h1 class="metal-title">DILL DOH | UNBLOCKED GAMES</h1>
         <p class="subtitle">(very funny name please laugh)</p>
     </header>
 
-    <!-- RIPPED PAPER START BUTTON -->
+    <!-- MAIN ACTION -->
     <main>
         <div class="ripped-container">
             <div class="tape"></div>
-            <a href="games.html" class="start-btn" onclick="navigateToPage(event, this.href)">initalize</a>
+            <a href="games.html" class="start-btn" onclick="navigateToPage(event, this.href)">initialize</a>
         </div>
     </main>
 
     <footer></footer>
 
     <script>
-        // Loader timeout
         window.addEventListener('load', () => {
             setTimeout(() => {
                 document.body.classList.add('loaded');
             }, 1200);
         });
 
-        // Page Navigation Transition
         function navigateToPage(event, destinationUrl) {
             event.preventDefault();
             document.body.classList.add('fade-out');
