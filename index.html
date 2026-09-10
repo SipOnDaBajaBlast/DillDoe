@@ -3,47 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DILLD NEW GAMES</title>
+    <title>DILL DOH</title>
+    <!-- Metallica-style sharp metallic font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@900&family=Permanent+Marker&family=Metal+Mania&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0d0d0d;
-            --accent-color: #e6e6e6;
-            --lightning-color: #7df9ff;
-            --lightning-glow: rgba(125, 249, 255, 0.8);
+            --bg-color: #0d0d0c;
+            --electric-blue: #00e5ff;
+            --lightning-glow: rgba(0, 229, 255, 0.8);
+            --grunge-yellow: #facc15;
+            --grunge-red: #dc2626;
+            --metal-silver: #e2e8f0;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Impact', 'Arial Black', sans-serif;
         }
 
         body {
             background-color: var(--bg-color);
-            /* Grunge paper/concrete texture overlay */
+            /* Heavy Grunge Noise Background */
             background-image: 
-                radial-gradient(circle, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.95) 100%),
-                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
-            color: var(--accent-color);
+                radial-gradient(circle, rgba(13, 13, 12, 0.4) 0%, rgba(5, 5, 5, 0.95) 100%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.22'/%3E%3C/svg%3E");
+            color: #ffffff;
             height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
             overflow: hidden;
+            font-family: 'Permanent Marker', cursive, sans-serif;
             transition: opacity 0.5s ease;
         }
 
-        /* --- GRUNGE LIGHTNING LOADING SCREEN --- */
+        /* --- ELECTRIC GRUNGE LOADING SCREEN --- */
         #loader-wrapper {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: var(--bg-color);
-            background-image: radial-gradient(circle, rgba(20,20,20,1) 0%, rgba(5,5,5,1) 100%);
+            background-color: #050505;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -52,42 +57,33 @@
             transition: opacity 0.8s ease, visibility 0.8s ease;
         }
 
-        /* Distorted Metal Ring */
-        .grunge-spinner {
+        /* Lightning / Spark Loader Box */
+        .loader-box {
             position: relative;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 4px solid #222;
-            border-top: 4px solid var(--lightning-color);
-            border-bottom: 4px solid #ff0055;
-            filter: drop-shadow(0 0 15px var(--lightning-glow));
-            animation: spin 0.8s linear infinite, flash 1.2s infinite alternate;
+            padding: 20px 40px;
+            border: 4px solid var(--electric-blue);
+            box-shadow: 0 0 20px var(--lightning-glow), inset 0 0 15px var(--lightning-glow);
+            animation: border-flicker 0.15s infinite alternate;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes flash {
-            0%, 90%, 100% { opacity: 1; filter: drop-shadow(0 0 15px var(--lightning-glow)); }
-            92%, 98% { opacity: 0.3; filter: drop-shadow(0 0 2px var(--lightning-glow)); }
-        }
-
-        .loading-text {
-            margin-top: 30px;
-            font-size: 1.5rem;
-            letter-spacing: 5px;
+        .loader-text {
+            font-family: 'Metal Mania', cursive;
+            font-size: 2.5rem;
+            color: #ffffff;
+            letter-spacing: 4px;
             text-transform: uppercase;
-            color: var(--accent-color);
-            text-shadow: 0 0 10px var(--lightning-glow);
-            animation: flicker 0.2s infinite alternate;
+            text-shadow: 0 0 10px var(--electric-blue), 0 0 20px var(--electric-blue);
+            animation: text-surge 1s infinite alternate;
         }
 
-        @keyframes flicker {
-            0% { opacity: 0.8; }
-            100% { opacity: 1; text-shadow: 0 0 18px var(--lightning-color); }
+        @keyframes border-flicker {
+            0% { opacity: 0.8; box-shadow: 0 0 10px var(--lightning-glow); }
+            100% { opacity: 1; box-shadow: 0 0 30px var(--electric-blue), 0 0 10px #fff; }
+        }
+
+        @keyframes text-surge {
+            0% { filter: drop-shadow(0 0 2px #fff); }
+            100% { filter: drop-shadow(0 0 15px var(--electric-blue)); }
         }
 
         .loaded #loader-wrapper {
@@ -99,110 +95,166 @@
             opacity: 0;
         }
 
-        /* --- HEAVY METAL LIGHTNING HEADER --- */
+        /* --- HEADER & METALLICA LIGHTNING TEXT --- */
         header {
-            margin-top: 12vh;
+            margin-top: 8vh;
             text-align: center;
             position: relative;
+            z-index: 2;
         }
 
         .metal-title {
-            font-size: 5.5rem;
-            text-transform: uppercase;
+            font-family: 'Metal Mania', cursive;
+            font-size: 6rem;
             letter-spacing: 6px;
+            text-transform: uppercase;
             font-style: italic;
-            /* Metallic Gradient */
-            background: linear-gradient(180deg, #ffffff 0%, #a6a6a6 45%, #303030 50%, #8c8c8c 85%, #ffffff 100%);
+            /* Chrome Metal Gradient */
+            background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 30%, #334155 48%, #0f172a 50%, #94a3b8 80%, #ffffff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            /* Metal outline & Lightning Glow */
-            filter: drop-shadow(2px 2px 0px #000) 
+            /* Metallic Outline & Electric Lightning Glow */
+            filter: drop-shadow(3px 3px 0px #000) 
                     drop-shadow(-2px -2px 0px #000)
-                    drop-shadow(0 0 15px var(--lightning-glow));
-            animation: lightning-strike 2.5s infinite;
+                    drop-shadow(0 0 20px var(--lightning-glow));
+            animation: lightning-strike 2s infinite;
         }
 
-        /* Electric Lightning Flash Animation */
+        /* Lightning Strike Animation */
         @keyframes lightning-strike {
-            0%, 80%, 84%, 88%, 100% {
-                filter: drop-shadow(0 0 10px var(--lightning-glow)) drop-shadow(0 0 20px var(--lightning-color));
+            0%, 70%, 74%, 78%, 100% {
+                filter: drop-shadow(0 0 15px var(--lightning-glow)) drop-shadow(0 0 30px var(--electric-blue));
             }
-            82%, 86% {
-                filter: drop-shadow(0 0 30px #ffffff) drop-shadow(0 0 60px var(--lightning-color));
+            72%, 76% {
+                filter: drop-shadow(0 0 40px #ffffff) drop-shadow(0 0 80px var(--electric-blue));
             }
         }
 
+        /* --- MAIN CONTENT & RIPPED PAPER BUTTON --- */
         main {
             display: flex;
             justify-content: center;
             align-items: center;
             flex-grow: 1;
+            z-index: 2;
         }
 
-        /* --- GRUNGE METAL BUTTON --- */
+        /* Ripped Paper Banner Container */
+        .ripped-container {
+            position: relative;
+            padding: 15px;
+            /* Angled Grunge Shake Effect */
+            transform: rotate(-3deg);
+            animation: subtle-float 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes subtle-float {
+            0% { transform: rotate(-3deg) translateY(0px); }
+            100% { transform: rotate(-1deg) translateY(-8px); }
+        }
+
+        /* Start Button with Ripped Edge Clip-Path */
         .start-btn {
             position: relative;
-            padding: 20px 70px;
-            font-size: 2.2rem;
-            font-weight: 900;
+            display: inline-block;
+            padding: 25px 80px;
+            font-family: 'Permanent Marker', cursive, sans-serif;
+            font-size: 3rem;
             text-transform: uppercase;
-            letter-spacing: 4px;
-            color: #fff;
-            background: linear-gradient(180deg, #2c2c2c 0%, #111111 100%);
-            border: 3px solid #555;
-            box-shadow: 0 0 15px rgba(0,0,0,0.9), inset 0 0 10px rgba(255,255,255,0.2);
+            color: #000000;
+            background-color: var(--grunge-yellow);
+            text-decoration: none;
             cursor: pointer;
             outline: none;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.2s ease-in-out;
-            transform: skew(-10deg); /* Metallic angled look */
+            border: none;
+            /* Ripped Paper Jagged Edges */
+            clip-path: polygon(
+                0% 8%, 5% 0%, 12% 7%, 20% 2%, 28% 9%, 35% 1%, 45% 8%, 55% 2%, 65% 9%, 75% 0%, 85% 7%, 92% 1%, 100% 9%,
+                98% 30%, 100% 50%, 97% 70%, 100% 90%, 
+                92% 98%, 82% 91%, 74% 100%, 62% 93%, 50% 99%, 40% 90%, 28% 98%, 18% 92%, 8% 99%, 0% 91%,
+                2% 70%, 0% 45%, 3% 25%
+            );
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            transition: all 0.2s ease;
         }
 
+        /* Hover & Interactive States */
         .start-btn:hover {
-            border-color: var(--lightning-color);
-            color: var(--lightning-color);
-            background: #1a1a1a;
-            box-shadow: 0 0 25px var(--lightning-glow), inset 0 0 15px var(--lightning-glow);
-            transform: skew(-10deg) scale(1.05);
+            background-color: #ffffff;
+            color: var(--grunge-red);
+            transform: scale(1.1) rotate(2deg);
+            filter: drop-shadow(0 0 25px var(--electric-blue));
         }
 
         .start-btn:active {
-            transform: skew(-10deg) scale(0.98);
+            transform: scale(0.95) rotate(-1deg);
+        }
+
+        /* Ripped Paper Tape Effect on Top */
+        .tape {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-2deg);
+            width: 120px;
+            height: 35px;
+            background-color: rgba(255, 255, 255, 0.35);
+            border-left: 2px dashed rgba(0,0,0,0.2);
+            border-right: 2px dashed rgba(0,0,0,0.2);
+            backdrop-filter: blur(2px);
+            z-index: 3;
+            pointer-events: none;
         }
 
         footer {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            z-index: 2;
+        }
+
+        .sub-text {
+            font-size: 1rem;
+            letter-spacing: 3px;
+            color: #64748b;
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 
-    <!-- LIGHTNING LOADING SCREEN -->
+    <!-- LIGHTNING & GRUNGE LOADING SCREEN -->
     <div id="loader-wrapper">
-        <div class="grunge-spinner"></div>
-        <div class="loading-text">Loading DillDoe...</div>
+        <div class="loader-box">
+            <div class="loader-text">DILL DOH LOADING...</div>
+        </div>
     </div>
 
-    <!-- METAL TITLE WITH LIGHTNING EFFECT -->
+    <!-- METALLICA LIGHTNING STYLE HEADER -->
     <header>
-        <h1 class="metal-title">DillDoe</h1>
+        <h1 class="metal-title">DILL DOH</h1>
     </header>
 
-    <!-- START BUTTON -->
+    <!-- NIRVANA RIPPED-PAPER START BUTTON -->
     <main>
-        <a href="games.html" class="start-btn" onclick="navigateToPage(event, this.href)">Start</a>
+        <div class="ripped-container">
+            <div class="tape"></div>
+            <!-- Change 'games.html' to your target destination URL -->
+            <a href="games.html" class="start-btn" onclick="navigateToPage(event, this.href)">START</a>
+        </div>
     </main>
 
-    <footer></footer>
+    <footer>
+        <div class="sub-text">NEW GAMING PLATFORM</div>
+    </footer>
 
     <script>
+        // Loading screen delay
         window.addEventListener('load', () => {
             setTimeout(() => {
                 document.body.classList.add('loaded');
             }, 1800);
         });
 
+        // Smooth Page Transition Handler
         function navigateToPage(event, destinationUrl) {
             event.preventDefault();
             document.body.classList.add('fade-out');
