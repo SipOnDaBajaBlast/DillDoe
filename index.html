@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DillDoe</title>
+    <style>
+        :root {
+            --bg-color: #0b0d17;
+            --accent-color: #00ffcc;
+            --accent-glow: rgba(0, 255, 204, 0.4);
+            --text-color: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            overflow: hidden;
+            transition: opacity 0.5s ease;
+        }
+
+        /* --- LOADING SCREEN ANIMATION --- */
+        #loader-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        .spinner {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--accent-color);
+            animation: spin 1.5s linear infinite;
+        }
+
+        .spinner::before, .spinner::after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid transparent;
+        }
+
+        .spinner::before {
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border-top-color: #ff007f;
+            animation: spin 2s linear infinite reverse;
+        }
+
+        .spinner::after {
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border-top-color: #7928ca;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 25px;
+            font-size: 1.2rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--text-color);
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .loaded #loader-wrapper {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* Fade out transition when clicking Start */
+        body.fade-out {
+            opacity: 0;
+        }
+
+        /* --- MAIN PAGE CONTENT --- */
+        header {
+            margin-top: 10vh;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, #00ffcc, #7928ca, #ff007f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        /* Start Button */
+        .start-btn {
+            padding: 18px 60px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--bg-color);
+            background-color: var(--accent-color);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 25px var(--accent-glow);
+            transition: all 0.3s ease;
+            outline: none;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 40px var(--accent-color);
+            background-color: #ffffff;
+        }
+
+        .start-btn:active {
+            transform: scale(0.98);
+        }
+
+        footer {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- COOL LOADING SCREEN -->
+    <div id="loader-wrapper">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading DillDoe...</div>
+    </div>
+
+    <!-- PLATFORM HEADER -->
+    <header>
+        <h1 class="title">DillDoe</h1>
+    </header>
+
+    <!-- MAIN START BUTTON -->
+    <main>
+        <!-- Change 'games.html' to the page file or URL you want to open -->
+        <a href="games.html" class="start-btn" onclick="navigateToPage(event, this.href)">Start</a>
+    </main>
+
+    <footer></footer>
+
+    <script>
+        // Hide loader screen after page finishes loading
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.body.classList.add('loaded');
+            }, 1500); // 1.5 seconds loading duration
+        });
+
+        // Smooth transition effect when clicking Start to go to new page
+        function navigateToPage(event, destinationUrl) {
+            event.preventDefault(); // Prevents instant jump
+            document.body.classList.add('fade-out'); // Smooth fade-out effect
+
+            setTimeout(() => {
+                window.location.href = destinationUrl; // Navigates to new page
+            }, 500); // Wait 0.5s for fade-out animation to complete
+        }
+    </script>
+</body>
+</html>
