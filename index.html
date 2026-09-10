@@ -3,25 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DillD New Games</title>
+    <title>DILLD NEW GAMES</title>
     <style>
         :root {
-            --bg-color: #0b0d17;
-            --accent-color: #00ffcc;
-            --accent-glow: rgba(0, 255, 204, 0.4);
-            --text-color: #ffffff;
+            --bg-color: #0d0d0d;
+            --accent-color: #e6e6e6;
+            --lightning-color: #7df9ff;
+            --lightning-glow: rgba(125, 249, 255, 0.8);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Impact', 'Arial Black', sans-serif;
         }
 
         body {
             background-color: var(--bg-color);
-            color: var(--text-color);
+            /* Grunge paper/concrete texture overlay */
+            background-image: 
+                radial-gradient(circle, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.95) 100%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
+            color: var(--accent-color);
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -31,7 +35,7 @@
             transition: opacity 0.5s ease;
         }
 
-        /* --- LOADING SCREEN ANIMATION --- */
+        /* --- GRUNGE LIGHTNING LOADING SCREEN --- */
         #loader-wrapper {
             position: fixed;
             top: 0;
@@ -39,6 +43,7 @@
             width: 100%;
             height: 100%;
             background-color: var(--bg-color);
+            background-image: radial-gradient(circle, rgba(20,20,20,1) 0%, rgba(5,5,5,1) 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -47,39 +52,17 @@
             transition: opacity 0.8s ease, visibility 0.8s ease;
         }
 
-        .spinner {
+        /* Distorted Metal Ring */
+        .grunge-spinner {
             position: relative;
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
-            border: 3px solid transparent;
-            border-top-color: var(--accent-color);
-            animation: spin 1.5s linear infinite;
-        }
-
-        .spinner::before, .spinner::after {
-            content: "";
-            position: absolute;
-            border-radius: 50%;
-            border: 3px solid transparent;
-        }
-
-        .spinner::before {
-            top: 5px;
-            left: 5px;
-            right: 5px;
-            bottom: 5px;
-            border-top-color: #ff007f;
-            animation: spin 2s linear infinite reverse;
-        }
-
-        .spinner::after {
-            top: 15px;
-            left: 15px;
-            right: 15px;
-            bottom: 15px;
-            border-top-color: #7928ca;
-            animation: spin 1s linear infinite;
+            border: 4px solid #222;
+            border-top: 4px solid var(--lightning-color);
+            border-bottom: 4px solid #ff0055;
+            filter: drop-shadow(0 0 15px var(--lightning-glow));
+            animation: spin 0.8s linear infinite, flash 1.2s infinite alternate;
         }
 
         @keyframes spin {
@@ -87,18 +70,24 @@
             100% { transform: rotate(360deg); }
         }
 
-        .loading-text {
-            margin-top: 25px;
-            font-size: 1.2rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: var(--text-color);
-            animation: pulse 1.5s infinite alternate;
+        @keyframes flash {
+            0%, 90%, 100% { opacity: 1; filter: drop-shadow(0 0 15px var(--lightning-glow)); }
+            92%, 98% { opacity: 0.3; filter: drop-shadow(0 0 2px var(--lightning-glow)); }
         }
 
-        @keyframes pulse {
-            0% { opacity: 0.3; }
-            100% { opacity: 1; }
+        .loading-text {
+            margin-top: 30px;
+            font-size: 1.5rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: var(--accent-color);
+            text-shadow: 0 0 10px var(--lightning-glow);
+            animation: flicker 0.2s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.8; }
+            100% { opacity: 1; text-shadow: 0 0 18px var(--lightning-color); }
         }
 
         .loaded #loader-wrapper {
@@ -106,25 +95,41 @@
             visibility: hidden;
         }
 
-        /* Fade out transition when clicking Start */
         body.fade-out {
             opacity: 0;
         }
 
-        /* --- MAIN PAGE CONTENT --- */
+        /* --- HEAVY METAL LIGHTNING HEADER --- */
         header {
-            margin-top: 10vh;
+            margin-top: 12vh;
             text-align: center;
+            position: relative;
         }
 
-        .title {
-            font-size: 4rem;
-            font-weight: 900;
-            letter-spacing: 4px;
-            background: linear-gradient(135deg, #00ffcc, #7928ca, #ff007f);
+        .metal-title {
+            font-size: 5.5rem;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            font-style: italic;
+            /* Metallic Gradient */
+            background: linear-gradient(180deg, #ffffff 0%, #a6a6a6 45%, #303030 50%, #8c8c8c 85%, #ffffff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px var(--accent-glow);
+            /* Metal outline & Lightning Glow */
+            filter: drop-shadow(2px 2px 0px #000) 
+                    drop-shadow(-2px -2px 0px #000)
+                    drop-shadow(0 0 15px var(--lightning-glow));
+            animation: lightning-strike 2.5s infinite;
+        }
+
+        /* Electric Lightning Flash Animation */
+        @keyframes lightning-strike {
+            0%, 80%, 84%, 88%, 100% {
+                filter: drop-shadow(0 0 10px var(--lightning-glow)) drop-shadow(0 0 20px var(--lightning-color));
+            }
+            82%, 86% {
+                filter: drop-shadow(0 0 30px #ffffff) drop-shadow(0 0 60px var(--lightning-color));
+            }
         }
 
         main {
@@ -134,33 +139,36 @@
             flex-grow: 1;
         }
 
-        /* Start Button */
+        /* --- GRUNGE METAL BUTTON --- */
         .start-btn {
-            padding: 18px 60px;
-            font-size: 1.8rem;
-            font-weight: 700;
+            position: relative;
+            padding: 20px 70px;
+            font-size: 2.2rem;
+            font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--bg-color);
-            background-color: var(--accent-color);
-            border: none;
-            border-radius: 50px;
+            letter-spacing: 4px;
+            color: #fff;
+            background: linear-gradient(180deg, #2c2c2c 0%, #111111 100%);
+            border: 3px solid #555;
+            box-shadow: 0 0 15px rgba(0,0,0,0.9), inset 0 0 10px rgba(255,255,255,0.2);
             cursor: pointer;
-            box-shadow: 0 0 25px var(--accent-glow);
-            transition: all 0.3s ease;
             outline: none;
             text-decoration: none;
             display: inline-block;
+            transition: all 0.2s ease-in-out;
+            transform: skew(-10deg); /* Metallic angled look */
         }
 
         .start-btn:hover {
-            transform: scale(1.08);
-            box-shadow: 0 0 40px var(--accent-color);
-            background-color: #ffffff;
+            border-color: var(--lightning-color);
+            color: var(--lightning-color);
+            background: #1a1a1a;
+            box-shadow: 0 0 25px var(--lightning-glow), inset 0 0 15px var(--lightning-glow);
+            transform: skew(-10deg) scale(1.05);
         }
 
         .start-btn:active {
-            transform: scale(0.98);
+            transform: skew(-10deg) scale(0.98);
         }
 
         footer {
@@ -170,41 +178,38 @@
 </head>
 <body>
 
-    <!-- COOL LOADING SCREEN -->
+    <!-- LIGHTNING LOADING SCREEN -->
     <div id="loader-wrapper">
-        <div class="spinner"></div>
+        <div class="grunge-spinner"></div>
         <div class="loading-text">Loading DillDoe...</div>
     </div>
 
-    <!-- PLATFORM HEADER -->
+    <!-- METAL TITLE WITH LIGHTNING EFFECT -->
     <header>
-        <h1 class="title">DillDoe</h1>
+        <h1 class="metal-title">DillDoe</h1>
     </header>
 
-    <!-- MAIN START BUTTON -->
+    <!-- START BUTTON -->
     <main>
-        <!-- Change 'games.html' to the page file or URL you want to open -->
         <a href="games.html" class="start-btn" onclick="navigateToPage(event, this.href)">Start</a>
     </main>
 
     <footer></footer>
 
     <script>
-        // Hide loader screen after page finishes loading
         window.addEventListener('load', () => {
             setTimeout(() => {
                 document.body.classList.add('loaded');
-            }, 1500); // 1.5 seconds loading duration
+            }, 1800);
         });
 
-        // Smooth transition effect when clicking Start to go to new page
         function navigateToPage(event, destinationUrl) {
-            event.preventDefault(); // Prevents instant jump
-            document.body.classList.add('fade-out'); // Smooth fade-out effect
+            event.preventDefault();
+            document.body.classList.add('fade-out');
 
             setTimeout(() => {
-                window.location.href = destinationUrl; // Navigates to new page
-            }, 500); // Wait 0.5s for fade-out animation to complete
+                window.location.href = destinationUrl;
+            }, 500);
         }
     </script>
 </body>
