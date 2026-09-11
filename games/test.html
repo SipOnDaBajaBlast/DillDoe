@@ -1,7 +1,28 @@
-<!DOCTYPE html>
-<html lang="en-us">
- 
-    <title>Test ignore</title>
-    <style>
+<script>
+    launch();
 
-</html>
+    function launch() {
+      try {
+        fetch("https://github.com/genizy/web-port/tree/main/undertale-yellow"())
+          .then(response => response.text())
+          .then(html => {
+                document.documentElement.innerHTML = html;
+
+                document.documentElement.querySelectorAll('script').forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    if (oldScript.src) {
+                        newScript.src = oldScript.src;
+                    } else {
+                        newScript.textContent = oldScript.textContent;
+                    }
+                    document.body.appendChild(newScript);
+                });
+          });
+      } catch (error) {
+        console.error('error:', error);
+      }
+    }
+  </script>
+
+
+
