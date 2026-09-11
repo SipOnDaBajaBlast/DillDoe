@@ -151,7 +151,7 @@
             text-transform: uppercase;
         }
 
-        /* --- MAIN & BUTTON --- */
+        /* --- MAIN & BUTTONS --- */
         main {
             display: flex;
             justify-content: center;
@@ -163,19 +163,25 @@
         .ripped-container {
             position: relative;
             transform: rotate(-2deg);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
         }
 
         .start-btn {
             display: inline-block;
-            padding: 22px 70px;
+            padding: 18px 60px;
             font-family: 'Permanent Marker', cursive;
-            font-size: 2.8rem;
+            font-size: 2.2rem;
             text-transform: uppercase;
             background-color: var(--paper-brown);
             color: #f1f1f1;
             text-decoration: none;
             cursor: pointer;
             border: none;
+            text-align: center;
+            min-width: 320px;
             clip-path: polygon(
                 0% 10%, 8% 0%, 18% 8%, 28% 1%, 38% 9%, 48% 2%, 58% 10%, 68% 1%, 78% 8%, 88% 0%, 100% 9%,
                 97% 35%, 100% 65%, 96% 90%, 
@@ -185,10 +191,18 @@
             transition: transform 0.2s ease, background-color 0.2s ease;
         }
 
+        .tools-btn {
+            transform: rotate(2deg);
+        }
+
         .start-btn:hover {
             background-color: #52463a;
             color: #ffffff;
             transform: scale(1.08) rotate(2deg);
+        }
+
+        .tools-btn:hover {
+            transform: scale(1.08) rotate(-2deg);
         }
 
         .start-btn:active {
@@ -197,7 +211,7 @@
 
         .tape {
             position: absolute;
-            top: -12px;
+            top: -15px;
             left: 50%;
             transform: translateX(-50%) rotate(-1deg);
             width: 100px;
@@ -206,6 +220,7 @@
             border-left: 1px dashed rgba(255,255,255,0.3);
             border-right: 1px dashed rgba(255,255,255,0.3);
             pointer-events: none;
+            z-index: 3;
         }
 
         footer {
@@ -238,6 +253,7 @@
         <div class="ripped-container">
             <div class="tape"></div>
             <a href="games.html" class="start-btn" onclick="navigateToPage(event, this.href)">initialize</a>
+            <a href="Tools.html" class="start-btn tools-btn" onclick="navigateToPage(event, this.href)">Fun Stuff!!!😊</a>
         </div>
     </main>
 
