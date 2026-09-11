@@ -32,12 +32,95 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* --- BACKGROUND MEMES --- */
+        .bg-meme-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none; /* Allows clicks through to game cards */
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        /* Nyan Cat Animation */
+        .nyan-cat {
+            position: absolute;
+            top: 15%;
+            width: 180px;
+            height: auto;
+            animation: flyNyan 12s linear infinite;
+        }
+
+        @keyframes flyNyan {
+            0% {
+                left: -200px;
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(30px);
+            }
+            100% {
+                left: 100vw;
+                transform: translateY(0px);
+            }
+        }
+
+        /* Doge Meme Animation */
+        .doge-meme {
+            position: absolute;
+            bottom: 5%;
+            left: 3%;
+            width: 140px;
+            height: auto;
+            opacity: 0.7;
+            animation: floatDoge 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatDoge {
+            0% {
+                transform: translateY(0) rotate(-5deg);
+            }
+            100% {
+                transform: translateY(-20px) rotate(5deg);
+            }
+        }
+
+        /* Troll Face Animation */
+        .troll-face {
+            position: absolute;
+            top: 25%;
+            right: 4%;
+            width: 130px;
+            height: auto;
+            opacity: 0.6;
+            animation: floatTroll 5s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatTroll {
+            0% {
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                transform: translateY(25px) scale(1.08);
+            }
+        }
+
+        /* --- CONTENT LAYER --- */
+        header, main, .search-container, .back-btn {
+            position: relative;
+            z-index: 1;
         }
 
         /* --- HEADER --- */
         header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 25px;
         }
 
         .metal-title {
@@ -64,6 +147,36 @@
 
         .back-btn:hover {
             color: var(--text-white);
+        }
+
+        /* --- SEARCH BAR --- */
+        .search-container {
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 35px;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 12px 20px;
+            font-family: 'Permanent Marker', cursive, sans-serif;
+            font-size: 1.2rem;
+            background-color: var(--card-bg);
+            border: 2px solid var(--paper-brown);
+            color: var(--text-white);
+            border-radius: 4px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            clip-path: polygon(1% 0%, 99% 2%, 100% 98%, 0% 100%);
+        }
+
+        .search-bar:focus {
+            border-color: var(--text-white);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .search-bar::placeholder {
+            color: var(--text-grey);
         }
 
         /* --- GAMES GRID --- */
@@ -118,76 +231,105 @@
 </head>
 <body>
 
+    <!-- MEME BACKGROUND ELEMENTS -->
+    <div class="bg-meme-container">
+        <img class="nyan-cat" src="https://freepngimg.com/save/15407-nyan-cat-picture/512x512" alt="Nyan Cat">
+        <img class="doge-meme" src="https://pngimg.com/uploads/doge_meme/doge_meme_PNG112723.png" alt="Doge">
+        <img class="troll-face" src="https://www.pngkey.com/png/full/22-226917_memes-unhappy-troll-sticker-sad-trollface.png" alt="Sad Trollface">
+    </div>
+
     <a href="index.html" class="back-btn">&larr; Back to Home</a>
 
     <header>
         <h1 class="metal-title">GAME LIBRARY</h1>
     </header>
 
-    <main class="games-grid">
+    <!-- SEARCH BAR -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-bar" placeholder="Search games..." onkeyup="filterGames()">
+    </div>
+
+    <main class="games-grid" id="gamesGrid">
 
         <!-- GAME 1: FNAF -->
         <a href="games/fnaf.html" class="game-card">
-            <!-- Replace image src with your custom thumbnail path if you have one -->
             <img src="https://images.immediate.co.uk/production/volatile/sites/3/2023/08/FNAF-games-in-order-cd67434.jpg?quality=90" alt="FNAF Game Thumbnail">
             <div class="game-title">FNAF 1</div>
         </a>
 
-        <!-- GAME 2: TEST -->
+        <!-- GAME 2: DELTARUNE -->
         <a href="games/Deltarune.html" class="game-card">
-            <!-- Replace image src with your custom thumbnail path if you have one -->
             <img src="https://media.tenor.com/gLqK62ZQVRQAAAAe/sans-undertale.png" alt="Test Game Thumbnail">
             <div class="game-title">Deltarune</div>
         </a>
 
-
+        <!-- GAME 3: ANIMAL CROSSING -->
         <a href="games/AnimalCrossing.html" class="game-card">
-            <!-- Replace image src with your custom thumbnail path if you have one -->
-            <img src="https://i.ebayimg.com/00/s/OTk3WDEzMTI=/z/AkwAAOSw6NNfZcRl/$_57.PNG?set_id=8800005007" alt=" Thumbnail">
+            <img src="https://i.ebayimg.com/00/s/OTk3WDEzMTI=/z/AkwAAOSw6NNfZcRl/$_57.PNG?set_id=8800005007" alt="Thumbnail">
             <div class="game-title">Animal Crossing</div>
         </a>
 
+        <!-- GAME 4: MINECRAFT -->
         <a href="games/wasm-gc 1.20.html" class="game-card">
-            <!-- Replace image src with your custom thumbnail path if you have one -->
-            <img src="https://www.minecraft.net/content/dam/minecraftnet/games/minecraft/key-art/MCV_SummerDrop_Hero_DotNet_Downloadable_Wallpaper_r414x414.png" alt=" Thumbnail">
+            <img src="https://www.minecraft.net/content/dam/minecraftnet/games/minecraft/key-art/MCV_SummerDrop_Hero_DotNet_Downloadable_Wallpaper_r414x414.png" alt="Thumbnail">
             <div class="game-title">Minecraft(v26)</div>
         </a>
+
+        <!-- GAME 5: SMASH BROS -->
         <a href="games/Smash.html" class="game-card">
-            <!-- Replace image src with your custom thumbnail path if you have one -->
             <img src="https://ssb.wiki.gallery/images/thumb/d/db/Taunts-SSB-Yoshi.gif/200px-Taunts-SSB-Yoshi.gif" alt="Test Game Thumbnail">
             <div class="game-title">Smash Bros N64</div>
         </a>
 
-                <a href="games/BartBash.html" class="game-card">
-            <!-- Replace image src with your custom thumbnail path if you have one -->
+        <!-- GAME 6: BARTBASH -->
+        <a href="games/BartBash.html" class="game-card">
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBU3Lsv14l1Wd_Dz2nXuN854vY2Fh2i-vx6Ctpp8A7gMp1s9XPojalopYz&s=10" alt="Test Game Thumbnail">
             <div class="game-title">BartBash</div>
         </a>
-                <a href="games/fish.html" class="game-card">
-            <!-- Replace image src with your custom thumbnail path if you have one -->
+
+        <!-- GAME 7: FISH -->
+        <a href="games/fish.html" class="game-card">
             <img src="https://i.etsystatic.com/56181984/r/il/b67efa/7168666349/il_1080xN.7168666349_ozuc.jpg" alt="Test Game Thumbnail">
             <div class="game-title">Fish</div>
         </a>
 
-                <a href="games/iron lung.html" class="game-card">
-            <!-- Replace image src with your custom thumbnail path if you have one -->
+        <!-- GAME 8: IRON LUNG -->
+        <a href="games/iron lung.html" class="game-card">
             <img src="https://i.ytimg.com/vi/WPiCSsW-2as/maxresdefault.jpg" alt="Test Game Thumbnail">
             <div class="game-title">Iron Lung</div>
         </a>
-                <a href="games/bitlife.html" class="game-card">
-            <!-- Replace image src with your custom thumbnail path if you have one -->
+
+        <!-- GAME 9: BITLIFE -->
+        <a href="games/bitlife.html" class="game-card">
             <img src="https://www.bitlife.school/wp-content/uploads/2026/02/Bitlife.webp" alt="Test Game Thumbnail">
             <div class="game-title">BitLife</div>
         </a>
-       <a href="games/DumbWay.html" class="game-card">
-            <!-- Replace image src with your custom thumbnail path if you have one -->
+
+        <!-- GAME 10: DUMB WAYS TO DIE -->
+        <a href="games/DumbWay.html" class="game-card">
             <img src="https://img.utdstc.com/icon/8c2/fec/8c2fec4950ffa7fdfc05d0b174778ecef574a60e5d6234e86ccfc186425094cc:600" alt="Test Game Thumbnail">
-            <div class="game-title">Dumb Ways To DIe</div>
+            <div class="game-title">Dumb Ways To Die</div>
         </a>
 
-
-        
     </main>
+
+    <!-- JS FOR SEARCH FILTERING -->
+    <script>
+        function filterGames() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const cards = document.querySelectorAll('.game-card');
+
+            cards.forEach(card => {
+                const title = card.querySelector('.game-title').textContent.toLowerCase();
+                if (title.includes(filter)) {
+                    card.style.display = "flex";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        }
+    </script>
 
 </body>
 </html>
