@@ -43,7 +43,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            pointer-events: none; /* Allows clicks through to game cards */
+            pointer-events: none;
             z-index: 0;
             overflow: hidden;
         }
@@ -108,6 +108,46 @@
             }
             100% {
                 transform: translateY(25px) scale(1.08);
+            }
+        }
+
+        /* Sad Bart Animation */
+        .sad-bart {
+            position: absolute;
+            bottom: 8%;
+            right: 5%;
+            width: 120px;
+            height: auto;
+            opacity: 0.65;
+            animation: floatBart 7s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatBart {
+            0% {
+                transform: translateY(0) rotate(3deg);
+            }
+            100% {
+                transform: translateY(-18px) rotate(-3deg);
+            }
+        }
+
+        /* Ugandan Knuckles Animation */
+        .ugandan-knuckles {
+            position: absolute;
+            top: 55%;
+            left: 2%;
+            width: 110px;
+            height: auto;
+            opacity: 0.7;
+            animation: floatKnuckles 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatKnuckles {
+            0% {
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                transform: translateY(-15px) scale(1.05);
             }
         }
 
@@ -236,6 +276,8 @@
         <img class="nyan-cat" src="https://freepngimg.com/save/15407-nyan-cat-picture/512x512" alt="Nyan Cat">
         <img class="doge-meme" src="https://pngimg.com/uploads/doge_meme/doge_meme_PNG112723.png" alt="Doge">
         <img class="troll-face" src="https://www.pngkey.com/png/full/22-226917_memes-unhappy-troll-sticker-sad-trollface.png" alt="Sad Trollface">
+        <img class="sad-bart" src="https://www.nicepng.com/png/full/136-1362322_sad-simpsons-and-bart-image-bart-simpson-sad.png" alt="Sad Bart Simpson">
+        <img class="ugandan-knuckles" src="https://static.wikia.nocookie.net/supermarioglitchy4/images/6/6d/Ugandan_Knuckles_meme.webp/revision/latest?cb=20220407031933" alt="Ugandan Knuckles">
     </div>
 
     <a href="index.html" class="back-btn">&larr; Back to Home</a>
