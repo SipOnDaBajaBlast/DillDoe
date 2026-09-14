@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adrian Clicker - Supreme Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>Adrian Clicker - Umamusume Pretty Derby Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=M+PLUS+Rounded+1c:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #ff2a5f;
-            --primary-glow: rgba(255, 42, 95, 0.6);
-            --accent: #00f0ff;
-            --accent-glow: rgba(0, 240, 255, 0.5);
-            --bg-dark: #0a0a16;
-            --card-bg: rgba(20, 20, 45, 0.7);
+            --primary: #ff3377;
+            --primary-glow: rgba(255, 51, 119, 0.6);
+            --accent: #55cc22;
+            --accent-glow: rgba(85, 204, 34, 0.5);
+            --gold: #ffbe00;
+            --bg-dark: #120826;
+            --card-bg: rgba(35, 18, 60, 0.85);
+            --turf-green: #28a745;
         }
 
         * {
@@ -22,22 +24,20 @@
         }
 
         body {
-            font-family: 'Outfit', sans-serif;
-            background: radial-gradient(circle at center, #1a1a3a 0%, var(--bg-dark) 100%);
+            font-family: 'Outfit', 'M PLUS Rounded 1c', sans-serif;
+            background: radial-gradient(circle at center, #2d1254 0%, var(--bg-dark) 100%);
             color: #ffffff;
             min-height: 100vh;
             margin: 0;
-            overflow: hidden;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
             padding: 20px;
         }
 
-        /* Ambient Background Canvas */
         #particle-canvas {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
@@ -46,9 +46,8 @@
             pointer-events: none;
         }
 
-        /* Floating +1 Text Layer */
         #floating-text-container {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
@@ -57,72 +56,136 @@
             pointer-events: none;
         }
 
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: rgba(30, 15, 50, 0.95);
+            border: 3px solid var(--gold);
+            border-radius: 16px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 0 25px rgba(255, 190, 0, 0.5);
+            animation: slideIn 0.3s forwards, fadeOut 0.5s 2.5s forwards;
+            backdrop-filter: blur(8px);
+        }
+
+        .toast-icon { font-size: 2rem; }
+        .toast-title { font-weight: 900; color: var(--gold); font-size: 0.9rem; text-transform: uppercase; }
+        .toast-desc { font-size: 0.85rem; color: #fff; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+
         header {
             z-index: 2;
             text-align: center;
-            margin-top: 10px;
+            margin-top: 5px;
         }
 
         h1 {
-            font-size: 3.5rem;
+            font-size: 3.2rem;
             font-weight: 900;
             margin: 0;
             letter-spacing: 2px;
-            background: linear-gradient(45deg, var(--primary), var(--accent), #fff);
+            background: linear-gradient(180deg, #ffffff 20%, #ffccee 50%, var(--primary) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px var(--primary-glow);
-            animation: titlePulse 3s infinite alternate ease-in-out;
+            text-shadow: 0 0 20px var(--primary-glow);
+            filter: drop-shadow(2px 4px 0px #660033);
+            animation: titleBounce 2s infinite ease-in-out;
         }
 
-        @keyframes titlePulse {
-            0% { filter: drop-shadow(0 0 15px var(--primary-glow)); }
-            100% { filter: drop-shadow(0 0 35px var(--accent-glow)); }
+        @keyframes titleBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
         }
 
-        /* Stats Display */
+        .subtitle {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: -5px;
+            text-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .top-controls {
+            z-index: 2;
+            margin-top: 12px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.08) translateY(-2px);
+            background: rgba(255, 255, 255, 0.3);
+            border-color: var(--accent);
+            box-shadow: 0 6px 15px var(--accent-glow);
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
         .stats-panel {
             z-index: 2;
             background: var(--card-bg);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 15px 40px;
+            border: 3px solid #ff99cc;
+            padding: 12px 35px;
             border-radius: 50px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 153, 204, 0.3);
             display: flex;
             gap: 30px;
             align-items: center;
-            margin-top: 15px;
+            margin-top: 12px;
         }
 
-        .stat-box {
-            text-align: center;
-        }
+        .stat-box { text-align: center; }
+        .stat-label { font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: #ffb3da; }
+        .stat-value { font-size: 2.5rem; font-weight: 900; color: #fff; text-shadow: 0 0 15px var(--primary-glow); }
 
-        .stat-label {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #8a8aa3;
-        }
-
-        .stat-value {
-            font-size: 2.8rem;
-            font-weight: 900;
-            color: #fff;
-            text-shadow: 0 0 15px rgba(255,255,255,0.5);
-        }
-
-        /* Main Clicker Image (Full Rectangular Image, NO Circle) */
+        /* Main Clicker Stage */
         .main-stage {
             z-index: 2;
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-grow: 1;
             width: 100%;
-            max-width: 500px;
+            max-width: 450px;
             margin: 20px 0;
             perspective: 1000px;
         }
@@ -131,148 +194,223 @@
             position: relative;
             cursor: pointer;
             transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6),
-                        0 0 40px var(--primary-glow);
-            padding: 8px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 40px var(--primary-glow);
+            padding: 10px;
+            background: linear-gradient(135deg, var(--gold), var(--primary), var(--accent));
+            background-size: 200% 200%;
+            animation: rainbowBorder 4s ease infinite;
+        }
+
+        @keyframes rainbowBorder {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         #click-img {
             display: block;
             max-width: 100%;
-            max-height: 40vh;
+            max-height: 35vh;
             object-fit: contain;
-            border-radius: 14px;
+            border-radius: 16px;
             pointer-events: none;
-            transition: filter 0.1s;
+            transition: filter 0.15s;
         }
 
         #click-btn-container:hover {
-            transform: scale(1.03) rotate(0.5deg);
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8),
-                        0 0 60px var(--accent-glow);
+            transform: scale(1.05) rotate(1deg);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 60px var(--accent-glow);
         }
 
         #click-btn-container:active {
-            transform: scale(0.93) rotate(-1deg) !important;
-            filter: brightness(1.3);
+            transform: scale(0.92) rotate(-1.5deg) !important;
+            filter: brightness(1.2);
         }
 
-        /* Upgrades Panel */
-        .upgrades-container {
+        /* Content Grid */
+        .content-grid {
             z-index: 2;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
             width: 100%;
-            max-width: 900px;
+            max-width: 1000px;
             margin-bottom: 20px;
         }
 
-        .upgrade-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 16px;
+        @media (max-width: 768px) {
+            .content-grid { grid-template-columns: 1fr; }
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-shadow: 0 0 10px rgba(255, 190, 0, 0.4);
+        }
+
+        .upgrades-container, .achievements-container {
             display: flex;
             flex-direction: column;
+            gap: 14px;
+        }
+
+        /* Animated Upgrade Buttons */
+        .upgrade-card {
+            background: linear-gradient(135deg, rgba(40, 20, 70, 0.9) 0%, rgba(20, 10, 40, 0.9) 100%);
+            border: 2px solid rgba(255, 100, 180, 0.3);
+            border-radius: 20px;
+            padding: 14px 18px;
+            display: flex;
             justify-content: space-between;
+            align-items: center;
             cursor: pointer;
             position: relative;
             overflow: hidden;
-            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        .upgrade-card::before {
+        /* Continuous Pulse Shimmer on Purchaseable Buttons */
+        .upgrade-card:not(.disabled) {
+            border-color: var(--accent);
+            animation: pulseGlow 2s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 8px rgba(85, 204, 34, 0.3); }
+            100% { box-shadow: 0 0 20px rgba(85, 204, 34, 0.7); }
+        }
+
+        /* Animated Hover Sheen */
+        .upgrade-card::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-            transition: 0.5s;
+            top: -50%;
+            left: -60%;
+            width: 50%;
+            height: 200%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+            transform: rotate(30deg);
+            transition: all 0.6s ease;
         }
 
-        .upgrade-card:hover::before {
-            left: 100%;
+        .upgrade-card:hover:not(.disabled)::after {
+            left: 140%;
         }
 
         .upgrade-card:hover:not(.disabled) {
-            transform: translateY(-5px);
-            border-color: var(--accent);
-            box-shadow: 0 10px 25px rgba(0, 240, 255, 0.3);
+            transform: translateY(-5px) scale(1.02);
+            border-color: #fff;
+            background: linear-gradient(135deg, rgba(70, 30, 110, 0.95) 0%, rgba(40, 15, 70, 0.95) 100%);
         }
 
         .upgrade-card:active:not(.disabled) {
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(0.98);
         }
 
         .upgrade-card.disabled {
             opacity: 0.4;
             cursor: not-allowed;
             filter: grayscale(0.8);
+            border-color: rgba(255, 255, 255, 0.1);
+            animation: none;
         }
 
-        .upgrade-title {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: #fff;
-            margin-bottom: 4px;
-        }
-
-        .upgrade-desc {
-            font-size: 0.85rem;
-            color: #aaa;
-            margin-bottom: 12px;
-        }
-
-        .upgrade-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .upgrade-cost {
-            font-weight: 900;
-            font-size: 1.1rem;
-            color: var(--accent);
-        }
+        .upgrade-info { display: flex; flex-direction: column; }
+        .upgrade-title { font-weight: 900; font-size: 1.05rem; color: #fff; }
+        .upgrade-desc { font-size: 0.82rem; color: #ffccee; }
+        .upgrade-cost { font-weight: 900; font-size: 1rem; color: var(--gold); margin-top: 4px; }
 
         .upgrade-count {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 4px 10px;
+            background: linear-gradient(135deg, var(--primary), #cc0055);
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
+            font-size: 0.9rem;
+            font-weight: 900;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            transition: transform 0.2s;
         }
+
+        .upgrade-card:hover:not(.disabled) .upgrade-count {
+            transform: scale(1.1);
+        }
+
+        /* Achievement Cards */
+        .achievement-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            opacity: 0.45;
+            filter: grayscale(1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .achievement-card.unlocked {
+            opacity: 1;
+            filter: grayscale(0);
+            border-color: var(--gold);
+            background: linear-gradient(135deg, rgba(60, 45, 20, 0.85) 0%, rgba(35, 25, 10, 0.85) 100%);
+            box-shadow: 0 0 20px rgba(255, 190, 0, 0.25);
+            animation: unlockPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes unlockPop {
+            0% { transform: scale(0.9); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .achievement-icon {
+            font-size: 1.8rem;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+        }
+
+        .achievement-card.unlocked .achievement-icon {
+            background: linear-gradient(135deg, var(--gold), #ff8800);
+            box-shadow: 0 0 12px rgba(255, 190, 0, 0.5);
+        }
+
+        .achievement-details { display: flex; flex-direction: column; }
+        .achievement-name { font-weight: 900; font-size: 0.95rem; color: #fff; }
+        .achievement-card.unlocked .achievement-name { color: var(--gold); }
+        .achievement-desc { font-size: 0.78rem; color: #ffddf0; }
 
         /* Floating Text Animation */
         .float-text {
             position: absolute;
             font-weight: 900;
-            font-size: 2rem;
+            font-size: 2.2rem;
             color: #fff;
-            text-shadow: 0 0 10px var(--primary), 0 0 20px var(--accent);
+            text-shadow: 0 0 10px var(--primary), 0 0 20px var(--gold);
             pointer-events: none;
             animation: floatUp 0.8s forwards cubic-bezier(0.1, 0.8, 0.3, 1);
             z-index: 100;
         }
 
         @keyframes floatUp {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(0.8) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-50px) scale(1.3) rotate(calc(-10deg + 20deg * var(--rand)));
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-100px) scale(1) rotate(calc(-15deg + 30deg * var(--rand)));
-            }
+            0% { opacity: 1; transform: translateY(0) scale(0.8) rotate(0deg); }
+            50% { transform: translateY(-50px) scale(1.3) rotate(-5deg); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1) rotate(5deg); }
         }
     </style>
 </head>
@@ -280,18 +418,24 @@
 
     <canvas id="particle-canvas"></canvas>
     <div id="floating-text-container"></div>
+    <div id="toast-container"></div>
 
     <header>
         <h1>ADRIAN CLICKER</h1>
+        <div class="subtitle">✨ PRETTY DERBY EDITION ✨</div>
+        <div class="top-controls">
+            <button class="action-btn" onclick="saveGame(true)">💾 Save Progress</button>
+            <button class="action-btn" onclick="resetGame()">🔄 Reset Data</button>
+        </div>
     </header>
 
     <div class="stats-panel">
         <div class="stat-box">
-            <div class="stat-label">Adrians</div>
+            <div class="stat-label">Carrots Earned</div>
             <div class="stat-value" id="score">0</div>
         </div>
         <div class="stat-box">
-            <div class="stat-label">Per Second</div>
+            <div class="stat-label">Stamina / Sec</div>
             <div class="stat-value" id="cps" style="font-size: 1.8rem; color: var(--accent);">0</div>
         </div>
     </div>
@@ -302,159 +446,230 @@
         </div>
     </div>
 
-    <div class="upgrades-container">
-        <div class="upgrade-card disabled" id="upg-clicker" onclick="buyUpgrade('clicker')">
-            <div>
-                <div class="upgrade-title">⚡ Auto-Adrian</div>
-                <div class="upgrade-desc">+1 Adrian per second</div>
-            </div>
-            <div class="upgrade-footer">
-                <span class="upgrade-cost" id="cost-clicker">15</span>
-                <span class="upgrade-count" id="count-clicker">0</span>
+    <div class="content-grid">
+        <!-- Upgrades Column -->
+        <div>
+            <div class="section-title">👟 Training Facilities</div>
+            <div class="upgrades-container">
+                <div class="upgrade-card disabled" id="upg-clicker" onclick="buyUpgrade('clicker')">
+                    <div class="upgrade-info">
+                        <span class="upgrade-title">🥕 Carrot Auto-Trainer</span>
+                        <span class="upgrade-desc">+1 Carrot/sec</span>
+                        <span class="upgrade-cost">Cost: <span id="cost-clicker">15</span></span>
+                    </div>
+                    <span class="upgrade-count" id="count-clicker">0</span>
+                </div>
+
+                <div class="upgrade-card disabled" id="upg-multiplier" onclick="buyUpgrade('multiplier')">
+                    <div class="upgrade-info">
+                        <span class="upgrade-title">⚡ Speed Burst</span>
+                        <span class="upgrade-desc">+1 Carrot/click</span>
+                        <span class="upgrade-cost">Cost: <span id="cost-multiplier">50</span></span>
+                    </div>
+                    <span class="upgrade-count" id="count-multiplier">0</span>
+                </div>
+
+                <div class="upgrade-card disabled" id="upg-overclock" onclick="buyUpgrade('overclock')">
+                    <div class="upgrade-info">
+                        <span class="upgrade-title">🏆 URA Finals Overclock</span>
+                        <span class="upgrade-desc">+10 Carrots/sec</span>
+                        <span class="upgrade-cost">Cost: <span id="cost-overclock">250</span></span>
+                    </div>
+                    <span class="upgrade-count" id="count-overclock">0</span>
+                </div>
             </div>
         </div>
 
-        <div class="upgrade-card disabled" id="upg-multiplier" onclick="buyUpgrade('multiplier')">
-            <div>
-                <div class="upgrade-title">💥 Double Touch</div>
-                <div class="upgrade-desc">+1 Adrian per click</div>
-            </div>
-            <div class="upgrade-footer">
-                <span class="upgrade-cost" id="cost-multiplier">50</span>
-                <span class="upgrade-count" id="count-multiplier">0</span>
-            </div>
-        </div>
-
-        <div class="upgrade-card disabled" id="upg-overclock" onclick="buyUpgrade('overclock')">
-            <div>
-                <div class="upgrade-title">🚀 Adrian Overclock</div>
-                <div class="upgrade-desc">+10 Adrians per second</div>
-            </div>
-            <div class="upgrade-footer">
-                <span class="upgrade-cost" id="cost-overclock">250</span>
-                <span class="upgrade-count" id="count-overclock">0</span>
-            </div>
+        <!-- Achievements Column -->
+        <div>
+            <div class="section-title">🌟 Race Trophies</div>
+            <div class="achievements-container" id="achievements-list"></div>
         </div>
     </div>
 
     <script>
         // Game State
-        let score = 0;
-        let clickValue = 1;
-        
-        const upgrades = {
-            clicker: { cost: 15, count: 0, cps: 1, elementId: 'upg-clicker' },
-            multiplier: { cost: 50, count: 0, clickAdd: 1, elementId: 'upg-multiplier' },
-            overclock: { cost: 250, count: 0, cps: 10, elementId: 'upg-overclock' }
+        let gameState = {
+            score: 0,
+            totalClicks: 0,
+            clickValue: 1,
+            upgrades: {
+                clicker: { cost: 15, count: 0, cps: 1, elementId: 'upg-clicker' },
+                multiplier: { cost: 50, count: 0, clickAdd: 1, elementId: 'upg-multiplier' },
+                overclock: { cost: 250, count: 0, cps: 10, elementId: 'upg-overclock' }
+            },
+            unlockedAchievements: []
         };
 
-        // DOM Elements
-        const scoreDisplay = document.getElementById('score');
-        const cpsDisplay = document.getElementById('cps');
-        const clickContainer = document.getElementById('click-btn-container');
-        const floatContainer = document.getElementById('floating-text-container');
+        const achievements = [
+            { id: 'first_click', icon: '🐎', name: 'Debut Race', desc: 'Tap Adrian on the turf for the first time', condition: () => gameState.totalClicks >= 1 },
+            { id: 'clicks_50', icon: '👟', name: 'Track Star', desc: 'Sprint 50 clicks on the racetrack', condition: () => gameState.totalClicks >= 50 },
+            { id: 'score_100', icon: '🥕', name: 'Carrot Feast', desc: 'Gather 100 Training Carrots', condition: () => gameState.score >= 100 },
+            { id: 'score_1000', icon: '👑', name: 'G1 Champion', desc: 'Accumulate 1,000 Training Carrots', condition: () => gameState.score >= 1000 },
+            { id: 'first_upgrade', icon: '🎪', name: 'Fan Favorite', desc: 'Upgrade your first training facility', condition: () => getSumUpgrades() >= 1 },
+            { id: 'cps_20', icon: '🌠', name: 'Twinkle Series', desc: 'Reach 20 Stamina / sec', condition: () => getCps() >= 20 }
+        ];
 
-        // Audio Effects using Web Audio API (Synthesized SFX, no external assets needed!)
+        // Audio System (Synthesized Web Audio API)
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
-        function playClickSound() {
+        function playSound(type) {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(300 + Math.random() * 200, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.05);
-            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.05);
+
+            if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400 + Math.random() * 250, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+            } else if (type === 'buy') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.07); // E5
+                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.14); // G5
+                osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.21); // C6
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.35);
+            } else if (type === 'achievement') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                osc.frequency.setValueAtTime(880.00, audioCtx.currentTime + 0.1); // A5
+                osc.frequency.setValueAtTime(1174.66, audioCtx.currentTime + 0.2); // D6
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.45);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.45);
+            }
         }
 
-        function playBuySound() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
-            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.08); // E5
-            osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.16); // G5
-            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.3);
+        // Initialize Achievements UI
+        function initAchievementsUI() {
+            const container = document.getElementById('achievements-list');
+            container.innerHTML = '';
+            achievements.forEach(ach => {
+                const isUnlocked = gameState.unlockedAchievements.includes(ach.id);
+                const card = document.createElement('div');
+                card.id = `ach-${ach.id}`;
+                card.className = `achievement-card ${isUnlocked ? 'unlocked' : ''}`;
+                card.innerHTML = `
+                    <div class="achievement-icon">${ach.icon}</div>
+                    <div class="achievement-details">
+                        <div class="achievement-name">${ach.name}</div>
+                        <div class="achievement-desc">${ach.desc}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
         }
 
-        // Handle Main Click Event
+        function checkAchievements() {
+            achievements.forEach(ach => {
+                if (!gameState.unlockedAchievements.includes(ach.id) && ach.condition()) {
+                    gameState.unlockedAchievements.push(ach.id);
+                    document.getElementById(`ach-${ach.id}`).classList.add('unlocked');
+                    showToast(ach.name, ach.desc, ach.icon);
+                    playSound('achievement');
+                }
+            });
+        }
+
+        function showToast(title, desc, icon) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <div class="toast-icon">${icon}</div>
+                <div>
+                    <div class="toast-title">Trophy Earned!</div>
+                    <div class="toast-desc"><strong>${title}</strong>: ${desc}</div>
+                </div>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Main Click Handler
+        const clickContainer = document.getElementById('click-btn-container');
         clickContainer.addEventListener('pointerdown', (e) => {
-            score += clickValue;
-            playClickSound();
-            spawnFloatingText(e.clientX, e.clientY, `+${clickValue}`);
-            spawnParticles(e.clientX, e.clientY, 8);
+            gameState.score += gameState.clickValue;
+            gameState.totalClicks++;
+            playSound('click');
+            spawnFloatingText(e.clientX, e.clientY, `+${gameState.clickValue} 🥕`);
+            spawnParticles(e.clientX, e.clientY, 10);
             
-            // Subtle 3D Tilt Effect on Click Location
             const rect = clickContainer.getBoundingClientRect();
             const x = e.clientX - rect.left - rect.width / 2;
             const y = e.clientY - rect.top - rect.height / 2;
-            clickContainer.style.transform = `scale(0.94) rotateX(${-y / 5}deg) rotateY(${x / 5}deg)`;
+            clickContainer.style.transform = `scale(0.93) rotateX(${-y / 5}deg) rotateY(${x / 5}deg)`;
             
             updateDisplay();
+            checkAchievements();
         });
 
-        clickContainer.addEventListener('pointerup', () => {
-            clickContainer.style.transform = '';
-        });
+        clickContainer.addEventListener('pointerup', () => clickContainer.style.transform = '');
+        clickContainer.addEventListener('pointerleave', () => clickContainer.style.transform = '');
 
-        clickContainer.addEventListener('pointerleave', () => {
-            clickContainer.style.transform = '';
-        });
-
-        // Upgrades Logic
         function buyUpgrade(key) {
-            const upg = upgrades[key];
-            if (score >= upg.cost) {
-                score -= upg.cost;
+            const upg = gameState.upgrades[key];
+            if (gameState.score >= upg.cost) {
+                gameState.score -= upg.cost;
                 upg.count++;
-                
-                if (upg.clickAdd) clickValue += upg.clickAdd;
-                
+                if (upg.clickAdd) gameState.clickValue += upg.clickAdd;
                 upg.cost = Math.floor(upg.cost * 1.25);
-                playBuySound();
+                playSound('buy');
                 updateDisplay();
+                checkAchievements();
             }
         }
 
         function getCps() {
             let total = 0;
-            for (let k in upgrades) {
-                if (upgrades[k].cps) total += upgrades[k].cps * upgrades[k].count;
+            for (let k in gameState.upgrades) {
+                if (gameState.upgrades[k].cps) total += gameState.upgrades[k].cps * gameState.upgrades[k].count;
             }
             return total;
         }
 
-        // Passive CPS Loop
+        function getSumUpgrades() {
+            let total = 0;
+            for (let k in gameState.upgrades) total += gameState.upgrades[k].count;
+            return total;
+        }
+
+        // Game Loop
         setInterval(() => {
             const currentCps = getCps();
             if (currentCps > 0) {
-                score += currentCps / 10; // Smooth 100ms updates
+                gameState.score += currentCps / 10;
                 updateDisplay();
+                checkAchievements();
             }
         }, 100);
 
-        function updateDisplay() {
-            scoreDisplay.textContent = Math.floor(score).toLocaleString();
-            cpsDisplay.textContent = getCps().toLocaleString();
+        // Auto Save Loop (Every 10 Seconds)
+        setInterval(() => {
+            saveGame(false);
+        }, 10000);
 
-            for (let k in upgrades) {
-                const upg = upgrades[k];
+        function updateDisplay() {
+            document.getElementById('score').textContent = Math.floor(gameState.score).toLocaleString();
+            document.getElementById('cps').textContent = getCps().toLocaleString();
+
+            for (let k in gameState.upgrades) {
+                const upg = gameState.upgrades[k];
                 document.getElementById(`cost-${k}`).textContent = upg.cost.toLocaleString();
                 document.getElementById(`count-${k}`).textContent = upg.count;
                 
                 const el = document.getElementById(upg.elementId);
-                if (score >= upg.cost) {
+                if (gameState.score >= upg.cost) {
                     el.classList.remove('disabled');
                 } else {
                     el.classList.add('disabled');
@@ -462,20 +677,44 @@
             }
         }
 
-        // Floating FX Spawners
+        // Save & Load Systems
+        function saveGame(notify = false) {
+            localStorage.setItem('adrian_clicker_uma_save', JSON.stringify(gameState));
+            if (notify) showToast('Saved', 'Trainer progress saved!', '💾');
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('adrian_clicker_uma_save');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    gameState = { ...gameState, ...parsed };
+                } catch (e) {
+                    console.error("Failed to load save data", e);
+                }
+            }
+            initAchievementsUI();
+            updateDisplay();
+        }
+
+        function resetGame() {
+            if (confirm("Reset all training data and trophies?")) {
+                localStorage.removeItem('adrian_clicker_uma_save');
+                location.reload();
+            }
+        }
+
         function spawnFloatingText(x, y, text) {
             const el = document.createElement('div');
             el.className = 'float-text';
             el.textContent = text;
-            el.style.left = `${x - 20}px`;
+            el.style.left = `${x - 30}px`;
             el.style.top = `${y - 30}px`;
-            el.style.setProperty('--rand', Math.random());
-            floatContainer.appendChild(el);
-
+            document.getElementById('floating-text-container').appendChild(el);
             setTimeout(() => el.remove(), 800);
         }
 
-        // Ambient Particle Canvas System
+        // Star & Horseshoe Sparkle Particle System
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -491,58 +730,60 @@
             constructor(x, y, isBurst = false) {
                 this.x = x || Math.random() * canvas.width;
                 this.y = y || (isBurst ? y : canvas.height + 10);
-                this.radius = Math.random() * 4 + 1;
-                this.color = Math.random() > 0.5 ? '#ff2a5f' : '#00f0ff';
-                this.vx = isBurst ? (Math.random() - 0.5) * 8 : (Math.random() - 0.5) * 1;
-                this.vy = isBurst ? (Math.random() - 0.5) * 8 : -Math.random() * 2 - 0.5;
+                this.radius = Math.random() * 5 + 2;
+                this.colors = ['#ff3377', '#ffbe00', '#55cc22', '#ffffff', '#ff99cc'];
+                this.color = this.colors[Math.floor(Math.random() * this.colors.length)];
+                this.vx = isBurst ? (Math.random() - 0.5) * 9 : (Math.random() - 0.5) * 1.2;
+                this.vy = isBurst ? (Math.random() - 0.5) * 9 : -Math.random() * 2 - 0.5;
                 this.alpha = 1;
                 this.decay = isBurst ? Math.random() * 0.03 + 0.015 : 0;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.vRot = (Math.random() - 0.5) * 0.2;
             }
 
             update() {
                 this.x += this.vx;
                 this.y += this.vy;
-                if (this.decay > 0) {
-                    this.alpha -= this.decay;
-                }
+                this.rotation += this.vRot;
+                if (this.decay > 0) this.alpha -= this.decay;
             }
 
             draw() {
                 ctx.save();
                 ctx.globalAlpha = this.alpha;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
                 ctx.fillStyle = this.color;
-                ctx.shadowBlur = 10;
+                ctx.shadowBlur = 12;
                 ctx.shadowColor = this.color;
+                
+                // Draw Star Shape
+                ctx.beginPath();
+                for (let i = 0; i < 5; i++) {
+                    ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * this.radius,
+                               -Math.sin((18 + i * 72) * Math.PI / 180) * this.radius);
+                    ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * (this.radius / 2),
+                               -Math.sin((54 + i * 72) * Math.PI / 180) * (this.radius / 2));
+                }
+                ctx.closePath();
                 ctx.fill();
                 ctx.restore();
             }
         }
 
         function spawnParticles(x, y, count) {
-            for (let i = 0; i < count; i++) {
-                particles.push(new Particle(x, y, true));
-            }
+            for (let i = 0; i < count; i++) particles.push(new Particle(x, y, true));
         }
 
-        // Fill background ambient particles
-        for (let i = 0; i < 40; i++) {
-            particles.push(new Particle());
-        }
+        for (let i = 0; i < 35; i++) particles.push(new Particle());
 
         function animateParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            if (Math.random() < 0.1) {
-                particles.push(new Particle());
-            }
-
+            if (Math.random() < 0.1) particles.push(new Particle());
             for (let i = particles.length - 1; i >= 0; i--) {
                 const p = particles[i];
                 p.update();
                 p.draw();
-
                 if (p.alpha <= 0 || p.y < -10 || p.x < -10 || p.x > canvas.width + 10) {
                     particles.splice(i, 1);
                 }
@@ -550,8 +791,9 @@
             requestAnimationFrame(animateParticles);
         }
 
+        // Initialize
+        loadGame();
         animateParticles();
-        updateDisplay();
     </script>
 </body>
 </html>
