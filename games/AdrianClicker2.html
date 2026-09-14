@@ -1,855 +1,603 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adrian Clicker Remastered</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=M+PLUS+Rounded+1c:wght@700;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #ff3377;
-            --primary-glow: rgba(255, 51, 119, 0.6);
-            --accent: #00f0ff;
-            --accent-glow: rgba(0, 240, 255, 0.5);
-            --gold: #ffbe00;
-            --bg-dark: #120826;
-            --card-bg: rgba(35, 18, 60, 0.85);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adrians Clicker</title>
 
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-        }
+  <style>
+    :root {
+      --bg1: #392015;
+      --bg2: #170d0a;
+      --panel: rgba(42, 22, 14, 0.82);
+      --gold: #ffd36b;
+      --cream: #fff0c5;
+      --brown: #6c321d;
+      --green: #6bdf7c;
+    }
 
-        body {
-            font-family: 'Outfit', 'M PLUS Rounded 1c', sans-serif;
-            background: radial-gradient(circle at center, #2d1254 0%, var(--bg-dark) 100%);
-            color: #ffffff;
-            min-height: 100vh;
-            margin: 0;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
 
-        #particle-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--cream);
+      background:
+        radial-gradient(circle at top, #744125 0%, transparent 42%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+    }
 
-        #floating-text-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-            pointer-events: none;
-        }
+    .game {
+      width: min(1100px, 94vw);
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
 
-        #toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+    header {
+      text-align: center;
+      margin-bottom: 22px;
+    }
 
-        .toast {
-            background: rgba(30, 15, 50, 0.95);
-            border: 3px solid var(--gold);
-            border-radius: 16px;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 0 25px rgba(255, 190, 0, 0.5);
-            animation: slideIn 0.3s forwards, fadeOut 0.5s 2.5s forwards;
-            backdrop-filter: blur(8px);
-        }
+    h1 {
+      margin: 0;
+      color: var(--gold);
+      font-size: clamp(2.3rem, 5vw, 4rem);
+      text-shadow: 0 4px 0 #6d321b, 0 7px 20px rgba(0, 0, 0, 0.5);
+    }
 
-        .toast-icon { font-size: 2rem; }
-        .toast-title { font-weight: 900; color: var(--gold); font-size: 0.9rem; text-transform: uppercase; }
-        .toast-desc { font-size: 0.85rem; color: #fff; }
+    .subtitle {
+      margin: 8px 0 0;
+      color: #f8db9d;
+      opacity: 0.9;
+    }
 
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(320px, 1.05fr) minmax(310px, 0.95fr);
+      gap: 22px;
+      align-items: start;
+    }
 
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; transform: translateY(-10px); }
-        }
+    .card {
+      background: var(--panel);
+      border: 2px solid rgba(255, 211, 107, 0.25);
+      border-radius: 24px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(8px);
+    }
 
-        header {
-            z-index: 2;
-            text-align: center;
-            margin-top: 5px;
-        }
+    .cookie-area {
+      min-height: 625px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 28px;
+    }
 
-        h1 {
-            font-size: 3.2rem;
-            font-weight: 900;
-            margin: 0;
-            letter-spacing: 2px;
-            background: linear-gradient(180deg, #ffffff 20%, #ffccee 50%, var(--primary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px var(--primary-glow);
-            filter: drop-shadow(2px 4px 0px #660033);
-            animation: titleBounce 2s infinite ease-in-out;
-        }
+    .stats {
+      text-align: center;
+      z-index: 2;
+      margin-bottom: 14px;
+    }
 
-        @keyframes titleBounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
-        }
+    #adriansCount {
+      margin: 0;
+      font-size: clamp(2.1rem, 5vw, 3.4rem);
+      color: var(--gold);
+      text-shadow: 0 3px 0 #71351e;
+    }
 
-        .subtitle {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-top: -5px;
-            text-shadow: 0 0 10px var(--accent-glow);
-        }
+    #perSecond {
+      margin: 8px 0 0;
+      color: #f5dba4;
+      font-size: 1rem;
+    }
 
-        .top-controls {
-            z-index: 2;
-            margin-top: 12px;
-            display: flex;
-            gap: 12px;
-        }
+    #cookieButton {
+      width: min(330px, 72vw);
+      aspect-ratio: 1;
+      margin: 24px 0 18px;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.08s ease;
+      filter: drop-shadow(0 16px 12px rgba(0, 0, 0, 0.38));
+      touch-action: manipulation;
+    }
 
-        .action-btn {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            color: #fff;
-            padding: 8px 18px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: 700;
-            font-size: 0.85rem;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
+    #cookieButton:hover {
+      transform: scale(1.04);
+    }
 
-        .action-btn:hover {
-            transform: scale(1.08) translateY(-2px);
-            background: rgba(255, 255, 255, 0.3);
-            border-color: var(--accent);
-            box-shadow: 0 6px 15px var(--accent-glow);
-        }
+    #cookieButton:active {
+      transform: scale(0.92);
+    }
 
-        .action-btn:active {
-            transform: scale(0.95);
-        }
+    #cookieImage {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 8px solid #e9a052;
+      background: #d7873d;
+    }
 
-        .stats-panel {
-            z-index: 2;
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 3px solid #ff99cc;
-            padding: 12px 35px;
-            border-radius: 50px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 153, 204, 0.3);
-            display: flex;
-            gap: 30px;
-            align-items: center;
-            margin-top: 12px;
-        }
+    .click-hint {
+      margin: 0;
+      color: #f9dfaa;
+      font-weight: bold;
+      letter-spacing: 0.4px;
+    }
 
-        .stat-box { text-align: center; }
-        .stat-label { font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: #ffb3da; }
-        .stat-value { font-size: 2.5rem; font-weight: 900; color: #fff; text-shadow: 0 0 15px var(--primary-glow); }
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 22px;
+      z-index: 2;
+    }
 
-        /* Main Clicker Stage */
-        .main-stage {
-            z-index: 2;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            max-width: 450px;
-            margin: 20px 0;
-            perspective: 1000px;
-        }
+    .small-button {
+      border: 1px solid rgba(255, 211, 107, 0.35);
+      border-radius: 10px;
+      padding: 10px 13px;
+      background: rgba(255, 218, 153, 0.12);
+      color: var(--cream);
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-        #click-btn-container {
-            position: relative;
-            cursor: pointer;
-            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 40px var(--primary-glow);
-            padding: 10px;
-            background: linear-gradient(135deg, var(--gold), var(--primary), var(--accent));
-            background-size: 200% 200%;
-            animation: rainbowBorder 4s ease infinite;
-        }
+    .small-button:hover {
+      background: rgba(255, 218, 153, 0.22);
+    }
 
-        @keyframes rainbowBorder {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+    .shop {
+      padding: 22px;
+    }
 
-        #click-img {
-            display: block;
-            max-width: 100%;
-            max-height: 35vh;
-            object-fit: contain;
-            border-radius: 16px;
-            pointer-events: none;
-            transition: filter 0.15s;
-        }
+    .shop h2 {
+      margin: 0 0 7px;
+      color: var(--gold);
+      font-size: 1.8rem;
+    }
 
-        #click-btn-container:hover {
-            transform: scale(1.05) rotate(1deg);
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 60px var(--accent-glow);
-        }
+    .shop-description {
+      margin: 0 0 18px;
+      color: #eed7ad;
+      font-size: 0.95rem;
+    }
 
-        #click-btn-container:active {
-            transform: scale(0.92) rotate(-1.5deg) !important;
-            filter: brightness(1.2);
-        }
+    .upgrade {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 58px 1fr auto;
+      align-items: center;
+      gap: 13px;
+      padding: 13px;
+      margin-bottom: 12px;
+      border: 2px solid rgba(255, 211, 107, 0.18);
+      border-radius: 15px;
+      background: rgba(97, 48, 29, 0.62);
+      color: var(--cream);
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
 
-        /* Secret / Funny Adrian Popup Image */
-        #funny-adrian {
-            position: absolute;
-            top: -45px;
-            right: -45px;
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            border: 4px solid var(--gold);
-            box-shadow: 0 0 20px var(--gold);
-            object-fit: cover;
-            cursor: pointer;
-            z-index: 20;
-            animation: secretBounce 1.5s infinite ease-in-out alternate, secretGlow 2s infinite linear;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+    .upgrade:hover:not(:disabled) {
+      transform: translateY(-2px);
+      background: rgba(130, 66, 37, 0.78);
+      border-color: rgba(255, 211, 107, 0.46);
+    }
 
-        #funny-adrian:hover {
-            transform: scale(1.3) rotate(15deg);
-        }
+    .upgrade:disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+    }
 
-        @keyframes secretBounce {
-            0% { transform: translateY(0) rotate(-5deg); }
-            100% { transform: translateY(-12px) rotate(10deg); }
-        }
+    .upgrade-icon {
+      display: grid;
+      place-items: center;
+      width: 54px;
+      height: 54px;
+      border-radius: 13px;
+      background: #f4bf68;
+      font-size: 1.9rem;
+    }
 
-        @keyframes secretGlow {
-            0% { box-shadow: 0 0 15px var(--gold); }
-            50% { box-shadow: 0 0 30px var(--primary); }
-            100% { box-shadow: 0 0 15px var(--gold); }
-        }
+    .upgrade-name {
+      display: block;
+      color: #ffe2a0;
+      font-size: 1.04rem;
+      font-weight: bold;
+    }
 
-        /* Content Grid */
-        .content-grid {
-            z-index: 2;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            width: 100%;
-            max-width: 1000px;
-            margin-bottom: 20px;
-        }
+    .upgrade-info {
+      display: block;
+      margin-top: 5px;
+      color: #efd8ae;
+      font-size: 0.84rem;
+    }
 
-        @media (max-width: 768px) {
-            .content-grid { grid-template-columns: 1fr; }
-        }
+    .upgrade-price {
+      color: var(--gold);
+      font-size: 0.9rem;
+      font-weight: bold;
+      white-space: nowrap;
+      text-align: right;
+    }
 
-        .section-title {
-            font-size: 1.3rem;
-            font-weight: 900;
-            margin-bottom: 12px;
-            color: var(--gold);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-shadow: 0 0 10px rgba(255, 190, 0, 0.4);
-        }
+    .floating-number {
+      position: fixed;
+      z-index: 20;
+      pointer-events: none;
+      color: var(--gold);
+      font-size: 1.55rem;
+      font-weight: 900;
+      text-shadow: 0 3px 2px rgba(75, 27, 10, 0.9);
+      animation: floatUp 0.85s ease-out forwards;
+    }
 
-        .upgrades-container, .achievements-container {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
+    @keyframes floatUp {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, 0) scale(0.7);
+      }
 
-        /* Animated Upgrade Buttons */
-        .upgrade-card {
-            background: linear-gradient(135deg, rgba(40, 20, 70, 0.9) 0%, rgba(20, 10, 40, 0.9) 100%);
-            border: 2px solid rgba(255, 100, 180, 0.3);
-            border-radius: 20px;
-            padding: 14px 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
+      18% {
+        opacity: 1;
+        transform: translate(-50%, -15px) scale(1.1);
+      }
 
-        .upgrade-card:not(.disabled) {
-            border-color: var(--accent);
-            animation: pulseGlow 2s infinite alternate;
-        }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -105px) scale(1);
+      }
+    }
 
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 8px rgba(0, 240, 255, 0.3); }
-            100% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.7); }
-        }
+    .sparkle {
+      position: absolute;
+      border-radius: 50%;
+      width: 10px;
+      height: 10px;
+      background: #ffe89b;
+      box-shadow: 0 0 16px 5px rgba(255, 210, 84, 0.6);
+      opacity: 0.65;
+      animation: sparkle 2.2s infinite ease-in-out;
+    }
 
-        .upgrade-card::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -60%;
-            width: 50%;
-            height: 200%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
-            transform: rotate(30deg);
-            transition: all 0.6s ease;
-        }
+    .sparkle:nth-child(1) {
+      top: 13%;
+      left: 15%;
+      animation-delay: 0s;
+    }
 
-        .upgrade-card:hover:not(.disabled)::after {
-            left: 140%;
-        }
+    .sparkle:nth-child(2) {
+      top: 25%;
+      right: 13%;
+      animation-delay: 0.65s;
+    }
 
-        .upgrade-card:hover:not(.disabled) {
-            transform: translateY(-5px) scale(1.02);
-            border-color: #fff;
-            background: linear-gradient(135deg, rgba(70, 30, 110, 0.95) 0%, rgba(40, 15, 70, 0.95) 100%);
-        }
+    .sparkle:nth-child(3) {
+      bottom: 18%;
+      left: 18%;
+      animation-delay: 1.2s;
+    }
 
-        .upgrade-card:active:not(.disabled) {
-            transform: translateY(-2px) scale(0.98);
-        }
+    .sparkle:nth-child(4) {
+      bottom: 26%;
+      right: 14%;
+      animation-delay: 1.75s;
+    }
 
-        .upgrade-card.disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            filter: grayscale(0.8);
-            border-color: rgba(255, 255, 255, 0.1);
-            animation: none;
-        }
+    @keyframes sparkle {
+      0%, 100% {
+        transform: scale(0.4);
+        opacity: 0.2;
+      }
 
-        .upgrade-info { display: flex; flex-direction: column; }
-        .upgrade-title { font-weight: 900; font-size: 1.05rem; color: #fff; }
-        .upgrade-desc { font-size: 0.82rem; color: #ffccee; }
-        .upgrade-cost { font-weight: 900; font-size: 1rem; color: var(--gold); margin-top: 4px; }
+      50% {
+        transform: scale(1.25);
+        opacity: 0.9;
+      }
+    }
 
-        .upgrade-count {
-            background: linear-gradient(135deg, var(--primary), #cc0055);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 900;
-            color: #fff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-            transition: transform 0.2s;
-        }
+    @media (max-width: 780px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
 
-        .upgrade-card:hover:not(.disabled) .upgrade-count {
-            transform: scale(1.1);
-        }
-
-        /* Achievement Cards */
-        .achievement-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 2px solid rgba(255, 255, 255, 0.08);
-            border-radius: 18px;
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            opacity: 0.45;
-            filter: grayscale(1);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .achievement-card.unlocked {
-            opacity: 1;
-            filter: grayscale(0);
-            border-color: var(--gold);
-            background: linear-gradient(135deg, rgba(60, 45, 20, 0.85) 0%, rgba(35, 25, 10, 0.85) 100%);
-            box-shadow: 0 0 20px rgba(255, 190, 0, 0.25);
-            animation: unlockPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes unlockPop {
-            0% { transform: scale(0.9); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .achievement-icon {
-            font-size: 1.8rem;
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 14px;
-        }
-
-        .achievement-card.unlocked .achievement-icon {
-            background: linear-gradient(135deg, var(--gold), #ff8800);
-            box-shadow: 0 0 12px rgba(255, 190, 0, 0.5);
-        }
-
-        .achievement-details { display: flex; flex-direction: column; }
-        .achievement-name { font-weight: 900; font-size: 0.95rem; color: #fff; }
-        .achievement-card.unlocked .achievement-name { color: var(--gold); }
-        .achievement-desc { font-size: 0.78rem; color: #ffddf0; }
-
-        /* Floating Text Animation */
-        .float-text {
-            position: absolute;
-            font-weight: 900;
-            font-size: 2.2rem;
-            color: #fff;
-            text-shadow: 0 0 10px var(--primary), 0 0 20px var(--gold);
-            pointer-events: none;
-            animation: floatUp 0.8s forwards cubic-bezier(0.1, 0.8, 0.3, 1);
-            z-index: 100;
-        }
-
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0) scale(0.8) rotate(0deg); }
-            50% { transform: translateY(-50px) scale(1.3) rotate(-5deg); }
-            100% { opacity: 0; transform: translateY(-100px) scale(1); }
-        }
-    </style>
+      .cookie-area {
+        min-height: 500px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-
-    <canvas id="particle-canvas"></canvas>
-    <div id="floating-text-container"></div>
-    <div id="toast-container"></div>
-
+  <main class="game">
     <header>
-        <h1>ADRIAN CLICKER</h1>
-        <div class="subtitle">Remastered</div>
-        <div class="top-controls">
-            <button class="action-btn" onclick="saveGame(true)">💾 Save Progress</button>
-            <button class="action-btn" onclick="resetGame()">🔄 Reset Data</button>
-        </div>
+      <h1>Adrians Clicker</h1>
+      <p class="subtitle">Click the Adrian cookie. Build an unstoppable Adrian empire.</p>
     </header>
 
-    <div class="stats-panel">
-        <div class="stat-box">
-            <div class="stat-label">Adrians Gathered</div>
-            <div class="stat-value" id="score">0</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-label">Adrians / Sec</div>
-            <div class="stat-value" id="cps" style="font-size: 1.8rem; color: var(--accent);">0</div>
-        </div>
-    </div>
+    <section class="layout">
+      <div class="cookie-area card">
+        <span class="sparkle"></span>
+        <span class="sparkle"></span>
+        <span class="sparkle"></span>
+        <span class="sparkle"></span>
 
-    <div class="main-stage">
-        <div id="click-btn-container">
-            <img id="click-img" src="https://cdn.phototourl.com/free/2026-09-14-3e502ad6-a3c4-4f5b-891e-b9b1a61f27c4.jpg" alt="Adrian">
-            
-            <!-- Funny Floating Secret Adrian Button -->
-            <img id="funny-adrian" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUR8UV74ASlVNd5Tfo4aa-hv4ql6K4rJcGn8KgSUqIxA&s" alt="Secret Adrian" title="Bonus Secret Adrian!" onclick="clickSecretAdrian(event)">
-        </div>
-    </div>
-
-    <div class="content-grid">
-        <!-- Upgrades Column -->
-        <div>
-            <div class="section-title">⚡ Adrian Multipliers</div>
-            <div class="upgrades-container">
-                <div class="upgrade-card disabled" id="upg-clicker" onclick="buyUpgrade('clicker')">
-                    <div class="upgrade-info">
-                        <span class="upgrade-title">🤖 Auto-Adrian</span>
-                        <span class="upgrade-desc">+1 Adrian/sec</span>
-                        <span class="upgrade-cost">Cost: <span id="cost-clicker">15</span></span>
-                    </div>
-                    <span class="upgrade-count" id="count-clicker">0</span>
-                </div>
-
-                <div class="upgrade-card disabled" id="upg-multiplier" onclick="buyUpgrade('multiplier')">
-                    <div class="upgrade-info">
-                        <span class="upgrade-title">💥 Double Adrian Touch</span>
-                        <span class="upgrade-desc">+1 Adrian/click</span>
-                        <span class="upgrade-cost">Cost: <span id="cost-multiplier">50</span></span>
-                    </div>
-                    <span class="upgrade-count" id="count-multiplier">0</span>
-                </div>
-
-                <div class="upgrade-card disabled" id="upg-overclock" onclick="buyUpgrade('overclock')">
-                    <div class="upgrade-info">
-                        <span class="upgrade-title">🚀 Adrian Turbo Overclock</span>
-                        <span class="upgrade-desc">+10 Adrians/sec</span>
-                        <span class="upgrade-cost">Cost: <span id="cost-overclock">250</span></span>
-                    </div>
-                    <span class="upgrade-count" id="count-overclock">0</span>
-                </div>
-            </div>
+        <div class="stats">
+          <h2 id="adriansCount">0 Adrians</h2>
+          <p id="perSecond">0 Adrians per second</p>
         </div>
 
-        <!-- Achievements Column -->
-        <div>
-            <div class="section-title">🏆 Adrian Milestones</div>
-            <div class="achievements-container" id="achievements-list"></div>
+        <button id="cookieButton" aria-label="Click for Adrians">
+          <img
+            id="cookieImage"
+            src="https://cdn.phototourl.com/free/2026-09-14-3e502ad6-a3c4-4f5b-891e-b9b1a61f27c4.jpg"
+            alt="Adrian cookie"
+          />
+        </button>
+
+        <p class="click-hint">Click for +<span id="clickPower">1</span> Adrian<span id="clickPlural"></span></p>
+
+        <div class="controls">
+          <button class="small-button" id="saveButton">Save Game</button>
+          <button class="small-button" id="resetButton">Reset</button>
         </div>
-    </div>
+      </div>
 
-    <script>
-        // Game State
-        let gameState = {
-            score: 0,
-            totalClicks: 0,
-            clickValue: 1,
-            secretClicks: 0,
-            upgrades: {
-                clicker: { cost: 15, count: 0, cps: 1, elementId: 'upg-clicker' },
-                multiplier: { cost: 50, count: 0, clickAdd: 1, elementId: 'upg-multiplier' },
-                overclock: { cost: 250, count: 0, cps: 10, elementId: 'upg-overclock' }
-            },
-            unlockedAchievements: []
-        };
+      <aside class="shop card">
+        <h2>Adrian Shop</h2>
+        <p class="shop-description">Buy upgrades to make more Adrians automatically.</p>
 
-        const achievements = [
-            { id: 'first_click', icon: '👆', name: 'First Adrian', desc: 'Click Adrian for the first time', condition: () => gameState.totalClicks >= 1 },
-            { id: 'clicks_50', icon: '🔥', name: 'Adrian Fanatic', desc: 'Click Adrian 50 times', condition: () => gameState.totalClicks >= 50 },
-            { id: 'score_100', icon: '💯', name: 'Century Adrian', desc: 'Accumulate 100 Adrians', condition: () => gameState.score >= 100 },
-            { id: 'score_1000', icon: '👑', name: 'Adrian Empire', desc: 'Accumulate 1,000 Adrians', condition: () => gameState.score >= 1000 },
-            { id: 'first_upgrade', icon: '🛠️', name: 'Adrian Engineer', desc: 'Purchase your first Adrian upgrade', condition: () => getSumUpgrades() >= 1 },
-            { id: 'secret_adrian', icon: '🤪', name: 'Secret Adrian Found!', desc: 'Click the funny floating secret Adrian', condition: () => gameState.secretClicks >= 1 }
-        ];
+        <button class="upgrade" id="cursorUpgrade">
+          <span class="upgrade-icon">🖱️</span>
+          <span>
+            <span class="upgrade-name">Adrian Cursor</span>
+            <span class="upgrade-info">Adds 1 Adrian per second</span>
+          </span>
+          <span class="upgrade-price" id="cursorPrice">15 Adrians</span>
+        </button>
 
-        // Audio System (Synthesized Web Audio API)
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
-        function playSound(type) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
+        <button class="upgrade" id="grandmaUpgrade">
+          <span class="upgrade-icon">👵</span>
+          <span>
+            <span class="upgrade-name">Adrian Grandma</span>
+            <span class="upgrade-info">Adds 5 Adrians per second</span>
+          </span>
+          <span class="upgrade-price" id="grandmaPrice">100 Adrians</span>
+        </button>
 
-            if (type === 'click') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(400 + Math.random() * 250, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.05);
-                gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.05);
-            } else if (type === 'secret') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-                osc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.15);
-                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.15);
-            } else if (type === 'buy') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.07);
-                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.14);
-                osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.21);
-                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.35);
-            } else if (type === 'achievement') {
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
-                osc.frequency.setValueAtTime(880.00, audioCtx.currentTime + 0.1);
-                osc.frequency.setValueAtTime(1174.66, audioCtx.currentTime + 0.2);
-                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.45);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.45);
-            }
-        }
+        <button class="upgrade" id="factoryUpgrade">
+          <span class="upgrade-icon">🏭</span>
+          <span>
+            <span class="upgrade-name">Adrian Factory</span>
+            <span class="upgrade-info">Adds 25 Adrians per second</span>
+          </span>
+          <span class="upgrade-price" id="factoryPrice">500 Adrians</span>
+        </button>
 
-        // Initialize Achievements UI
-        function initAchievementsUI() {
-            const container = document.getElementById('achievements-list');
-            container.innerHTML = '';
-            achievements.forEach(ach => {
-                const isUnlocked = gameState.unlockedAchievements.includes(ach.id);
-                const card = document.createElement('div');
-                card.id = `ach-${ach.id}`;
-                card.className = `achievement-card ${isUnlocked ? 'unlocked' : ''}`;
-                card.innerHTML = `
-                    <div class="achievement-icon">${ach.icon}</div>
-                    <div class="achievement-details">
-                        <div class="achievement-name">${ach.name}</div>
-                        <div class="achievement-desc">${ach.desc}</div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
+        <button class="upgrade" id="clickUpgrade">
+          <span class="upgrade-icon">⚡</span>
+          <span>
+            <span class="upgrade-name">Power Click</span>
+            <span class="upgrade-info">Adds 1 Adrian to every click</span>
+          </span>
+          <span class="upgrade-price" id="clickPrice">75 Adrians</span>
+        </button>
+      </aside>
+    </section>
+  </main>
 
-        function checkAchievements() {
-            achievements.forEach(ach => {
-                if (!gameState.unlockedAchievements.includes(ach.id) && ach.condition()) {
-                    gameState.unlockedAchievements.push(ach.id);
-                    document.getElementById(`ach-${ach.id}`).classList.add('unlocked');
-                    showToast(ach.name, ach.desc, ach.icon);
-                    playSound('achievement');
-                }
-            });
-        }
+  <script>
+    const COOKIE_IMAGE =
+      "https://cdn.phototourl.com/free/2026-09-14-3e502ad6-a3c4-4f5b-891e-b9b1a61f27c4.jpg";
 
-        function showToast(title, desc, icon) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerHTML = `
-                <div class="toast-icon">${icon}</div>
-                <div>
-                    <div class="toast-title">Milestone Unlocked!</div>
-                    <div class="toast-desc"><strong>${title}</strong>: ${desc}</div>
-                </div>
-            `;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
+    const game = {
+      adrians: 0,
+      cursors: 0,
+      grandmas: 0,
+      factories: 0,
+      clickLevel: 0,
+      cursorCost: 15,
+      grandmaCost: 100,
+      factoryCost: 500,
+      clickCost: 75
+    };
 
-        // Main Click Handler
-        const clickContainer = document.getElementById('click-btn-container');
-        clickContainer.addEventListener('pointerdown', (e) => {
-            if (e.target.id === 'funny-adrian') return; // Handled separately
-            gameState.score += gameState.clickValue;
-            gameState.totalClicks++;
-            playSound('click');
-            spawnFloatingText(e.clientX, e.clientY, `+${gameState.clickValue}`);
-            spawnParticles(e.clientX, e.clientY, 10);
-            
-            const rect = clickContainer.getBoundingClientRect();
-            const x = e.clientX - rect.left - rect.width / 2;
-            const y = e.clientY - rect.top - rect.height / 2;
-            clickContainer.style.transform = `scale(0.93) rotateX(${-y / 5}deg) rotateY(${x / 5}deg)`;
-            
-            updateDisplay();
-            checkAchievements();
-        });
+    const elements = {
+      count: document.getElementById("adriansCount"),
+      perSecond: document.getElementById("perSecond"),
+      cookie: document.getElementById("cookieButton"),
+      cookieImage: document.getElementById("cookieImage"),
+      clickPower: document.getElementById("clickPower"),
+      clickPlural: document.getElementById("clickPlural"),
+      cursorButton: document.getElementById("cursorUpgrade"),
+      grandmaButton: document.getElementById("grandmaUpgrade"),
+      factoryButton: document.getElementById("factoryUpgrade"),
+      clickButton: document.getElementById("clickUpgrade"),
+      cursorPrice: document.getElementById("cursorPrice"),
+      grandmaPrice: document.getElementById("grandmaPrice"),
+      factoryPrice: document.getElementById("factoryPrice"),
+      clickPrice: document.getElementById("clickPrice"),
+      saveButton: document.getElementById("saveButton"),
+      resetButton: document.getElementById("resetButton")
+    };
 
-        // Secret Adrian Click Handler
-        function clickSecretAdrian(e) {
-            e.stopPropagation();
-            const bonus = gameState.clickValue * 10;
-            gameState.score += bonus;
-            gameState.secretClicks++;
-            playSound('secret');
-            spawnFloatingText(e.clientX, e.clientY, `MEGA ADRIAN +${bonus}!`);
-            spawnParticles(e.clientX, e.clientY, 25);
-            
-            updateDisplay();
-            checkAchievements();
-        }
+    elements.cookieImage.src = COOKIE_IMAGE;
 
-        clickContainer.addEventListener('pointerup', () => clickContainer.style.transform = '');
-        clickContainer.addEventListener('pointerleave', () => clickContainer.style.transform = '');
+    function formatNumber(number) {
+      if (number < 1000) {
+        return Math.floor(number).toLocaleString();
+      }
 
-        function buyUpgrade(key) {
-            const upg = gameState.upgrades[key];
-            if (gameState.score >= upg.cost) {
-                gameState.score -= upg.cost;
-                upg.count++;
-                if (upg.clickAdd) gameState.clickValue += upg.clickAdd;
-                upg.cost = Math.floor(upg.cost * 1.25);
-                playSound('buy');
-                updateDisplay();
-                checkAchievements();
-            }
-        }
+      const suffixes = ["K", "M", "B", "T", "Qa", "Qi"];
+      const tier = Math.floor(Math.log10(number) / 3);
+      const suffix = suffixes[tier - 1] || "∞";
+      const scaled = number / Math.pow(1000, tier);
 
-        function getCps() {
-            let total = 0;
-            for (let k in gameState.upgrades) {
-                if (gameState.upgrades[k].cps) total += gameState.upgrades[k].cps * gameState.upgrades[k].count;
-            }
-            return total;
-        }
+      return `${scaled.toFixed(scaled >= 100 ? 0 : 1)}${suffix}`;
+    }
 
-        function getSumUpgrades() {
-            let total = 0;
-            for (let k in gameState.upgrades) total += gameState.upgrades[k].count;
-            return total;
-        }
+    function getClickPower() {
+      return 1 + game.clickLevel;
+    }
 
-        // Game Loop
-        setInterval(() => {
-            const currentCps = getCps();
-            if (currentCps > 0) {
-                gameState.score += currentCps / 10;
-                updateDisplay();
-                checkAchievements();
-            }
-        }, 100);
+    function getPerSecond() {
+      return game.cursors + game.grandmas * 5 + game.factories * 25;
+    }
 
-        // Auto Save Loop (Every 10 Seconds)
-        setInterval(() => {
-            saveGame(false);
-        }, 10000);
+    function showFloatingNumber(x, y, amount) {
+      const floatingNumber = document.createElement("div");
+      floatingNumber.className = "floating-number";
+      floatingNumber.textContent = `+${formatNumber(amount)}`;
+      floatingNumber.style.left = `${x}px`;
+      floatingNumber.style.top = `${y}px`;
 
-        function updateDisplay() {
-            document.getElementById('score').textContent = Math.floor(gameState.score).toLocaleString();
-            document.getElementById('cps').textContent = getCps().toLocaleString();
+      document.body.appendChild(floatingNumber);
 
-            for (let k in gameState.upgrades) {
-                const upg = gameState.upgrades[k];
-                document.getElementById(`cost-${k}`).textContent = upg.cost.toLocaleString();
-                document.getElementById(`count-${k}`).textContent = upg.count;
-                
-                const el = document.getElementById(upg.elementId);
-                if (gameState.score >= upg.cost) {
-                    el.classList.remove('disabled');
-                } else {
-                    el.classList.add('disabled');
-                }
-            }
-        }
+      setTimeout(() => {
+        floatingNumber.remove();
+      }, 850);
+    }
 
-        // Save & Load Systems
-        function saveGame(notify = false) {
-            localStorage.setItem('adrian_clicker_save_data', JSON.stringify(gameState));
-            if (notify) showToast('Saved', 'Adrian progress saved successfully!', '💾');
-        }
+    function updateUI() {
+      const total = Math.floor(game.adrians);
+      const perSecond = getPerSecond();
+      const clickPower = getClickPower();
 
-        function loadGame() {
-            const saved = localStorage.getItem('adrian_clicker_save_data');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    gameState = { ...gameState, ...parsed };
-                } catch (e) {
-                    console.error("Failed to load save data", e);
-                }
-            }
-            initAchievementsUI();
-            updateDisplay();
-        }
+      elements.count.textContent = `${formatNumber(total)} Adrian${total === 1 ? "" : "s"}`;
+      elements.perSecond.textContent =
+        `${formatNumber(perSecond)} Adrian${perSecond === 1 ? "" : "s"} per second`;
 
-        function resetGame() {
-            if (confirm("Reset all Adrian progress and achievements?")) {
-                localStorage.removeItem('adrian_clicker_save_data');
-                location.reload();
-            }
-        }
+      elements.clickPower.textContent = clickPower;
+      elements.clickPlural.textContent = clickPower === 1 ? "" : "s";
 
-        function spawnFloatingText(x, y, text) {
-            const el = document.createElement('div');
-            el.className = 'float-text';
-            el.textContent = text;
-            el.style.left = `${x - 30}px`;
-            el.style.top = `${y - 30}px`;
-            document.getElementById('floating-text-container').appendChild(el);
-            setTimeout(() => el.remove(), 800);
-        }
+      elements.cursorPrice.textContent = `${formatNumber(game.cursorCost)} Adrians`;
+      elements.grandmaPrice.textContent = `${formatNumber(game.grandmaCost)} Adrians`;
+      elements.factoryPrice.textContent = `${formatNumber(game.factoryCost)} Adrians`;
+      elements.clickPrice.textContent = `${formatNumber(game.clickCost)} Adrians`;
 
-        // Particle System
-        const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
+      elements.cursorButton.disabled = game.adrians < game.cursorCost;
+      elements.grandmaButton.disabled = game.adrians < game.grandmaCost;
+      elements.factoryButton.disabled = game.adrians < game.factoryCost;
+      elements.clickButton.disabled = game.adrians < game.clickCost;
+    }
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+    function saveGame() {
+      localStorage.setItem("adriansClickerSave", JSON.stringify(game));
+    }
 
-        class Particle {
-            constructor(x, y, isBurst = false) {
-                this.x = x || Math.random() * canvas.width;
-                this.y = y || (isBurst ? y : canvas.height + 10);
-                this.radius = Math.random() * 5 + 2;
-                this.colors = ['#ff3377', '#ffbe00', '#00f0ff', '#ffffff', '#ff99cc'];
-                this.color = this.colors[Math.floor(Math.random() * this.colors.length)];
-                this.vx = isBurst ? (Math.random() - 0.5) * 9 : (Math.random() - 0.5) * 1.2;
-                this.vy = isBurst ? (Math.random() - 0.5) * 9 : -Math.random() * 2 - 0.5;
-                this.alpha = 1;
-                this.decay = isBurst ? Math.random() * 0.03 + 0.015 : 0;
-                this.rotation = Math.random() * Math.PI * 2;
-                this.vRot = (Math.random() - 0.5) * 0.2;
-            }
+    function loadGame() {
+      const savedGame = localStorage.getItem("adriansClickerSave");
 
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.rotation += this.vRot;
-                if (this.decay > 0) this.alpha -= this.decay;
-            }
+      if (!savedGame) return;
 
-            draw() {
-                ctx.save();
-                ctx.globalAlpha = this.alpha;
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.rotation);
-                ctx.fillStyle = this.color;
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = this.color;
-                
-                // Draw Star Shape
-                ctx.beginPath();
-                for (let i = 0; i < 5; i++) {
-                    ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * this.radius,
-                               -Math.sin((18 + i * 72) * Math.PI / 180) * this.radius);
-                    ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * (this.radius / 2),
-                               -Math.sin((54 + i * 72) * Math.PI / 180) * (this.radius / 2));
-                }
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
-            }
-        }
+      try {
+        const loaded = JSON.parse(savedGame);
+        Object.assign(game, loaded);
+      } catch (error) {
+        console.warn("Could not load saved Adrian game.");
+      }
+    }
 
-        function spawnParticles(x, y, count) {
-            for (let i = 0; i < count; i++) particles.push(new Particle(x, y, true));
-        }
+    function buyUpgrade(type) {
+      if (type === "cursor" && game.adrians >= game.cursorCost) {
+        game.adrians -= game.cursorCost;
+        game.cursors += 1;
+        game.cursorCost = Math.ceil(game.cursorCost * 1.18);
+      }
 
-        for (let i = 0; i < 35; i++) particles.push(new Particle());
+      if (type === "grandma" && game.adrians >= game.grandmaCost) {
+        game.adrians -= game.grandmaCost;
+        game.grandmas += 1;
+        game.grandmaCost = Math.ceil(game.grandmaCost * 1.2);
+      }
 
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (Math.random() < 0.1) particles.push(new Particle());
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                p.update();
-                p.draw();
-                if (p.alpha <= 0 || p.y < -10 || p.x < -10 || p.x > canvas.width + 10) {
-                    particles.splice(i, 1);
-                }
-            }
-            requestAnimationFrame(animateParticles);
-        }
+      if (type === "factory" && game.adrians >= game.factoryCost) {
+        game.adrians -= game.factoryCost;
+        game.factories += 1;
+        game.factoryCost = Math.ceil(game.factoryCost * 1.23);
+      }
 
-        // Initialize
-        loadGame();
-        animateParticles();
-    </script>
+      if (type === "click" && game.adrians >= game.clickCost) {
+        game.adrians -= game.clickCost;
+        game.clickLevel += 1;
+        game.clickCost = Math.ceil(game.clickCost * 1.55);
+      }
+
+      saveGame();
+      updateUI();
+    }
+
+    elements.cookie.addEventListener("click", (event) => {
+      const gained = getClickPower();
+      game.adrians += gained;
+
+      const rect = elements.cookie.getBoundingClientRect();
+      const x = event.clientX || rect.left + rect.width / 2;
+      const y = event.clientY || rect.top + rect.height / 2;
+
+      showFloatingNumber(x, y, gained);
+      updateUI();
+    });
+
+    elements.cursorButton.addEventListener("click", () => buyUpgrade("cursor"));
+    elements.grandmaButton.addEventListener("click", () => buyUpgrade("grandma"));
+    elements.factoryButton.addEventListener("click", () => buyUpgrade("factory"));
+    elements.clickButton.addEventListener("click", () => buyUpgrade("click"));
+
+    elements.saveButton.addEventListener("click", () => {
+      saveGame();
+      elements.saveButton.textContent = "Saved!";
+      setTimeout(() => {
+        elements.saveButton.textContent = "Save Game";
+      }, 1000);
+    });
+
+    elements.resetButton.addEventListener("click", () => {
+      const confirmed = confirm("Reset all Adrians and upgrades?");
+
+      if (!confirmed) return;
+
+      localStorage.removeItem("adriansClickerSave");
+
+      game.adrians = 0;
+      game.cursors = 0;
+      game.grandmas = 0;
+      game.factories = 0;
+      game.clickLevel = 0;
+      game.cursorCost = 15;
+      game.grandmaCost = 100;
+      game.factoryCost = 500;
+      game.clickCost = 75;
+
+      updateUI();
+    });
+
+    loadGame();
+    updateUI();
+
+    setInterval(() => {
+      game.adrians += getPerSecond() / 10;
+      updateUI();
+    }, 100);
+
+    setInterval(saveGame, 5000);
+  </script>
 </body>
 </html>
