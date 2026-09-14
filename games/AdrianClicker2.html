@@ -34,18 +34,15 @@
             width: 200px;
             height: 200px;
             border-radius: 50%;
-            background: linear-gradient(145deg, #e94560, #0f3460);
             border: 4px solid #ffffff;
-            color: white;
-            font-size: 2.2rem;
-            font-weight: bold;
             cursor: pointer;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             transition: transform 0.05s ease, box-shadow 0.05s ease;
             outline: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background-image: url('https://cdn.phototourl.com/free/2026-09-14-3e502ad6-a3c4-4f5b-891e-b9b1a61f27c4.jpg');
+            background-size: cover;
+            background-position: center;
+            padding: 0;
         }
 
         #click-btn:active {
@@ -91,7 +88,7 @@
         Adrians: <span id="score">0</span>
     </div>
 
-    <button id="click-btn">ADRIAN</button>
+    <button id="click-btn" aria-label="Click Adrian"></button>
 
     <div class="upgrades">
         <button class="upgrade-btn" id="buy-clicker" onclick="buyClicker()">
