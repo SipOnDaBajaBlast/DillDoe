@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adrian Clicker</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a2e;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #e94560;
+            text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+        }
+
+        .score-container {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+        }
+
+        #click-btn {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #e94560, #0f3460);
+            border: 4px solid #ffffff;
+            color: white;
+            font-size: 2.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            transition: transform 0.05s ease, box-shadow 0.05s ease;
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #click-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .upgrades {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .upgrade-btn {
+            padding: 12px 20px;
+            font-size: 1rem;
+            background-color: #16213e;
+            color: #fff;
+            border: 2px solid #0f3460;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .upgrade-btn:hover {
+            background-color: #0f3460;
+            border-color: #e94560;
+        }
+
+        .upgrade-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #0f3460;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Adrian Clicker</h1>
+    <div class="score-container">
+        Adrians: <span id="score">0</span>
+    </div>
+
+    <button id="click-btn">ADRIAN</button>
+
+    <div class="upgrades">
+        <button class="upgrade-btn" id="buy-clicker" onclick="buyClicker()">
+            Auto-Adrian (+1/s)<br>Cost: <span id="clicker-cost">15</span>
+        </button>
+        <button class="upgrade-btn" id="buy-multiplier" onclick="buyMultiplier()">
+            Double Touch (+1/click)<br>Cost: <span id="multiplier-cost">50</span>
+        </button>
+    </div>
+
+    <script>
+        let score = 0;
+        let clickValue = 1;
+        let autoClickers = 0;
+        let clickerCost = 15;
+        let multiplierCost = 50;
+
+        const scoreDisplay = document.getElementById('score');
+        const clickBtn = document.getElementById('click-btn');
+        const clickerCostDisplay = document.getElementById('clicker-cost');
+        const multiplierCostDisplay = document.getElementById('multiplier-cost');
+
+        clickBtn.addEventListener('click', () => {
+            score += clickValue;
+            updateDisplay();
+        });
+
+        function buyClicker() {
+            if (score >= clickerCost) {
+                score -= clickerCost;
+                autoClickers++;
+                clickerCost = Math.floor(clickerCost * 1.15);
+                updateDisplay();
+            }
+        }
+
+        function buyMultiplier() {
+            if (score >= multiplierCost) {
+                score -= multiplierCost;
+                clickValue++;
+                multiplierCost = Math.floor(multiplierCost * 1.5);
+                updateDisplay();
+            }
+        }
+
+        setInterval(() => {
+            score += autoClickers;
+            updateDisplay();
+        }, 1000);
+
+        function updateDisplay() {
+            scoreDisplay.textContent = score;
+            clickerCostDisplay.textContent = clickerCost;
+            multiplierCostDisplay.textContent = multiplierCost;
+
+            document.getElementById('buy-clicker').disabled = score < clickerCost;
+            document.getElementById('buy-multiplier').disabled = score < multiplierCost;
+        }
+
+        updateDisplay();
+    </script>
+</body>
+</html>
