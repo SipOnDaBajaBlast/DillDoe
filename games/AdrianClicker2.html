@@ -3,151 +3,554 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adrian Clicker</title>
+    <title>Adrian Clicker - Supreme Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #ff2a5f;
+            --primary-glow: rgba(255, 42, 95, 0.6);
+            --accent: #00f0ff;
+            --accent-glow: rgba(0, 240, 255, 0.5);
+            --bg-dark: #0a0a16;
+            --card-bg: rgba(20, 20, 45, 0.7);
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1a2e;
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at center, #1a1a3a 0%, var(--bg-dark) 100%);
             color: #ffffff;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            user-select: none;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        /* Ambient Background Canvas */
+        #particle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Floating +1 Text Layer */
+        #floating-text-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        header {
+            z-index: 2;
+            text-align: center;
+            margin-top: 10px;
         }
 
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            color: #e94560;
-            text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin: 0;
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, var(--primary), var(--accent), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px var(--primary-glow);
+            animation: titlePulse 3s infinite alternate ease-in-out;
         }
 
-        .score-container {
-            font-size: 1.8rem;
-            margin-bottom: 25px;
+        @keyframes titlePulse {
+            0% { filter: drop-shadow(0 0 15px var(--primary-glow)); }
+            100% { filter: drop-shadow(0 0 35px var(--accent-glow)); }
         }
 
-        #click-btn {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            border: 4px solid #ffffff;
-            cursor: pointer;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            transition: transform 0.05s ease, box-shadow 0.05s ease;
-            outline: none;
-            background-image: url('https://cdn.phototourl.com/free/2026-09-14-3e502ad6-a3c4-4f5b-891e-b9b1a61f27c4.jpg');
-            background-size: cover;
-            background-position: center;
-            padding: 0;
-        }
-
-        #click-btn:active {
-            transform: scale(0.95);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-
-        .upgrades {
-            margin-top: 30px;
+        /* Stats Display */
+        .stats-panel {
+            z-index: 2;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 40px;
+            border-radius: 50px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
+            gap: 30px;
+            align-items: center;
+            margin-top: 15px;
         }
 
-        .upgrade-btn {
-            padding: 12px 20px;
-            font-size: 1rem;
-            background-color: #16213e;
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #8a8aa3;
+        }
+
+        .stat-value {
+            font-size: 2.8rem;
+            font-weight: 900;
             color: #fff;
-            border: 2px solid #0f3460;
-            border-radius: 8px;
+            text-shadow: 0 0 15px rgba(255,255,255,0.5);
+        }
+
+        /* Main Clicker Image (Full Rectangular Image, NO Circle) */
+        .main-stage {
+            z-index: 2;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            width: 100%;
+            max-width: 500px;
+            margin: 20px 0;
+            perspective: 1000px;
+        }
+
+        #click-btn-container {
+            position: relative;
             cursor: pointer;
-            transition: background-color 0.2s, border-color 0.2s;
+            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6),
+                        0 0 40px var(--primary-glow);
+            padding: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
         }
 
-        .upgrade-btn:hover {
-            background-color: #0f3460;
-            border-color: #e94560;
+        #click-img {
+            display: block;
+            max-width: 100%;
+            max-height: 40vh;
+            object-fit: contain;
+            border-radius: 14px;
+            pointer-events: none;
+            transition: filter 0.1s;
         }
 
-        .upgrade-btn:disabled {
-            opacity: 0.5;
+        #click-btn-container:hover {
+            transform: scale(1.03) rotate(0.5deg);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8),
+                        0 0 60px var(--accent-glow);
+        }
+
+        #click-btn-container:active {
+            transform: scale(0.93) rotate(-1deg) !important;
+            filter: brightness(1.3);
+        }
+
+        /* Upgrades Panel */
+        .upgrades-container {
+            z-index: 2;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 20px;
+        }
+
+        .upgrade-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .upgrade-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: 0.5s;
+        }
+
+        .upgrade-card:hover::before {
+            left: 100%;
+        }
+
+        .upgrade-card:hover:not(.disabled) {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 25px rgba(0, 240, 255, 0.3);
+        }
+
+        .upgrade-card:active:not(.disabled) {
+            transform: translateY(-2px);
+        }
+
+        .upgrade-card.disabled {
+            opacity: 0.4;
             cursor: not-allowed;
-            border-color: #0f3460;
+            filter: grayscale(0.8);
+        }
+
+        .upgrade-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .upgrade-desc {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-bottom: 12px;
+        }
+
+        .upgrade-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .upgrade-cost {
+            font-weight: 900;
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+
+        .upgrade-count {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        /* Floating Text Animation */
+        .float-text {
+            position: absolute;
+            font-weight: 900;
+            font-size: 2rem;
+            color: #fff;
+            text-shadow: 0 0 10px var(--primary), 0 0 20px var(--accent);
+            pointer-events: none;
+            animation: floatUp 0.8s forwards cubic-bezier(0.1, 0.8, 0.3, 1);
+            z-index: 100;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(0.8) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-50px) scale(1.3) rotate(calc(-10deg + 20deg * var(--rand)));
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) scale(1) rotate(calc(-15deg + 30deg * var(--rand)));
+            }
         }
     </style>
 </head>
 <body>
 
-    <h1>Adrian Clicker</h1>
-    <div class="score-container">
-        Adrians: <span id="score">0</span>
+    <canvas id="particle-canvas"></canvas>
+    <div id="floating-text-container"></div>
+
+    <header>
+        <h1>ADRIAN CLICKER</h1>
+    </header>
+
+    <div class="stats-panel">
+        <div class="stat-box">
+            <div class="stat-label">Adrians</div>
+            <div class="stat-value" id="score">0</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Per Second</div>
+            <div class="stat-value" id="cps" style="font-size: 1.8rem; color: var(--accent);">0</div>
+        </div>
     </div>
 
-    <button id="click-btn" aria-label="Click Adrian"></button>
+    <div class="main-stage">
+        <div id="click-btn-container">
+            <img id="click-img" src="https://cdn.phototourl.com/free/2026-09-14-3e502ad6-a3c4-4f5b-891e-b9b1a61f27c4.jpg" alt="Adrian">
+        </div>
+    </div>
 
-    <div class="upgrades">
-        <button class="upgrade-btn" id="buy-clicker" onclick="buyClicker()">
-            Auto-Adrian (+1/s)<br>Cost: <span id="clicker-cost">15</span>
-        </button>
-        <button class="upgrade-btn" id="buy-multiplier" onclick="buyMultiplier()">
-            Double Touch (+1/click)<br>Cost: <span id="multiplier-cost">50</span>
-        </button>
+    <div class="upgrades-container">
+        <div class="upgrade-card disabled" id="upg-clicker" onclick="buyUpgrade('clicker')">
+            <div>
+                <div class="upgrade-title">⚡ Auto-Adrian</div>
+                <div class="upgrade-desc">+1 Adrian per second</div>
+            </div>
+            <div class="upgrade-footer">
+                <span class="upgrade-cost" id="cost-clicker">15</span>
+                <span class="upgrade-count" id="count-clicker">0</span>
+            </div>
+        </div>
+
+        <div class="upgrade-card disabled" id="upg-multiplier" onclick="buyUpgrade('multiplier')">
+            <div>
+                <div class="upgrade-title">💥 Double Touch</div>
+                <div class="upgrade-desc">+1 Adrian per click</div>
+            </div>
+            <div class="upgrade-footer">
+                <span class="upgrade-cost" id="cost-multiplier">50</span>
+                <span class="upgrade-count" id="count-multiplier">0</span>
+            </div>
+        </div>
+
+        <div class="upgrade-card disabled" id="upg-overclock" onclick="buyUpgrade('overclock')">
+            <div>
+                <div class="upgrade-title">🚀 Adrian Overclock</div>
+                <div class="upgrade-desc">+10 Adrians per second</div>
+            </div>
+            <div class="upgrade-footer">
+                <span class="upgrade-cost" id="cost-overclock">250</span>
+                <span class="upgrade-count" id="count-overclock">0</span>
+            </div>
+        </div>
     </div>
 
     <script>
+        // Game State
         let score = 0;
         let clickValue = 1;
-        let autoClickers = 0;
-        let clickerCost = 15;
-        let multiplierCost = 50;
+        
+        const upgrades = {
+            clicker: { cost: 15, count: 0, cps: 1, elementId: 'upg-clicker' },
+            multiplier: { cost: 50, count: 0, clickAdd: 1, elementId: 'upg-multiplier' },
+            overclock: { cost: 250, count: 0, cps: 10, elementId: 'upg-overclock' }
+        };
 
+        // DOM Elements
         const scoreDisplay = document.getElementById('score');
-        const clickBtn = document.getElementById('click-btn');
-        const clickerCostDisplay = document.getElementById('clicker-cost');
-        const multiplierCostDisplay = document.getElementById('multiplier-cost');
+        const cpsDisplay = document.getElementById('cps');
+        const clickContainer = document.getElementById('click-btn-container');
+        const floatContainer = document.getElementById('floating-text-container');
 
-        clickBtn.addEventListener('click', () => {
+        // Audio Effects using Web Audio API (Synthesized SFX, no external assets needed!)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playClickSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(300 + Math.random() * 200, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+
+        function playBuySound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.08); // E5
+            osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.16); // G5
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+
+        // Handle Main Click Event
+        clickContainer.addEventListener('pointerdown', (e) => {
             score += clickValue;
+            playClickSound();
+            spawnFloatingText(e.clientX, e.clientY, `+${clickValue}`);
+            spawnParticles(e.clientX, e.clientY, 8);
+            
+            // Subtle 3D Tilt Effect on Click Location
+            const rect = clickContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            clickContainer.style.transform = `scale(0.94) rotateX(${-y / 5}deg) rotateY(${x / 5}deg)`;
+            
             updateDisplay();
         });
 
-        function buyClicker() {
-            if (score >= clickerCost) {
-                score -= clickerCost;
-                autoClickers++;
-                clickerCost = Math.floor(clickerCost * 1.15);
+        clickContainer.addEventListener('pointerup', () => {
+            clickContainer.style.transform = '';
+        });
+
+        clickContainer.addEventListener('pointerleave', () => {
+            clickContainer.style.transform = '';
+        });
+
+        // Upgrades Logic
+        function buyUpgrade(key) {
+            const upg = upgrades[key];
+            if (score >= upg.cost) {
+                score -= upg.cost;
+                upg.count++;
+                
+                if (upg.clickAdd) clickValue += upg.clickAdd;
+                
+                upg.cost = Math.floor(upg.cost * 1.25);
+                playBuySound();
                 updateDisplay();
             }
         }
 
-        function buyMultiplier() {
-            if (score >= multiplierCost) {
-                score -= multiplierCost;
-                clickValue++;
-                multiplierCost = Math.floor(multiplierCost * 1.5);
-                updateDisplay();
+        function getCps() {
+            let total = 0;
+            for (let k in upgrades) {
+                if (upgrades[k].cps) total += upgrades[k].cps * upgrades[k].count;
             }
+            return total;
         }
 
+        // Passive CPS Loop
         setInterval(() => {
-            score += autoClickers;
-            updateDisplay();
-        }, 1000);
+            const currentCps = getCps();
+            if (currentCps > 0) {
+                score += currentCps / 10; // Smooth 100ms updates
+                updateDisplay();
+            }
+        }, 100);
 
         function updateDisplay() {
-            scoreDisplay.textContent = score;
-            clickerCostDisplay.textContent = clickerCost;
-            multiplierCostDisplay.textContent = multiplierCost;
+            scoreDisplay.textContent = Math.floor(score).toLocaleString();
+            cpsDisplay.textContent = getCps().toLocaleString();
 
-            document.getElementById('buy-clicker').disabled = score < clickerCost;
-            document.getElementById('buy-multiplier').disabled = score < multiplierCost;
+            for (let k in upgrades) {
+                const upg = upgrades[k];
+                document.getElementById(`cost-${k}`).textContent = upg.cost.toLocaleString();
+                document.getElementById(`count-${k}`).textContent = upg.count;
+                
+                const el = document.getElementById(upg.elementId);
+                if (score >= upg.cost) {
+                    el.classList.remove('disabled');
+                } else {
+                    el.classList.add('disabled');
+                }
+            }
         }
 
+        // Floating FX Spawners
+        function spawnFloatingText(x, y, text) {
+            const el = document.createElement('div');
+            el.className = 'float-text';
+            el.textContent = text;
+            el.style.left = `${x - 20}px`;
+            el.style.top = `${y - 30}px`;
+            el.style.setProperty('--rand', Math.random());
+            floatContainer.appendChild(el);
+
+            setTimeout(() => el.remove(), 800);
+        }
+
+        // Ambient Particle Canvas System
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, isBurst = false) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || (isBurst ? y : canvas.height + 10);
+                this.radius = Math.random() * 4 + 1;
+                this.color = Math.random() > 0.5 ? '#ff2a5f' : '#00f0ff';
+                this.vx = isBurst ? (Math.random() - 0.5) * 8 : (Math.random() - 0.5) * 1;
+                this.vy = isBurst ? (Math.random() - 0.5) * 8 : -Math.random() * 2 - 0.5;
+                this.alpha = 1;
+                this.decay = isBurst ? Math.random() * 0.03 + 0.015 : 0;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.decay > 0) {
+                    this.alpha -= this.decay;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function spawnParticles(x, y, count) {
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle(x, y, true));
+            }
+        }
+
+        // Fill background ambient particles
+        for (let i = 0; i < 40; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (Math.random() < 0.1) {
+                particles.push(new Particle());
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.update();
+                p.draw();
+
+                if (p.alpha <= 0 || p.y < -10 || p.x < -10 || p.x > canvas.width + 10) {
+                    particles.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        animateParticles();
         updateDisplay();
     </script>
 </body>
