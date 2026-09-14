@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adrian Clicker - Umamusume Pretty Derby Edition</title>
+    <title>Adrian Clicker Remastered</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=M+PLUS+Rounded+1c:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #ff3377;
             --primary-glow: rgba(255, 51, 119, 0.6);
-            --accent: #55cc22;
-            --accent-glow: rgba(85, 204, 34, 0.5);
+            --accent: #00f0ff;
+            --accent-glow: rgba(0, 240, 255, 0.5);
             --gold: #ffbe00;
             --bg-dark: #120826;
             --card-bg: rgba(35, 18, 60, 0.85);
-            --turf-green: #28a745;
         }
 
         * {
@@ -228,6 +227,38 @@
             filter: brightness(1.2);
         }
 
+        /* Secret / Funny Adrian Popup Image */
+        #funny-adrian {
+            position: absolute;
+            top: -45px;
+            right: -45px;
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 4px solid var(--gold);
+            box-shadow: 0 0 20px var(--gold);
+            object-fit: cover;
+            cursor: pointer;
+            z-index: 20;
+            animation: secretBounce 1.5s infinite ease-in-out alternate, secretGlow 2s infinite linear;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #funny-adrian:hover {
+            transform: scale(1.3) rotate(15deg);
+        }
+
+        @keyframes secretBounce {
+            0% { transform: translateY(0) rotate(-5deg); }
+            100% { transform: translateY(-12px) rotate(10deg); }
+        }
+
+        @keyframes secretGlow {
+            0% { box-shadow: 0 0 15px var(--gold); }
+            50% { box-shadow: 0 0 30px var(--primary); }
+            100% { box-shadow: 0 0 15px var(--gold); }
+        }
+
         /* Content Grid */
         .content-grid {
             z-index: 2;
@@ -278,18 +309,16 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        /* Continuous Pulse Shimmer on Purchaseable Buttons */
         .upgrade-card:not(.disabled) {
             border-color: var(--accent);
             animation: pulseGlow 2s infinite alternate;
         }
 
         @keyframes pulseGlow {
-            0% { box-shadow: 0 0 8px rgba(85, 204, 34, 0.3); }
-            100% { box-shadow: 0 0 20px rgba(85, 204, 34, 0.7); }
+            0% { box-shadow: 0 0 8px rgba(0, 240, 255, 0.3); }
+            100% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.7); }
         }
 
-        /* Animated Hover Sheen */
         .upgrade-card::after {
             content: '';
             position: absolute;
@@ -410,7 +439,7 @@
         @keyframes floatUp {
             0% { opacity: 1; transform: translateY(0) scale(0.8) rotate(0deg); }
             50% { transform: translateY(-50px) scale(1.3) rotate(-5deg); }
-            100% { opacity: 0; transform: translateY(-100px) scale(1) rotate(5deg); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1); }
         }
     </style>
 </head>
@@ -422,7 +451,7 @@
 
     <header>
         <h1>ADRIAN CLICKER</h1>
-        <div class="subtitle">✨ PRETTY DERBY EDITION ✨</div>
+        <div class="subtitle">Remastered</div>
         <div class="top-controls">
             <button class="action-btn" onclick="saveGame(true)">💾 Save Progress</button>
             <button class="action-btn" onclick="resetGame()">🔄 Reset Data</button>
@@ -431,11 +460,11 @@
 
     <div class="stats-panel">
         <div class="stat-box">
-            <div class="stat-label">Carrots Earned</div>
+            <div class="stat-label">Adrians Gathered</div>
             <div class="stat-value" id="score">0</div>
         </div>
         <div class="stat-box">
-            <div class="stat-label">Stamina / Sec</div>
+            <div class="stat-label">Adrians / Sec</div>
             <div class="stat-value" id="cps" style="font-size: 1.8rem; color: var(--accent);">0</div>
         </div>
     </div>
@@ -443,18 +472,21 @@
     <div class="main-stage">
         <div id="click-btn-container">
             <img id="click-img" src="https://cdn.phototourl.com/free/2026-09-14-3e502ad6-a3c4-4f5b-891e-b9b1a61f27c4.jpg" alt="Adrian">
+            
+            <!-- Funny Floating Secret Adrian Button -->
+            <img id="funny-adrian" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUR8UV74ASlVNd5Tfo4aa-hv4ql6K4rJcGn8KgSUqIxA&s" alt="Secret Adrian" title="Bonus Secret Adrian!" onclick="clickSecretAdrian(event)">
         </div>
     </div>
 
     <div class="content-grid">
         <!-- Upgrades Column -->
         <div>
-            <div class="section-title">👟 Training Facilities</div>
+            <div class="section-title">⚡ Adrian Multipliers</div>
             <div class="upgrades-container">
                 <div class="upgrade-card disabled" id="upg-clicker" onclick="buyUpgrade('clicker')">
                     <div class="upgrade-info">
-                        <span class="upgrade-title">🥕 Carrot Auto-Trainer</span>
-                        <span class="upgrade-desc">+1 Carrot/sec</span>
+                        <span class="upgrade-title">🤖 Auto-Adrian</span>
+                        <span class="upgrade-desc">+1 Adrian/sec</span>
                         <span class="upgrade-cost">Cost: <span id="cost-clicker">15</span></span>
                     </div>
                     <span class="upgrade-count" id="count-clicker">0</span>
@@ -462,8 +494,8 @@
 
                 <div class="upgrade-card disabled" id="upg-multiplier" onclick="buyUpgrade('multiplier')">
                     <div class="upgrade-info">
-                        <span class="upgrade-title">⚡ Speed Burst</span>
-                        <span class="upgrade-desc">+1 Carrot/click</span>
+                        <span class="upgrade-title">💥 Double Adrian Touch</span>
+                        <span class="upgrade-desc">+1 Adrian/click</span>
                         <span class="upgrade-cost">Cost: <span id="cost-multiplier">50</span></span>
                     </div>
                     <span class="upgrade-count" id="count-multiplier">0</span>
@@ -471,8 +503,8 @@
 
                 <div class="upgrade-card disabled" id="upg-overclock" onclick="buyUpgrade('overclock')">
                     <div class="upgrade-info">
-                        <span class="upgrade-title">🏆 URA Finals Overclock</span>
-                        <span class="upgrade-desc">+10 Carrots/sec</span>
+                        <span class="upgrade-title">🚀 Adrian Turbo Overclock</span>
+                        <span class="upgrade-desc">+10 Adrians/sec</span>
                         <span class="upgrade-cost">Cost: <span id="cost-overclock">250</span></span>
                     </div>
                     <span class="upgrade-count" id="count-overclock">0</span>
@@ -482,7 +514,7 @@
 
         <!-- Achievements Column -->
         <div>
-            <div class="section-title">🌟 Race Trophies</div>
+            <div class="section-title">🏆 Adrian Milestones</div>
             <div class="achievements-container" id="achievements-list"></div>
         </div>
     </div>
@@ -493,6 +525,7 @@
             score: 0,
             totalClicks: 0,
             clickValue: 1,
+            secretClicks: 0,
             upgrades: {
                 clicker: { cost: 15, count: 0, cps: 1, elementId: 'upg-clicker' },
                 multiplier: { cost: 50, count: 0, clickAdd: 1, elementId: 'upg-multiplier' },
@@ -502,12 +535,12 @@
         };
 
         const achievements = [
-            { id: 'first_click', icon: '🐎', name: 'Debut Race', desc: 'Tap Adrian on the turf for the first time', condition: () => gameState.totalClicks >= 1 },
-            { id: 'clicks_50', icon: '👟', name: 'Track Star', desc: 'Sprint 50 clicks on the racetrack', condition: () => gameState.totalClicks >= 50 },
-            { id: 'score_100', icon: '🥕', name: 'Carrot Feast', desc: 'Gather 100 Training Carrots', condition: () => gameState.score >= 100 },
-            { id: 'score_1000', icon: '👑', name: 'G1 Champion', desc: 'Accumulate 1,000 Training Carrots', condition: () => gameState.score >= 1000 },
-            { id: 'first_upgrade', icon: '🎪', name: 'Fan Favorite', desc: 'Upgrade your first training facility', condition: () => getSumUpgrades() >= 1 },
-            { id: 'cps_20', icon: '🌠', name: 'Twinkle Series', desc: 'Reach 20 Stamina / sec', condition: () => getCps() >= 20 }
+            { id: 'first_click', icon: '👆', name: 'First Adrian', desc: 'Click Adrian for the first time', condition: () => gameState.totalClicks >= 1 },
+            { id: 'clicks_50', icon: '🔥', name: 'Adrian Fanatic', desc: 'Click Adrian 50 times', condition: () => gameState.totalClicks >= 50 },
+            { id: 'score_100', icon: '💯', name: 'Century Adrian', desc: 'Accumulate 100 Adrians', condition: () => gameState.score >= 100 },
+            { id: 'score_1000', icon: '👑', name: 'Adrian Empire', desc: 'Accumulate 1,000 Adrians', condition: () => gameState.score >= 1000 },
+            { id: 'first_upgrade', icon: '🛠️', name: 'Adrian Engineer', desc: 'Purchase your first Adrian upgrade', condition: () => getSumUpgrades() >= 1 },
+            { id: 'secret_adrian', icon: '🤪', name: 'Secret Adrian Found!', desc: 'Click the funny floating secret Adrian', condition: () => gameState.secretClicks >= 1 }
         ];
 
         // Audio System (Synthesized Web Audio API)
@@ -528,21 +561,29 @@
                 gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.05);
+            } else if (type === 'secret') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
             } else if (type === 'buy') {
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
-                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.07); // E5
-                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.14); // G5
-                osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.21); // C6
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.07);
+                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.14);
+                osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.21);
                 gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.35);
             } else if (type === 'achievement') {
                 osc.type = 'square';
-                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-                osc.frequency.setValueAtTime(880.00, audioCtx.currentTime + 0.1); // A5
-                osc.frequency.setValueAtTime(1174.66, audioCtx.currentTime + 0.2); // D6
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(880.00, audioCtx.currentTime + 0.1);
+                osc.frequency.setValueAtTime(1174.66, audioCtx.currentTime + 0.2);
                 gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.45);
                 osc.start();
@@ -588,7 +629,7 @@
             toast.innerHTML = `
                 <div class="toast-icon">${icon}</div>
                 <div>
-                    <div class="toast-title">Trophy Earned!</div>
+                    <div class="toast-title">Milestone Unlocked!</div>
                     <div class="toast-desc"><strong>${title}</strong>: ${desc}</div>
                 </div>
             `;
@@ -599,10 +640,11 @@
         // Main Click Handler
         const clickContainer = document.getElementById('click-btn-container');
         clickContainer.addEventListener('pointerdown', (e) => {
+            if (e.target.id === 'funny-adrian') return; // Handled separately
             gameState.score += gameState.clickValue;
             gameState.totalClicks++;
             playSound('click');
-            spawnFloatingText(e.clientX, e.clientY, `+${gameState.clickValue} 🥕`);
+            spawnFloatingText(e.clientX, e.clientY, `+${gameState.clickValue}`);
             spawnParticles(e.clientX, e.clientY, 10);
             
             const rect = clickContainer.getBoundingClientRect();
@@ -613,6 +655,20 @@
             updateDisplay();
             checkAchievements();
         });
+
+        // Secret Adrian Click Handler
+        function clickSecretAdrian(e) {
+            e.stopPropagation();
+            const bonus = gameState.clickValue * 10;
+            gameState.score += bonus;
+            gameState.secretClicks++;
+            playSound('secret');
+            spawnFloatingText(e.clientX, e.clientY, `MEGA ADRIAN +${bonus}!`);
+            spawnParticles(e.clientX, e.clientY, 25);
+            
+            updateDisplay();
+            checkAchievements();
+        }
 
         clickContainer.addEventListener('pointerup', () => clickContainer.style.transform = '');
         clickContainer.addEventListener('pointerleave', () => clickContainer.style.transform = '');
@@ -679,12 +735,12 @@
 
         // Save & Load Systems
         function saveGame(notify = false) {
-            localStorage.setItem('adrian_clicker_uma_save', JSON.stringify(gameState));
-            if (notify) showToast('Saved', 'Trainer progress saved!', '💾');
+            localStorage.setItem('adrian_clicker_save_data', JSON.stringify(gameState));
+            if (notify) showToast('Saved', 'Adrian progress saved successfully!', '💾');
         }
 
         function loadGame() {
-            const saved = localStorage.getItem('adrian_clicker_uma_save');
+            const saved = localStorage.getItem('adrian_clicker_save_data');
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
@@ -698,8 +754,8 @@
         }
 
         function resetGame() {
-            if (confirm("Reset all training data and trophies?")) {
-                localStorage.removeItem('adrian_clicker_uma_save');
+            if (confirm("Reset all Adrian progress and achievements?")) {
+                localStorage.removeItem('adrian_clicker_save_data');
                 location.reload();
             }
         }
@@ -714,7 +770,7 @@
             setTimeout(() => el.remove(), 800);
         }
 
-        // Star & Horseshoe Sparkle Particle System
+        // Particle System
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -731,7 +787,7 @@
                 this.x = x || Math.random() * canvas.width;
                 this.y = y || (isBurst ? y : canvas.height + 10);
                 this.radius = Math.random() * 5 + 2;
-                this.colors = ['#ff3377', '#ffbe00', '#55cc22', '#ffffff', '#ff99cc'];
+                this.colors = ['#ff3377', '#ffbe00', '#00f0ff', '#ffffff', '#ff99cc'];
                 this.color = this.colors[Math.floor(Math.random() * this.colors.length)];
                 this.vx = isBurst ? (Math.random() - 0.5) * 9 : (Math.random() - 0.5) * 1.2;
                 this.vy = isBurst ? (Math.random() - 0.5) * 9 : -Math.random() * 2 - 0.5;
