@@ -1,142 +1,180 @@
 <!DOCTYPE html>
-<html lang="en-us">
-
+<html lang="zh-CN">
 <head>
-	<base href="https://cdn.jsdelivr.net/gh/genizy/web-port@master/yandere-simulator/">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>YandereSimulator</title>
-    <script src="Build/UnityLoader.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="病娇模拟器2025最新汉化版下载，体验沉浸式病娇校园生活，多种策略消除情敌，解锁不同结局。">
+    <meta name="keywords" content="病娇模拟器, Yandere Simulator, 病娇游戏, 汉化版, PC游戏下载">
+    <title>病娇模拟器2025最新汉化版官方下载</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            overflow: hidden;
-        }
-
-        #unityContainer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-        }
-
-        #unityContainer canvas {
-            width: 100% !important;
-            height: 100% !important;
-            display: block;
-        }
-
-        #loading-text {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        .hero-section {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f8f9fa"/><text x="50%" y="50%" font-family="Arial" font-size="10" fill="%23dc3545" text-anchor="middle" dominant-baseline="middle">病娇模拟器</text></svg>');
+            background-size: cover;
+            background-position: center;
             color: white;
-            font-size: 48px;
-            font-family: cursive;
-            text-align: center;
+            padding: 5rem 0;
+        }
+        .feature-icon {
+            font-size: 2rem;
+            color: #dc3545;
+            margin-bottom: 1rem;
+        }
+        .disclaimer {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        .game-character {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .btn-download {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+            padding: 0.75rem 2rem;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-download:hover {
+            background-color: #bb2d3b;
+            border-color: #bb2d3b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+            color: white;
         }
     </style>
-
-    <script>
-        let max = 0,
-            done = 0;
-
-        function mergeFiles(fileParts) {
-            return new Promise((resolve, reject) => {
-                const buffers = [];
-                const fetchPart = (index) => {
-                    if (index >= fileParts.length) {
-                        const blob = new Blob(buffers);
-                        resolve(URL.createObjectURL(blob));
-                        return;
-                    }
-                    fetch(fileParts[index])
-                        .then(r => r.arrayBuffer())
-                        .then(b => {
-                            buffers.push(b);
-                            done++;
-                            document.querySelector("#loading-text").textContent = `LOADING... (${done}/${max})`;
-                            fetchPart(index + 1);
-                        })
-                        .catch(reject);
-                };
-                fetchPart(0);
-            });
-        }
-
-        function getParts(file, start, end) {
-            const parts = [];
-            for (let i = start; i <= end; i++) parts.push(`${file}.part${i}`);
-            max += end;
-            return parts;
-        }
-
-        Promise.all([
-            mergeFiles(getParts("Build/YandereSim.data.unityweb", 1, 5)),
-        ]).then(([dataUrl]) => {
-            const json = {
-                companyName: "YandereDev",
-                productName: "YandereSimulator",
-                dataUrl: dataUrl,
-                wasmCodeUrl: "YandereSim.wasm.code.unityweb",
-                wasmFrameworkUrl: "YandereSim.wasm.framework.unityweb",
-                TOTAL_MEMORY: 268435456,
-                graphicsAPI: ["WebGL 2.0", "WebGL 1.0"],
-                webglContextAttributes: {
-                    preserveDrawingBuffer: false
-                },
-                splashScreenStyle: "Dark",
-                backgroundColor: "#000000",
-                cacheControl: {
-                    default: "must-revalidate"
-                }
-            };
-
-            const blob = new Blob([JSON.stringify(json)], {
-                type: "application/json"
-            });
-            const blobUrl = URL.createObjectURL(blob);
-
-            const gameInstance = UnityLoader.instantiate("unityContainer", json, {
-                url: blobUrl,
-                Module: {
-                    onRuntimeInitialized: () => {
-                        const loadingText = document.querySelector("#loading-text");
-                        if (loadingText) loadingText.remove();
-                    },
-                },
-            });
-
-            const resize = () => {
-                const container = document.getElementById("unityContainer");
-                container.style.width = window.innerWidth + "px";
-                container.style.height = window.innerHeight + "px";
-            };
-            window.addEventListener("resize", resize);
-            resize();
-        });
-    </script>
 </head>
-
 <body>
-    <div id="loading-text" style="
-					color: white;
-					font-size: 48px;
-					font-family: 'Comic Sans MS', cursive;
-					text-align: center;
-					margin-top: 20px;
-				">
-        LOADING...
-    </div>LOADING...</div>
-    <div id="unityContainer"></div>
-</body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-heartbreak-fill me-2"></i>病娇模拟器
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#intro">游戏介绍</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">游戏特色</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#download">下载游戏</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
+    <!-- 英雄区域 -->
+    <section class="hero-section text-center">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-3">病娇模拟器 2025最新汉化版</h1>
+            <p class="lead mb-4">沉浸式体验病娇少女的扭曲爱恋，用尽一切手段守护你的爱情</p>
+            <a href="#download" class="btn btn-download btn-lg">
+                <i class="bi bi-download me-2"></i>立即下载
+            </a>
+        </div>
+    </section>
+
+    <!-- 游戏介绍 -->
+    <section id="intro" class="py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h2 class="mb-4">游戏介绍</h2>
+                    <p>《病娇模拟器》（Yandere Simulator）是由独立开发者Yandere Dev制作的一款以校园为背景的模拟类角色扮演游戏，最早于2015年3月23日发行PC版本。</p>
+                    <p>游戏以日本次文化"病娇"为核心，玩家将操控名为爱诗绫乃（Ayano Aishi）的女高中生，因对学长山田太郎（Taro Yamada）的病态迷恋，采用极端手段排除校园内的潜在情敌。</p>
+                    <p>故事发生在架空学院"赤魅学院"，结合神秘传说与现实校园生活。主角家族具有病娇遗传特质，其母亲同样拥有类似的极端行为历史，进一步深化角色行为的合理性。</p>
+                </div>
+                <div class="col-lg-6">
+                    <img src="https://i.ytimg.com/vi/5eIlNYJ_-S0/maxresdefault.jpg" alt="病娇模拟器游戏截图" class="img-fluid game-character">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 游戏特色 -->
+    <section id="features" class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">游戏特色</h2>
+            <div class="row">
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="text-center">
+                        <i class="bi bi-heart-pulse feature-icon"></i>
+                        <h4>沉浸式病娇体验</h4>
+                        <p>通过"病娇视线"系统增强代入感，接近学长时画面呈现粉红色滤镜并伴随逐渐急促的心跳声，突出主角情感的扭曲与偏执。</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="text-center">
+                        <i class="bi bi-gear-fill feature-icon"></i>
+                        <h4>高自由度策略</h4>
+                        <p>提供多种任务路线与结局，如暴力暗杀、制造意外事故、散布谣言迫使对手退学等。人物关系系统高度复杂，每个NPC均拥有独立背景故事和行为逻辑。</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="text-center">
+                        <i class="bi bi-people-fill feature-icon"></i>
+                        <h4>丰富角色设定</h4>
+                        <p>游戏中有多位性格各异的角色，每个角色都有自己的日程安排和互动方式，玩家需要观察并制定针对性策略。</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="text-center">
+                        <i class="bi bi-graph-up feature-icon"></i>
+                        <h4>成长体系</h4>
+                        <p>最近更新引入经验值生态系统，玩家可通过日常互动（如跟踪学长、执行特殊任务）解锁成长体系，增强长期养成体验。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 下载区域 -->
+    <section id="download" class="py-5">
+        <div class="container text-center">
+            <h2 class="mb-4">下载病娇模拟器2025最新汉化版</h2>
+            <p class="lead mb-4">当前版本包含完整汉化补丁，适配最新Windows系统</p>
+            
+            <div class="alert alert-info mb-4">
+                <i class="bi bi-info-circle me-2"></i>此版本是PC电脑版，手机版请查看其他下载选项。
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">下载信息</h5>
+                    <p class="card-text">版本: 2025最新汉化版 | 平台: Windows PC </p>
+                    <a href="https://pan.quark.cn/s/748496c0aec8" class="btn btn-download">
+                        <i class="bi bi-download me-2"></i>立即下载
+                    </a>
+                </div>
+            </div>
+            
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <strong>注意事项：</strong> 请确保设备满足系统要求。
+            </div>
+        </div>
+    </section>
+
+    <!-- 免责声明 -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="disclaimer text-center">
+                <p>免责声明：本软件仅供个人娱乐使用，不得用于商业用途。所有版权归原作者所有，本站不承担任何技术及版权问题。下载后请在24小时内删除，如果您喜欢该软件，请购买正版。</p>
+                <p class="mb-0">© 2025 病娇模拟器中文资源站 - 仅供学习交流使用</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>
