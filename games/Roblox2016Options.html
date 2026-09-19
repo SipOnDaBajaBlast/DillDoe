@@ -1,0 +1,395 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox 2016 Client</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Permanent+Marker&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1b18;
+            --text-white: #f1f1f1;
+            --text-grey: #8a8580;
+            --paper-brown: #3d342b;
+            --roblox-red: #c40000;
+            --roblox-dark: #720000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-white);
+            min-height: 100vh;
+            font-family: 'Permanent Marker', cursive, sans-serif;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* =========================
+           BACKGROUND MEMES
+        ========================= */
+
+        .bg-meme-container {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .nyan-cat {
+            position: absolute;
+            top: 15%;
+            width: 180px;
+            animation: flyNyan 12s linear infinite;
+        }
+
+        @keyframes flyNyan {
+            0% {
+                left: -200px;
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(30px);
+            }
+
+            100% {
+                left: 100vw;
+                transform: translateY(0);
+            }
+        }
+
+        .doge-meme {
+            position: absolute;
+            bottom: 5%;
+            left: 3%;
+            width: 140px;
+            opacity: 0.7;
+            animation: floatDoge 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatDoge {
+            from {
+                transform: translateY(0) rotate(-5deg);
+            }
+
+            to {
+                transform: translateY(-20px) rotate(5deg);
+            }
+        }
+
+        .troll-face {
+            position: absolute;
+            top: 25%;
+            right: 4%;
+            width: 130px;
+            opacity: 0.6;
+            animation: floatTroll 5s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatTroll {
+            from {
+                transform: translateY(0) scale(1);
+            }
+
+            to {
+                transform: translateY(25px) scale(1.08);
+            }
+        }
+
+        .sad-bart {
+            position: absolute;
+            bottom: 8%;
+            right: 5%;
+            width: 120px;
+            opacity: 0.65;
+            animation: floatBart 7s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatBart {
+            from {
+                transform: translateY(0) rotate(3deg);
+            }
+
+            to {
+                transform: translateY(-18px) rotate(-3deg);
+            }
+        }
+
+        /* =========================
+           CONTENT
+        ========================= */
+
+        header,
+        main,
+        .back-btn {
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 45px;
+        }
+
+        .metal-title {
+            font-family: 'Metal Mania', cursive;
+            font-size: 4rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+
+            background: linear-gradient(
+                180deg,
+                #ffffff 0%,
+                #a3a3a3 50%,
+                #3a3a3a 51%,
+                #757575 100%
+            );
+
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+
+            filter: drop-shadow(4px 4px 0px #000);
+        }
+
+        .subtitle {
+            margin-top: 10px;
+            color: var(--text-grey);
+            font-size: 1.2rem;
+        }
+
+        /* =========================
+           BACK BUTTON
+        ========================= */
+
+        .back-btn {
+            align-self: center;
+            display: inline-block;
+            margin-bottom: 30px;
+            color: var(--text-grey);
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: 0.2s ease;
+        }
+
+        .back-btn:hover {
+            color: white;
+        }
+
+        /* =========================
+           OPTIONS
+        ========================= */
+
+        .options {
+            width: 100%;
+            max-width: 700px;
+
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .option-card {
+            background-color: var(--card-bg);
+            border: 3px solid var(--paper-brown);
+
+            padding: 30px 20px;
+
+            min-height: 220px;
+
+            text-decoration: none;
+            color: white;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            text-align: center;
+
+            position: relative;
+
+            clip-path: polygon(
+                0% 2%,
+                98% 0%,
+                100% 98%,
+                2% 100%
+            );
+
+            transition:
+                transform 0.2s ease,
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .option-card:hover {
+            transform: scale(1.05) rotate(-1deg);
+            border-color: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        /* =========================
+           RED GAME FILES CARD
+        ========================= */
+
+        .files-card {
+            background: linear-gradient(
+                145deg,
+                #720000,
+                #3d0000
+            );
+
+            border-color: #ff1a1a;
+        }
+
+        .files-card:hover {
+            background: linear-gradient(
+                145deg,
+                #990000,
+                #520000
+            );
+
+            border-color: white;
+
+            box-shadow:
+                0 10px 30px rgba(255, 0, 0, 0.45);
+        }
+
+        .card-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 2rem;
+            text-transform: uppercase;
+            text-shadow: 3px 3px 0 #000;
+        }
+
+        .card-description {
+            margin-top: 10px;
+            color: #c8c8c8;
+            font-size: 1rem;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 650px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+
+            .metal-title {
+                font-size: 2.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- BACKGROUND MEMES -->
+    <div class="bg-meme-container">
+
+        <img
+            class="nyan-cat"
+            src="https://freepngimg.com/save/15407-nyan-cat-picture/512x512"
+            alt=""
+        >
+
+        <img
+            class="doge-meme"
+            src="https://pngimg.com/uploads/doge_meme/doge_meme_PNG112723.png"
+            alt=""
+        >
+
+        <img
+            class="troll-face"
+            src="https://www.pngkey.com/png/full/22-226917_memes-unhappy-troll-sticker-sad-trollface.png"
+            alt=""
+        >
+
+        <img
+            class="sad-bart"
+            src="https://www.nicepng.com/png/full/136-1362322_sad-simpsons-and-bart-image-bart-simpson-sad.png"
+            alt=""
+        >
+
+    </div>
+
+    <a href="../index.html" class="back-btn">
+        &larr; Back to Game Library
+    </a>
+
+    <header>
+        <h1 class="metal-title">
+            ROBLOX 2016 CLIENT
+        </h1>
+
+        <div class="subtitle">
+            Choose an option
+        </div>
+    </header>
+
+    <main class="options">
+
+        <!-- GAME FILES -->
+        <a
+            href="YOUR_GOOGLE_DRIVE_LINK_HERE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="option-card files-card"
+        >
+            <div class="card-icon">📁</div>
+
+            <div class="card-title">
+                Game Files
+            </div>
+
+            <div class="card-description">
+                Open the Roblox 2016 game files
+            </div>
+        </a>
+
+        <!-- ROBLOX CLIENT PAGE -->
+        <a
+            href="robloxclient2016.html"
+            class="option-card"
+        >
+            <div class="card-icon">🎮</div>
+
+            <div class="card-title">
+                Roblox Client
+            </div>
+
+            <div class="card-description">
+                Open the Roblox 2016 client page
+            </div>
+        </a>
+
+    </main>
+
+</body>
+</html>
+```
