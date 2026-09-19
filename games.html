@@ -1,13 +1,16 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ALL GAMES</title>
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Permanent+Marker&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --bg-color: #121212;
@@ -48,7 +51,6 @@
             overflow: hidden;
         }
 
-        /* Nyan Cat Animation */
         .nyan-cat {
             position: absolute;
             top: 15%;
@@ -62,16 +64,17 @@
                 left: -200px;
                 transform: translateY(0px);
             }
+
             50% {
                 transform: translateY(30px);
             }
+
             100% {
                 left: 100vw;
                 transform: translateY(0px);
             }
         }
 
-        /* Doge Meme Animation */
         .doge-meme {
             position: absolute;
             bottom: 5%;
@@ -86,12 +89,12 @@
             0% {
                 transform: translateY(0) rotate(-5deg);
             }
+
             100% {
                 transform: translateY(-20px) rotate(5deg);
             }
         }
 
-        /* Troll Face Animation */
         .troll-face {
             position: absolute;
             top: 25%;
@@ -106,12 +109,12 @@
             0% {
                 transform: translateY(0) scale(1);
             }
+
             100% {
                 transform: translateY(25px) scale(1.08);
             }
         }
 
-        /* Sad Bart Animation */
         .sad-bart {
             position: absolute;
             bottom: 8%;
@@ -126,17 +129,17 @@
             0% {
                 transform: translateY(0) rotate(3deg);
             }
+
             100% {
                 transform: translateY(-18px) rotate(-3deg);
             }
         }
 
-        }
-
-
-
         /* --- CONTENT LAYER --- */
-        header, main, .search-container, .back-btn {
+        header,
+        main,
+        .search-container,
+        .back-btn {
             position: relative;
             z-index: 1;
         }
@@ -152,7 +155,13 @@
             font-size: 4rem;
             letter-spacing: 4px;
             text-transform: uppercase;
-            background: linear-gradient(180deg, #ffffff 0%, #a3a3a3 50%, #3a3a3a 51%, #757575 100%);
+            background: linear-gradient(
+                180deg,
+                #ffffff 0%,
+                #a3a3a3 50%,
+                #3a3a3a 51%,
+                #757575 100%
+            );
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -191,7 +200,12 @@
             border-radius: 4px;
             outline: none;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
-            clip-path: polygon(1% 0%, 99% 2%, 100% 98%, 0% 100%);
+            clip-path: polygon(
+                1% 0%,
+                99% 2%,
+                100% 98%,
+                0% 100%
+            );
         }
 
         .search-bar:focus {
@@ -206,13 +220,16 @@
         /* --- GAMES GRID --- */
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            grid-template-columns: repeat(
+                auto-fill,
+                minmax(220px, 1fr)
+            );
             gap: 30px;
             width: 100%;
             max-width: 1000px;
         }
 
-        /* Game Card Styling */
+        /* --- GAME CARD --- */
         .game-card {
             background-color: var(--card-bg);
             border: 2px solid var(--paper-brown);
@@ -224,9 +241,15 @@
             align-items: center;
             border-radius: 4px;
             position: relative;
-            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            transition:
+                transform 0.2s ease,
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
             clip-path: polygon(
-                0% 2%, 98% 0%, 100% 98%, 2% 100%
+                0% 2%,
+                98% 0%,
+                100% 98%,
+                2% 100%
             );
         }
 
@@ -251,16 +274,54 @@
             letter-spacing: 1px;
             text-align: center;
         }
+
+        /* --- ROBLOX 2016 CARD --- */
+        .roblox-card {
+            background-color: #720000;
+            border-color: #ff1a1a;
+        }
+
+        .roblox-card:hover {
+            background-color: #990000;
+            border-color: #ffffff;
+            box-shadow: 0px 8px 25px rgba(255, 0, 0, 0.5);
+        }
+
+        .roblox-card .game-title {
+            color: #ffffff;
+            text-shadow: 2px 2px 0px #000;
+        }
     </style>
 </head>
+
 <body>
 
     <!-- MEME BACKGROUND ELEMENTS -->
     <div class="bg-meme-container">
-        <img class="nyan-cat" src="https://freepngimg.com/save/15407-nyan-cat-picture/512x512" alt="Nyan Cat">
-        <img class="doge-meme" src="https://pngimg.com/uploads/doge_meme/doge_meme_PNG112723.png" alt="Doge">
-        <img class="troll-face" src="https://www.pngkey.com/png/full/22-226917_memes-unhappy-troll-sticker-sad-trollface.png" alt="Sad Trollface">
-        <img class="sad-bart" src="https://www.nicepng.com/png/full/136-1362322_sad-simpsons-and-bart-image-bart-simpson-sad.png" alt="Sad Bart Simpson">
+
+        <img
+            class="nyan-cat"
+            src="https://freepngimg.com/save/15407-nyan-cat-picture/512x512"
+            alt="Nyan Cat"
+        >
+
+        <img
+            class="doge-meme"
+            src="https://pngimg.com/uploads/doge_meme/doge_meme_PNG112723.png"
+            alt="Doge"
+        >
+
+        <img
+            class="troll-face"
+            src="https://www.pngkey.com/png/full/22-226917_memes-unhappy-troll-sticker-sad-trollface.png"
+            alt="Sad Trollface"
+        >
+
+        <img
+            class="sad-bart"
+            src="https://www.nicepng.com/png/full/136-1362322_sad-simpsons-and-bart-image-bart-simpson-sad.png"
+            alt="Sad Bart Simpson"
+        >
 
     </div>
 
@@ -272,120 +333,204 @@
 
     <!-- SEARCH BAR -->
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-bar" placeholder="Search games..." onkeyup="filterGames()">
+        <input
+            type="text"
+            id="searchInput"
+            class="search-bar"
+            placeholder="Search games..."
+            onkeyup="filterGames()"
+        >
     </div>
 
     <main class="games-grid" id="gamesGrid">
 
         <!-- GAME 1: FNAF -->
         <a href="games/fnaf.html" class="game-card">
-            <img src="https://images.immediate.co.uk/production/volatile/sites/3/2023/08/FNAF-games-in-order-cd67434.jpg?quality=90" alt="FNAF Game Thumbnail">
+            <img
+                src="https://images.immediate.co.uk/production/volatile/sites/3/2023/08/FNAF-games-in-order-cd67434.jpg?quality=90"
+                alt="FNAF Game Thumbnail"
+            >
             <div class="game-title">FNAF 1</div>
         </a>
 
         <!-- GAME 2: DELTARUNE -->
         <a href="games/Deltarune.html" class="game-card">
-            <img src="https://media.tenor.com/gLqK62ZQVRQAAAAe/sans-undertale.png" alt="Test Game Thumbnail">
+            <img
+                src="https://media.tenor.com/gLqK62ZQVRQAAAAe/sans-undertale.png"
+                alt="Test Game Thumbnail"
+            >
             <div class="game-title">Deltarune</div>
         </a>
 
         <!-- GAME 3: ANIMAL CROSSING -->
         <a href="games/AnimalCrossing.html" class="game-card">
-            <img src="https://i.ebayimg.com/00/s/OTk3WDEzMTI=/z/AkwAAOSw6NNfZcRl/$_57.PNG?set_id=8800005007" alt="Thumbnail">
+            <img
+                src="https://i.ebayimg.com/00/s/OTk3WDEzMTI=/z/AkwAAOSw6NNfZcRl/$_57.PNG?set_id=8800005007"
+                alt="Thumbnail"
+            >
             <div class="game-title">Animal Crossing</div>
         </a>
 
         <!-- GAME 4: MINECRAFT -->
         <a href="games/wasm-gc 1.20.html" class="game-card">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZgdMVkTgOaJ_5_r_XOcFzFDCDbhUCeLm6mfEHSUwP3yPR0u85pjXIjVw&s=10" alt="Thumbnail">
+            <img
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZgdMVkTgOaJ_5_r_XOcFzFDCDbhUCeLm6mfEHSUwP3yPR0u85pjXIjVw&s=10"
+                alt="Thumbnail"
+            >
             <div class="game-title">Minecraft(v26)</div>
         </a>
 
         <!-- GAME 5: SMASH BROS -->
         <a href="games/Smash.html" class="game-card">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRuRpGQMUYYx8r_LjRwNnhSneqB02qejOlX0jeIMuq1lCeBRnixwZ_PO2P&s=10" alt="Test Game Thumbnail">
+            <img
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRuRpGQMUYYx8r_LjRwNnhSneqB02qejOlX0jeIMuq1lCeBRnixwZ_PO2P&s=10"
+                alt="Test Game Thumbnail"
+            >
             <div class="game-title">Smash Bros N64</div>
         </a>
 
         <!-- GAME 6: BARTBASH -->
         <a href="games/BartBash.html" class="game-card">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBU3Lsv14l1Wd_Dz2nXuN854vY2Fh2i-vx6Ctpp8A7gMp1s9XPojalopYz&s=10" alt="Test Game Thumbnail">
+            <img
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBU3Lsv14l1Wd_Dz2nXuN854vY2Fh2i-vx6Ctpp8A7gMp1s9XPojalopYz&s=10"
+                alt="Test Game Thumbnail"
+            >
             <div class="game-title">BartBash</div>
         </a>
 
         <!-- GAME 7: FISH -->
         <a href="games/fish.html" class="game-card">
-            <img src="https://i.etsystatic.com/56181984/r/il/b67efa/7168666349/il_1080xN.7168666349_ozuc.jpg" alt="Test Game Thumbnail">
+            <img
+                src="https://i.etsystatic.com/56181984/r/il/b67efa/7168666349/il_1080xN.7168666349_ozuc.jpg"
+                alt="Test Game Thumbnail"
+            >
             <div class="game-title">Fish</div>
         </a>
 
         <!-- GAME 8: IRON LUNG -->
         <a href="games/iron lung.html" class="game-card">
-            <img src="https://i.ytimg.com/vi/WPiCSsW-2as/maxresdefault.jpg" alt="Test Game Thumbnail">
+            <img
+                src="https://i.ytimg.com/vi/WPiCSsW-2as/maxresdefault.jpg"
+                alt="Test Game Thumbnail"
+            >
             <div class="game-title">Iron Lung</div>
         </a>
 
         <!-- GAME 9: BITLIFE -->
         <a href="games/bitlife.html" class="game-card">
-            <img src="https://www.bitlife.school/wp-content/uploads/2026/02/Bitlife.webp" alt="Test Game Thumbnail">
+            <img
+                src="https://www.bitlife.school/wp-content/uploads/2026/02/Bitlife.webp"
+                alt="Test Game Thumbnail"
+            >
             <div class="game-title">BitLife</div>
         </a>
 
         <!-- GAME 10: DUMB WAYS TO DIE -->
         <a href="games/DumbWay.html" class="game-card">
-            <img src="https://img.gamepix.com/games/dumb-ways-to-die/cover/dumb-ways-to-die.png?w=1200&ar=16:10" alt="Test Game Thumbnail">
+            <img
+                src="https://img.gamepix.com/games/dumb-ways-to-die/cover/dumb-ways-to-die.png?w=1200&ar=16:10"
+                alt="Test Game Thumbnail"
+            >
             <div class="game-title">Dumb Ways To Die</div>
         </a>
 
-         <a href="games/ClassOf09.html" class="game-card">
-            <img src="https://media.tenor.com/CS98TshZEzgAAAAe/class-of-09.png" alt="Test Game Thumbnail">
+        <a href="games/ClassOf09.html" class="game-card">
+            <img
+                src="https://media.tenor.com/CS98TshZEzgAAAAe/class-of-09.png"
+                alt="Test Game Thumbnail"
+            >
             <div class="game-title">Class Of 09 The Flip Side</div>
         </a>
-        
-         <a href="games/AdrianClicker2.html" class="game-card">
-            <img src="https://i.ibb.co/KzpvPDv5/IMG-20260224-122424.jpg" alt="Test Game Thumbnail">
+
+        <a href="games/AdrianClicker2.html" class="game-card">
+            <img
+                src="https://i.ibb.co/KzpvPDv5/IMG-20260224-122424.jpg"
+                alt="Test Game Thumbnail"
+            >
             <div class="game-title">Adrian Derby</div>
         </a>
 
-         <a href="games/SuperMonkey.html" class="game-card">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxqmwLw8JqBvMrzIj3f7d2YmOEghu6D9VV1tD25-2hmUh0NR_-v1XHCcU&s=10" alt="Test Game Thumbnail">
+        <a href="games/SuperMonkey.html" class="game-card">
+            <img
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxqmwLw8JqBvMrzIj3f7d2YmOEghu6D9VV1tD25-2hmUh0NR_-v1XHCcU&s=10"
+                alt="Test Game Thumbnail"
+            >
             <div class="game-title">Super Monkey Ball</div>
         </a>
-        
-         <a href="games/FNF.html" class="game-card">
-            <img src="https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/0cd0c8bc4dc15c069dba7ccfb6809f6d/friday-night-funkin-logo.png" alt="Test Game Thumbnail">
+
+        <a href="games/FNF.html" class="game-card">
+            <img
+                src="https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/0cd0c8bc4dc15c069dba7ccfb6809f6d/friday-night-funkin-logo.png"
+                alt="Test Game Thumbnail"
+            >
             <div class="game-title">Friday Night Funkin'</div>
         </a>
-         <a href="games/Sonic.html" class="game-card">
-            <img src="https://upload.wikimedia.org/wikipedia/en/b/ba/Sonic_the_Hedgehog_1_Genesis_box_art.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original" alt="Test Game Thumbnail">
+
+        <a href="games/Sonic.html" class="game-card">
+            <img
+                src="https://upload.wikimedia.org/wikipedia/en/b/ba/Sonic_the_Hedgehog_1_Genesis_box_art.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original"
+                alt="Test Game Thumbnail"
+            >
             <div class="game-title">Sonic</div>
         </a>
+
         <a href="games/Flappy.html" class="game-card">
-            <img src="https://th.bing.com/th/id/R.7482ed9dad08f48b9f6db70b274fe675?rik=6Z3yms%2bFt3gxxA&riu=http%3a%2f%2fstudents.com.miami.edu%2freporting%2fwp-content%2fuploads%2f2014%2f02%2fphoto.png&ehk=4onSifMV1r73Q57jOY4TtZEmAmEf%2fT%2bqovb6XWVXKak%3d&risl=&pid=ImgRaw&r=0" alt="Test Game Thumbnail">
+            <img
+                src="https://th.bing.com/th/id/R.7482ed9dad08f48b9f6db70b274fe675?rik=6Z3yms%2bFt3gxxA&riu=http%3a%2f%2fstudents.com.miami.edu%2freporting%2fwp-content%2fuploads%2f2014%2f02%2fphoto.png&ehk=4onSifMV1r73Q57jOY4TtZEmAmEf%2fT%2bqovb6XWVXKak%3d&risl=&pid=ImgRaw&r=0"
+                alt="Test Game Thumbnail"
+            >
             <div class="game-title">Flappy Bird</div>
         </a>
 
         <a href="games/Tromebone.html" class="game-card">
-            <img src="https://repacklab.com/wp-content/uploads/2024/12/Trombone-Champ-Unflattened-Video-Game-Free-Download-Repacklab-1.jpg" alt="Thumbnail">
+            <img
+                src="https://repacklab.com/wp-content/uploads/2024/12/Trombone-Champ-Unflattened-Video-Game-Free-Download-Repacklab-1.jpg"
+                alt="Thumbnail"
+            >
             <div class="game-title">Trombone Champ</div>
         </a>
+
         <a href="games/Simpsons.html" class="game-card">
-            <img src="https://static0.gamerantimages.com/wordpress/wp-content/uploads/2023/11/simpsons-hit-and-run.jpg?q=50&fit=crop&w=825&dpr=1.5" alt="Thumbnail">
+            <img
+                src="https://static0.gamerantimages.com/wordpress/wp-content/uploads/2023/11/simpsons-hit-and-run.jpg?q=50&fit=crop&w=825&dpr=1.5"
+                alt="Thumbnail"
+            >
             <div class="game-title">The Simpsons: Hit & Run</div>
         </a>
+
         <a href="games/meteor.html" class="game-card">
-            <img src="https://play-lh.googleusercontent.com/FwW4g5DfsHgRPMVvVXiTr0B-c4vHRqLAe2ViOIAHrRKp5aatPFdmOer-I7m1P8gXwUmTrFyw7eVKGQrSzXabxQ=w526-h296-rw" alt="Thumbnail">
+            <img
+                src="https://play-lh.googleusercontent.com/FwW4g5DfsHgRPMVvVXiTr0B-c4vHRqLAe2ViOIAHrRKp5aatPFdmOer-I7m1P8gXwUmTrFyw7eVKGQrSzXabxQ=w526-h296-rw"
+                alt="Thumbnail"
+            >
             <div class="game-title">Meteor 60 Seconds</div>
         </a>
+
         <a href="games/baldi.html" class="game-card">
-            <img src="https://i.pinimg.com/474x/4e/65/16/4e6516685214ca21e7c6086c01a44d73.jpg" alt="Thumbnail">
+            <img
+                src="https://i.pinimg.com/474x/4e/65/16/4e6516685214ca21e7c6086c01a44d73.jpg"
+                alt="Thumbnail"
+            >
             <div class="game-title">Baldi's basics</div>
         </a>
 
         <a href="games/flyingg.html" class="game-card">
-            <img src="https://img.itch.zone/aW1nLzIwODYwNDAucG5n/original/3%2BS1Jr.png" alt="Thumbnail">
+            <img
+                src="https://img.itch.zone/aW1nLzIwODYwNDAucG5n/original/3%2BS1Jr.png"
+                alt="Thumbnail"
+            >
             <div class="game-title">Flying gorrila</div>
-        </a>        
+        </a>
+
+        <!-- ROBLOX 2016 CLIENT -->
+        <a href="games/Roblox2016Options.html" class="game-card roblox-card">
+            <img
+                src="https://devforum-uploads.s3.dualstack.us-east-2.amazonaws.com/uploads/original/5X/c/1/8/4/c18492030e09d7d9cb79a3e0e6ce554274a2d684.jpeg"
+                alt="Roblox 2016 Client Thumbnail"
+            >
+            <div class="game-title">Roblox 2016 Client</div>
+        </a>
+
     </main>
 
     <!-- JS FOR SEARCH FILTERING -->
@@ -396,7 +541,11 @@
             const cards = document.querySelectorAll('.game-card');
 
             cards.forEach(card => {
-                const title = card.querySelector('.game-title').textContent.toLowerCase();
+                const title = card
+                    .querySelector('.game-title')
+                    .textContent
+                    .toLowerCase();
+
                 if (title.includes(filter)) {
                     card.style.display = "flex";
                 } else {
@@ -408,3 +557,4 @@
 
 </body>
 </html>
+```
