@@ -3,16 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>P3P</title>
+  <title>Persona 3 Portable</title>
   <style>
     /* Makes the iframe fill the entire screen */
     body, html {
       margin: 0;
       padding: 0;
+      width: 100%;
       height: 100%;
       overflow: hidden;
+      background: #000;
     }
     iframe {
+      display: block;
       width: 100%;
       height: 100%;
       border: none;
@@ -21,7 +24,12 @@
 </head>
 <body>
 
-  <iframe src="https://persona3-browser.vercel.app/" title="Embedded Webpage"></iframe>
+  <iframe
+    src="https://persona3-browser.vercel.app/"
+    title="Persona 3 Portable"
+    allow="cross-origin-isolated; autoplay; fullscreen; gamepad"
+    allowfullscreen
+  ></iframe>
 
 </body>
 </html>
