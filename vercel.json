@@ -1,6 +1,22 @@
 {
   "headers": [
     {
+      "source": "/games/ghost-of-sparta.html",
+      "headers": [
+        {"key": "Cross-Origin-Opener-Policy", "value": "same-origin"},
+        {"key": "Cross-Origin-Embedder-Policy", "value": "require-corp"},
+        {"key": "Permissions-Policy", "value": "cross-origin-isolated=(self \"https://ghost-sparta-browser.vercel.app\")"}
+      ]
+    },
+    {
+      "source": "/games/ghost-of-sparta",
+      "headers": [
+        {"key": "Cross-Origin-Opener-Policy", "value": "same-origin"},
+        {"key": "Cross-Origin-Embedder-Policy", "value": "require-corp"},
+        {"key": "Permissions-Policy", "value": "cross-origin-isolated=(self \"https://ghost-sparta-browser.vercel.app\")"}
+      ]
+    },
+    {
       "source": "/games/p3p.html",
       "headers": [
         {"key": "Cross-Origin-Opener-Policy", "value": "same-origin"},
