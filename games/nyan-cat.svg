@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <rect width="640" height="360" fill="#080b26"/>
+  <path d="M0 105h310v150H0z" fill="#f33"/><path d="M0 130h310v125H0z" fill="#ff9d00"/><path d="M0 155h310v100H0z" fill="#ffe500"/><path d="M0 180h310v75H0z" fill="#35d747"/><path d="M0 205h310v50H0z" fill="#36a9ff"/><path d="M0 230h310v25H0z" fill="#ad56e8"/>
+  <g stroke="#151521" stroke-width="8" shape-rendering="crispEdges">
+    <rect x="240" y="100" width="180" height="160" rx="12" fill="#eed39c"/>
+    <rect x="257" y="118" width="145" height="122" fill="#f0a3c1" stroke="none"/>
+    <path d="M360 160v-45h30l25 28h45l25-28h25v115H360z" fill="#999ca8"/>
+  </g>
+  <g fill="#151521"><rect x="382" y="173" width="10" height="14"/><rect x="474" y="173" width="10" height="14"/><path d="M414 206h42v8h-42z"/></g>
+  <g fill="white"><path d="M75 45h8v8h-8zM530 70h8v8h-8zM540 270h8v8h-8zM160 280h8v8h-8z"/></g>
+  <text x="320" y="323" text-anchor="middle" font-family="Arial,sans-serif" font-weight="bold" font-size="27" fill="white">NYAN CAT: LOST IN SPACE</text>
+</svg>
