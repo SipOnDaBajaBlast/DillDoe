@@ -35,7 +35,7 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             overflow: hidden;
             font-family: 'Trebuchet MS', 'Segoe UI', 'Lucida Grande', Tahoma, sans-serif;
@@ -179,7 +179,7 @@
 
         /* --- MAIN AERO GLASS WINDOW CONTAINER --- */
         .aero-window {
-            margin-top: 6vh;
+            position: absolute;
             width: 90%;
             max-width: 680px;
             background: rgba(255, 255, 255, 0.35);
@@ -192,17 +192,28 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            position: relative;
+            user-select: none;
+            touch-action: none;
+            transition: box-shadow 0.2s ease;
         }
 
-        /* Window Titlebar */
+        .aero-window.is-dragging {
+            box-shadow: 0 30px 70px rgba(0, 80, 180, 0.5), inset 0 1.5px 3px rgba(255, 255, 255, 0.95);
+        }
+
+        /* Window Titlebar (Draggable Handle) */
         .window-titlebar {
             background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(200, 235, 255, 0.6) 45%, rgba(120, 195, 255, 0.7) 50%, rgba(175, 225, 255, 0.8) 100%);
-            padding: 8px 16px;
+            padding: 10px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.7);
+            cursor: grab !important;
+        }
+
+        .window-titlebar:active {
+            cursor: grabbing !important;
         }
 
         .window-title-text {
@@ -213,6 +224,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            pointer-events: none;
         }
 
         /* Mac / Vista Control Buttons */
@@ -227,6 +239,7 @@
             border-radius: 50%;
             border: 1px solid rgba(0,0,0,0.25);
             box-shadow: inset 0 1px 2px rgba(255,255,255,0.8);
+            cursor: pointer !important;
         }
 
         .win-close { background: linear-gradient(180deg, #ff7b7b, #e60000); }
@@ -301,7 +314,7 @@
             text-transform: uppercase;
             color: #ffffff;
             text-decoration: none;
-            cursor: pointer;
+            cursor: pointer !important;
             border: 2px solid rgba(255, 255, 255, 0.9);
             text-align: center;
             width: 80%;
@@ -358,11 +371,6 @@
             display: flex;
             justify-content: space-between;
         }
-
-        footer {
-            margin-bottom: 15px;
-            z-index: 5;
-        }
     </style>
 </head>
 <body>
@@ -392,9 +400,9 @@
     </div>
 
     <!-- AERO GLASS WINDOW CONTAINER -->
-    <div class="aero-window">
-        <!-- Title Bar -->
-        <div class="window-titlebar">
+    <div class="aero-window" id="aeroWindow">
+        <!-- Title Bar (Draggable Handle) -->
+        <div class="window-titlebar" id="windowTitlebar">
             <div class="window-title-text">
                 🌐 DillDoh_Unblocked_v2.0.exe
             </div>
@@ -424,20 +432,20 @@
 
         <!-- Status Bar -->
         <div class="window-statusbar">
-            <span>Status: Ready</span>
-            <span>helloooo :3</span>
+            <span>Status: Ready (Drag titlebar to move)</span>
+            <span>Frutiger Aero Edition 2006</span>
         </div>
     </div>
 
-    <footer></footer>
-
     <script>
+        // Loader Transition
         window.addEventListener('load', () => {
             setTimeout(() => {
                 document.body.classList.add('loaded');
             }, 800);
         });
 
+        // Navigation
         function navigateToPage(event, destinationUrl) {
             event.preventDefault();
             document.body.classList.add('fade-out');
@@ -446,6 +454,69 @@
                 window.location.href = destinationUrl;
             }, 400);
         }
+
+        // --- WINDOW DRAGGING FUNCTIONALITY ---
+        const windowElem = document.getElementById('aeroWindow');
+        const titlebarElem = document.getElementById('windowTitlebar');
+
+        let isDragging = false;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        function startDrag(e) {
+            // Prevent drag if clicking on window controls
+            if (e.target.classList.contains('win-btn')) return;
+
+            isDragging = true;
+            windowElem.classList.add('is-dragging');
+
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+            const rect = windowElem.getBoundingClientRect();
+            offsetX = clientX - rect.left;
+            offsetY = clientY - rect.top;
+        }
+
+        function onDrag(e) {
+            if (!isDragging) return;
+
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+            let newX = clientX - offsetX;
+            let newY = clientY - offsetY;
+
+            // Clamping window within screen boundaries
+            const minX = 10;
+            const minY = 10;
+            const maxX = window.innerWidth - windowElem.offsetWidth - 10;
+            const maxY = window.innerHeight - windowElem.offsetHeight - 10;
+
+            newX = Math.max(minX, Math.min(newX, maxX));
+            newY = Math.max(minY, Math.min(newY, maxY));
+
+            windowElem.style.left = `${newX}px`;
+            windowElem.style.top = `${newY}px`;
+            windowElem.style.transform = 'none'; // remove centered transform once dragged
+        }
+
+        function stopDrag() {
+            if (isDragging) {
+                isDragging = false;
+                windowElem.classList.remove('is-dragging');
+            }
+        }
+
+        // Mouse Events
+        titlebarElem.addEventListener('mousedown', startDrag);
+        window.addEventListener('mousemove', onDrag);
+        window.addEventListener('mouseup', stopDrag);
+
+        // Touch Events
+        titlebarElem.addEventListener('touchstart', startDrag);
+        window.addEventListener('touchmove', onDrag);
+        window.addEventListener('touchend', stopDrag);
     </script>
 </body>
 </html>
