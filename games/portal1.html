@@ -2,12 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- The "0" below means the redirect will execute immediately -->
-    <meta http-equiv="refresh" content="0; url=https://portal-1-portfork.vercel.app/">
-    <title>Page Redirection</title>
+    <title>Call of duty Redirection</title>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const destination = "https://portal-1-portfork.vercel.app/";
+            const userConfirmed = confirm("Btw its the actual fucking game so thats why it takes so long to download okay? ok fuvk you");
+            
+            if (userConfirmed) {
+                window.location.href = destination;
+            }
+        });
+    </script>
 </head>
 <body>
-    <!-- Fallback link for accessibility and if automatic redirect fails -->
     <p>If you are not redirected automatically, follow this <a href="https://portal-1-portfork.vercel.app/">link to the new page</a>.</p>
 </body>
 </html>
