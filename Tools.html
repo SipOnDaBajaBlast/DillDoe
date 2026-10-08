@@ -5,195 +5,206 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TOOLS.EXE</title>
 
-    <!-- Horror & Metal Fonts -->
+    <!-- Early 2000s Frutiger Aero Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Metal+Mania&family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Trebuchet+MS&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --blood-red: #8b0000;
-            --bright-red: #ff0000;
-            --corrupt-green: #00ff66;
-            --dark-void: #050203;
-            --glass-horror: rgba(20, 5, 8, 0.85);
+            --text-dark: #072a4a;
+            --aqua-blue: #00a8ff;
+            --aqua-green: #00e676;
+            --glass-border: rgba(255, 255, 255, 0.85);
+            --glass-shine: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 51%, rgba(255,255,255,0.25) 100%);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            cursor: crosshair !important;
+            /* Early 2000s Clear Blue Aqua Mouse Cursor */
+            cursor: url('https://skeuoss.net/cdn/shop/files/aqua-mouse-clear-blue-main.webp?v=1722070790&width=1946'), auto !important;
         }
 
         body {
-            /* Your provided background image */
-            background: #000 url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRidsvRX5V1092HP11qY6LYQcv2ogY2QRefbMYRWDrN_A&s') no-repeat center center fixed;
+            /* Frutiger Aero Sky & Nature Background */
+            background: #80d2ff url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWn06EKF4l8vPj4NNF6Da7XtkAnR3tWl_K3fZQLjvSwSJVmlqV6jLgFHX6&s=10') no-repeat center center fixed;
             background-size: cover;
-            color: #f1f1f1;
+            color: var(--text-dark);
             height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            font-family: 'VT323', monospace;
+            font-family: 'Trebuchet MS', 'Segoe UI', 'Lucida Grande', Tahoma, sans-serif;
+            transition: opacity 0.4s ease;
             position: relative;
             user-select: none;
-            transition: opacity 0.4s ease;
         }
 
-        /* CRT Scanline & Screen Noise Overlay */
-        .crt-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.75) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            background-size: 100% 4px, 6px 100%;
-            pointer-events: none;
-            z-index: 20;
-            opacity: 0.8;
-        }
-
-        /* Screen Glitch Flash */
-        .horror-flash {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: var(--bright-red);
-            opacity: 0;
-            pointer-events: none;
-            z-index: 19;
-            animation: randomGlitch 8s infinite;
-        }
-
-        @keyframes randomGlitch {
-            0%, 95%, 100% { opacity: 0; }
-            96% { opacity: 0.12; }
-            97% { opacity: 0.04; }
-            98% { opacity: 0.25; }
-        }
-
-        /* --- CREEPYPASTA BACKGROUND ENTITIES --- */
-        .creepypasta-entity {
+        /* --- WATER RIPPLE OVERLAY --- */
+        .water-overlay {
             position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 168, 255, 0.12) 0%, rgba(255, 255, 255, 0) 70%);
+            pointer-events: none;
+            z-index: 1;
+            animation: waterPulse 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes waterPulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.08); opacity: 0.9; }
+        }
+
+        /* --- GRASS BOTTOM BORDER --- */
+        .grass-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 45px;
+            background: linear-gradient(0deg, #1b8a00 0%, #3cd000 60%, rgba(60, 208, 0, 0) 100%);
             z-index: 2;
+            pointer-events: none;
+        }
+
+        /* --- BACKGROUND CAT IMAGES --- */
+        .bg-cat {
+            position: absolute;
+            z-index: 3;
             pointer-events: none;
             user-select: none;
         }
 
-        /* BEN DROWNED */
-        .entity-ben {
-            top: 8%;
-            left: 4%;
+        /* Dancing Kitten - Bottom Left */
+        .bg-cat-kitten {
+            bottom: 15px;
+            left: 25px;
             width: 250px;
-            max-width: 28vw;
-            opacity: 0.85;
-            filter: drop-shadow(0 0 15px #ff0000) contrast(130%);
-            animation: floatBen 5s ease-in-out infinite alternate;
-        }
-
-        @keyframes floatBen {
-            0% { transform: translateY(0) scale(1) rotate(-2deg); }
-            100% { transform: translateY(-18px) scale(1.05) rotate(2deg); }
-        }
-
-        /* JEFF THE KILLER */
-        .entity-jeff {
-            bottom: -10px;
-            right: 3%;
-            width: 280px;
             max-width: 30vw;
-            opacity: 0.85;
-            filter: contrast(140%) drop-shadow(-5px -5px 20px #8b0000);
-            animation: twitchJeff 4s infinite alternate;
+            opacity: 0.95;
+            filter: drop-shadow(0px 10px 20px rgba(0, 60, 120, 0.4));
         }
 
-        @keyframes twitchJeff {
-            0%, 90% { transform: scale(1); }
-            92% { transform: scale(1.04) skewX(4deg); }
-            95% { transform: scale(0.98); }
+        /* Nyan Cat - Top Right */
+        .bg-cat-nyan {
+            top: 10%;
+            right: 35px;
+            width: 290px;
+            max-width: 35vw;
+            opacity: 0.95;
+            filter: drop-shadow(0px 0px 25px rgba(255, 255, 255, 0.9));
+            animation: float-cat 4s ease-in-out infinite alternate;
         }
 
-        /* SLENDERMAN */
-        .entity-slender {
-            top: 5%;
-            right: 22%;
-            height: 80vh;
-            opacity: 0.4;
-            filter: blur(1px) contrast(180%);
-            animation: fadeSlender 7s ease-in-out infinite alternate;
+        @keyframes float-cat {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-18px) rotate(4deg); }
         }
 
-        @keyframes fadeSlender {
-            0% { opacity: 0.25; transform: scaleX(1); }
-            100% { opacity: 0.55; transform: scaleX(1.05); }
+        /* --- RISING FRUTIGER BUBBLES --- */
+        .bubble {
+            position: absolute;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.25) 60%, rgba(0, 168, 255, 0.5));
+            border-radius: 50%;
+            box-shadow: inset -2px -2px 6px rgba(0, 40, 80, 0.2), inset 2px 2px 8px rgba(255,255,255,0.9), 0 4px 12px rgba(0,100,200,0.25);
+            pointer-events: none;
+            z-index: 2;
+            animation: rise 9s infinite linear;
+        }
+
+        @keyframes rise {
+            0% { transform: translateY(105vh) scale(0.7); opacity: 0; }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
         }
 
         body.fade-out {
             opacity: 0;
         }
 
-        /* --- CORRUPTED DRAGGABLE WINDOW --- */
+        /* --- MAIN AERO GLASS WINDOW CONTAINER --- */
         .aero-window {
             position: absolute;
             width: 90%;
             max-width: 620px;
-            background: var(--glass-horror);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 2px solid var(--blood-red);
-            border-radius: 8px;
-            box-shadow: 0 0 35px rgba(139, 0, 0, 0.8), inset 0 0 15px rgba(255, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1.5px solid rgba(255, 255, 255, 0.85);
+            border-radius: 14px;
+            box-shadow: 0 20px 50px rgba(0, 60, 130, 0.35), inset 0 1.5px 3px rgba(255, 255, 255, 0.95);
             z-index: 10;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             touch-action: none;
+            transition: box-shadow 0.2s ease, background 0.3s ease;
+        }
+
+        .aero-window.is-dragging {
+            box-shadow: 0 30px 70px rgba(0, 80, 180, 0.5), inset 0 1.5px 3px rgba(255, 255, 255, 0.95);
         }
 
         /* Window Titlebar (Draggable Handle) */
         .window-titlebar {
-            background: linear-gradient(180deg, #4a0000 0%, #1a0000 100%);
-            padding: 10px 15px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(200, 235, 255, 0.6) 45%, rgba(120, 195, 255, 0.7) 50%, rgba(175, 225, 255, 0.8) 100%);
+            padding: 10px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid var(--blood-red);
-            cursor: move !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.7);
+            cursor: grab !important;
+        }
+
+        .window-titlebar:active {
+            cursor: grabbing !important;
         }
 
         .window-title-text {
-            font-family: 'VT323', monospace;
-            font-size: 1.3rem;
-            color: var(--bright-red);
-            text-shadow: 0 0 8px red;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #003366;
+            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
             display: flex;
             align-items: center;
             gap: 8px;
             pointer-events: none;
         }
 
+        /* Windows / Mac Control Buttons */
         .window-controls {
             display: flex;
-            gap: 6px;
+            gap: 7px;
         }
 
         .win-btn {
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            border: 1px solid #000;
+            border: 1px solid rgba(0,0,0,0.25);
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.8);
+            cursor: pointer !important;
         }
 
-        .win-close { background: #ff0000; box-shadow: 0 0 8px red; }
-        .win-min { background: #660000; }
-        .win-max { background: #330000; }
+        .win-close { background: linear-gradient(180deg, #ff7b7b, #e60000); }
+        .win-min { background: linear-gradient(180deg, #ffea7b, #e6a100); }
+        .win-max { background: linear-gradient(180deg, #7bff8a, #00c81b); }
 
         .window-content {
-            padding: 35px 20px;
+            padding: 35px 25px 40px 25px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: radial-gradient(circle, rgba(40,0,0,0.4) 0%, rgba(5,0,0,0.9) 100%);
+            position: relative;
+            background: var(--glass-shine);
         }
 
         /* --- HEADER & TITLE --- */
@@ -203,30 +214,31 @@
         }
 
         .metal-title {
-            font-family: 'Creepster', cursive;
-            font-size: 4.8rem;
-            letter-spacing: 3px;
+            font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            letter-spacing: 1px;
             text-transform: uppercase;
-            color: var(--bright-red);
-            text-shadow: 0 0 20px red, 3px 3px 0px #000;
-            animation: bloodPulse 2s infinite alternate;
-        }
-
-        @keyframes bloodPulse {
-            0% { filter: drop-shadow(0 0 5px red); }
-            100% { filter: drop-shadow(0 0 20px var(--bright-red)); }
+            background: linear-gradient(180deg, #ffffff 0%, #d4efff 40%, #0099ff 50%, #004ba8 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 10px rgba(0, 70, 150, 0.45));
+            text-shadow: 0 2px 8px rgba(255, 255, 255, 0.9);
         }
 
         .subtitle {
-            font-family: 'VT323', monospace;
-            font-size: 1.2rem;
-            color: #8a8580;
-            margin-top: -5px;
-            letter-spacing: 3px;
+            font-family: 'Trebuchet MS', sans-serif;
+            font-size: 0.95rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #004d99;
+            margin-top: 4px;
             text-transform: uppercase;
+            text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9);
         }
 
-        /* --- BUTTONS --- */
+        /* --- MAIN & BUTTONS --- */
         main {
             display: flex;
             justify-content: center;
@@ -242,81 +254,150 @@
             width: 100%;
         }
 
+        /* Web 2.0 Glossy Crystal Buttons */
         .tool-btn {
             display: inline-flex;
             justify-content: center;
             align-items: center;
-            padding: 14px 40px;
-            font-family: 'Metal Mania', cursive;
-            font-size: 2rem;
+            padding: 16px 50px;
+            font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+            font-weight: bold;
+            font-size: 1.8rem;
             text-transform: uppercase;
-            color: #fff;
+            color: #ffffff;
             text-decoration: none;
             cursor: pointer !important;
-            border: 2px solid var(--blood-red);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            text-align: center;
             width: 85%;
-            max-width: 340px;
-            background: linear-gradient(180deg, #300000 0%, #100000 100%);
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.4), inset 0 0 10px rgba(0,0,0,0.8);
-            text-shadow: 0 0 8px red;
-            transition: all 0.2s ease;
+            max-width: 360px;
+            border-radius: 50px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(0,168,255,0.9) 48%, rgba(0,85,179,0.98) 50%, rgba(0,130,225,1) 100%);
+            box-shadow: 0 10px 25px rgba(0, 80, 160, 0.45), inset 0 2px 4px rgba(255, 255, 255, 1), inset 0 -2px 6px rgba(0, 0, 0, 0.25);
+            text-shadow: 0 -1px 2px rgba(0, 30, 70, 0.8), 0 1px 2px rgba(0, 0, 0, 0.3);
+            transition: all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
         }
 
-        .tool-btn:hover {
-            background: var(--blood-red);
-            color: #000;
-            box-shadow: 0 0 30px var(--bright-red);
-            transform: scale(1.05) rotate(1deg);
-            text-shadow: none;
+        /* Top Curved Gloss Highlight */
+        .tool-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 5%;
+            right: 5%;
+            height: 48%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.1) 100%);
+            border-radius: 50px 50px 10px 10px;
+            pointer-events: none;
         }
 
         .back-btn {
-            border-color: #444;
-            background: linear-gradient(180deg, #222 0%, #050505 100%);
-            color: #888;
-            text-shadow: none;
+            background: linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(120,130,140,0.9) 48%, rgba(60,70,80,0.98) 50%, rgba(80,90,100,1) 100%);
+            box-shadow: 0 10px 25px rgba(40, 50, 60, 0.4), inset 0 2px 4px rgba(255, 255, 255, 1), inset 0 -2px 6px rgba(0, 0, 0, 0.25);
+            text-shadow: 0 -1px 2px rgba(20, 20, 20, 0.8), 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .tool-btn:hover {
+            transform: translateY(-4px) scale(1.04);
+            box-shadow: 0 15px 32px rgba(0, 168, 255, 0.65), inset 0 2px 6px rgba(255, 255, 255, 1);
+            filter: brightness(1.08);
         }
 
         .back-btn:hover {
-            background: #fff;
-            color: #000;
-            box-shadow: 0 0 25px #fff;
-            transform: scale(1.05) rotate(-1deg);
+            box-shadow: 0 15px 32px rgba(120, 130, 140, 0.65), inset 0 2px 6px rgba(255, 255, 255, 1);
+        }
+
+        .tool-btn:active {
+            transform: translateY(2px) scale(0.98);
+            box-shadow: 0 5px 15px rgba(0, 80, 160, 0.4), inset 0 2px 5px rgba(0, 0, 0, 0.3);
         }
 
         /* Status Bar */
         .window-statusbar {
-            background: #100000;
-            border-top: 1px solid var(--blood-red);
-            padding: 6px 12px;
-            font-size: 0.85rem;
-            color: var(--bright-red);
+            background: rgba(255, 255, 255, 0.5);
+            border-top: 1px solid rgba(255, 255, 255, 0.6);
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            color: #004080;
             display: flex;
             justify-content: space-between;
+        }
+
+        /* --- SECRET STEALTH MODE (PANIC MODE) --- */
+        body.stealth-active {
+            background: #f8f9fa !important;
+        }
+        body.stealth-active .water-overlay,
+        body.stealth-active .grass-bottom,
+        body.stealth-active .bubble,
+        body.stealth-active .bg-cat {
+            display: none !important;
+        }
+        body.stealth-active .aero-window {
+            background: #ffffff !important;
+            border: 1px solid #dadce0 !important;
+            box-shadow: 0 1px 3px rgba(60,64,67,0.15) !important;
+            border-radius: 8px !important;
+            width: 95% !important;
+            max-width: 800px !important;
+        }
+        body.stealth-active .window-titlebar {
+            background: #ffffff !important;
+            border-bottom: 1px solid #dadce0 !important;
+        }
+        body.stealth-active .window-title-text {
+            color: #202124 !important;
+            font-family: Arial, sans-serif !important;
+        }
+        body.stealth-active .window-content {
+            background: #ffffff !important;
+            padding: 20px !important;
+            align-items: flex-start !important;
+        }
+        .stealth-doc {
+            display: none;
+            width: 100%;
+            font-family: Arial, sans-serif;
+            color: #202124;
+            user-select: text !important;
+        }
+        body.stealth-active .stealth-doc {
+            display: block;
+        }
+        body.stealth-active header,
+        body.stealth-active main,
+        body.stealth-active .window-statusbar {
+            display: none !important;
         }
     </style>
 </head>
 <body>
 
-    <div class="crt-overlay"></div>
-    <div class="horror-flash"></div>
+    <!-- WATER OVERLAY -->
+    <div class="water-overlay"></div>
 
-    <!-- CREEPYPASTA BACKGROUND ENTITIES -->
-    <!-- BEN DROWNED -->
-    <img src="https://upload.wikimedia.org/wikipedia/en/5/59/Elegy_of_Emptiness.png?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=thumbnail_unscaled" alt="BEN DROWNED" class="creepypasta-entity entity-ben">
-    
-    <!-- JEFF THE KILLER -->
-    <img src="https://static.wikia.nocookie.net/fcoc-vs-battles/images/b/bd/JefftheKillerRender.png/revision/latest/scale-to-width-down/425?cb=20230627233359" alt="Jeff The Killer" class="creepypasta-entity entity-jeff">
+    <!-- GRASS BOTTOM BORDER -->
+    <div class="grass-bottom"></div>
 
-    <!-- SLENDERMAN -->
-    <img src="https://static.wikia.nocookie.net/deathbattlefanon/images/0/05/Slender_Man.png/revision/latest?cb=20250212063702" alt="Slenderman" class="creepypasta-entity entity-slender">
+    <!-- RISING BUBBLES -->
+    <div class="bubble" style="width: 42px; height: 42px; left: 8%; animation-duration: 9s;"></div>
+    <div class="bubble" style="width: 26px; height: 26px; left: 22%; animation-duration: 7s; animation-delay: 2s;"></div>
+    <div class="bubble" style="width: 52px; height: 52px; left: 52%; animation-duration: 11s; animation-delay: 1s;"></div>
+    <div class="bubble" style="width: 32px; height: 32px; left: 74%; animation-duration: 8s; animation-delay: 3s;"></div>
+    <div class="bubble" style="width: 46px; height: 46px; left: 90%; animation-duration: 10s; animation-delay: 0.5s;"></div>
 
-    <!-- CORRUPTED AERO WINDOW -->
+    <!-- BACKGROUND CAT IMAGES -->
+    <img src="https://png.pngtree.com/png-vector/20240917/ourmid/pngtree-funny-kitten-cat-standing-or-dancing-isolated-png-image_13844217.png" alt="Dancing Kitten" class="bg-cat bg-cat-kitten">
+    <img src="https://wallpapers.com/images/featured/nyan-cat-png-az8jeatasi3z7yda.png" alt="Nyan Cat" class="bg-cat bg-cat-nyan">
+
+    <!-- AERO GLASS WINDOW CONTAINER -->
     <div class="aero-window" id="aeroWindow">
         <!-- Title Bar (Draggable Handle) -->
         <div class="window-titlebar" id="windowTitlebar">
-            <div class="window-title-text">
-                C:\DOWNLOADS\TOOLS
+            <div class="window-title-text" id="windowTitleText">
+                🌐 C:\DOWNLOADS\TOOLS.EXE
             </div>
             <div class="window-controls">
                 <div class="win-btn win-min"></div>
@@ -341,12 +422,28 @@
                     <a href="index.html" class="tool-btn back-btn" onclick="navigateToPage(event, this.href)">← HOME</a>
                 </div>
             </main>
+
+            <!-- SECRET STEALTH DOCUMENT -->
+            <div class="stealth-doc">
+                <div style="border-bottom: 1px solid #dadce0; padding-bottom: 8px; margin-bottom: 12px; font-size: 13px; color: #5f6368;">
+                    <strong>File</strong> &nbsp; <strong>Edit</strong> &nbsp; <strong>View</strong> &nbsp; <strong>Insert</strong> &nbsp; <strong>Format</strong> &nbsp; <strong>Tools</strong>
+                </div>
+                <h2 style="font-size: 20px; color: #1a73e8; margin-bottom: 10px;">Project_Notes_Draft.docx</h2>
+                <p style="font-size: 14px; line-height: 1.6; color: #3c4043; margin-bottom: 12px;">
+                    <strong>Section 1: Executive Summary</strong><br>
+                    The primary objective of this research initiative is to evaluate market engagement across key digital sectors during Q3 and Q4. Initial benchmarks indicate a steady increase in user retention when intuitive interface design patterns are implemented.
+                </p>
+                <p style="font-size: 14px; line-height: 1.6; color: #3c4043;">
+                    <strong>Section 2: Performance Metrics</strong><br>
+                    Data collection remains consistent with established standard operating procedures. All team deliverables should be aligned with the milestone schedule outlined in Appendix B.
+                </p>
+            </div>
         </div>
 
         <!-- Status Bar -->
         <div class="window-statusbar">
-            <span>SYSTEM</span>
-            <span>ERROR </span>
+            <span>Status: Ready</span>
+            <span>Frutiger Aero Edition 2006</span>
         </div>
     </div>
 
@@ -364,6 +461,7 @@
         // Draggable Window Script
         const windowElem = document.getElementById('aeroWindow');
         const titlebarElem = document.getElementById('windowTitlebar');
+        const windowTitleText = document.getElementById('windowTitleText');
 
         let isDragging = false;
         let offsetX = 0;
@@ -373,6 +471,8 @@
             if (e.target.classList.contains('win-btn')) return;
 
             isDragging = true;
+            windowElem.classList.add('is-dragging');
+
             const clientX = e.clientX || (e.touches && e.touches[0].clientX);
             const clientY = e.clientY || (e.touches && e.touches[0].clientY);
 
@@ -405,6 +505,7 @@
 
         function stopDrag() {
             isDragging = false;
+            windowElem.classList.remove('is-dragging');
         }
 
         titlebarElem.addEventListener('mousedown', startDrag);
@@ -414,6 +515,26 @@
         titlebarElem.addEventListener('touchstart', startDrag);
         window.addEventListener('touchmove', onDrag);
         window.addEventListener('touchend', stopDrag);
+
+        // --- SECRET TOGGLE (STEALTH MODE / PANIC KEY) ---
+        function toggleStealthMode() {
+            document.body.classList.toggle('stealth-active');
+            if (document.body.classList.contains('stealth-active')) {
+                windowTitleText.innerHTML = "📄 Google Docs - Project_Notes_Draft";
+            } else {
+                windowTitleText.innerHTML = "🌐 C:\\DOWNLOADS\\TOOLS.EXE";
+            }
+        }
+
+        // Toggle on ESC key press
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                toggleStealthMode();
+            }
+        });
+
+        // Toggle on Titlebar Double-Click
+        titlebarElem.addEventListener('dblclick', toggleStealthMode);
     </script>
 </body>
 </html>
