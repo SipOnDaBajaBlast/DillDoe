@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TOOLS</title>
+    <title>TOOLS.EXE</title>
 
     <!-- Horror & Metal Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,19 +16,18 @@
             --bright-red: #ff0000;
             --corrupt-green: #00ff66;
             --dark-void: #050203;
-            --glass-horror: rgba(20, 5, 8, 0.75);
+            --glass-horror: rgba(20, 5, 8, 0.85);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            /* Creepy Red Cursor */
             cursor: crosshair !important;
         }
 
         body {
-            /* Provided Creepy Background Image mixed with dark vignette */
+            /* Provided Creepy Background Image */
             background: #000 url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRidsvRX5V1092HP11qY6LYQcv2ogY2QRefbMYRWDrN_A&s') no-repeat center center fixed;
             background-size: cover;
             color: #f1f1f1;
@@ -41,6 +40,7 @@
             font-family: 'VT323', monospace;
             position: relative;
             user-select: none;
+            transition: opacity 0.4s ease;
         }
 
         /* CRT Scanline & Screen Noise Effect */
@@ -67,9 +67,9 @@
 
         @keyframes randomGlitch {
             0%, 95%, 100% { opacity: 0; }
-            96% { opacity: 0.15; }
-            97% { opacity: 0.05; }
-            98% { opacity: 0.3; }
+            96% { opacity: 0.12; }
+            97% { opacity: 0.04; }
+            98% { opacity: 0.25; }
         }
 
         /* --- CREEPYPASTA BACKGROUND ENTITIES --- */
@@ -78,29 +78,28 @@
             z-index: 2;
             pointer-events: none;
             user-select: none;
-            filter: drop-shadow(0 0 15px rgba(255,0,0,0.6)) contrast(120%);
         }
 
-        /* BEN DROWNED (Elegy of Emptiness) */
+        /* BEN DROWNED */
         .entity-ben {
             top: 5%;
             left: 3%;
             width: 260px;
             opacity: 0.8;
-            mix-blend-mode: color-dodge;
+            filter: drop-shadow(0 0 15px red) contrast(120%);
             animation: floatBen 5s ease-in-out infinite alternate;
         }
 
         @keyframes floatBen {
-            0% { transform: translateY(0) scale(1) rotate(-2deg); filter: drop-shadow(0 0 10px red); }
-            100% { transform: translateY(-20px) scale(1.05) rotate(2deg); filter: drop-shadow(0 0 25px red); }
+            0% { transform: translateY(0) scale(1) rotate(-2deg); }
+            100% { transform: translateY(-20px) scale(1.05) rotate(2deg); }
         }
 
         /* JEFF THE KILLER */
         .entity-jeff {
-            bottom: -20px;
+            bottom: 0px;
             right: 2%;
-            width: 320px;
+            width: 280px;
             opacity: 0.85;
             filter: grayscale(40%) contrast(150%) drop-shadow(-5px -5px 20px #8b0000);
             animation: twitchJeff 4s infinite alternate;
@@ -114,72 +113,17 @@
 
         /* SLENDERMAN */
         .entity-slender {
-            top: 15%;
+            top: 10%;
             right: 15%;
-            height: 70vh;
-            opacity: 0.45;
+            height: 75vh;
+            opacity: 0.35;
             filter: blur(1px) contrast(200%);
             animation: fadeSlender 7s ease-in-out infinite alternate;
         }
 
         @keyframes fadeSlender {
             0% { opacity: 0.2; transform: scaleX(1); }
-            100% { opacity: 0.6; transform: scaleX(1.05); }
-        }
-
-        /* SMILE DOG */
-        .entity-smile {
-            bottom: 5%;
-            left: 5%;
-            width: 220px;
-            opacity: 0.7;
-            mix-blend-mode: hard-light;
-            animation: pulseSmile 3s infinite alternate;
-        }
-
-        @keyframes pulseSmile {
-            0% { opacity: 0.4; filter: sepia(100%) hue-rotate(-50deg) saturate(500%); }
-            100% { opacity: 0.8; filter: sepia(100%) hue-rotate(0deg) saturate(800%); }
-        }
-
-        /* --- LOADING SCREEN --- */
-        #loader-wrapper {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.8s ease, visibility 0.8s ease;
-        }
-
-        .loader-box {
-            padding: 20px 50px;
-            background: #110000;
-            border: 2px solid var(--blood-red);
-            box-shadow: 0 0 30px var(--blood-red);
-            text-align: center;
-        }
-
-        .loader-text {
-            font-family: 'Creepster', cursive;
-            font-size: 3rem;
-            color: var(--bright-red);
-            letter-spacing: 4px;
-            animation: textFlicker 0.2s infinite;
-        }
-
-        @keyframes textFlicker {
-            0% { opacity: 0.8; text-shadow: 0 0 10px red; }
-            50% { opacity: 0.2; text-shadow: none; }
-            100% { opacity: 1; text-shadow: 0 0 20px red; }
-        }
-
-        .loaded #loader-wrapper {
-            opacity: 0;
-            visibility: hidden;
+            100% { opacity: 0.5; transform: scaleX(1.05); }
         }
 
         body.fade-out {
@@ -223,6 +167,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            pointer-events: none;
         }
 
         .window-controls {
@@ -242,7 +187,7 @@
         .win-max { background: #330000; }
 
         .window-content {
-            padding: 30px 20px;
+            padding: 35px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -257,7 +202,7 @@
 
         .metal-title {
             font-family: 'Creepster', cursive;
-            font-size: 4.5rem;
+            font-size: 4.8rem;
             letter-spacing: 3px;
             text-transform: uppercase;
             color: var(--bright-red);
@@ -313,7 +258,6 @@
             box-shadow: 0 0 15px rgba(255, 0, 0, 0.4), inset 0 0 10px rgba(0,0,0,0.8);
             text-shadow: 0 0 8px red;
             transition: all 0.2s ease;
-            position: relative;
         }
 
         .tool-btn:hover {
@@ -357,23 +301,13 @@
 
     <!-- CREEPYPASTA BACKGROUND ENTITIES -->
     <!-- BEN DROWNED -->
-    <img src="https://creepypasta.fandom.com/wiki/Special:Redirect/file/BEN_Drowned.png" alt="BEN DROWNED" class="creepypasta-entity entity-ben" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/ thumb/7/77/Delete_key.svg/512px-Delete_key.svg.png'">
+    <img src="https://wallpapers.com/images/hd/ben-drowned-statue-majora-s-mask-c4544dky036m7gsc.png" alt="BEN DROWNED" class="creepypasta-entity entity-ben">
     
     <!-- JEFF THE KILLER -->
-    <img src="https://toppng.com/uploads/preview/jeff-the-killer-creepypasta-jeff-the-killer-115632517833y3b76i6sk.png" alt="Jeff The Killer" class="creepypasta-entity entity-jeff" onerror="this.src='https://www.pngitem.com/middle/ibxRmbo_creepypastas-of-jeff-the-killer-hd-png-download/'">
+    <img src="https://www.pngitem.com/middle/ibxRmbo_creepypastas-of-jeff-the-killer-hd-png-download/" alt="Jeff The Killer" class="creepypasta-entity entity-jeff" onerror="this.style.display='none'">
 
     <!-- SLENDERMAN -->
-    <img src="https://www.pngkey.com/png/full/300-3003257_slenderman-el-terror-de-los-creepypastas-creepypastas.png" alt="Slenderman" class="creepypasta-entity entity-slender">
-
-    <!-- SMILE DOG -->
-    <img src="https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/smile-dog-creepypasta-horror-art.jpg" alt="Smile Dog" class="creepypasta-entity entity-smile">
-
-    <!-- LOADING SCREEN -->
-    <div id="loader-wrapper">
-        <div class="loader-box">
-            <div class="loader-text">YOU SHOULDN'T HAVE DONE THAT</div>
-        </div>
-    </div>
+    <img src="https://www.pngkey.com/png/full/300-3003257_slenderman-el-terror-de-los-creepypastas-creepypastas.png" alt="Slenderman" class="creepypasta-entity entity-slender" onerror="this.style.display='none'">
 
     <!-- CORRUPTED AERO WINDOW -->
     <div class="aero-window" id="aeroWindow">
@@ -394,7 +328,7 @@
             <!-- HEADER -->
             <header>
                 <h1 class="metal-title">TOOLS</h1>
-                <p class="subtitle">(unblock everything... if you dare)</p>
+                <p class="subtitle">(unblock everything)</p>
             </header>
 
             <!-- MAIN ACTION -->
@@ -402,56 +336,27 @@
                 <div class="button-container">
                     <a href="proxy.html" class="tool-btn" onclick="navigateToPage(event, this.href)">WEB PROXY</a>
                     <a href="movies.html" class="tool-btn" onclick="navigateToPage(event, this.href)">MOVIES</a>
-                    <a href="index.html" class="tool-btn back-btn" onclick="navigateToPage(event, this.href)">← ESCAPE</a>
+                    <a href="index.html" class="tool-btn back-btn" onclick="navigateToPage(event, this.href)">← HOME</a>
                 </div>
             </main>
         </div>
 
         <!-- Status Bar -->
         <div class="window-statusbar">
-            <span>AURA</span>
+            <span>SYSTEM CORRUPTED</span>
             <span>ERROR 666</span>
         </div>
     </div>
 
     <script>
-        // Web Audio API Horror Sound Generator
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-        function playHorrorStatic() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(80, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.15);
-            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.15);
-        }
-
-        document.querySelectorAll('.tool-btn').forEach(btn => {
-            btn.addEventListener('mouseenter', playHorrorStatic);
-        });
-
-        // Loader
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.body.classList.add('loaded');
-            }, 1000);
-        });
-
-        // Navigation
+        // Navigation function
         function navigateToPage(event, destinationUrl) {
             event.preventDefault();
             document.body.classList.add('fade-out');
 
             setTimeout(() => {
                 window.location.href = destinationUrl;
-            }, 400);
+            }, 300);
         }
 
         // Draggable Window Script
