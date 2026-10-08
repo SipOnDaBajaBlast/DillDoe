@@ -27,7 +27,7 @@
         }
 
         body {
-            /* Provided Creepy Background Image */
+            /* Your provided background image */
             background: #000 url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRidsvRX5V1092HP11qY6LYQcv2ogY2QRefbMYRWDrN_A&s') no-repeat center center fixed;
             background-size: cover;
             color: #f1f1f1;
@@ -43,7 +43,7 @@
             transition: opacity 0.4s ease;
         }
 
-        /* CRT Scanline & Screen Noise Effect */
+        /* CRT Scanline & Screen Noise Overlay */
         .crt-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -82,48 +82,50 @@
 
         /* BEN DROWNED */
         .entity-ben {
-            top: 5%;
-            left: 3%;
-            width: 260px;
-            opacity: 0.8;
-            filter: drop-shadow(0 0 15px red) contrast(120%);
+            top: 8%;
+            left: 4%;
+            width: 250px;
+            max-width: 28vw;
+            opacity: 0.85;
+            filter: drop-shadow(0 0 15px #ff0000) contrast(130%);
             animation: floatBen 5s ease-in-out infinite alternate;
         }
 
         @keyframes floatBen {
             0% { transform: translateY(0) scale(1) rotate(-2deg); }
-            100% { transform: translateY(-20px) scale(1.05) rotate(2deg); }
+            100% { transform: translateY(-18px) scale(1.05) rotate(2deg); }
         }
 
         /* JEFF THE KILLER */
         .entity-jeff {
-            bottom: 0px;
-            right: 2%;
+            bottom: -10px;
+            right: 3%;
             width: 280px;
+            max-width: 30vw;
             opacity: 0.85;
-            filter: grayscale(40%) contrast(150%) drop-shadow(-5px -5px 20px #8b0000);
+            filter: contrast(140%) drop-shadow(-5px -5px 20px #8b0000);
             animation: twitchJeff 4s infinite alternate;
         }
 
         @keyframes twitchJeff {
             0%, 90% { transform: scale(1); }
-            92% { transform: scale(1.04) skewX(5deg); }
+            92% { transform: scale(1.04) skewX(4deg); }
             95% { transform: scale(0.98); }
         }
 
         /* SLENDERMAN */
         .entity-slender {
-            top: 10%;
-            right: 15%;
-            height: 75vh;
-            opacity: 0.35;
-            filter: blur(1px) contrast(200%);
+            top: 5%;
+            right: 22%;
+            height: 80vh;
+            opacity: 0.4;
+            filter: blur(1px) contrast(180%);
             animation: fadeSlender 7s ease-in-out infinite alternate;
         }
 
         @keyframes fadeSlender {
-            0% { opacity: 0.2; transform: scaleX(1); }
-            100% { opacity: 0.5; transform: scaleX(1.05); }
+            0% { opacity: 0.25; transform: scaleX(1); }
+            100% { opacity: 0.55; transform: scaleX(1.05); }
         }
 
         body.fade-out {
@@ -301,13 +303,13 @@
 
     <!-- CREEPYPASTA BACKGROUND ENTITIES -->
     <!-- BEN DROWNED -->
-    <img src="https://wallpapers.com/images/hd/ben-drowned-statue-majora-s-mask-c4544dky036m7gsc.png" alt="BEN DROWNED" class="creepypasta-entity entity-ben">
+    <img src="https://www.pngkey.com/png/full/226-2269517_ben-drowned-who-me-awesome-creepypasta.png" alt="BEN DROWNED" class="creepypasta-entity entity-ben">
     
     <!-- JEFF THE KILLER -->
-    <img src="https://www.pngitem.com/middle/ibxRmbo_creepypastas-of-jeff-the-killer-hd-png-download/" alt="Jeff The Killer" class="creepypasta-entity entity-jeff" onerror="this.style.display='none'">
+    <img src="https://www.pngitem.com/pngs/m/115-1152412_jeff-the-killer-png-transparent-png.png" alt="Jeff The Killer" class="creepypasta-entity entity-jeff">
 
     <!-- SLENDERMAN -->
-    <img src="https://www.pngkey.com/png/full/300-3003257_slenderman-el-terror-de-los-creepypastas-creepypastas.png" alt="Slenderman" class="creepypasta-entity entity-slender" onerror="this.style.display='none'">
+    <img src="https://pngimg.com/uploads/slender_man/slender_man_PNG71793.png" alt="Slenderman" class="creepypasta-entity entity-slender">
 
     <!-- CORRUPTED AERO WINDOW -->
     <div class="aero-window" id="aeroWindow">
