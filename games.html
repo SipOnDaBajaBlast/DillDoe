@@ -3,37 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALL GAMES - ARCADE MEME VAULT</title>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Permanent+Marker&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <title>GAME LIBRARY</title>
 
     <style>
+        /* ==========================================================================
+           2000s FRUTIGER AERO & MAC OS X AQUA / WINDOWS VISTA DESIGN SYSTEM
+           ========================================================================== */
+        
         :root {
-            --bg-color: #0d0c11;
-            --card-bg: #1a1622;
-            --accent-pink: #ff2a74;
-            --accent-cyan: #00f0ff;
-            --accent-yellow: #ffea00;
-            --text-white: #f1f1f1;
-            --text-grey: #8a8580;
-            --paper-brown: #3d342b;
+            --aqua-light: #d6f5ff;
+            --aqua-bright: #00d2ff;
+            --aqua-deep: #0072ff;
+            --aqua-dark: #003366;
+            --gel-green: #3cd070;
+            --glass-white: rgba(255, 255, 255, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.85);
+            --glass-shadow: rgba(0, 100, 200, 0.35);
+            
+            /* Classic early 2000s font stacks */
+            --font-heading: 'Trebuchet MS', 'Lucida Grande', 'Segoe UI', Tahoma, sans-serif;
+            --font-body: 'Lucida Grande', Tahoma, 'Segoe UI', Verdana, sans-serif;
+        }
+
+        /* CUSTOM AQUA CLEAR BLUE MOUSE CURSOR (SVG Base64 inspired by early 2000s liquid mouse) */
+        body, a, button, input {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><linearGradient id="aqua" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%2380e5ff" stop-opacity="0.9"/><stop offset="60%" stop-color="%230088ff" stop-opacity="0.85"/><stop offset="100%" stop-color="%230044aa" stop-opacity="0.95"/></linearGradient><linearGradient id="shine" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.95"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0.1"/></linearGradient><filter id="drop"><feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-color="%23002255" flood-opacity="0.4"/></filter></defs><g filter="url(%23drop)"><path d="M 4 2 L 18 16 L 11 17 L 16 27 L 12 29 L 7 19 L 2 23 Z" fill="url(%23aqua)" stroke="%23ffffff" stroke-width="1.2" stroke-linejoin="round"/><ellipse cx="8" cy="10" rx="3.5" ry="5" fill="url(%23shine)" transform="rotate(-25 8 10)"/><circle cx="10" cy="14" r="1.5" fill="%23ffffff" opacity="0.8"/><circle cx="12" cy="20" r="1" fill="%23ffffff" opacity="0.6"/></g></svg>'), auto !important;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            user-select: none;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-white);
+            /* Authentic Frutiger Aero Background image + gradient tint */
+            background: linear-gradient(180deg, rgba(0, 110, 200, 0.25) 0%, rgba(0, 190, 255, 0.15) 100%),
+                        url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWn06EKF4l8vPj4NNF6Da7XtkAnR3tWl_K3fZQLjvSwSJVmlqV6jLgFHX6&s=10") center/cover no-repeat fixed;
+            color: var(--aqua-dark);
             min-height: 100vh;
-            font-family: 'Permanent Marker', cursive, sans-serif;
-            padding: 30px 20px;
+            font-family: var(--font-body);
+            padding: 25px 20px 60px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -41,7 +52,16 @@
             overflow-x: hidden;
         }
 
-        /* --- BACKGROUND MEMES --- */
+        #bubbleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+        }
+
         .bg-meme-container {
             position: fixed;
             top: 0;
@@ -49,242 +69,228 @@
             width: 100vw;
             height: 100vh;
             pointer-events: none;
-            z-index: 0;
+            z-index: 2;
             overflow: hidden;
         }
 
         .nyan-cat {
             position: absolute;
-            top: 12%;
+            top: 10%;
             width: 180px;
             height: auto;
-            animation: flyNyan 10s linear infinite;
+            filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.9));
+            animation: flyNyan 11s linear infinite;
         }
 
         @keyframes flyNyan {
-            0% { left: -200px; transform: translateY(0px); }
-            50% { transform: translateY(30px); }
-            100% { left: 100vw; transform: translateY(0px); }
+            0% { left: -220px; transform: translateY(0px) scale(0.95); }
+            50% { transform: translateY(25px) scale(1.05); }
+            100% { left: 100vw; transform: translateY(0px) scale(0.95); }
         }
 
         .doge-meme {
             position: absolute;
-            bottom: 5%;
+            bottom: 4%;
             left: 2%;
-            width: 130px;
-            opacity: 0.6;
+            width: 135px;
+            opacity: 0.88;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
             animation: floatDoge 5s ease-in-out infinite alternate;
         }
 
         @keyframes floatDoge {
-            0% { transform: translateY(0) rotate(-5deg); }
-            100% { transform: translateY(-20px) rotate(5deg); }
+            0% { transform: translateY(0) rotate(-6deg); }
+            100% { transform: translateY(-22px) rotate(6deg); }
         }
 
         .troll-face {
             position: absolute;
-            top: 20%;
+            top: 18%;
             right: 3%;
-            width: 120px;
-            opacity: 0.5;
-            animation: floatTroll 4s ease-in-out infinite alternate;
+            width: 125px;
+            opacity: 0.8;
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.85));
+            animation: floatTroll 4.5s ease-in-out infinite alternate;
         }
 
         @keyframes floatTroll {
-            0% { transform: translateY(0) scale(1); }
-            100% { transform: translateY(20px) scale(1.1); }
+            0% { transform: translateY(0) scale(0.98); }
+            100% { transform: translateY(22px) scale(1.08); }
         }
 
         .sad-bart {
             position: absolute;
-            bottom: 6%;
-            right: 4%;
-            width: 110px;
-            opacity: 0.5;
+            bottom: 5%;
+            right: 3%;
+            width: 115px;
+            opacity: 0.8;
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.85));
             animation: floatBart 6s ease-in-out infinite alternate;
         }
 
         @keyframes floatBart {
-            0% { transform: translateY(0) rotate(3deg); }
-            100% { transform: translateY(-15px) rotate(-3deg); }
+            0% { transform: translateY(0) rotate(4deg); }
+            100% { transform: translateY(-18px) rotate(-4deg); }
         }
 
-        /* --- CONTENT LAYER --- */
-        header, main, .search-container, .top-nav, .stat-bar {
+        header, main, .search-container, .top-nav {
             position: relative;
-            z-index: 1;
+            z-index: 3;
         }
 
-        /* --- TOP BAR --- */
         .top-nav {
             width: 100%;
-            max-width: 1000px;
+            max-width: 1100px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             margin-bottom: 20px;
         }
 
+        /* Early 2000s Aqua Capsule Button */
         .back-btn {
-            color: var(--text-grey);
+            font-family: var(--font-heading);
+            color: #003055;
+            font-weight: 700;
             text-decoration: none;
-            font-size: 1.1rem;
-            transition: color 0.2s ease, transform 0.2s ease;
-        }
-
-        .back-btn:hover {
-            color: var(--accent-cyan);
-            transform: translateX(-5px);
-        }
-
-        .live-counter {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.75rem;
-            color: #00ff66;
-            background: rgba(0, 255, 102, 0.1);
-            padding: 8px 14px;
-            border-radius: 20px;
-            border: 1px solid #00ff66;
-            box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
             gap: 8px;
+            padding: 8px 24px;
+            background: linear-gradient(180deg, #ffffff 0%, #d4f2ff 45%, #7bd7ff 50%, #20b0ff 85%, #0088e0 100%);
+            border-radius: 20px;
+            border: 1.5px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 70, 150, 0.35), inset 0 1px 1px #ffffff, inset 0 -2px 3px rgba(0, 50, 120, 0.4);
+            transition: all 0.2s ease;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
         }
 
-        .pulse-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #00ff66;
-            border-radius: 50%;
-            animation: pulse 1.2s infinite;
+        .back-btn:hover {
+            background: linear-gradient(180deg, #ffffff 0%, #e8f8ff 45%, #9ee3ff 50%, #4cc3ff 85%, #00a0f0 100%);
+            box-shadow: 0 6px 18px rgba(0, 170, 255, 0.6), inset 0 1px 2px #ffffff;
+            transform: translateY(-2px);
         }
 
-        @keyframes pulse {
-            0% { opacity: 0.3; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.2); }
-            100% { opacity: 0.3; transform: scale(0.8); }
-        }
-
-        /* --- HEADER --- */
+        /* Early 2000s Trebuchet MS Glass Banner Title */
         header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 22px;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 18px 45px;
+            border-radius: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 10px 30px rgba(0, 90, 180, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.9);
+            position: relative;
+            overflow: hidden;
         }
 
-        .metal-title {
-            font-family: 'Metal Mania', cursive;
-            font-size: 4.5rem;
-            letter-spacing: 5px;
+        /* Title Gloss Reflection Overlay */
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 50%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 100%);
+            border-radius: 40px 40px 0 0;
+            pointer-events: none;
+        }
+
+        .aero-title {
+            font-family: var(--font-heading);
+            font-size: 3.2rem;
+            font-weight: 800;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            background: linear-gradient(180deg, #ffffff 0%, #ff0055 50%, #720026 100%);
+            background: linear-gradient(180deg, #ffffff 0%, #e0f4ff 35%, #1ac0ff 65%, #0055b8 100%);
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(4px 4px 0px #000);
-            animation: glowTitle 3s infinite alternate;
+            filter: drop-shadow(0 3px 6px rgba(0, 40, 100, 0.4)) drop-shadow(0 1px 0 #ffffff);
         }
 
-        @keyframes glowTitle {
-            0% { filter: drop-shadow(4px 4px 0px #000) drop-shadow(0 0 5px rgba(255,0,85,0.2)); }
-            100% { filter: drop-shadow(4px 4px 0px #000) drop-shadow(0 0 20px rgba(255,0,85,0.8)); }
-        }
-
-        /* --- CONTROLS SECTION --- */
         .search-container {
             width: 100%;
-            max-width: 600px;
-            margin-bottom: 30px;
+            max-width: 520px;
+            margin-bottom: 35px;
             display: flex;
-            gap: 12px;
+            justify-content: center;
         }
 
         .search-bar {
-            flex: 1;
-            padding: 14px 20px;
-            font-family: 'Permanent Marker', cursive, sans-serif;
-            font-size: 1.2rem;
-            background-color: var(--card-bg);
-            border: 2px solid var(--accent-pink);
-            color: var(--text-white);
-            border-radius: 8px;
+            width: 100%;
+            padding: 14px 28px;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(230, 245, 255, 0.6) 100%);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            color: #003366;
+            border-radius: 30px;
             outline: none;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: all 0.25s ease;
+            box-shadow: inset 0 2px 5px rgba(0, 60, 130, 0.25), 0 8px 20px rgba(0, 100, 200, 0.2);
+            text-align: center;
+        }
+
+        .search-bar::placeholder {
+            color: rgba(0, 60, 120, 0.65);
+            font-weight: 600;
         }
 
         .search-bar:focus {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
-            transform: scale(1.01);
+            background: linear-gradient(180deg, #ffffff 0%, #e6f7ff 100%);
+            border-color: #00d2ff;
+            box-shadow: inset 0 2px 4px rgba(0, 60, 130, 0.15), 0 0 25px rgba(0, 210, 255, 0.8);
+            transform: scale(1.02);
         }
 
-        .random-btn {
-            background: linear-gradient(45deg, var(--accent-pink), var(--accent-yellow));
-            border: none;
-            color: #000;
-            font-family: 'Permanent Marker', cursive;
-            font-size: 1.1rem;
-            padding: 0 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(255, 42, 116, 0.4);
-            white-space: nowrap;
-        }
-
-        .random-btn:hover {
-            transform: scale(1.05) rotate(2deg);
-            filter: brightness(1.2);
-        }
-
-        /* --- GAMES GRID --- */
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 28px;
             width: 100%;
-            max-width: 1050px;
+            max-width: 1100px;
         }
 
-        /* --- GAME CARD --- */
+        /* Skeuomorphic Glass Card */
         .game-card {
-            background-color: var(--card-bg);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            padding: 12px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(210, 240, 255, 0.25) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            padding: 14px;
             text-decoration: none;
-            color: var(--text-white);
+            color: #003366;
             display: flex;
             flex-direction: column;
             align-items: center;
-            border-radius: 12px;
+            border-radius: 22px;
             position: relative;
             overflow: hidden;
-            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 25px rgba(0, 70, 150, 0.25), inset 0 2px 2px rgba(255, 255, 255, 0.95);
         }
 
+        /* 2000s Gel/Glass Top Sheen Reflector */
         .game-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            border-radius: 12px;
-            padding: 2px;
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-pink));
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            top: 0; left: 0; right: 0; height: 48%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 100%);
+            border-radius: 20px 20px 0 0;
+            pointer-events: none;
+            z-index: 2;
         }
 
         .game-card:hover {
             transform: translateY(-8px) scale(1.03);
-            border-color: transparent;
-            box-shadow: 0 12px 25px rgba(0, 240, 255, 0.3);
-        }
-
-        .game-card:hover::before {
-            opacity: 1;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(180, 230, 255, 0.45) 100%);
+            border-color: #ffffff;
+            box-shadow: 0 18px 38px rgba(0, 140, 255, 0.4), 0 0 22px rgba(0, 210, 255, 0.6), inset 0 2px 4px #ffffff;
         }
 
         .img-wrapper {
@@ -292,73 +298,66 @@
             height: 160px;
             position: relative;
             overflow: hidden;
-            border-radius: 8px;
+            border-radius: 14px;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.3), 0 3px 8px rgba(0, 50, 100, 0.2);
+            border: 1.5px solid rgba(255, 255, 255, 0.8);
         }
 
         .game-card img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            background-color: #0d0d0d;
-            transition: transform 0.3s ease;
+            background-color: #cbeaff;
+            transition: transform 0.4s ease;
         }
 
         .game-card:hover img {
-            transform: scale(1.1);
+            transform: scale(1.08);
         }
 
-        /* BADGES */
-        .badge {
+        /* Sweep lens light beam */
+        .img-wrapper::after {
+            content: '';
             position: absolute;
-            top: 8px;
-            right: 8px;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.55rem;
-            padding: 4px 8px;
-            border-radius: 4px;
-            color: #000;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            z-index: 2;
+            top: -100%;
+            left: -100%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(25deg);
+            transition: all 0.6s ease;
+            pointer-events: none;
         }
 
-        .badge-hot { background-color: #ff3300; color: #fff; }
-        .badge-new { background-color: #00f0ff; }
-        .badge-pop { background-color: #ffea00; }
+        .game-card:hover .img-wrapper::after {
+            top: 50%;
+            left: 50%;
+        }
 
+        /* Early 2000s Typography: Lucida Grande / Tahoma with bevel shadow */
         .game-title {
-            margin-top: 12px;
-            font-size: 1.3rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            margin-top: 14px;
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 1.05rem;
             text-align: center;
-            line-height: 1.2;
+            line-height: 1.3;
+            color: #002b55;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
             transition: color 0.2s ease;
         }
 
         .game-card:hover .game-title {
-            color: var(--accent-cyan);
-            text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
-        }
-
-        /* PARTICLE EFFECT CANVAS */
-        #particleCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 99;
+            color: #0066d6;
         }
     </style>
 </head>
 
 <body>
 
-    <canvas id="particleCanvas"></canvas>
+    <!-- Water Bubbles Background Canvas -->
+    <canvas id="bubbleCanvas"></canvas>
 
-    <!-- MEME BACKGROUND ELEMENTS -->
     <div class="bg-meme-container">
         <img class="nyan-cat" src="https://freepngimg.com/save/15407-nyan-cat-picture/512x512" alt="Nyan Cat">
         <img class="doge-meme" src="https://pngimg.com/uploads/doge_meme/doge_meme_PNG112723.png" alt="Doge">
@@ -366,269 +365,296 @@
         <img class="sad-bart" src="https://www.nicepng.com/png/full/136-1362322_sad-simpsons-and-bart-image-bart-simpson-sad.png" alt="Sad Bart Simpson">
     </div>
 
-    <!-- TOP BAR -->
+    <!-- NAVIGATION BAR -->
     <div class="top-nav">
-        <a href="index.html" class="back-btn">&larr; Home</a>
-        <div class="live-counter">
-            <span class="pulse-dot"></span>
-            <span id="playerCount">1,420</span> PLAYERS ONLINE
-        </div>
+        <a href="index.html" class="back-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Home
+        </a>
     </div>
 
     <header>
-        <h1 class="metal-title">GAME LIBRARY</h1>
+        <h1 class="aero-title">GAME LIBRARY</h1>
     </header>
 
-    <!-- CONTROLS -->
+    <!-- SEARCH BAR -->
     <div class="search-container">
         <input 
             type="text" 
             id="searchInput" 
             class="search-bar" 
-            placeholder="Search games..." 
+            placeholder="🔍 Search game collection..." 
             onkeyup="filterGames()"
         >
-        <button class="random-btn" onclick="playRandomGame()">🎲 RANDOM</button>
     </div>
 
-    <!-- GAMES GRID -->
     <main class="games-grid" id="gamesGrid">
 
+        <!-- GAME 1: FNAF -->
         <a href="games/fnaf.html" class="game-card">
             <div class="img-wrapper">
-                <span class="badge badge-hot">HOT</span>
-                <img src="https://images.immediate.co.uk/production/volatile/sites/3/2023/08/FNAF-games-in-order-cd67434.jpg?quality=90" alt="FNAF">
+                <img src="https://images.immediate.co.uk/production/volatile/sites/3/2023/08/FNAF-games-in-order-cd67434.jpg?quality=90" alt="FNAF Game Thumbnail">
             </div>
             <div class="game-title">FNAF 1</div>
         </a>
 
+        <!-- GAME 2: DELTARUNE -->
         <a href="games/Deltarune.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://media.tenor.com/gLqK62ZQVRQAAAAe/sans-undertale.png" alt="Deltarune">
+                <img src="https://media.tenor.com/gLqK62ZQVRQAAAAe/sans-undertale.png" alt="Deltarune Thumbnail">
             </div>
             <div class="game-title">Deltarune</div>
         </a>
 
+        <!-- GAME 3: ANIMAL CROSSING -->
         <a href="games/AnimalCrossing.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://i.ebayimg.com/00/s/OTk3WDEzMTI=/z/AkwAAOSw6NNfZcRl/$_57.PNG?set_id=8800005007" alt="Animal Crossing">
+                <img src="https://i.ebayimg.com/00/s/OTk3WDEzMTI=/z/AkwAAOSw6NNfZcRl/$_57.PNG?set_id=8800005007" alt="Animal Crossing Thumbnail">
             </div>
             <div class="game-title">Animal Crossing</div>
         </a>
 
+        <!-- GAME 4: MINECRAFT -->
         <a href="games/wasm-gc 1.20.html" class="game-card">
             <div class="img-wrapper">
-                <span class="badge badge-pop">POPULAR</span>
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZgdMVkTgOaJ_5_r_XOcFzFDCDbhUCeLm6mfEHSUwP3yPR0u85pjXIjVw&s=10" alt="Minecraft">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZgdMVkTgOaJ_5_r_XOcFzFDCDbhUCeLm6mfEHSUwP3yPR0u85pjXIjVw&s=10" alt="Minecraft Thumbnail">
             </div>
             <div class="game-title">Minecraft (v26)</div>
         </a>
 
+        <!-- GAME 5: SMASH BROS -->
         <a href="games/Smash.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRuRpGQMUYYx8r_LjRwNnhSneqB02qejOlX0jeIMuq1lCeBRnixwZ_PO2P&s=10" alt="Smash Bros N64">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRuRpGQMUYYx8r_LjRwNnhSneqB02qejOlX0jeIMuq1lCeBRnixwZ_PO2P&s=10" alt="Smash Bros Thumbnail">
             </div>
             <div class="game-title">Smash Bros N64</div>
         </a>
 
+        <!-- GAME 6: BARTBASH -->
         <a href="games/BartBash.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBU3Lsv14l1Wd_Dz2nXuN854vY2Fh2i-vx6Ctpp8A7gMp1s9XPojalopYz&s=10" alt="BartBash">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBU3Lsv14l1Wd_Dz2nXuN854vY2Fh2i-vx6Ctpp8A7gMp1s9XPojalopYz&s=10" alt="BartBash Thumbnail">
             </div>
             <div class="game-title">BartBash</div>
         </a>
 
+        <!-- GAME 7: FISH -->
         <a href="games/fish.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://i.etsystatic.com/56181984/r/il/b67efa/7168666349/il_1080xN.7168666349_ozuc.jpg" alt="Fish">
+                <img src="https://i.etsystatic.com/56181984/r/il/b67efa/7168666349/il_1080xN.7168666349_ozuc.jpg" alt="Fish Thumbnail">
             </div>
             <div class="game-title">Fish</div>
         </a>
 
+        <!-- GAME 8: IRON LUNG -->
         <a href="games/iron lung.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://i.ytimg.com/vi/WPiCSsW-2as/maxresdefault.jpg" alt="Iron Lung">
+                <img src="https://i.ytimg.com/vi/WPiCSsW-2as/maxresdefault.jpg" alt="Iron Lung Thumbnail">
             </div>
             <div class="game-title">Iron Lung</div>
         </a>
 
+        <!-- GAME 9: BITLIFE -->
         <a href="games/bitlife.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://m.media-amazon.com/images/I/61jpZBYLFWL.png" alt="BitLife">
+                <img src="https://m.media-amazon.com/images/I/61jpZBYLFWL.png" alt="BitLife Thumbnail">
             </div>
             <div class="game-title">BitLife</div>
         </a>
 
+        <!-- GAME 10: DUMB WAYS TO DIE -->
         <a href="games/DumbWay.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://img.gamepix.com/games/dumb-ways-to-die/cover/dumb-ways-to-die.png?w=1200&ar=16:10" alt="Dumb Ways To Die">
+                <img src="https://img.gamepix.com/games/dumb-ways-to-die/cover/dumb-ways-to-die.png?w=1200&ar=16:10" alt="Dumb Ways To Die Thumbnail">
             </div>
             <div class="game-title">Dumb Ways To Die</div>
         </a>
 
+        <!-- GAME 11: CLASS OF 09 -->
         <a href="games/ClassOf09.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://media.tenor.com/CS98TshZEzgAAAAe/class-of-09.png" alt="Class Of 09">
+                <img src="https://media.tenor.com/CS98TshZEzgAAAAe/class-of-09.png" alt="Class Of 09 Thumbnail">
             </div>
-            <div class="game-title">Class Of 09</div>
+            <div class="game-title">Class Of 09 The Flip Side</div>
         </a>
 
+        <!-- GAME 12: SUPER MONKEY BALL -->
         <a href="games/SuperMonkey.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxqmwLw8JqBvMrzIj3f7d2YmOEghu6D9VV1tD25-2hmUh0NR_-v1XHCcU&s=10" alt="Super Monkey Ball">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxqmwLw8JqBvMrzIj3f7d2YmOEghu6D9VV1tD25-2hmUh0NR_-v1XHCcU&s=10" alt="Super Monkey Ball Thumbnail">
             </div>
             <div class="game-title">Super Monkey Ball</div>
         </a>
 
+        <!-- GAME 13: FNF -->
         <a href="games/FNF.html" class="game-card">
             <div class="img-wrapper">
-                <span class="badge badge-hot">HOT</span>
-                <img src="https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/0cd0c8bc4dc15c069dba7ccfb6809f6d/friday-night-funkin-logo.png" alt="Friday Night Funkin'">
+                <img src="https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/0cd0c8bc4dc15c069dba7ccfb6809f6d/friday-night-funkin-logo.png" alt="Friday Night Funkin Logo">
             </div>
             <div class="game-title">Friday Night Funkin'</div>
         </a>
 
+        <!-- GAME 14: SONIC -->
         <a href="games/Sonic.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://upload.wikimedia.org/wikipedia/en/b/ba/Sonic_the_Hedgehog_1_Genesis_box_art.jpg" alt="Sonic">
+                <img src="https://upload.wikimedia.org/wikipedia/en/b/ba/Sonic_the_Hedgehog_1_Genesis_box_art.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original" alt="Sonic Thumbnail">
             </div>
             <div class="game-title">Sonic</div>
         </a>
 
+        <!-- GAME 15: FLAPPY BIRD -->
         <a href="games/Flappy.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://th.bing.com/th/id/R.7482ed9dad08f48b9f6db70b274fe675?rik=6Z3yms%2bFt3gxxA&riu=http%3a%2f%2fstudents.com.miami.edu%2freporting%2fwp-content%2fuploads%2f2014%2f02%2fphoto.png&ehk=4onSifMV1r73Q57jOY4TtZEmAmEf%2fT%2bqovb6XWVXKak%3d&risl=&pid=ImgRaw&r=0" alt="Flappy Bird">
+                <img src="https://th.bing.com/th/id/R.7482ed9dad08f48b9f6db70b274fe675?rik=6Z3yms%2bFt3gxxA&riu=http%3a%2f%2fstudents.com.miami.edu%2freporting%2fwp-content%2fuploads%2f2014%2f02%2fphoto.png&ehk=4onSifMV1r73Q57jOY4TtZEmAmEf%2fT%2bqovb6XWVXKak%3d&risl=&pid=ImgRaw&r=0" alt="Flappy Bird Thumbnail">
             </div>
             <div class="game-title">Flappy Bird</div>
         </a>
 
+        <!-- GAME 16: TROMBONE CHAMP -->
         <a href="games/Tromebone.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://repacklab.com/wp-content/uploads/2024/12/Trombone-Champ-Unflattened-Video-Game-Free-Download-Repacklab-1.jpg" alt="Trombone Champ">
+                <img src="https://repacklab.com/wp-content/uploads/2024/12/Trombone-Champ-Unflattened-Video-Game-Free-Download-Repacklab-1.jpg" alt="Trombone Champ Thumbnail">
             </div>
             <div class="game-title">Trombone Champ</div>
         </a>
 
+        <!-- GAME 17: SIMPSONS -->
         <a href="games/Simpsons.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://static0.gamerantimages.com/wordpress/wp-content/uploads/2023/11/simpsons-hit-and-run.jpg?q=50&fit=crop&w=825&dpr=1.5" alt="Simpsons Hit & Run">
+                <img src="https://static0.gamerantimages.com/wordpress/wp-content/uploads/2023/11/simpsons-hit-and-run.jpg?q=50&fit=crop&w=825&dpr=1.5" alt="Simpsons Hit & Run Thumbnail">
             </div>
-            <div class="game-title">Simpsons Hit & Run</div>
+            <div class="game-title">The Simpsons: Hit & Run</div>
         </a>
 
+        <!-- GAME 18: METEOR -->
         <a href="games/meteor.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://play-lh.googleusercontent.com/FwW4g5DfsHgRPMVvVXiTr0B-c4vHRqLAe2ViOIAHrRKp5aatPFdmOer-I7m1P8gXwUmTrFyw7eVKGQrSzXabxQ=w526-h296-rw" alt="Meteor 60 Seconds">
+                <img src="https://play-lh.googleusercontent.com/FwW4g5DfsHgRPMVvVXiTr0B-c4vHRqLAe2ViOIAHrRKp5aatPFdmOer-I7m1P8gXwUmTrFyw7eVKGQrSzXabxQ=w526-h296-rw" alt="Meteor 60 Seconds Thumbnail">
             </div>
             <div class="game-title">Meteor 60 Seconds</div>
         </a>
 
+        <!-- GAME 19: BALDI -->
         <a href="games/baldi.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://i.pinimg.com/474x/4e/65/16/4e6516685214ca21e7c6086c01a44d73.jpg" alt="Baldi's Basics">
+                <img src="https://i.pinimg.com/474x/4e/65/16/4e6516685214ca21e7c6086c01a44d73.jpg" alt="Baldi's Basics Thumbnail">
             </div>
             <div class="game-title">Baldi's Basics</div>
         </a>
 
+        <!-- GAME 20: FLYING GORILLA -->
         <a href="games/flyingg.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://img.itch.zone/aW1nLzIwODYwNDAucG5n/original/3%2BS1Jr.png" alt="Flying Gorilla">
+                <img src="https://img.itch.zone/aW1nLzIwODYwNDAucG5n/original/3%2BS1Jr.png" alt="Flying Gorilla Thumbnail">
             </div>
             <div class="game-title">Flying Gorilla</div>
         </a>
 
+        <!-- GAME 21: NATURAL DISASTER -->
         <a href="games/NaturalD.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://tse2.mm.bing.net/th/id/OIP.vEY1HA_PakuovieO4zwaUQHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Natural Disaster">
+                <img src="https://tse2.mm.bing.net/th/id/OIP.vEY1HA_PakuovieO4zwaUQHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Natural Disaster Thumbnail">
             </div>
             <div class="game-title">Natural Disaster</div>
         </a>
 
+        <!-- GAME 22: FEAR ME -->
         <a href="games/DateJeff.html" class="game-card">
             <div class="img-wrapper">
-                <span class="badge badge-new">NEW</span>
-                <img src="https://img.qizhilu.org/website-builder/2025-11-04/images/1762240129440-ejvylc.avif" alt="Fear Me">
+                <img src="https://img.qizhilu.org/website-builder/2025-11-04/images/1762240129440-ejvylc.avif" alt="Fear Me Thumbnail">
             </div>
-            <div class="game-title">Fear Me (Jeff Sim)</div>
+            <div class="game-title">Fear Me [Jeff the Killer's Dating Sim]</div>
         </a>
 
+        <!-- GAME 23: ANGRY BIRDS -->
         <a href="games/AngryBirds.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://m.gjcdn.net/fireside-post-image/900/25359106-caj975da-v4.webp" alt="Angry Birds">
+                <img src="https://m.gjcdn.net/fireside-post-image/900/25359106-caj975da-v4.webp" alt="Angry Birds Thumbnail">
             </div>
             <div class="game-title">Angry Birds</div>
         </a>
 
+        <!-- GAME 24: FNAF DAYBREAK -->
         <a href="games/DayBreak.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://kbhgames.com/wp-content/uploads/2026/07/fnaf-daybreak.webp" alt="FNaF: DAYBREAK">
+                <img src="https://kbhgames.com/wp-content/uploads/2026/07/fnaf-daybreak.webp" alt="FNaF DAYBREAK Thumbnail">
             </div>
             <div class="game-title">FNaF: DAYBREAK</div>
         </a>
 
+        <!-- GAME 25: GANG BEASTS -->
         <a href="games/GangBeast.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://image.api.playstation.com/vulcan/ap/rnd/202012/0912/DaMDXP75LV9pti5nA2IALzhO.png" alt="Gang Beasts">
+                <img src="https://image.api.playstation.com/vulcan/ap/rnd/202012/0912/DaMDXP75LV9pti5nA2IALzhO.png" alt="Gang Beasts Thumbnail">
             </div>
             <div class="game-title">Gang Beasts</div>
         </a>
 
+        <!-- GAME 26: SUPER FLIGHT -->
         <a href="games/superflightt.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://tse4.mm.bing.net/th/id/OIP.iQUaHZ6PulAViiVB8lsyEgHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Super Flight">
+                <img src="https://tse4.mm.bing.net/th/id/OIP.iQUaHZ6PulAViiVB8lsyEgHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Super Flight Thumbnail">
             </div>
             <div class="game-title">Super Flight</div>
         </a>
 
+        <!-- GAME 27: DOKI DOKI KOMBAT KLUB -->
         <a href="games/DokiDokiKombatKlub.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://tse4.mm.bing.net/th/id/OIP.PFmT61emJCaQ0nElh2B9kwAAAA?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Doki Doki Kombat Klub">
+                <img src="https://tse4.mm.bing.net/th/id/OIP.PFmT61emJCaQ0nElh2B9kwAAAA?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Doki Doki Kombat Klub Thumbnail">
             </div>
             <div class="game-title">Doki Doki Kombat Klub</div>
         </a>
 
+        <!-- GAME 28: STEWIE KILLS GRIFFINS -->
         <a href="games/StewieKILLSTheGriffins.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co9f51.jpg" alt="Stewie KILLS The Griffins">
+                <img src="https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co9f51.jpg" alt="Stewie KILLS The Griffins Thumbnail">
             </div>
-            <div class="game-title">Stewie Kills Griffins</div>
+            <div class="game-title">Stewie KILLS The Griffins</div>
         </a>
 
+        <!-- GAME 29: PERSONA 3 PORTABLE -->
         <a href="games/p3p.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://www.gamespot.com/a/uploads/scale_landscape/43/434805/4094344-1298817349-hero.jpg" alt="Persona 3 Portable">
+                <img src="https://www.gamespot.com/a/uploads/scale_landscape/43/434805/4094344-1298817349-hero.jpg" alt="Persona 3 Portable Thumbnail">
             </div>
             <div class="game-title">Persona 3 Portable</div>
         </a>
 
+        <!-- GAME 30: VERITY DATING SIM -->
         <a href="games/VdatingSim.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://th.bing.com/th?id=OVF.9ovpC56CcC97C8J2LNbP%2bw&w=354&h=199&c=7&rs=1&qlt=70&o=7&dpr=1.3&pid=2.1&rm=3" alt="Verity Dating Simulator">
+                <img src="https://th.bing.com/th?id=OVF.9ovpC56CcC97C8J2LNbP%2bw&w=354&h=199&c=7&rs=1&qlt=70&o=7&dpr=1.3&pid=2.1&rm=3" alt="Verity Dating Simulator Thumbnail">
             </div>
-            <div class="game-title">Verity Dating Sim</div>
+            <div class="game-title">Verity Dating Simulator</div>
         </a>
 
+        <!-- GAME 31: GHOST OF SPARTA -->
         <a href="games/ghost-of-sparta.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://th.bing.com/th/id/R.97fbacd6c014e6bace33fdacb6c117ad?rik=STzwp9eYyOO2BA&pid=ImgRaw&r=0" alt="Ghost of Sparta">
+                <img src="https://th.bing.com/th/id/R.97fbacd6c014e6bace33fdacb6c117ad?rik=STzwp9eYyOO2BA&pid=ImgRaw&r=0" alt="God of War: Ghost of Sparta">
             </div>
-            <div class="game-title">GoW: Ghost of Sparta</div>
+            <div class="game-title">God of War: Ghost of Sparta</div>
         </a>
 
+        <!-- GAME 32: MASTER QUEST -->
         <a href="games/master-quest.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://m.media-amazon.com/images/M/MV5BMTAxOTE2NDEwMTNeQTJeQWpwZ15BbWU4MDI3NTY5NTUz._V1_.jpg" alt="Zelda Master Quest">
+                <img src="https://m.media-amazon.com/images/M/MV5BMTAxOTE2NDEwMTNeQTJeQWpwZ15BbWU4MDI3NTY5NTUz._V1_.jpg" alt="Zelda: Ocarina of Time - Master Quest">
             </div>
-            <div class="game-title">Zelda: Master Quest</div>
+            <div class="game-title">Zelda: Ocarina of Time</div>
         </a>
 
+        <!-- GAME 33: NYAN CAT -->
         <a href="games/nyan-cat.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://play-lh.googleusercontent.com/rKLMwthaxMG2wXoSRI7gyuoZWkuIUagkFhRh4pFWqKquwzXx5R8w7aS148LzgeDlqWZs" alt="Nyan Cat">
+                <img src="https://play-lh.googleusercontent.com/rKLMwthaxMG2wXoSRI7gyuoZWkuIUagkFhRh4pFWqKquwzXx5R8w7aS148LzgeDlqWZs" alt="Nyan Cat: Lost in Space">
             </div>
-            <div class="game-title">Nyan Cat: Lost Space</div>
+            <div class="game-title">Nyan Cat: Lost in Space</div>
         </a>
 
+        <!-- GAME 34: PORTAL 1 -->
         <a href="games/portal1.html" class="game-card">
             <div class="img-wrapper">
                 <img src="https://sm.ign.com/ign_nordic/cover/p/portal/portal_h2g3.jpg" alt="Portal 1">
@@ -636,48 +662,54 @@
             <div class="game-title">Portal 1</div>
         </a>
 
+        <!-- GAME 35: TF2 -->
         <a href="games/Tf2.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://upload.wikimedia.org/wikipedia/en/5/5f/Tf2_standalonebox.jpg" alt="Team Fortress 2">
+                <img src="https://upload.wikimedia.org/wikipedia/en/5/5f/Tf2_standalonebox.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original" alt="Team Fortress 2">
             </div>
             <div class="game-title">Team Fortress 2</div>
         </a>
 
+        <!-- GAME 36: COD 4 -->
         <a href="games/Cod4.html" class="game-card">
             <div class="img-wrapper">
-                <img src="https://upload.wikimedia.org/wikipedia/en/5/5f/Call_of_Duty_4_Modern_Warfare.jpg" alt="Call Of Duty 4">
+                <img src="https://upload.wikimedia.org/wikipedia/en/5/5f/Call_of_Duty_4_Modern_Warfare.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original" alt="Call of Duty 4">
             </div>
-            <div class="game-title">CoD 4: Modern Warfare</div>
+            <div class="game-title">Call Of Duty 4: Modern Warfare</div>
         </a>
 
     </main>
 
-    <!-- JS INTERACTIONS & SOUND FX -->
     <script>
-        // --- Web Audio API for Instant Sound Effects ---
+        // Web Audio API for 2000s Glass Hover Sound Effect
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        function playHoverSound() {
+        function playAquaSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
+            
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
+            
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.05);
+            osc.frequency.setValueAtTime(900, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1800, audioCtx.currentTime + 0.07);
+            
             gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.07);
+            
             osc.connect(gain);
             gain.connect(audioCtx.destination);
+            
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.05);
+            osc.stop(audioCtx.currentTime + 0.07);
         }
 
-        // Attach sound to cards
-        document.querySelectorAll('.game-card, .random-btn').forEach(card => {
-            card.addEventListener('mouseenter', playHoverSound);
+        // Attach audio hover listeners
+        document.querySelectorAll('.game-card, .back-btn').forEach(element => {
+            element.addEventListener('mouseenter', playAquaSound);
         });
 
-        // --- Search Filtering ---
+        // Search Filter Engine
         function filterGames() {
             const input = document.getElementById('searchInput');
             const filter = input.value.toLowerCase();
@@ -685,39 +717,15 @@
 
             cards.forEach(card => {
                 const title = card.querySelector('.game-title').textContent.toLowerCase();
-                if (title.includes(filter)) {
-                    card.style.display = "flex";
-                } else {
-                    card.style.display = "none";
-                }
+                card.style.display = title.includes(filter) ? "flex" : "none";
             });
         }
 
-        // --- Random Game Picker ---
-        function playRandomGame() {
-            const cards = Array.from(document.querySelectorAll('.game-card'))
-                .filter(c => c.style.display !== 'none');
-            
-            if (cards.length > 0) {
-                const randomCard = cards[Math.floor(Math.random() * cards.length)];
-                randomCard.style.transform = "scale(1.15) rotate(5deg)";
-                setTimeout(() => {
-                    window.location.href = randomCard.href;
-                }, 300);
-            }
-        }
-
-        // --- Live Counter Fluctuation ---
-        let count = 1420;
-        setInterval(() => {
-            count += Math.floor(Math.random() * 11) - 5;
-            document.getElementById('playerCount').textContent = count.toLocaleString();
-        }, 3000);
-
-        // --- Sparkle Burst Effect on Click ---
-        const canvas = document.getElementById('particleCanvas');
+        // --- FLOATING CLEAR BLUE WATER BUBBLES ---
+        const canvas = document.getElementById('bubbleCanvas');
         const ctx = canvas.getContext('2d');
-        let particles = [];
+
+        let bubbles = [];
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -726,37 +734,52 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        window.addEventListener('click', (e) => {
-            for (let i = 0; i < 12; i++) {
-                particles.push({
-                    x: e.clientX,
-                    y: e.clientY,
-                    vx: (Math.random() - 0.5) * 8,
-                    vy: (Math.random() - 0.5) * 8,
-                    size: Math.random() * 6 + 2,
-                    color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-                    life: 1
-                });
-            }
-        });
+        for (let i = 0; i < 30; i++) {
+            bubbles.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                radius: Math.random() * 16 + 5,
+                vy: - (Math.random() * 0.75 + 0.25),
+                vx: (Math.random() - 0.5) * 0.4,
+                opacity: Math.random() * 0.45 + 0.25
+            });
+        }
 
-        function animateParticles() {
+        function animateBubbles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach((p, index) => {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.life -= 0.03;
-                ctx.fillStyle = p.color;
-                ctx.globalAlpha = Math.max(0, p.life);
+
+            bubbles.forEach((b) => {
+                b.y += b.vy;
+                b.x += b.vx;
+
+                if (b.y + b.radius < 0) {
+                    b.y = canvas.height + b.radius;
+                    b.x = Math.random() * canvas.width;
+                }
+
+                // Render Glassy Water Bubble with High Gloss Highlight
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                
+                let grad = ctx.createRadialGradient(
+                    b.x - b.radius * 0.35, b.y - b.radius * 0.35, b.radius * 0.1,
+                    b.x, b.y, b.radius
+                );
+                grad.addColorStop(0, `rgba(255, 255, 255, ${b.opacity + 0.35})`);
+                grad.addColorStop(0.5, `rgba(0, 210, 255, ${b.opacity * 0.4})`);
+                grad.addColorStop(1, `rgba(0, 100, 220, ${b.opacity * 0.65})`);
+
+                ctx.fillStyle = grad;
                 ctx.fill();
 
-                if (p.life <= 0) particles.splice(index, 1);
+                ctx.lineWidth = 1.2;
+                ctx.strokeStyle = `rgba(255, 255, 255, ${b.opacity * 0.9})`;
+                ctx.stroke();
             });
-            requestAnimationFrame(animateParticles);
+
+            requestAnimationFrame(animateBubbles);
         }
-        animateParticles();
+        animateBubbles();
     </script>
 </body>
 </html>
