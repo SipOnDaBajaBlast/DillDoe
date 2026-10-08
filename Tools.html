@@ -4,111 +4,177 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TOOLS</title>
-    <!-- Sharp Metal & Grunge Fonts -->
+
+    <!-- Horror & Metal Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Permanent+Marker&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Metal+Mania&family=VT323&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --bg-color: #121212;
-            --card-bg: #1e1b18;
-            --paper-brown: #3d342b;
-            --paper-light: #d6ce1f;
-            --text-white: #f1f1f1;
-            --text-grey: #8a8580;
-            --dark-grey: #2b2b2b;
+            --blood-red: #8b0000;
+            --bright-red: #ff0000;
+            --corrupt-green: #00ff66;
+            --dark-void: #050203;
+            --glass-horror: rgba(20, 5, 8, 0.75);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            /* Creepy Red Cursor */
+            cursor: crosshair !important;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-white);
+            /* Provided Creepy Background Image mixed with dark vignette */
+            background: #000 url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRidsvRX5V1092HP11qY6LYQcv2ogY2QRefbMYRWDrN_A&s') no-repeat center center fixed;
+            background-size: cover;
+            color: #f1f1f1;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             overflow: hidden;
-            font-family: 'Permanent Marker', cursive, sans-serif;
-            transition: opacity 0.5s ease;
+            font-family: 'VT323', monospace;
             position: relative;
-        }
-
-        /* --- BACKGROUND CAT IMAGES --- */
-        .bg-cat {
-            position: absolute;
-            z-index: 1;
-            pointer-events: none;
             user-select: none;
         }
 
-        .bg-cat-kitten {
-            bottom: 0;
-            left: 20px;
-            width: 250px;
-            max-width: 30vw;
-            opacity: 0.85;
-            filter: drop-shadow(2px 4px 10px rgba(0,0,0,0.7));
+        /* CRT Scanline & Screen Noise Effect */
+        .crt-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.75) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+            z-index: 20;
+            opacity: 0.8;
         }
 
-        .bg-cat-nyan {
+        /* Screen Glitch Flash */
+        .horror-flash {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: var(--bright-red);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 19;
+            animation: randomGlitch 8s infinite;
+        }
+
+        @keyframes randomGlitch {
+            0%, 95%, 100% { opacity: 0; }
+            96% { opacity: 0.15; }
+            97% { opacity: 0.05; }
+            98% { opacity: 0.3; }
+        }
+
+        /* --- CREEPYPASTA BACKGROUND ENTITIES --- */
+        .creepypasta-entity {
+            position: absolute;
+            z-index: 2;
+            pointer-events: none;
+            user-select: none;
+            filter: drop-shadow(0 0 15px rgba(255,0,0,0.6)) contrast(120%);
+        }
+
+        /* BEN DROWNED (Elegy of Emptiness) */
+        .entity-ben {
+            top: 5%;
+            left: 3%;
+            width: 260px;
+            opacity: 0.8;
+            mix-blend-mode: color-dodge;
+            animation: floatBen 5s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatBen {
+            0% { transform: translateY(0) scale(1) rotate(-2deg); filter: drop-shadow(0 0 10px red); }
+            100% { transform: translateY(-20px) scale(1.05) rotate(2deg); filter: drop-shadow(0 0 25px red); }
+        }
+
+        /* JEFF THE KILLER */
+        .entity-jeff {
+            bottom: -20px;
+            right: 2%;
+            width: 320px;
+            opacity: 0.85;
+            filter: grayscale(40%) contrast(150%) drop-shadow(-5px -5px 20px #8b0000);
+            animation: twitchJeff 4s infinite alternate;
+        }
+
+        @keyframes twitchJeff {
+            0%, 90% { transform: scale(1); }
+            92% { transform: scale(1.04) skewX(5deg); }
+            95% { transform: scale(0.98); }
+        }
+
+        /* SLENDERMAN */
+        .entity-slender {
             top: 15%;
-            right: 30px;
-            width: 280px;
-            max-width: 35vw;
-            opacity: 0.85;
-            filter: drop-shadow(0px 0px 12px rgba(255, 255, 255, 0.2));
-            animation: float-cat 4s ease-in-out infinite alternate;
+            right: 15%;
+            height: 70vh;
+            opacity: 0.45;
+            filter: blur(1px) contrast(200%);
+            animation: fadeSlender 7s ease-in-out infinite alternate;
         }
 
-        @keyframes float-cat {
-            0% { transform: translateY(0px) rotate(0deg); }
-            100% { transform: translateY(-15px) rotate(3deg); }
+        @keyframes fadeSlender {
+            0% { opacity: 0.2; transform: scaleX(1); }
+            100% { opacity: 0.6; transform: scaleX(1.05); }
+        }
+
+        /* SMILE DOG */
+        .entity-smile {
+            bottom: 5%;
+            left: 5%;
+            width: 220px;
+            opacity: 0.7;
+            mix-blend-mode: hard-light;
+            animation: pulseSmile 3s infinite alternate;
+        }
+
+        @keyframes pulseSmile {
+            0% { opacity: 0.4; filter: sepia(100%) hue-rotate(-50deg) saturate(500%); }
+            100% { opacity: 0.8; filter: sepia(100%) hue-rotate(0deg) saturate(800%); }
         }
 
         /* --- LOADING SCREEN --- */
         #loader-wrapper {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #0a0a0a;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #000;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            transition: opacity 0.6s ease, visibility 0.6s ease;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
         }
 
         .loader-box {
-            padding: 20px 40px;
-            background-color: var(--card-bg);
-            border: 2px solid var(--text-grey);
-            clip-path: polygon(
-                0% 5%, 10% 0%, 25% 6%, 40% 1%, 55% 7%, 70% 0%, 85% 6%, 100% 1%,
-                98% 50%, 100% 95%, 85% 90%, 70% 100%, 55% 92%, 40% 98%, 25% 91%, 10% 100%, 0% 92%
-            );
+            padding: 20px 50px;
+            background: #110000;
+            border: 2px solid var(--blood-red);
+            box-shadow: 0 0 30px var(--blood-red);
+            text-align: center;
         }
 
         .loader-text {
-            font-family: 'Metal Mania', cursive;
-            font-size: 2rem;
-            color: var(--text-white);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            animation: pulse-grey 1s infinite alternate;
+            font-family: 'Creepster', cursive;
+            font-size: 3rem;
+            color: var(--bright-red);
+            letter-spacing: 4px;
+            animation: textFlicker 0.2s infinite;
         }
 
-        @keyframes pulse-grey {
-            0% { color: var(--text-grey); }
-            100% { color: var(--text-white); }
+        @keyframes textFlicker {
+            0% { opacity: 0.8; text-shadow: 0 0 10px red; }
+            50% { opacity: 0.2; text-shadow: none; }
+            100% { opacity: 1; text-shadow: 0 0 20px red; }
         }
 
         .loaded #loader-wrapper {
@@ -120,154 +186,265 @@
             opacity: 0;
         }
 
-        /* --- HEADER --- */
+        /* --- CORRUPTED DRAGGABLE WINDOW --- */
+        .aero-window {
+            position: absolute;
+            width: 90%;
+            max-width: 620px;
+            background: var(--glass-horror);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 2px solid var(--blood-red);
+            border-radius: 8px;
+            box-shadow: 0 0 35px rgba(139, 0, 0, 0.8), inset 0 0 15px rgba(255, 0, 0, 0.3);
+            z-index: 10;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            touch-action: none;
+        }
+
+        /* Window Titlebar (Draggable Handle) */
+        .window-titlebar {
+            background: linear-gradient(180deg, #4a0000 0%, #1a0000 100%);
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--blood-red);
+            cursor: move !important;
+        }
+
+        .window-title-text {
+            font-family: 'VT323', monospace;
+            font-size: 1.3rem;
+            color: var(--bright-red);
+            text-shadow: 0 0 8px red;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 6px;
+        }
+
+        .win-btn {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1px solid #000;
+        }
+
+        .win-close { background: #ff0000; box-shadow: 0 0 8px red; }
+        .win-min { background: #660000; }
+        .win-max { background: #330000; }
+
+        .window-content {
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: radial-gradient(circle, rgba(40,0,0,0.4) 0%, rgba(5,0,0,0.9) 100%);
+        }
+
+        /* --- HEADER & TITLE --- */
         header {
-            margin-top: 10vh;
             text-align: center;
-            z-index: 2;
+            margin-bottom: 25px;
         }
 
         .metal-title {
-            font-family: 'Metal Mania', cursive;
-            font-size: 5.5rem;
-            letter-spacing: 5px;
+            font-family: 'Creepster', cursive;
+            font-size: 4.5rem;
+            letter-spacing: 3px;
             text-transform: uppercase;
-            color: var(--text-white);
-            background: linear-gradient(180deg, #ffffff 0%, #a3a3a3 50%, #3a3a3a 51%, #757575 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(4px 4px 0px #000);
+            color: var(--bright-red);
+            text-shadow: 0 0 20px red, 3px 3px 0px #000;
+            animation: bloodPulse 2s infinite alternate;
+        }
+
+        @keyframes bloodPulse {
+            0% { filter: drop-shadow(0 0 5px red); }
+            100% { filter: drop-shadow(0 0 20px var(--bright-red)); }
         }
 
         .subtitle {
-            font-family: Arial, sans-serif;
-            font-size: 0.9rem;
-            letter-spacing: 4px;
-            color: var(--text-grey);
-            margin-top: -10px;
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            color: #8a8580;
+            margin-top: -5px;
+            letter-spacing: 3px;
             text-transform: uppercase;
         }
 
-        /* --- MAIN CONTAINER & BUTTONS --- */
+        /* --- BUTTONS --- */
         main {
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-grow: 1;
-            z-index: 2;
+            width: 100%;
         }
 
-        .ripped-container {
-            position: relative;
-            transform: rotate(-2deg);
+        .button-container {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 18px;
             align-items: center;
+            width: 100%;
         }
 
         .tool-btn {
-            display: inline-block;
-            padding: 18px 60px;
-            font-family: 'Permanent Marker', cursive;
-            font-size: 2.2rem;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 14px 40px;
+            font-family: 'Metal Mania', cursive;
+            font-size: 2rem;
             text-transform: uppercase;
-            background-color: var(--paper-brown);
-            color: #f1f1f1;
+            color: #fff;
             text-decoration: none;
-            cursor: pointer;
-            border: none;
-            text-align: center;
-            min-width: 320px;
-            clip-path: polygon(
-                0% 10%, 8% 0%, 18% 8%, 28% 1%, 38% 9%, 48% 2%, 58% 10%, 68% 1%, 78% 8%, 88% 0%, 100% 9%,
-                97% 35%, 100% 65%, 96% 90%, 
-                88% 100%, 78% 92%, 68% 99%, 58% 91%, 48% 98%, 38% 90%, 28% 100%, 18% 93%, 8% 99%, 0% 90%,
-                3% 60%, 0% 30%
-            );
-            transition: transform 0.2s ease, background-color 0.2s ease;
-        }
-
-        .back-btn {
-            transform: rotate(2deg);
-            background-color: var(--dark-grey);
-            font-size: 1.8rem;
+            cursor: pointer !important;
+            border: 2px solid var(--blood-red);
+            width: 85%;
+            max-width: 340px;
+            background: linear-gradient(180deg, #300000 0%, #100000 100%);
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.4), inset 0 0 10px rgba(0,0,0,0.8);
+            text-shadow: 0 0 8px red;
+            transition: all 0.2s ease;
+            position: relative;
         }
 
         .tool-btn:hover {
-            background-color: #52463a;
-            color: #ffffff;
-            transform: scale(1.08) rotate(2deg);
+            background: var(--blood-red);
+            color: #000;
+            box-shadow: 0 0 30px var(--bright-red);
+            transform: scale(1.05) rotate(1deg);
+            text-shadow: none;
+        }
+
+        .back-btn {
+            border-color: #444;
+            background: linear-gradient(180deg, #222 0%, #050505 100%);
+            color: #888;
+            text-shadow: none;
         }
 
         .back-btn:hover {
-            background-color: #3f3f3f;
-            transform: scale(1.08) rotate(-2deg);
+            background: #fff;
+            color: #000;
+            box-shadow: 0 0 25px #fff;
+            transform: scale(1.05) rotate(-1deg);
         }
 
-        .tool-btn:active {
-            transform: scale(0.95);
-        }
-
-        .tape {
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%) rotate(-1deg);
-            width: 100px;
-            height: 28px;
-            background-color: rgba(255, 255, 255, 0.15);
-            border-left: 1px dashed rgba(255,255,255,0.3);
-            border-right: 1px dashed rgba(255,255,255,0.3);
-            pointer-events: none;
-            z-index: 3;
-        }
-
-        footer {
-            margin-bottom: 25px;
-            z-index: 2;
+        /* Status Bar */
+        .window-statusbar {
+            background: #100000;
+            border-top: 1px solid var(--blood-red);
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            color: var(--bright-red);
+            display: flex;
+            justify-content: space-between;
         }
     </style>
 </head>
 <body>
 
-    <!-- BACKGROUND CAT IMAGES -->
-    <img src="https://png.pngtree.com/png-vector/20240917/ourmid/pngtree-funny-kitten-cat-standing-or-dancing-isolated-png-image_13844217.png" alt="Dancing Kitten" class="bg-cat bg-cat-kitten">
-    <img src="https://wallpapers.com/images/featured/nyan-cat-png-az8jeatasi3z7yda.png" alt="Nyan Cat" class="bg-cat bg-cat-nyan">
+    <div class="crt-overlay"></div>
+    <div class="horror-flash"></div>
+
+    <!-- CREEPYPASTA BACKGROUND ENTITIES -->
+    <!-- BEN DROWNED -->
+    <img src="https://creepypasta.fandom.com/wiki/Special:Redirect/file/BEN_Drowned.png" alt="BEN DROWNED" class="creepypasta-entity entity-ben" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/ thumb/7/77/Delete_key.svg/512px-Delete_key.svg.png'">
+    
+    <!-- JEFF THE KILLER -->
+    <img src="https://toppng.com/uploads/preview/jeff-the-killer-creepypasta-jeff-the-killer-115632517833y3b76i6sk.png" alt="Jeff The Killer" class="creepypasta-entity entity-jeff" onerror="this.src='https://www.pngitem.com/middle/ibxRmbo_creepypastas-of-jeff-the-killer-hd-png-download/'">
+
+    <!-- SLENDERMAN -->
+    <img src="https://www.pngkey.com/png/full/300-3003257_slenderman-el-terror-de-los-creepypastas-creepypastas.png" alt="Slenderman" class="creepypasta-entity entity-slender">
+
+    <!-- SMILE DOG -->
+    <img src="https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/smile-dog-creepypasta-horror-art.jpg" alt="Smile Dog" class="creepypasta-entity entity-smile">
 
     <!-- LOADING SCREEN -->
     <div id="loader-wrapper">
         <div class="loader-box">
-            <div class="loader-text">TOOLS</div>
+            <div class="loader-text">YOU SHOULDN'T HAVE DONE THAT</div>
         </div>
     </div>
 
-    <!-- HEADER -->
-    <header>
-        <h1 class="metal-title">TOOLS</h1>
-        <p class="subtitle">(unblock everything)</p>
-    </header>
-
-    <!-- MAIN ACTION -->
-    <main>
-        <div class="ripped-container">
-            <div class="tape"></div>
-            <a href="proxy.html" class="tool-btn" onclick="navigateToPage(event, this.href)">web proxy</a>
-            <a href="movies.html" class="tool-btn" onclick="navigateToPage(event, this.href)">movies</a>
-            <a href="index.html" class="tool-btn back-btn" onclick="navigateToPage(event, this.href)">← home</a>
+    <!-- CORRUPTED AERO WINDOW -->
+    <div class="aero-window" id="aeroWindow">
+        <!-- Title Bar (Draggable Handle) -->
+        <div class="window-titlebar" id="windowTitlebar">
+            <div class="window-title-text">
+                ⚠️ C:\SYSTEM32\SYSTEM_CORRUPT.EXE
+            </div>
+            <div class="window-controls">
+                <div class="win-btn win-min"></div>
+                <div class="win-btn win-max"></div>
+                <div class="win-btn win-close"></div>
+            </div>
         </div>
-    </main>
 
-    <footer></footer>
+        <!-- Inner Content -->
+        <div class="window-content">
+            <!-- HEADER -->
+            <header>
+                <h1 class="metal-title">TOOLS</h1>
+                <p class="subtitle">(unblock everything... if you dare)</p>
+            </header>
+
+            <!-- MAIN ACTION -->
+            <main>
+                <div class="button-container">
+                    <a href="proxy.html" class="tool-btn" onclick="navigateToPage(event, this.href)">WEB PROXY</a>
+                    <a href="movies.html" class="tool-btn" onclick="navigateToPage(event, this.href)">MOVIES</a>
+                    <a href="index.html" class="tool-btn back-btn" onclick="navigateToPage(event, this.href)">← ESCAPE</a>
+                </div>
+            </main>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="window-statusbar">
+            <span>AURA</span>
+            <span>ERROR 666</span>
+        </div>
+    </div>
 
     <script>
+        // Web Audio API Horror Sound Generator
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playHorrorStatic() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(80, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.15);
+        }
+
+        document.querySelectorAll('.tool-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', playHorrorStatic);
+        });
+
+        // Loader
         window.addEventListener('load', () => {
             setTimeout(() => {
                 document.body.classList.add('loaded');
-            }, 800);
+            }, 1000);
         });
 
+        // Navigation
         function navigateToPage(event, destinationUrl) {
             event.preventDefault();
             document.body.classList.add('fade-out');
@@ -276,6 +453,60 @@
                 window.location.href = destinationUrl;
             }, 400);
         }
+
+        // Draggable Window Script
+        const windowElem = document.getElementById('aeroWindow');
+        const titlebarElem = document.getElementById('windowTitlebar');
+
+        let isDragging = false;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        function startDrag(e) {
+            if (e.target.classList.contains('win-btn')) return;
+
+            isDragging = true;
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+            const rect = windowElem.getBoundingClientRect();
+            offsetX = clientX - rect.left;
+            offsetY = clientY - rect.top;
+        }
+
+        function onDrag(e) {
+            if (!isDragging) return;
+
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+            let newX = clientX - offsetX;
+            let newY = clientY - offsetY;
+
+            const minX = 5;
+            const minY = 5;
+            const maxX = window.innerWidth - windowElem.offsetWidth - 5;
+            const maxY = window.innerHeight - windowElem.offsetHeight - 5;
+
+            newX = Math.max(minX, Math.min(newX, maxX));
+            newY = Math.max(minY, Math.min(newY, maxY));
+
+            windowElem.style.left = `${newX}px`;
+            windowElem.style.top = `${newY}px`;
+            windowElem.style.transform = 'none';
+        }
+
+        function stopDrag() {
+            isDragging = false;
+        }
+
+        titlebarElem.addEventListener('mousedown', startDrag);
+        window.addEventListener('mousemove', onDrag);
+        window.addEventListener('mouseup', stopDrag);
+
+        titlebarElem.addEventListener('touchstart', startDrag);
+        window.addEventListener('touchmove', onDrag);
+        window.addEventListener('touchend', stopDrag);
     </script>
 </body>
 </html>
