@@ -3,49 +3,137 @@
     {
       "source": "/games/master-quest.html",
       "headers": [
-        {"key": "Cross-Origin-Opener-Policy", "value": "same-origin"},
-        {"key": "Cross-Origin-Embedder-Policy", "value": "require-corp"},
-        {"key": "Permissions-Policy", "value": "cross-origin-isolated=(self \"https://master-quest-browser.vercel.app\")"}
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "cross-origin-isolated=(self \"https://master-quest-browser.vercel.app\")"
+        }
       ]
     },
     {
       "source": "/games/master-quest",
       "headers": [
-        {"key": "Cross-Origin-Opener-Policy", "value": "same-origin"},
-        {"key": "Cross-Origin-Embedder-Policy", "value": "require-corp"},
-        {"key": "Permissions-Policy", "value": "cross-origin-isolated=(self \"https://master-quest-browser.vercel.app\")"}
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "cross-origin-isolated=(self \"https://master-quest-browser.vercel.app\")"
+        }
       ]
     },
     {
       "source": "/games/ghost-of-sparta.html",
       "headers": [
-        {"key": "Cross-Origin-Opener-Policy", "value": "same-origin"},
-        {"key": "Cross-Origin-Embedder-Policy", "value": "require-corp"},
-        {"key": "Permissions-Policy", "value": "cross-origin-isolated=(self \"https://ghost-sparta-browser.vercel.app\")"}
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "cross-origin-isolated=(self \"https://ghost-sparta-browser.vercel.app\")"
+        }
       ]
     },
     {
       "source": "/games/ghost-of-sparta",
       "headers": [
-        {"key": "Cross-Origin-Opener-Policy", "value": "same-origin"},
-        {"key": "Cross-Origin-Embedder-Policy", "value": "require-corp"},
-        {"key": "Permissions-Policy", "value": "cross-origin-isolated=(self \"https://ghost-sparta-browser.vercel.app\")"}
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "cross-origin-isolated=(self \"https://ghost-sparta-browser.vercel.app\")"
+        }
       ]
     },
     {
       "source": "/games/p3p.html",
       "headers": [
-        {"key": "Cross-Origin-Opener-Policy", "value": "same-origin"},
-        {"key": "Cross-Origin-Embedder-Policy", "value": "require-corp"},
-        {"key": "Permissions-Policy", "value": "cross-origin-isolated=(self \"https://persona3-browser.vercel.app\")"}
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "cross-origin-isolated=(self \"https://persona3-browser.vercel.app\")"
+        }
       ]
     },
     {
       "source": "/games/p3p",
       "headers": [
-        {"key": "Cross-Origin-Opener-Policy", "value": "same-origin"},
-        {"key": "Cross-Origin-Embedder-Policy", "value": "require-corp"},
-        {"key": "Permissions-Policy", "value": "cross-origin-isolated=(self \"https://persona3-browser.vercel.app\")"}
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "cross-origin-isolated=(self \"https://persona3-browser.vercel.app\")"
+        }
+      ]
+    },
+    {
+      "source": "/games/HaloCE.html",
+      "headers": [
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "cross-origin-isolated=(self \"https://halo-mobile-theta.vercel.app\")"
+        }
+      ]
+    },
+    {
+      "source": "/games/HaloCE",
+      "headers": [
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "cross-origin-isolated=(self \"https://halo-mobile-theta.vercel.app\")"
+        }
       ]
     }
   ]
