@@ -156,6 +156,10 @@
   ],
   "rewrites": [
     {
+      "source": "/halo-mobile/",
+      "destination": "https://halo-mobile-theta.vercel.app/index.html"
+    },
+    {
       "source": "/halo-mobile/:path*",
       "destination": "https://halo-mobile-theta.vercel.app/:path*"
     }
