@@ -71,7 +71,7 @@ async function gameAsset(request,url,game,path) {
  const body=entry.mode==='raw'?await rawBody(entry,path,start,end,partial,request.signal):await readPacked(packed.files[game+'/'+path],start,end,request.signal);
  const textFile=/\.(html|js|mjs|css|json)$/.test(path);
  if(!partial&&textFile&&size<8*1024*1024){
-  let text=await new Response(body).text();text=rewriteRootPaths(text,game,entry.files);
+  let text=await new Response(body).text();text=rewriteRootPaths(text,game,entry.files,path);
   if(path.endsWith('.html')){
    text=text.replace(/<base\b[^>]*>/gi,'');
    const inject=bootstrap(game);
