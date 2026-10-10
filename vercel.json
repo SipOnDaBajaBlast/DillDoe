@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/:path*",
+      "destination": "https://dilldoe-games.pages.dev/:path*",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/games/master-quest.html",
