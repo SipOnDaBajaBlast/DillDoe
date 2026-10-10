@@ -17,7 +17,7 @@ if(await fs.stat(path.join(repository,'games.html')).catch(()=>null)){
  // Read the editable website from the repository root on every build.
  const siteFiles=tracked.filter(file=>!file.split('/').some(part=>part.startsWith('.'))&&!file.startsWith('cloudflare/')&&!/^(README[^/]*|vercel\.json)$/.test(file)&&/\.(html|css|js|json|svg|png|jpe?g|webp|gif|ico|swf|woff2?|ttf|mp[34]|ogg|wav|webm)$/i.test(file));
  for(const file of catalog.main){
-  if(file==='games/GTA5.html'||siteFiles.includes(file))continue;
+  if(siteFiles.includes(file))continue;
   const target=path.resolve(output,file);if(!target.startsWith(output+path.sep))throw new Error('Unsafe website path');
   await fs.unlink(target).catch(e=>{if(e.code!=='ENOENT')throw e;});
  }
@@ -29,7 +29,6 @@ if(await fs.stat(path.join(repository,'games.html')).catch(()=>null)){
     if(!catalog.mainIsolation.includes(file))catalog.mainIsolation.push(file);
     text=text.replace(/<iframe\b([^>]*)>/gi,(whole,attrs)=>/\ballow=/.test(attrs)?whole:'<iframe'+attrs+' allow="cross-origin-isolated; fullscreen; autoplay; gamepad" allowfullscreen>');
    }
-   if(file==='games.html'&&!/games\/GTA5\.html/.test(text))text=text.replace(/(<main class="games-grid" id="gamesGrid">)/,'$1\n<a href="games/GTA5.html" class="game-card"><div class="img-wrapper" style="background:linear-gradient(135deg,#174d2a,#051c11);display:grid;place-items:center;color:white;font-size:42px;font-weight:bold">GTA V</div><div class="game-title">Grand Theft Auto V</div></a>');
    await fs.writeFile(target,text);
   }else await fs.copyFile(path.join(repository,file),target);
  }
