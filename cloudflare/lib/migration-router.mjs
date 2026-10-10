@@ -74,11 +74,12 @@ async function gameAsset(request,url,game,path) {
   let text=await new Response(body).text();text=rewriteRootPaths(text,game,entry.files,path);
   if(path.endsWith('.html')){
    text=text.replace(/<base\b[^>]*>/gi,'');
+   if(entry.files['renpy.wasm'])text=text.replace(/(src=["'])(renpy(?:-pre)?\.js)(["'])/g,'$1$2?paths=2$3');
    const inject=bootstrap(game);
    text=/<head\b[^>]*>/i.test(text)?text.replace(/<head\b[^>]*>/i,m=>m+inject):inject+text;
   }
   delete headers['Content-Length'];delete headers.ETag;
-  if(path.endsWith('.html'))headers['Cache-Control']='no-cache';
+  if(path.endsWith('.html')||(entry.files['renpy.wasm']&&/^renpy(?:-pre)?\.js$/.test(path)))headers['Cache-Control']='no-cache';
   return response(text,200,headers);
  }
  const result=response(body,partial?206:200,headers);
