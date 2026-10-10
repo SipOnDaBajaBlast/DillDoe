@@ -1,0 +1,12 @@
+{
+  "name": "dilldoe-cloudflare",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "wrangler pages dev dist",
+    "deploy": "wrangler pages deploy dist --project-name dilldoe-games"
+  },
+  "devDependencies": {"esbuild": "0.28.0", "wrangler": "4.92.0"}
+}

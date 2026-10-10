@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I LOVE NYAN CAT <3</title>
+    
+    <!-- Early 2000s Frutiger Aero / Web 2.0 Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Trebuchet+MS&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --text-dark: #072a4a;
+            --aqua-blue: #00a8ff;
+            --aqua-green: #00e676;
+            --glass-border: rgba(255, 255, 255, 0.85);
+            --glass-shine: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 51%, rgba(255,255,255,0.25) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            /* Early 2000s Clear Blue Aqua Mouse Cursor */
+            cursor: url('https://skeuoss.net/cdn/shop/files/aqua-mouse-clear-blue-main.webp?v=1722070790&width=1946'), auto !important;
+        }
+
+        body {
+            /* Frutiger Aero Sky & Nature Background */
+            background: #80d2ff url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWn06EKF4l8vPj4NNF6Da7XtkAnR3tWl_K3fZQLjvSwSJVmlqV6jLgFHX6&s=10') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-dark);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Trebuchet MS', 'Segoe UI', 'Lucida Grande', Tahoma, sans-serif;
+            transition: opacity 0.5s ease;
+            position: relative;
+        }
+
+        /* --- WATER RIPPLE OVERLAY --- */
+        .water-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 168, 255, 0.12) 0%, rgba(255, 255, 255, 0) 70%);
+            pointer-events: none;
+            z-index: 1;
+            animation: waterPulse 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes waterPulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.08); opacity: 0.9; }
+        }
+
+        /* --- GRASS BOTTOM BORDER --- */
+        .grass-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 45px;
+            background: linear-gradient(0deg, #1b8a00 0%, #3cd000 60%, rgba(60, 208, 0, 0) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* --- BACKGROUND CAT IMAGES --- */
+        .bg-cat {
+            position: absolute;
+            z-index: 3;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* Dancing Kitten - Bottom Left */
+        .bg-cat-kitten {
+            bottom: 15px;
+            left: 25px;
+            width: 250px;
+            max-width: 30vw;
+            opacity: 0.95;
+            filter: drop-shadow(0px 10px 20px rgba(0, 60, 120, 0.4));
+        }
+
+        /* Nyan Cat - Top Right */
+        .bg-cat-nyan {
+            top: 10%;
+            right: 35px;
+            width: 290px;
+            max-width: 35vw;
+            opacity: 0.95;
+            filter: drop-shadow(0px 0px 25px rgba(255, 255, 255, 0.9));
+            animation: float-cat 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes float-cat {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-18px) rotate(4deg); }
+        }
+
+        /* --- RISING FRUTIGER BUBBLES --- */
+        .bubble {
+            position: absolute;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.25) 60%, rgba(0, 168, 255, 0.5));
+            border-radius: 50%;
+            box-shadow: inset -2px -2px 6px rgba(0, 40, 80, 0.2), inset 2px 2px 8px rgba(255,255,255,0.9), 0 4px 12px rgba(0,100,200,0.25);
+            pointer-events: none;
+            z-index: 2;
+            animation: rise 9s infinite linear;
+        }
+
+        @keyframes rise {
+            0% { transform: translateY(105vh) scale(0.7); opacity: 0; }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+        }
+
+        /* --- LOADING SCREEN --- */
+        #loader-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #e0f5ff 0%, #6ec2ff 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+
+        .loader-box {
+            padding: 30px 60px;
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(0, 80, 180, 0.35), inset 0 2px 6px rgba(255, 255, 255, 0.9);
+            text-align: center;
+        }
+
+        .loader-text {
+            font-family: 'Trebuchet MS', sans-serif;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #033666;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 6px rgba(255, 255, 255, 0.9);
+            animation: pulse-glow 1.2s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            0% { opacity: 0.65; transform: scale(0.97); }
+            100% { opacity: 1; transform: scale(1.03); }
+        }
+
+        .loaded #loader-wrapper {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        body.fade-out {
+            opacity: 0;
+        }
+
+        /* --- MAIN AERO GLASS WINDOW CONTAINER --- */
+        .aero-window {
+            position: absolute;
+            width: 90%;
+            max-width: 680px;
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1.5px solid rgba(255, 255, 255, 0.85);
+            border-radius: 14px;
+            box-shadow: 0 20px 50px rgba(0, 60, 130, 0.35), inset 0 1.5px 3px rgba(255, 255, 255, 0.95);
+            z-index: 5;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+            touch-action: none;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .aero-window.is-dragging {
+            box-shadow: 0 30px 70px rgba(0, 80, 180, 0.5), inset 0 1.5px 3px rgba(255, 255, 255, 0.95);
+        }
+
+        /* Window Titlebar (Draggable Handle) */
+        .window-titlebar {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(200, 235, 255, 0.6) 45%, rgba(120, 195, 255, 0.7) 50%, rgba(175, 225, 255, 0.8) 100%);
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.7);
+            cursor: grab !important;
+        }
+
+        .window-titlebar:active {
+            cursor: grabbing !important;
+        }
+
+        .window-title-text {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #003366;
+            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        /* Mac / Vista Control Buttons */
+        .window-controls {
+            display: flex;
+            gap: 7px;
+        }
+
+        .win-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.25);
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.8);
+            cursor: pointer !important;
+        }
+
+        .win-close { background: linear-gradient(180deg, #ff7b7b, #e60000); }
+        .win-min { background: linear-gradient(180deg, #ffea7b, #e6a100); }
+        .win-max { background: linear-gradient(180deg, #7bff8a, #00c81b); }
+
+        .window-content {
+            padding: 35px 25px 40px 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            background: var(--glass-shine);
+        }
+
+        /* --- HEADER & TITLE --- */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .metal-title {
+            font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: linear-gradient(180deg, #ffffff 0%, #d4efff 40%, #0099ff 50%, #004ba8 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 10px rgba(0, 70, 150, 0.45));
+            text-shadow: 0 2px 8px rgba(255, 255, 255, 0.9);
+        }
+
+        .subtitle {
+            font-family: 'Trebuchet MS', sans-serif;
+            font-size: 0.95rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #004d99;
+            margin-top: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9);
+        }
+
+        /* --- MAIN & BUTTONS --- */
+        main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* Web 2.0 Glossy Crystal Buttons */
+        .start-btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px 50px;
+            font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+            font-weight: bold;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            color: #ffffff;
+            text-decoration: none;
+            cursor: pointer !important;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            text-align: center;
+            width: 80%;
+            max-width: 360px;
+            border-radius: 50px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(0,168,255,0.9) 48%, rgba(0,85,179,0.98) 50%, rgba(0,130,225,1) 100%);
+            box-shadow: 0 10px 25px rgba(0, 80, 160, 0.45), inset 0 2px 4px rgba(255, 255, 255, 1), inset 0 -2px 6px rgba(0, 0, 0, 0.25);
+            text-shadow: 0 -1px 2px rgba(0, 30, 70, 0.8), 0 1px 2px rgba(0, 0, 0, 0.3);
+            transition: all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Top Curved Gloss Highlight */
+        .start-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 5%;
+            right: 5%;
+            height: 48%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.1) 100%);
+            border-radius: 50px 50px 10px 10px;
+            pointer-events: none;
+        }
+
+        .tools-btn {
+            background: linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(0,230,118,0.9) 48%, rgba(0,168,80,0.98) 50%, rgba(0,195,95,1) 100%);
+            box-shadow: 0 10px 25px rgba(0, 150, 70, 0.4), inset 0 2px 4px rgba(255, 255, 255, 1), inset 0 -2px 6px rgba(0, 0, 0, 0.25);
+            text-shadow: 0 -1px 2px rgba(0, 50, 20, 0.8), 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-4px) scale(1.04);
+            box-shadow: 0 15px 32px rgba(0, 168, 255, 0.65), inset 0 2px 6px rgba(255, 255, 255, 1);
+            filter: brightness(1.08);
+        }
+
+        .tools-btn:hover {
+            box-shadow: 0 15px 32px rgba(0, 230, 118, 0.65), inset 0 2px 6px rgba(255, 255, 255, 1);
+        }
+
+        .start-btn:active {
+            transform: translateY(2px) scale(0.98);
+            box-shadow: 0 5px 15px rgba(0, 80, 160, 0.4), inset 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .window-statusbar {
+            background: rgba(255, 255, 255, 0.5);
+            border-top: 1px solid rgba(255, 255, 255, 0.6);
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            color: #004080;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- WATER OVERLAY -->
+    <div class="water-overlay"></div>
+
+    <!-- GRASS BOTTOM BORDER -->
+    <div class="grass-bottom"></div>
+
+    <!-- RISING BUBBLES -->
+    <div class="bubble" style="width: 42px; height: 42px; left: 8%; animation-duration: 9s;"></div>
+    <div class="bubble" style="width: 26px; height: 26px; left: 22%; animation-duration: 7s; animation-delay: 2s;"></div>
+    <div class="bubble" style="width: 52px; height: 52px; left: 52%; animation-duration: 11s; animation-delay: 1s;"></div>
+    <div class="bubble" style="width: 32px; height: 32px; left: 74%; animation-duration: 8s; animation-delay: 3s;"></div>
+    <div class="bubble" style="width: 46px; height: 46px; left: 90%; animation-duration: 10s; animation-delay: 0.5s;"></div>
+
+    <!-- BACKGROUND CAT IMAGES -->
+    <img src="https://png.pngtree.com/png-vector/20240917/ourmid/pngtree-funny-kitten-cat-standing-or-dancing-isolated-png-image_13844217.png" alt="Dancing Kitten" class="bg-cat bg-cat-kitten">
+    <img src="https://wallpapers.com/images/featured/nyan-cat-png-az8jeatasi3z7yda.png" alt="Nyan Cat" class="bg-cat bg-cat-nyan">
+
+    <!-- LOADING SCREEN -->
+    <div id="loader-wrapper">
+        <div class="loader-box">
+            <div class="loader-text">DILL DOH</div>
+        </div>
+    </div>
+
+    <!-- AERO GLASS WINDOW CONTAINER -->
+    <div class="aero-window" id="aeroWindow">
+        <!-- Title Bar (Draggable Handle) -->
+        <div class="window-titlebar" id="windowTitlebar">
+            <div class="window-title-text">
+                🌐 DillDoh_Unblocked_v2.0.exe
+            </div>
+            <div class="window-controls">
+                <div class="win-btn win-min"></div>
+                <div class="win-btn win-max"></div>
+                <div class="win-btn win-close"></div>
+            </div>
+        </div>
+
+        <!-- Inner Content -->
+        <div class="window-content">
+            <!-- HEADER -->
+            <header>
+                <h1 class="metal-title">DILL DOH | UNBLOCKED GAMES</h1>
+                <p class="subtitle">(very funny name please laugh)</p>
+            </header>
+
+            <!-- MAIN ACTION -->
+            <main>
+                <div class="button-container">
+                    <a href="games.html" class="start-btn" onclick="navigateToPage(event, this.href)">Games</a>
+                    <a href="Tools.html" class="start-btn tools-btn" onclick="navigateToPage(event, this.href)">Fun Stuff!!!😊</a>
+                </div>
+            </main>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="window-statusbar">
+            <span>Status: error</span>
+            <span>version 67</span>
+        </div>
+    </div>
+
+    <script>
+        // Loader Transition
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.body.classList.add('loaded');
+            }, 800);
+        });
+
+        // Navigation
+        function navigateToPage(event, destinationUrl) {
+            event.preventDefault();
+            document.body.classList.add('fade-out');
+
+            setTimeout(() => {
+                window.location.href = destinationUrl;
+            }, 400);
+        }
+
+        // --- WINDOW DRAGGING FUNCTIONALITY ---
+        const windowElem = document.getElementById('aeroWindow');
+        const titlebarElem = document.getElementById('windowTitlebar');
+
+        let isDragging = false;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        function startDrag(e) {
+            // Prevent drag if clicking on window controls
+            if (e.target.classList.contains('win-btn')) return;
+
+            isDragging = true;
+            windowElem.classList.add('is-dragging');
+
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+            const rect = windowElem.getBoundingClientRect();
+            offsetX = clientX - rect.left;
+            offsetY = clientY - rect.top;
+        }
+
+        function onDrag(e) {
+            if (!isDragging) return;
+
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+            let newX = clientX - offsetX;
+            let newY = clientY - offsetY;
+
+            // Clamping window within screen boundaries
+            const minX = 10;
+            const minY = 10;
+            const maxX = window.innerWidth - windowElem.offsetWidth - 10;
+            const maxY = window.innerHeight - windowElem.offsetHeight - 10;
+
+            newX = Math.max(minX, Math.min(newX, maxX));
+            newY = Math.max(minY, Math.min(newY, maxY));
+
+            windowElem.style.left = `${newX}px`;
+            windowElem.style.top = `${newY}px`;
+            windowElem.style.transform = 'none'; // remove centered transform once dragged
+        }
+
+        function stopDrag() {
+            if (isDragging) {
+                isDragging = false;
+                windowElem.classList.remove('is-dragging');
+            }
+        }
+
+        // Mouse Events
+        titlebarElem.addEventListener('mousedown', startDrag);
+        window.addEventListener('mousemove', onDrag);
+        window.addEventListener('mouseup', stopDrag);
+
+        // Touch Events
+        titlebarElem.addEventListener('touchstart', startDrag);
+        window.addEventListener('touchmove', onDrag);
+        window.addEventListener('touchend', stopDrag);
+    </script>
+</body>
+</html>
