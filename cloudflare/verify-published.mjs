@@ -3,8 +3,11 @@ const expected=process.env.GITHUB_SHA;
 if(!expected)throw new Error('Expected website commit is missing');
 let published=false;
 for(let attempt=0;attempt<12;attempt++){
- const response=await fetch(origin+'/website-version.json?commit='+expected,{cache:'no-store',signal:AbortSignal.timeout(15000)});
- if(response.ok&&(await response.json()).commit===expected){published=true;break;}
+ try{
+  const response=await fetch(origin+'/website-version.json?commit='+expected+'&attempt='+attempt,{cache:'no-store',signal:AbortSignal.timeout(15000)});
+  if(response.ok&&response.headers.get('content-type')?.includes('application/json')&&(await response.json()).commit===expected){published=true;break;}
+  await response.body?.cancel().catch(()=>{});
+ }catch(error){console.log('Waiting for the production website to update: '+error.message);}
  await new Promise(resolve=>setTimeout(resolve,5000));
 }
 if(!published)throw new Error('The live website has not published this commit');
