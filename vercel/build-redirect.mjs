@@ -9,5 +9,5 @@ if (path.dirname(output) !== path.join(repository, '.vercel')) throw new Error('
 await fs.rm(output, {recursive: true, force: true});
 await fs.mkdir(path.join(output, 'static'), {recursive: true});
 await fs.writeFile(path.join(output, 'config.json'), JSON.stringify({version: 3}));
-await fs.writeFile(path.join(output, 'static', 'index.html'), '<!doctype html><meta charset="utf-8"><title>DillDoe has moved</title><a href="https://dilldoe-games.pages.dev/">Continue to DillDoe</a>');
+await fs.writeFile(path.join(output, 'static', 'index.html'), '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=https://dilldoe-games.pages.dev/"><title>DillDoe has moved</title><a href="https://dilldoe-games.pages.dev/">Continue to DillDoe</a>');
 console.log('Lightweight redirect build ready. No game files, ads, or Functions are hosted on Vercel.');

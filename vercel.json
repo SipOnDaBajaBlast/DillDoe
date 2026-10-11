@@ -5,6 +5,11 @@
   "buildCommand": "node vercel/build-redirect.mjs",
   "redirects": [
     {
+      "source": "/",
+      "destination": "https://dilldoe-games.pages.dev/",
+      "permanent": true
+    },
+    {
       "source": "/:path*",
       "destination": "https://dilldoe-games.pages.dev/:path*",
       "permanent": true
