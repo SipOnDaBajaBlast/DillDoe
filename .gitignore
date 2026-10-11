@@ -1,0 +1,3 @@
+.vercel/
+cloudflare/dist/
+cloudflare/node_modules/

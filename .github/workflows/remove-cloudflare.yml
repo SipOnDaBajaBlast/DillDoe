@@ -1,0 +1,29 @@
+name: Remove old Cloudflare website
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type delete-dilldoe-games to remove only the old Cloudflare Pages project
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  remove:
+    if: inputs.confirmation == 'delete-dilldoe-games'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove the old website project
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          const url = 'https://api.cloudflare.com/client/v4/accounts/7d0845823ccbb7316078275c24c2658c/pages/projects/dilldoe-games';
+          const response = await fetch(url, {method: 'DELETE', headers: {Authorization: 'Bearer ' + process.env.CLOUDFLARE_API_TOKEN}, signal: AbortSignal.timeout(60000)});
+          const data = await response.json();
+          if (!response.ok || !data.success) throw new Error('Cloudflare project removal failed: ' + JSON.stringify(data.errors));
+          console.log('Removed only the old dilldoe-games Cloudflare Pages project. GitHub source and asset releases are preserved.');
+          NODE

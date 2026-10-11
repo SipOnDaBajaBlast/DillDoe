@@ -1,8 +1,6 @@
-name: Update website
+name: Cloudflare backup (manual)
 
 on:
-  push:
-    branches: [App]
   workflow_dispatch:
 
 permissions:

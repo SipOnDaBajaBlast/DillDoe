@@ -1,18 +1,18 @@
 # DillDoe
 Free game Website1.0
 
-Website: **https://dilldoe-games.pages.dev/**
+Website: **https://dill-doh.vercel.app/**
 
-To update the website, edit files on the **App** branch and save your changes. GitHub's **Actions → Update website** workflow builds and publishes them automatically.
+To update the website, edit files on the **App** branch and save your changes. The existing Vercel GitHub integration builds and publishes them automatically.
 
 - Edit **games.html** to change the game library.
 - Edit **index.html** to change the homepage.
 - Edit files in **games/** to change individual game pages.
 
-See [publishing details](cloudflare/README.md) for the hosting setup and game asset updates.
+Vercel builds the current pages and streams game files from the existing GitHub releases. The shared game-loading code remains in `cloudflare/`, but running the website does not require Cloudflare hosting. The build entry point is `vercel/build.mjs`.
 
-## Old Vercel link
+## Cloudflare backup
 
-The root `vercel.json` redirects every old page to the same path on `https://dilldoe-games.pages.dev/`. For example, `/games/HaloCE.html` keeps that path on the new website. Cloudflare publishing ignores this Vercel configuration.
+Cloudflare automatic publishing is disabled. Its previous build workflow is kept for manual restoration if needed. The Vercel website serves pages directly; it does not redirect visitors to Cloudflare.
 
-Vercel currently blocks the team for exceeded fair use limits, so it cannot publish or serve this redirect yet. After Vercel restores access, redeploy the `dill-doh` project from the `App` branch. Until then, share the new website link directly.
+Game asset releases and website source files are preserved independently of either hosting project.
