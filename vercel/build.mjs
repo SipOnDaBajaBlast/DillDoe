@@ -3,6 +3,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
+import {buildGamePages} from './game-pages.mjs';
 
 const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(repository, '.vercel', 'output');
@@ -15,6 +16,7 @@ await fs.cp(path.join(repository, 'cloudflare', 'dist'), path.join(output, 'stat
     recursive: true,
     filter: source => !['_worker.js', '_routes.json', '_headers'].includes(path.basename(source)),
 });
+await buildGamePages(path.join(output, 'static'));
 const {build} = createRequire(path.join(repository, 'cloudflare', 'build.mjs'))('esbuild');
 const functionDirectory = path.join(output, 'functions', 'game-router.func');
 await fs.mkdir(functionDirectory, {recursive: true});

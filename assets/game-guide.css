@@ -1,0 +1,29 @@
+:root { color-scheme: light; font-family: 'Trebuchet MS', 'Segoe UI', sans-serif; color: #073654; background: #80d2ff; }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; padding: 24px 16px; background: radial-gradient(ellipse at top, #d7f6ff, #80c7ef 65%, #57934e); }
+a { color: #064d82; }
+.guide-nav, .game-guide, .guide-footer { width: min(100%, 1000px); margin: 0 auto; }
+.guide-nav { display: flex; flex-wrap: wrap; gap: 16px; padding: 0 0 20px; }
+.game-guide { border: 2px solid #ffffffc9; border-radius: 20px; overflow: hidden; box-shadow: 0 14px 40px #00436b3b; background: #eefaffee; }
+.guide-titlebar { padding: 12px 24px; background: linear-gradient(#c7edff, #77add6); border-bottom: 1px solid #477c9c; font-weight: bold; }
+.guide-content { padding: 28px; }
+.guide-category { text-transform: uppercase; letter-spacing: 2px; font-size: 12px; color: #35617b; }
+h1 { font-size: clamp(1.8rem, 5vw, 3rem); margin: 12px 0 20px; line-height: 1.1; }
+h2 { margin: 28px 0 12px; font-size: 1.25rem; }
+p, li { line-height: 1.65; }
+p { max-width: 75ch; }
+.guide-play { display: inline-block; margin: 24px 0 12px; padding: 15px 32px; border: 2px solid #fff; border-radius: 28px; box-shadow: 0 3px 8px #00537a45; color: #003d31; background: linear-gradient(#c2ffbb, #66d655); font-weight: bold; font-size: 1.15rem; text-decoration: none; }
+.guide-play:hover { background: #b4ff9b; }
+.guide-play:focus-visible, a:focus-visible { outline: 3px solid #005aa8; outline-offset: 4px; }
+.guide-note { font-size: 13px; color: #35536a; }
+.guide-intro { display: grid; grid-template-columns: minmax(0, 1fr) 336px; gap: 160px; align-items: start; }
+.guide-intro .guide-ad { margin: 0; }
+.guide-instructions { margin: 0; padding-left: 22px; }
+.guide-related { padding: 0; display: flex; flex-wrap: wrap; gap: 12px; list-style: none; }
+.guide-related a { display: inline-block; padding: 10px 14px; border: 1px solid #7ba6c1; border-radius: 12px; background: #fff; }
+.guide-footer { padding: 24px 0; text-align: center; font-size: 13px; }
+@media (max-width: 960px) {
+    .guide-intro { grid-template-columns: minmax(0, 1fr); gap: 48px; }
+    .guide-intro .guide-ad { margin: 0 auto; max-width: 336px; }
+}
+@media (max-width: 480px) { .guide-content { padding: 20px 16px; } .guide-titlebar { padding: 12px 16px; } }
