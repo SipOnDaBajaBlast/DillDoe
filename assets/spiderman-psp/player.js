@@ -16,23 +16,28 @@ async function download(){
   }}
   try{await Promise.all(Array.from({length:3},worker));}catch(error){controller.abort();throw error;}
 }
-function settings(fast){return{
+function settings(mode){const fast=mode!=='compatible';return{
   ppsspp_internal_resolution:'480x272',ppsspp_software_rendering:'disabled',
-  // Hardware transforms corrupt the system dialog in this browser core.
-  ppsspp_gpu_hardware_transform:'disabled',ppsspp_software_skinning:'enabled',
+  // GPU mode is opt-in: hardware transforms previously corrupted the system dialog.
+  ppsspp_gpu_hardware_transform:mode==='gpu'?'enabled':'disabled',ppsspp_software_skinning:'enabled',
   ppsspp_fast_memory:'enabled',ppsspp_locked_cpu_speed:fast?'222MHz':'disabled',
-  ppsspp_frameskip:fast?'2':'1',ppsspp_auto_frameskip:'enabled',ppsspp_frame_duplication:'disabled',
+  ppsspp_frameskip:fast?'1':'disabled',ppsspp_auto_frameskip:fast?'enabled':'disabled',ppsspp_frame_duplication:'disabled',
   ppsspp_texture_scaling_level:'disabled',ppsspp_texture_anisotropic_filtering:'disabled',
   ppsspp_texture_filtering:fast?'Nearest':'Auto',ppsspp_lazy_texture_caching:fast?'enabled':'disabled',
   ppsspp_spline_quality:'Low',ppsspp_lower_resolution_for_effects:fast?'Aggressive':'Safe',shader:'disabled'
 };}
 function boot(file){
-  const fast=$('quality').value==='fast';const gameUrl=URL.createObjectURL(file);
+  const options=settings($('quality').value);const gameUrl=URL.createObjectURL(file);
   window.EJS_player='#game';window.EJS_core='psp';window.EJS_gameUrl=gameUrl;
   window.EJS_gameName='Spider-Man Web of Shadows';
   window.EJS_pathtodata='https://cdn.emulatorjs.org/stable/data/';window.EJS_threads=true;
-  window.EJS_startOnLoaded=true;window.EJS_defaultOptions=settings(fast);window.EJS_color='#57cce6';
-  window.EJS_onGameStart=()=>{$('note').textContent='Click the game to enable play and sound.';$('game').addEventListener('pointerdown',()=>{$('note').hidden=true;},{once:true});URL.revokeObjectURL(gameUrl);};
+  window.EJS_startOnLoaded=true;window.EJS_defaultOptions=options;window.EJS_color='#57cce6';
+  window.EJS_onGameStart=()=>{
+    // EmulatorJS restores saved core options over defaults. Apply only this
+    // game's selected preset, preserving saves, key bindings and other preferences.
+    const manager=window.EJS_emulator?.gameManager;
+    if(manager?.setVariable){for(const [key,value] of Object.entries(options)){if(key.startsWith('ppsspp_'))manager.setVariable(key,value);}}
+    $('note').textContent='Click the game to enable play and sound.';$('game').addEventListener('pointerdown',()=>{$('note').hidden=true;},{once:true});URL.revokeObjectURL(gameUrl);};
   $('setup').hidden=true;$('note').hidden=false;
   if(memoryOnly)$('note').textContent='Storage unavailable: play works this visit, but the game may download again next time. Click to enable sound.';
   const loader=document.createElement('script');loader.src=window.EJS_pathtodata+'loader.js';loader.crossOrigin='anonymous';
