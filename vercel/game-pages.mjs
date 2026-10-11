@@ -3,7 +3,7 @@ import path from 'node:path';
 import notes from './game-guides.mjs';
 
 const escape = text => text.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const publicOrigin = 'https://dill-doh.vercel.app';
+const publicOrigin = 'https://dilldoe-games.pages.dev';
 
 export async function buildGamePages(output) {
     const libraryPath = path.join(output, 'games.html');

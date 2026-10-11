@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 import {execFileSync} from 'node:child_process';
+import {buildGamePages} from '../vercel/game-pages.mjs';
 const {build}=createRequire(import.meta.url)('esbuild');
 const project=process.cwd(),output=path.join(project,'dist');
 if(path.resolve(output)!==path.resolve(project,'dist')||path.dirname(output)!==project)throw new Error('Unsafe build directory');
@@ -33,6 +34,7 @@ if(await fs.stat(path.join(repository,'games.html')).catch(()=>null)){
   }else await fs.copyFile(path.join(repository,file),target);
  }
 }
+await buildGamePages(output);
 await fs.writeFile(path.join(output,'website-version.json'),JSON.stringify({commit:process.env.GITHUB_SHA||null,builtAt:new Date().toISOString()}));
 await build({entryPoints:['worker.mjs'],outfile:path.join(output,'_worker.js'),bundle:true,format:'esm',platform:'browser',target:'es2022',minify:true});
 await fs.writeFile(path.join(output,'_routes.json'),JSON.stringify({version:1,include:['/ports/*','/__migration/*','/halo-mobile/*'],exclude:[]},null,2));

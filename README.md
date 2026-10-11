@@ -1,15 +1,15 @@
 # DillDoe
 Free game Website1.0
 
-Website: **https://dill-doh.vercel.app/**
+Website: **https://dilldoe-games.pages.dev/**
 
-To update the website, edit files on the **App** branch and save your changes. The existing Vercel GitHub integration builds and publishes them automatically.
+To update the website, edit files on the **App** branch and save your changes. The **Update website** GitHub Action builds and publishes them to Cloudflare automatically.
 
 - Edit **games.html** to change the game library.
 - Edit **index.html** to change the homepage.
 - Edit files in **games/** to change individual game pages.
 
-Vercel builds the current pages and streams game files from the existing GitHub releases. The shared game-loading code remains in `cloudflare/`, but running the website does not require Cloudflare hosting. The build entry point is `vercel/build.mjs`.
+Cloudflare serves the website and streams game files from the existing GitHub releases. The build entry point is `cloudflare/build.mjs`. Static pages and game download routes use the existing Cloudflare configuration. Free-plan Function limits still apply to game routes.
 
 ## Homepage sponsor frames
 
@@ -23,12 +23,12 @@ The homepage includes the owner's AdSense loader and verification meta tag for p
 
 The library has one clearly labeled banner. Its cards open game pages under `/game/` with a description, playing tips, troubleshooting, related games, and one responsive display ad using unit `3349064473`. Play opens the original `/games/` page directly. Playable files and their isolation headers remain intact; there are no ads over gameplay, timers, or required ad clicks.
 
-`vercel/game-pages.mjs` generates these pages from the game cards in root `games.html` during every Vercel build. Edit game notes in `vercel/game-guides.mjs`; add notes there when adding a new game card. The build checks that every linked game exists and has notes. It also produces `sitemap.xml` and `robots.txt` so the library and game pages can be discovered by search engines. These do not guarantee indexing or traffic.
+`vercel/game-pages.mjs` generates these pages from the game cards in root `games.html` during every Cloudflare build. Edit game notes in `vercel/game-guides.mjs`; add notes there when adding a new game card. The build checks that every linked game exists and has notes. It also produces `sitemap.xml` and `robots.txt` so the library and game pages can be discovered by search engines. These do not guarantee indexing or traffic.
 
 `assets/site-ads.js` loads AdSense once per page, requests each unit once near the viewport, and skips ads when the page is embedded. No ads are refreshed automatically. Empty slots reserve space to avoid moving navigation when an ad arrives. Google approval and actual ad availability are still required; adding placements does not guarantee more income. Separate units can be created later in AdSense for separate placement reports.
 
-## Cloudflare backup
+## Former Vercel address
 
-Cloudflare automatic publishing is disabled. Its previous build workflow is kept for manual restoration if needed. The Vercel website serves pages directly; it does not redirect visitors to Cloudflare.
+The old Vercel address is reserved for redirecting visitors to Cloudflare. Vercel account limits can prevent that redirect from being served; use the Cloudflare URL directly in that case. Add `dilldoe-games.pages.dev` to AdSense and request review for that address; the old address’s approval does not automatically approve a new site.
 
 Game asset releases and website source files are preserved independently of either hosting project.
