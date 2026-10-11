@@ -1,33 +1,51 @@
-/* Moving sponsor previews stay below the main window (z-index: 5).
-   Do not insert AdSense units here: floating ad boxes are prohibited by AdSense. */
-.sponsor-background {
+/* Stationary sponsor previews in document flow. AdSense Auto ads are separate;
+   a manually placed ad requires the ad-unit code supplied by AdSense. */
+html { overflow-x: clip; }
+html body {
+    min-height: 100dvh;
+    height: auto;
+    padding: 24px;
+    overflow: visible;
+}
+.homepage-background {
     position: fixed;
     inset: 0;
-    z-index: 4;
-    pointer-events: none;
+    z-index: 0;
     overflow: hidden;
-    --sponsor-size: clamp(250px, 24vw, 340px);
+    pointer-events: none;
+}
+.homepage-layout {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 680px) minmax(0, 1fr);
+    gap: 16px;
+    width: 100%;
+    align-items: center;
+}
+body .aero-window {
+    position: relative;
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    touch-action: auto;
+}
+body .window-titlebar { cursor: default !important; }
+.sponsor-background {
+    display: contents;
 }
 
 .sponsor-window {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    width: var(--sponsor-size);
+    position: relative;
+    grid-row: 1;
+    grid-column: 1;
+    z-index: 4;
+    width: min(100%, 340px);
+    justify-self: center;
     aspect-ratio: 1;
-    animation: sponsor-drift 65s linear infinite alternate;
 }
 
 .sponsor-window[hidden] { display: none; }
-.sponsor-window-two { animation-delay: -65s; }
-
-@keyframes sponsor-drift {
-    0% { transform: translate(0, 0); }
-    25% { transform: translate(calc(100vw - var(--sponsor-size) - 24px), calc((100dvh - var(--sponsor-size) - 24px) * .28)); }
-    50% { transform: translate(calc((100vw - var(--sponsor-size) - 24px) * .65), calc(100dvh - var(--sponsor-size) - 24px)); }
-    75% { transform: translate(0, calc((100dvh - var(--sponsor-size) - 24px) * .72)); }
-    100% { transform: translate(calc(100vw - var(--sponsor-size) - 24px), 0); }
-}
+.sponsor-window-two { grid-column: 3; }
 
 .sponsor-frame {
     position: absolute;
@@ -92,40 +110,36 @@
 
 .sponsor-close:hover { background: #fff4; }
 .sponsor-close:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
-.sponsor-motion {
-    position: fixed;
-    z-index: 6;
-    bottom: 10px;
-    right: 12px;
-    padding: 8px 12px;
-    border: 1px solid #fff;
-    border-radius: 16px;
-    background: #e7f5ffeb;
+.homepage-privacy {
+    position: relative;
+    z-index: 5;
+    margin-top: 16px;
+    padding: 5px 12px;
+    background: #e7f5ffdf;
+    border-radius: 12px;
+    font-size: 12px;
     color: #073a62;
-    box-shadow: 0 2px 8px #07467433;
-    font: bold 11px 'Trebuchet MS', sans-serif;
 }
-.sponsor-motion[hidden] { display: none; }
-.sponsor-background.is-paused .sponsor-window { animation-play-state: paused; }
 
-@media (max-width: 720px) {
-    .sponsor-background { --sponsor-size: 220px; }
-    .sponsor-window { animation: none; }
-    .sponsor-window-two { top: auto; left: auto; bottom: 12px; right: 12px; }
-    .sponsor-motion { display: none; }
-    .sponsor-placeholder h2 { font-size: 20px; }
-    .sponsor-placeholder p { font-size: 11px; }
-    .sponsor-label { font-size: 8px; }
-    .sponsor-note { font-size: 9px; }
-    /* Keep navigation readable above the small background previews. */
+@media (max-width: 1199px) {
+    .homepage-layout {
+        grid-template-columns: repeat(2, minmax(0, 332px));
+        justify-content: center;
+        gap: 24px 16px;
+    }
+    body .aero-window { grid-column: 1 / -1; grid-row: 1; }
+    .sponsor-window { grid-row: 2; }
+    .sponsor-window-two { grid-column: 2; }
+}
+
+@media (max-width: 640px) {
+    html body { padding: 20px 16px; }
+    .homepage-layout { grid-template-columns: minmax(0, 680px); }
+    .sponsor-window { grid-column: 1; width: min(100%, 300px); }
+    .sponsor-window-two { grid-column: 1; grid-row: 3; }
+    .sponsor-placeholder h2 { font-size: 24px; }
     body .metal-title { font-size: clamp(1.8rem, 7vw, 3rem); }
     body .window-content { padding: 28px 16px; }
     body .start-btn { font-size: 1.25rem; padding: 14px 20px; width: 90%; }
     body .window-title-text { font-size: .72rem; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .sponsor-window { animation: none; }
-    .sponsor-window-two { top: auto; left: auto; bottom: 12px; right: 12px; }
-    .sponsor-motion { display: none; }
 }

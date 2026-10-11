@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-adsense-account" content="ca-pub-6483528780801608">
     <title>I LOVE NYAN CAT <3</title>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6483528780801608" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="assets/home-sponsors.css">
@@ -378,6 +379,7 @@
 </head>
 <body>
 
+    <div class="homepage-background" aria-hidden="true">
     <!-- WATER OVERLAY -->
     <div class="water-overlay"></div>
 
@@ -394,8 +396,10 @@
     <!-- BACKGROUND CAT IMAGES -->
     <img src="https://png.pngtree.com/png-vector/20240917/ourmid/pngtree-funny-kitten-cat-standing-or-dancing-isolated-png-image_13844217.png" alt="Dancing Kitten" class="bg-cat bg-cat-kitten">
     <img src="https://wallpapers.com/images/featured/nyan-cat-png-az8jeatasi3z7yda.png" alt="Nyan Cat" class="bg-cat bg-cat-nyan">
+    </div>
 
-    <!-- Sponsor previews only. Connect a sponsor before replacing the demo content. -->
+    <div class="homepage-layout">
+    <!-- Stationary sponsor previews. AdSense Auto ads use separate placements. -->
     <aside class="sponsor-background" aria-label="Sponsor space previews">
         <section class="sponsor-window sponsor-window-one" aria-label="First sponsor preview">
             <div class="sponsor-placeholder">
@@ -420,7 +424,6 @@
             <button class="sponsor-close" type="button" aria-label="Hide second sponsor preview"></button>
         </section>
     </aside>
-    <button class="sponsor-motion" type="button" aria-pressed="false">Pause ad previews</button>
 
     <!-- LOADING SCREEN -->
     <div id="loader-wrapper">
@@ -431,7 +434,7 @@
 
     <!-- AERO GLASS WINDOW CONTAINER -->
     <div class="aero-window" id="aeroWindow">
-        <!-- Title Bar (Draggable Handle) -->
+        <!-- Title Bar -->
         <div class="window-titlebar" id="windowTitlebar">
             <div class="window-title-text">
                 🌐 DillDoe_Unblocked_v2.0.exe
@@ -466,10 +469,12 @@
             <span>version 67</span>
         </div>
     </div>
+    </div>
+    <a class="homepage-privacy" href="privacy.html">Privacy &amp; advertising</a>
 
     <script>
         // Loader Transition
-        window.addEventListener('load', () => {
+        window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 document.body.classList.add('loaded');
             }, 800);
@@ -485,68 +490,6 @@
             }, 400);
         }
 
-        // --- WINDOW DRAGGING FUNCTIONALITY ---
-        const windowElem = document.getElementById('aeroWindow');
-        const titlebarElem = document.getElementById('windowTitlebar');
-
-        let isDragging = false;
-        let offsetX = 0;
-        let offsetY = 0;
-
-        function startDrag(e) {
-            // Prevent drag if clicking on window controls
-            if (e.target.classList.contains('win-btn')) return;
-
-            isDragging = true;
-            windowElem.classList.add('is-dragging');
-
-            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-
-            const rect = windowElem.getBoundingClientRect();
-            offsetX = clientX - rect.left;
-            offsetY = clientY - rect.top;
-        }
-
-        function onDrag(e) {
-            if (!isDragging) return;
-
-            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-
-            let newX = clientX - offsetX;
-            let newY = clientY - offsetY;
-
-            // Clamping window within screen boundaries
-            const minX = 10;
-            const minY = 10;
-            const maxX = window.innerWidth - windowElem.offsetWidth - 10;
-            const maxY = window.innerHeight - windowElem.offsetHeight - 10;
-
-            newX = Math.max(minX, Math.min(newX, maxX));
-            newY = Math.max(minY, Math.min(newY, maxY));
-
-            windowElem.style.left = `${newX}px`;
-            windowElem.style.top = `${newY}px`;
-            windowElem.style.transform = 'none'; // remove centered transform once dragged
-        }
-
-        function stopDrag() {
-            if (isDragging) {
-                isDragging = false;
-                windowElem.classList.remove('is-dragging');
-            }
-        }
-
-        // Mouse Events
-        titlebarElem.addEventListener('mousedown', startDrag);
-        window.addEventListener('mousemove', onDrag);
-        window.addEventListener('mouseup', stopDrag);
-
-        // Touch Events
-        titlebarElem.addEventListener('touchstart', startDrag);
-        window.addEventListener('touchmove', onDrag);
-        window.addEventListener('touchend', stopDrag);
     </script>
 </body>
 </html>
