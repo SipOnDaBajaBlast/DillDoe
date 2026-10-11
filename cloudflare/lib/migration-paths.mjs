@@ -23,9 +23,30 @@ export function rewriteRootPaths(text, game, files, path='') {
     return roots.has(root)||root==='api'||root==='data'||root==='game-data' ? quote+prefix+rest : whole;
   });
 }
+export function installSmgShaderCompatibility() {
+ // The port skips draws whose parallel shader compilation is still pending.
+ // Use WebGL's synchronous link-status check so those frames retain geometry.
+ const original = HTMLCanvasElement.prototype.getContext;
+ const patched = new WeakSet();
+ HTMLCanvasElement.prototype.getContext = function(type, ...args) {
+  const context = original.call(this, type, ...args);
+  if(type !== 'webgl2' || !context || patched.has(context))return context;
+  patched.add(context);
+  const extension = context.getExtension;
+  const extensions = context.getSupportedExtensions;
+  context.getExtension = function(name) {
+   return String(name).toLowerCase() === 'khr_parallel_shader_compile' ? null : extension.call(this, name);
+  };
+  context.getSupportedExtensions = function() {
+   return extensions.call(this)?.filter(name => name.toLowerCase() !== 'khr_parallel_shader_compile') ?? null;
+  };
+  return context;
+ };
+}
 export function bootstrap(game) {
+ const shaderCompatibility = game === 'smg-webport' ? `(${installSmgShaderCompatibility.toString()})();` : '';
  const prefix=`/ports/${game}/`;
  // Only root-relative requests inside this game are rebased. External hosts,
  // sibling games, and page navigation keep their original semantics.
- return `<script>(()=>{const p=${JSON.stringify(prefix)};const map=v=>{if(typeof v==='string'&&v.startsWith('/')&&!v.startsWith('//')&&!v.startsWith('/ports/'))return p+v.slice(1);return v};const f=window.fetch;window.fetch=function(v,o){return f.call(this,v instanceof Request?new Request(map(v.url.startsWith(location.origin+'/')?v.url.slice(location.origin.length):v.url),v):map(v),o)};const open=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u,...a){return open.call(this,m,map(u),...a)};for(const n of ['Worker','SharedWorker'])if(window[n]){const C=window[n];window[n]=new Proxy(C,{construct(t,a){a[0]=map(a[0]);return Reflect.construct(t,a)}})}if(navigator.serviceWorker){const r=navigator.serviceWorker.register.bind(navigator.serviceWorker);navigator.serviceWorker.register=(u,o)=>r(map(u),o&&{...o,scope:o.scope?map(o.scope):o.scope})}})();<\/script>`;
+ return `<script>${shaderCompatibility}(()=>{const p=${JSON.stringify(prefix)};const map=v=>{if(typeof v==='string'&&v.startsWith('/')&&!v.startsWith('//')&&!v.startsWith('/ports/'))return p+v.slice(1);return v};const f=window.fetch;window.fetch=function(v,o){return f.call(this,v instanceof Request?new Request(map(v.url.startsWith(location.origin+'/')?v.url.slice(location.origin.length):v.url),v):map(v),o)};const open=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u,...a){return open.call(this,m,map(u),...a)};for(const n of ['Worker','SharedWorker'])if(window[n]){const C=window[n];window[n]=new Proxy(C,{construct(t,a){a[0]=map(a[0]);return Reflect.construct(t,a)}})}if(navigator.serviceWorker){const r=navigator.serviceWorker.register.bind(navigator.serviceWorker);navigator.serviceWorker.register=(u,o)=>r(map(u),o&&{...o,scope:o.scope?map(o.scope):o.scope})}})();<\/script>`;
 }
