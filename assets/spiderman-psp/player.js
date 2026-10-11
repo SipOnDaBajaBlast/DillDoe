@@ -1,0 +1,54 @@
+'use strict';
+const SIZE=436830208, CHUNK=4*1024*1024, COUNT=Math.ceil(SIZE/CHUNK);
+const $=id=>document.getElementById(id), status=$('status'), play=$('play'), bar=$('progress');
+let db, busy=false, cached=[], memoryOnly=false;
+function openCache(){return new Promise((resolve,reject)=>{const r=indexedDB.open('dilldoe-spiderman-psp-v1',1);r.onupgradeneeded=()=>r.result.createObjectStore('chunks');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.onblocked=()=>reject(new Error('Close other Spider-Man tabs and try again.'));});}
+function readChunks(){return new Promise((resolve,reject)=>{const result=[],r=db.transaction('chunks').objectStore('chunks').openCursor();r.onsuccess=()=>{const cursor=r.result;if(!cursor){resolve(result);return;}const n=cursor.key,b=cursor.value;if(Number.isInteger(n)&&n>=0&&n<COUNT&&b instanceof Blob&&b.size===Math.min(CHUNK,SIZE-n*CHUNK))result[n]=b;cursor.continue();};r.onerror=()=>reject(r.error);});}
+function storeChunk(n,blob){return new Promise((resolve,reject)=>{const tx=db.transaction('chunks','readwrite');tx.objectStore('chunks').put(blob,n);tx.oncomplete=resolve;tx.onabort=()=>reject(tx.error);tx.onerror=()=>reject(tx.error);});}
+function bytesSaved(){return cached.reduce((total,b)=>total+(b?.size||0),0);}
+function report(bytes,text='Downloading game'){bar.hidden=false;bar.value=bytes;status.textContent=`${text}… ${Math.floor(bytes/SIZE*100)}% (${Math.round(bytes/1048576)} / 417 MB)`;}
+async function download(){
+  let next=0, loaded=bytesSaved();const controller=new AbortController();report(loaded);
+  async function worker(){while(next<COUNT){const n=next++;if(cached[n])continue;const start=n*CHUNK,end=Math.min(SIZE-1,start+CHUNK-1);let blob;
+    for(let attempt=0;attempt<4;attempt++){try{const timeout=AbortSignal.timeout(90000);const response=await fetch(`/ports/spiderman-psp/api/game?start=${start}&end=${end}&v=1`,{signal:AbortSignal.any([controller.signal,timeout])});if(!response.ok)throw new Error('Game download is temporarily unavailable.');blob=await response.blob();if(blob.size!==end-start+1)throw new Error('Incomplete game download.');break;}catch(error){if(controller.signal.aborted||attempt===3)throw error;await new Promise(resolve=>setTimeout(resolve,500*2**attempt));}}
+    cached[n]=blob;loaded+=blob.size;report(loaded);
+    if(db&&!memoryOnly){try{await storeChunk(n,blob);}catch{memoryOnly=true;console.warn('Browser storage is full or unavailable; this visit can still play.');}}
+  }}
+  try{await Promise.all(Array.from({length:3},worker));}catch(error){controller.abort();throw error;}
+}
+function settings(fast){return{
+  ppsspp_internal_resolution:'480x272',ppsspp_software_rendering:'disabled',
+  // Hardware transforms corrupt the system dialog in this browser core.
+  ppsspp_gpu_hardware_transform:'disabled',ppsspp_software_skinning:'enabled',
+  ppsspp_fast_memory:'enabled',ppsspp_locked_cpu_speed:fast?'222MHz':'disabled',
+  ppsspp_frameskip:fast?'2':'1',ppsspp_auto_frameskip:'enabled',ppsspp_frame_duplication:'disabled',
+  ppsspp_texture_scaling_level:'disabled',ppsspp_texture_anisotropic_filtering:'disabled',
+  ppsspp_texture_filtering:fast?'Nearest':'Auto',ppsspp_lazy_texture_caching:fast?'enabled':'disabled',
+  ppsspp_spline_quality:'Low',ppsspp_lower_resolution_for_effects:fast?'Aggressive':'Safe',shader:'disabled'
+};}
+function boot(file){
+  const fast=$('quality').value==='fast';const gameUrl=URL.createObjectURL(file);
+  window.EJS_player='#game';window.EJS_core='psp';window.EJS_gameUrl=gameUrl;
+  window.EJS_gameName='Spider-Man Web of Shadows';
+  window.EJS_pathtodata='https://cdn.emulatorjs.org/stable/data/';window.EJS_threads=true;
+  window.EJS_startOnLoaded=true;window.EJS_defaultOptions=settings(fast);window.EJS_color='#57cce6';
+  window.EJS_onGameStart=()=>{$('note').textContent='Click the game to enable play and sound.';$('game').addEventListener('pointerdown',()=>{$('note').hidden=true;},{once:true});URL.revokeObjectURL(gameUrl);};
+  $('setup').hidden=true;$('note').hidden=false;
+  if(memoryOnly)$('note').textContent='Storage unavailable: play works this visit, but the game may download again next time. Click to enable sound.';
+  const loader=document.createElement('script');loader.src=window.EJS_pathtodata+'loader.js';loader.crossOrigin='anonymous';
+  loader.onerror=()=>{$('setup').hidden=false;status.textContent='The emulator could not load. Check your connection and reload; saved downloads are kept.';play.disabled=false;busy=false;};document.body.append(loader);
+}
+play.onclick=async()=>{
+  if(busy)return;busy=true;play.disabled=true;$('quality').disabled=true;
+  if(!crossOriginIsolated||typeof SharedArrayBuffer==='undefined'){status.textContent='Open this game directly in a current Chrome or Edge browser. The emulator needs browser isolation.';play.disabled=false;$('quality').disabled=false;busy=false;return;}
+  try{if(bytesSaved()!==SIZE)await download();status.textContent='Starting emulator…';
+    const file=new File(cached,'Spider-Man-Web-of-Shadows.iso',{type:'application/octet-stream'});
+    const header=new Uint8Array(await file.slice(32768,32775).arrayBuffer());if(String.fromCharCode(...header.slice(1,6))!=='CD001')throw new Error('Game verification failed. Clear this game’s site storage and retry.');
+    boot(file);
+  }catch(error){status.textContent=`${error.name==='TimeoutError'?'Download timed out.':error.message} Press Resume to retry; saved parts are kept.`;play.textContent='Resume download';play.disabled=false;$('quality').disabled=false;busy=false;}
+};
+$('fullscreen').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen();else $('stage').requestFullscreen().catch(()=>{});};
+$('persist').onclick=async()=>{const kept=await navigator.storage?.persist?.().catch(()=>false);$('storage-status').textContent=kept?'Browser storage protection is enabled. Clearing site data still removes files.':'This browser manages storage automatically. Keep enough free space and avoid clearing site data.';};
+(async()=>{play.disabled=true;try{db=await openCache();cached=await readChunks();}catch{memoryOnly=true;}
+  const saved=bytesSaved();if(saved===SIZE){play.textContent='Play saved game';status.textContent='Game saved in this browser. No game download needed.';}else if(saved){play.textContent='Resume download & play';report(saved,'Saved download');}else status.textContent=memoryOnly?'Browser storage unavailable: first play downloads 417 MB; files may not be kept.':'Ready. First play downloads 417 MB; later visits reuse the saved game.';play.disabled=false;
+})();

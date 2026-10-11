@@ -15,6 +15,8 @@ const emulatorGames={
 const emulatorStores=Object.fromEntries(Object.entries(emulatorGames).map(([name,[file,size]])=>[name,createReleaseStore(`https://github.com/MagiczLunchly/${name}/releases/download/game-v1/`,[{name:file,size}])]));
 const haloSize=1857797028;
 const haloStore=createReleaseStore('https://github.com/MagiczLunchly/Halo-Mobile/releases/download/halo-game-data-v1/',[{name:'halo-maps.bin.gz',size:haloSize}]);
+const spiderSize=436830208;
+const spiderStore=createReleaseStore('https://github.com/MagiczLunchly/gta5-webport-vercel/releases/download/spiderman-psp-v1/',[{name:'webofshadows.iso',size:spiderSize}]);
 
 function response(body,status=200,headers={}){return new Response(body,{status,headers:{...isolatedHeaders,...headers}});}
 function rangeHeaders(size,start,end,partial){return {'Accept-Ranges':'bytes','Content-Length':String(Math.max(0,end-start+1)),'Vary':'Range','Cache-Control':partial?'no-store':'public, max-age=86400',...(partial?{'Content-Range':`bytes ${start}-${end}/${size}`}:{})};}
@@ -93,6 +95,13 @@ async function gameAsset(request,url,game,path) {
 
 export async function migrationRouter(request,env){
  const url=new URL(request.url);
+ if(url.pathname==='/ports/spiderman-psp/api/game'){
+  if(!['GET','HEAD'].includes(request.method))return response('Method not allowed',405,{'Allow':'GET, HEAD'});
+  const start=Number(url.searchParams.get('start')),end=Number(url.searchParams.get('end'));
+  if(!url.searchParams.has('start')||!url.searchParams.has('end')||!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start<0||end<start||end>=spiderSize||end-start+1>4194304)return response('Invalid game range',400);
+  try{return response(request.method==='HEAD'?null:await spiderStore([0,0,spiderSize],start,end,request.signal),200,{'Content-Type':'application/octet-stream','Content-Length':String(end-start+1),'Cache-Control':'public, max-age=31536000, immutable'});}
+  catch(e){console.error('Spider-Man game download failed',e instanceof Error?e.message:String(e));return response('Download temporarily unavailable. Please retry.',503,{'Cache-Control':'no-store','Retry-After':'2'});}
+ }
  if(url.pathname==='/__migration/health')return Response.json({site:'DillDoe',games:Object.keys(catalog.games),missingSources:catalog.missingSources},{headers:{'Cache-Control':'no-store'}});
  if(url.pathname.startsWith('/halo-mobile/'))return Response.redirect(new URL(url.pathname.replace('/halo-mobile/','/ports/halo-mobile/')+url.search,url),307);
  const match=/^\/ports\/([a-z0-9-]+)(\/.*)?$/.exec(url.pathname);
