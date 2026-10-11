@@ -20,17 +20,46 @@ function settings(mode){const fast=mode!=='compatible';return{
   ppsspp_internal_resolution:'480x272',ppsspp_software_rendering:'disabled',
   // GPU mode is opt-in: hardware transforms previously corrupted the system dialog.
   ppsspp_gpu_hardware_transform:mode==='gpu'?'enabled':'disabled',ppsspp_software_skinning:'enabled',
-  ppsspp_fast_memory:'enabled',ppsspp_locked_cpu_speed:fast?'222MHz':'disabled',
+  ppsspp_cpu_core:'IR JIT',ppsspp_fast_memory:'enabled',ppsspp_locked_cpu_speed:fast?'222MHz':'disabled',
+  ppsspp_inflight_frames:fast?'Up to 1':'Up to 2',
+  ppsspp_skip_gpu_readbacks:mode==='gpu'?'enabled':'disabled',
   ppsspp_frameskip:fast?'1':'disabled',ppsspp_auto_frameskip:fast?'enabled':'disabled',ppsspp_frame_duplication:'disabled',
   ppsspp_texture_scaling_level:'disabled',ppsspp_texture_anisotropic_filtering:'disabled',
   ppsspp_texture_filtering:fast?'Nearest':'Auto',ppsspp_lazy_texture_caching:fast?'enabled':'disabled',
   ppsspp_spline_quality:'Low',ppsspp_lower_resolution_for_effects:fast?'Aggressive':'Safe',shader:'disabled'
 };}
+function configureStartup(emulator,options){
+  // Verified against EmulatorJS 4.2.3. Set startup-only options before RetroArch
+  // reads them, while retaining unrelated saved settings and key bindings.
+  const original=emulator.getCoreSettings.bind(emulator);
+  emulator.getCoreSettings=()=>{
+    let config=original();
+    for(const [key,value] of Object.entries(options)){
+      if(!key.startsWith('ppsspp_'))continue;
+      config=config.replace(new RegExp('^'+key+'\\s*=.*(?:\\r?\\n|$)','gm'),'');
+      if(config&&!config.endsWith('\n'))config+='\n';
+      config+=key+' = "'+value+'"\n';
+    }
+    return config;
+  };
+  emulator.on('saveDatabaseLoaded',FS=>{
+    // Absorb brief scheduling stalls; extra buffering cannot cure sustained
+    // slow emulation. Preserve every other frontend configuration line.
+    try{
+      const path='/home/web_user/.config/retroarch/retroarch.cfg';
+      let config=FS.readFile(path,{encoding:'utf8'});
+      config=config.replace(/^audio_latency\s*=.*(?:\r?\n|$)/gm,'');
+      if(config&&!config.endsWith('\n'))config+='\n';
+      FS.writeFile(path,config+'audio_latency = 128\n');
+    }catch(error){console.warn('Could not configure audio buffering.',error);}
+  });
+}
 function boot(file){
   const options=settings($('quality').value);const gameUrl=URL.createObjectURL(file);
   window.EJS_player='#game';window.EJS_core='psp';window.EJS_gameUrl=gameUrl;
   window.EJS_gameName='Spider-Man Web of Shadows';
-  window.EJS_pathtodata='https://cdn.emulatorjs.org/stable/data/';window.EJS_threads=true;
+  window.EJS_pathtodata='https://cdn.emulatorjs.org/4.2.3/data/';window.EJS_threads=true;
+  window.EJS_ready=()=>{try{configureStartup(window.EJS_emulator,options);}catch(error){console.warn('Could not apply startup performance settings.',error);}};
   window.EJS_startOnLoaded=true;window.EJS_defaultOptions=options;window.EJS_color='#57cce6';
   window.EJS_onGameStart=()=>{
     // EmulatorJS restores saved core options over defaults. Apply only this
