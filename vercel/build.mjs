@@ -7,7 +7,8 @@ import {createRequire} from 'node:module';
 const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(repository, '.vercel', 'output');
 if (path.dirname(output) !== path.join(repository, '.vercel')) throw new Error('Unsafe build path');
-execFileSync(process.execPath, ['build.mjs'], {cwd: path.join(repository, 'cloudflare'), stdio: 'inherit'});
+const commit = process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA || execFileSync('git', ['rev-parse', 'HEAD'], {cwd: repository, encoding: 'utf8'}).trim();
+execFileSync(process.execPath, ['build.mjs'], {cwd: path.join(repository, 'cloudflare'), stdio: 'inherit', env: {...process.env, GITHUB_SHA: commit}});
 await fs.rm(output, {recursive: true, force: true});
 await fs.mkdir(path.join(output, 'static'), {recursive: true});
 await fs.cp(path.join(repository, 'cloudflare', 'dist'), path.join(output, 'static'), {
