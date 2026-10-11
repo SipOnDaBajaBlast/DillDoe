@@ -25,6 +25,10 @@ The library has one clearly labeled banner. Its cards open game pages under `/ga
 
 `vercel/game-pages.mjs` generates these pages from the game cards in root `games.html` during every Cloudflare build. Edit game notes in `vercel/game-guides.mjs`; add notes there when adding a new game card. The build checks that every linked game exists and has notes. It also produces `sitemap.xml` and `robots.txt` so the library and game pages can be discovered by search engines. These do not guarantee indexing or traffic.
 
+Game start pages use the Frutiger Aero theme in `assets/game-guide.css` with the local `assets/aero-landscape.svg` background. The glass window, green Play button, and information panels adapt to phones while the Google ad stays in a separate labeled area.
+
+Super Mario Galaxy uses T4ctica1YT/SMGwebport, pinned to commit `40837804e15e2b3ee6ebc6c41f7afd0bcb158954`, through `/ports/smg-webport/`. Its source inventory is in `cloudflare/lib/game-catalog.json`. The port retains its own download progress, OPFS storage, settings, and optional movies. Game assets stream from the public upstream repository rather than being copied into the Pages deployment. Credit: [T4ctica1YT/SMGwebport](https://github.com/T4ctica1YT/SMGwebport), based on Petari and GalaxyQuest.
+
 `assets/site-ads.js` loads AdSense once per page, requests each unit once near the viewport, and skips ads when the page is embedded. No ads are refreshed automatically. Empty slots reserve space to avoid moving navigation when an ad arrives. Google approval and actual ad availability are still required; adding placements does not guarantee more income. Separate units can be created later in AdSense for separate placement reports.
 
 ## Former Vercel address

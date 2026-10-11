@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+<defs>
+ <linearGradient id="sky" x2="0%" y2="100%"><stop stop-color="#0078d2"/><stop offset=".55" stop-color="#64d9f5"/><stop offset="1" stop-color="#e7ffff"/></linearGradient>
+ <radialGradient id="sun"><stop stop-color="#fff" stop-opacity=".95"/><stop offset=".2" stop-color="#e9ffff" stop-opacity=".6"/><stop offset="1" stop-color="#e7ffff" stop-opacity="0"/></radialGradient>
+ <linearGradient id="hill" x2="0%" y2="100%"><stop stop-color="#b6ec45"/><stop offset=".4" stop-color="#58b72b"/><stop offset="1" stop-color="#087845"/></linearGradient>
+ <linearGradient id="water" x2="0%" y2="100%"><stop stop-color="#e9ffff"/><stop offset=".5" stop-color="#21bfde"/><stop offset="1" stop-color="#0085bb"/></linearGradient>
+ <radialGradient id="bubble" cx="30%" cy="25%" r="75%"><stop stop-color="#fff" stop-opacity=".8"/><stop offset=".22" stop-color="#fff" stop-opacity=".05"/><stop offset=".78" stop-color="#7ceaff" stop-opacity=".1"/><stop offset="1" stop-color="#eaffff" stop-opacity=".6"/></radialGradient>
+ <filter id="soft"><feGaussianBlur stdDeviation="8"/></filter>
+</defs>
+<path fill="url(#sky)" d="M0 0h1600v1000H0z"/>
+<ellipse fill="url(#sun)" cx="1310" cy="115" rx="470" ry="400"/>
+<g fill="#fff" opacity=".75" filter="url(#soft)"><path d="M-100 280Q-40 215 60 250Q100 155 180 205Q260 145 310 225Q420 220 455 290Z"/><path d="M1000 340Q1050 265 1150 300Q1200 230 1290 282Q1380 215 1440 308Q1540 270 1690 350Z"/><path d="M550 140Q590 100 650 125Q700 75 760 125Q845 110 895 155Z"/></g>
+<path fill="#7bd650" d="M0 770Q300 590 680 710T1600 640V1000H0Z"/>
+<path fill="url(#hill)" d="M0 870Q320 680 700 800Q1100 650 1600 815V1000H0Z"/>
+<path fill="url(#water)" d="M940 744Q840 795 1035 841Q1180 883 780 1000H1150Q1390 874 1120 829Q920 791 970 738Z"/>
+<path fill="none" stroke="#e9ffff" stroke-opacity=".65" stroke-width="4" d="M952 748Q868 790 1060 839M1112 878Q1100 927 885 989"/>
+<g fill="url(#bubble)" stroke="#e3ffff" stroke-opacity=".65" stroke-width="2"><circle cx="130" cy="140" r="35"/><circle cx="1460" cy="510" r="58"/><circle cx="200" cy="605" r="62"/><circle cx="1340" cy="810" r="30"/><circle cx="460" cy="450" r="18"/><circle cx="1115" cy="120" r="22"/><circle cx="65" cy="900" r="19"/></g>
+</svg>

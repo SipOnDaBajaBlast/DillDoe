@@ -42,23 +42,23 @@ export async function buildGamePages(output) {
 </head><body>
 <nav class="guide-nav" aria-label="Main navigation"><a href="/games">← Game library</a><a href="/index.html">Home</a></nav>
 <main class="game-guide">
-<div class="guide-titlebar">DillDoe_Unblocked_v2.0.exe</div>
+<div class="guide-titlebar"><span class="guide-app-icon" aria-hidden="true">▶</span><span>DillDoe_Unblocked_v2.0.exe</span><span class="guide-window-dots" aria-hidden="true"><i></i><i></i><i></i></span></div>
 <div class="guide-content">
 <div class="guide-category">${escape(category)}</div>
 <h1>${escape(game.title)}</h1>
 <div class="guide-intro"><div><p>${escape(description)}</p>
-<a class="guide-play" href="${playRoute}">▶ Play ${escape(game.title)}</a>
+<a class="guide-play" href="${playRoute}"><span class="guide-play-icon" aria-hidden="true">▶</span><span>Play ${escape(game.title)}</span></a>
 <p class="guide-note">Opens the game directly.</p></div>
 <aside class="site-ad site-ad-rectangle guide-ad" aria-label="Advertisement">
 <span class="site-ad-label">Advertisements</span>
 <ins class="adsbygoogle game-display-ad" style="display:block" data-site-ad data-ad-client="ca-pub-6483528780801608" data-ad-slot="3349064473"></ins>
 </aside></div>
-<h2>Getting started</h2>
+<div class="guide-details"><section class="guide-panel guide-panel-wide"><h2>Getting started</h2>
 <ol class="guide-instructions"><li>Choose Play to open the game. The first load can take longer while game files download.</li><li>Use the game’s title screen or settings to check its keyboard, touch, or controller support.</li><li>For more room, use the game’s fullscreen control when available. Use your browser’s Back button to return here.</li></ol>
-<h2>Playing tips</h2><p>${escape(tip)}</p>
-<h2>If the game does not load</h2><p>Check your connection and wait for any download progress to finish. Some games need a recent browser and enough free device storage. If controls do not respond, give the game focus and review its settings. Avoid clearing browser site data if you want to keep locally stored saves.</p>
-<h2>More to explore</h2><ul class="guide-related">${suggestions.map(other => `<li><a href="/game/${encodeURIComponent(other.slug)}.html">${escape(other.title)}</a></li>`).join('')}</ul>
-</div></main><footer class="guide-footer"><a href="/privacy.html">Privacy &amp; advertising</a> · <a href="/games">All games</a></footer>
+</section><section class="guide-panel"><h2>Playing tips</h2><p>${escape(tip)}</p></section>
+<section class="guide-panel"><h2>If the game does not load</h2><p>Check your connection and wait for any download progress to finish. Some games need a recent browser and enough free device storage. If controls do not respond, give the game focus and review its settings. Avoid clearing browser site data if you want to keep locally stored saves.</p></section>
+<section class="guide-panel guide-panel-wide"><h2>More to explore</h2><ul class="guide-related">${suggestions.map(other => `<li><a href="/game/${encodeURIComponent(other.slug)}.html">${escape(other.title)}</a></li>`).join('')}</ul></section></div>
+</div></main><footer class="guide-footer"><span><a href="/privacy.html">Privacy &amp; advertising</a> · <a href="/games">All games</a></span></footer>
 </body></html>`;
         await fs.writeFile(path.join(output, 'game', game.slug + '.html'), html);
         library = library.replace(`href="${game.sourceHref}" class="game-card"`, `href="${guideRoute}" class="game-card"`);
