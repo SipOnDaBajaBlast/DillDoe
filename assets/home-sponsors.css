@@ -1,0 +1,131 @@
+/* Moving sponsor previews stay below the main window (z-index: 5).
+   Do not insert AdSense units here: floating ad boxes are prohibited by AdSense. */
+.sponsor-background {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    overflow: hidden;
+    --sponsor-size: clamp(250px, 24vw, 340px);
+}
+
+.sponsor-window {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: var(--sponsor-size);
+    aspect-ratio: 1;
+    animation: sponsor-drift 65s linear infinite alternate;
+}
+
+.sponsor-window[hidden] { display: none; }
+.sponsor-window-two { animation-delay: -65s; }
+
+@keyframes sponsor-drift {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(calc(100vw - var(--sponsor-size) - 24px), calc((100dvh - var(--sponsor-size) - 24px) * .28)); }
+    50% { transform: translate(calc((100vw - var(--sponsor-size) - 24px) * .65), calc(100dvh - var(--sponsor-size) - 24px)); }
+    75% { transform: translate(0, calc((100dvh - var(--sponsor-size) - 24px) * .72)); }
+    100% { transform: translate(calc(100vw - var(--sponsor-size) - 24px), 0); }
+}
+
+.sponsor-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    user-select: none;
+    filter: drop-shadow(0 8px 12px #07345f55);
+}
+
+.sponsor-placeholder {
+    position: absolute;
+    inset: 10% 7.7% 4.5% 7.7%;
+    padding: 7% 5% 25%;
+    background: radial-gradient(ellipse at top, #fff 0, #d9f4ff 60%, #8bc7eb 100%);
+    color: #073a62;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+}
+
+.sponsor-window-two .sponsor-placeholder {
+    background: radial-gradient(ellipse at top, #fff 0, #e5ffe4 60%, #b6ddb1 100%);
+}
+
+.sponsor-label { font: bold 9px/1.3 'Trebuchet MS', sans-serif; letter-spacing: 1px; }
+.sponsor-placeholder h2 { font: 900 clamp(20px, 2vw, 28px)/1.05 'Trebuchet MS', sans-serif; text-shadow: 0 1px #fff; }
+.sponsor-placeholder p { font: 13px/1.3 'Trebuchet MS', sans-serif; }
+.sponsor-note { font: bold 10px/1.2 'Trebuchet MS', sans-serif; padding: 5px 9px; border: 1px solid #fff; border-radius: 20px; background: #ffffff8c; }
+
+.sponsor-title {
+    position: absolute;
+    z-index: 2;
+    top: 4%;
+    left: 13.5%;
+    width: 47%;
+    padding: 1% 0;
+    color: #fff;
+    background: linear-gradient(100deg, #79a9d3, #447bb4);
+    font: 11px/1.1 'Trebuchet MS', sans-serif;
+    letter-spacing: .6px;
+    text-align: center;
+}
+
+.sponsor-close {
+    position: absolute;
+    z-index: 3;
+    top: 2.6%;
+    left: 79%;
+    width: 13.5%;
+    height: 5.6%;
+    border: 0;
+    border-radius: 0 0 5px 5px;
+    background: transparent;
+    pointer-events: auto;
+}
+
+.sponsor-close:hover { background: #fff4; }
+.sponsor-close:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.sponsor-motion {
+    position: fixed;
+    z-index: 6;
+    bottom: 10px;
+    right: 12px;
+    padding: 8px 12px;
+    border: 1px solid #fff;
+    border-radius: 16px;
+    background: #e7f5ffeb;
+    color: #073a62;
+    box-shadow: 0 2px 8px #07467433;
+    font: bold 11px 'Trebuchet MS', sans-serif;
+}
+.sponsor-motion[hidden] { display: none; }
+.sponsor-background.is-paused .sponsor-window { animation-play-state: paused; }
+
+@media (max-width: 720px) {
+    .sponsor-background { --sponsor-size: 220px; }
+    .sponsor-window { animation: none; }
+    .sponsor-window-two { top: auto; left: auto; bottom: 12px; right: 12px; }
+    .sponsor-motion { display: none; }
+    .sponsor-placeholder h2 { font-size: 20px; }
+    .sponsor-placeholder p { font-size: 11px; }
+    .sponsor-label { font-size: 8px; }
+    .sponsor-note { font-size: 9px; }
+    /* Keep navigation readable above the small background previews. */
+    body .metal-title { font-size: clamp(1.8rem, 7vw, 3rem); }
+    body .window-content { padding: 28px 16px; }
+    body .start-btn { font-size: 1.25rem; padding: 14px 20px; width: 90%; }
+    body .window-title-text { font-size: .72rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sponsor-window { animation: none; }
+    .sponsor-window-two { top: auto; left: auto; bottom: 12px; right: 12px; }
+    .sponsor-motion { display: none; }
+}
