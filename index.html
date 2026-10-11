@@ -8,6 +8,7 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6483528780801608" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="assets/home-sponsors.css">
     <script src="assets/home-sponsors.js" defer></script>
+    <script src="assets/home-window.js" defer></script>
     
     <!-- Early 2000s Frutiger Aero / Web 2.0 Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -375,6 +376,23 @@
             display: flex;
             justify-content: space-between;
         }
+
+        /* Explicit responsive ad sizes keep the entire ad above the frame artwork.
+           Keep these rules inline as recommended by the AdSense code guide. */
+        .homepage-display-ad { width: 180px; height: 150px; margin: 0 auto; }
+        @media (min-width: 400px) and (max-width: 640px),
+               (min-width: 800px) and (max-width: 1199px),
+               (min-width: 1440px) and (max-width: 1619px) {
+            .homepage-display-ad { width: 200px; height: 200px; }
+        }
+        @media (min-width: 1200px) and (max-width: 1279px) {
+            .homepage-display-ad { width: 125px; height: 125px; }
+        }
+        @media (min-width: 1620px),
+               (min-width: 1000px) and (max-width: 1199px),
+               (min-width: 500px) and (max-width: 640px) {
+            .homepage-display-ad { width: 300px; height: 250px; }
+        }
     </style>
 </head>
 <body>
@@ -399,29 +417,25 @@
     </div>
 
     <div class="homepage-layout">
-    <!-- Stationary sponsor previews. AdSense Auto ads use separate placements. -->
-    <aside class="sponsor-background" aria-label="Sponsor space previews">
-        <section class="sponsor-window sponsor-window-one" aria-label="First sponsor preview">
-            <div class="sponsor-placeholder">
-                <span class="sponsor-label">ADVERTISEMENT · DEMO</span>
-                <h2>Your ad<br>could be here!</h2>
-                <p>A little space for<br>something awesome.</p>
-                <span class="sponsor-note">Sponsor space available</span>
+    <!-- Stationary display ads. Each unit is initialized once by home-sponsors.js. -->
+    <aside class="sponsor-background" aria-label="Advertisements">
+        <section class="sponsor-window sponsor-window-one" aria-label="Advertisement">
+            <div class="sponsor-surface"></div>
+            <div class="sponsor-ad-area">
+                <ins class="adsbygoogle homepage-display-ad" style="display:block" data-ad-client="ca-pub-6483528780801608" data-ad-slot="3349064473"></ins>
             </div>
             <img class="sponsor-frame" src="assets/sponsor-window.png" alt="" width="720" height="720" decoding="async">
-            <span class="sponsor-title" aria-hidden="true">SPONSOR SPACE</span>
-            <button class="sponsor-close" type="button" aria-label="Hide first sponsor preview"></button>
+            <span class="sponsor-title" aria-hidden="true">ADVERTISEMENT</span>
+            <button class="sponsor-close" type="button" aria-label="Hide first advertisement"></button>
         </section>
-        <section class="sponsor-window sponsor-window-two" aria-label="Second sponsor preview">
-            <div class="sponsor-placeholder">
-                <span class="sponsor-label">ADVERTISEMENT · DEMO</span>
-                <h2>Retro vibes.<br>New sponsors.</h2>
-                <p>A spot for your<br>next favorite thing.</p>
-                <span class="sponsor-note">Sponsor space available</span>
+        <section class="sponsor-window sponsor-window-two" aria-label="Advertisement">
+            <div class="sponsor-surface"></div>
+            <div class="sponsor-ad-area">
+                <ins class="adsbygoogle homepage-display-ad" style="display:block" data-ad-client="ca-pub-6483528780801608" data-ad-slot="3349064473"></ins>
             </div>
             <img class="sponsor-frame" src="assets/sponsor-window.png" alt="" width="720" height="720" decoding="async">
-            <span class="sponsor-title" aria-hidden="true">SPONSOR SPACE</span>
-            <button class="sponsor-close" type="button" aria-label="Hide second sponsor preview"></button>
+            <span class="sponsor-title" aria-hidden="true">ADVERTISEMENT</span>
+            <button class="sponsor-close" type="button" aria-label="Hide second advertisement"></button>
         </section>
     </aside>
 
@@ -435,7 +449,7 @@
     <!-- AERO GLASS WINDOW CONTAINER -->
     <div class="aero-window" id="aeroWindow">
         <!-- Title Bar -->
-        <div class="window-titlebar" id="windowTitlebar">
+        <div class="window-titlebar" id="windowTitlebar" tabindex="0" aria-label="Move main window: drag the title bar or use arrow keys; Home resets its position">
             <div class="window-title-text">
                 🌐 DillDoe_Unblocked_v2.0.exe
             </div>

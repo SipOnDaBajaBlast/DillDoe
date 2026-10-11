@@ -13,11 +13,11 @@ Vercel builds the current pages and streams game files from the existing GitHub 
 
 ## Homepage sponsor frames
 
-The homepage has two stationary sponsor previews beside the main window, stacking below it on smaller screens. These are labeled demos and do not earn money. Edit their content in `index.html`; their styling and close controls are in `assets/home-sponsors.css` and `assets/home-sponsors.js`. The supplied artwork is `assets/sponsor-window.png`.
+The homepage has two stationary display ad frames beside the main window on wide screens, stacking below it on smaller screens. Both use the owner's AdSense unit `3349064473`. Their styling and initialization are in `assets/home-sponsors.css` and `assets/home-sponsors.js`. The supplied artwork is `assets/sponsor-window.png`. Inline ad-size rules in `index.html` use Google's documented responsive-code customization so ads stay within the frame. The title bar moves the main window, including its navigation buttons, below the ads; arrow keys move it and Home resets it.
 
-Connect a paying sponsor only after agreeing on the placement. To place Google ads inside a frame, first obtain the actual display ad-unit code and keep the entire ad unobscured by the artwork. Do not use floating or moving AdSense placements.
+Display ads stay in document flow and are initialized once each. They do not move, refresh automatically, or sit beneath artwork or the draggable window. The AdSense library is loaded only once on the homepage.
 
-The homepage includes the owner's AdSense loader and verification meta tag for publisher `ca-pub-6483528780801608`. The root `ads.txt` authorizes that publisher, and `privacy.html` describes advertising and browser storage. Site approval, Auto ads settings, and any required Google consent messages are managed in AdSense. This loader is separate from the sponsor demos; no ad-unit identifier has been supplied yet.
+The homepage includes the owner's AdSense loader and verification meta tag for publisher `ca-pub-6483528780801608`. The root `ads.txt` authorizes that publisher, and `privacy.html` describes advertising and browser storage. Site approval, optional Auto ads settings, and any required Google consent messages are managed in AdSense. Empty ad areas before approval do not mean that a paid ad was served.
 
 ## Cloudflare backup
 
