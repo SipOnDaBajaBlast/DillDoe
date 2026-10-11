@@ -17,6 +17,8 @@ The homepage has two moving sponsor previews behind the main window. These are l
 
 Connect a paying sponsor only after agreeing on the placement. Google AdSense prohibits floating ad boxes; approved AdSense units need separate stationary, visible placements rather than these moving previews.
 
+The homepage includes the owner's AdSense loader for publisher `ca-pub-6483528780801608`. Site approval and Auto ads settings are managed in AdSense. This loader is separate from the moving sponsor demos.
+
 ## Cloudflare backup
 
 Cloudflare automatic publishing is disabled. Its previous build workflow is kept for manual restoration if needed. The Vercel website serves pages directly; it does not redirect visitors to Cloudflare.
