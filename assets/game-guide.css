@@ -1,6 +1,6 @@
 :root { color-scheme: light; font-family: 'Trebuchet MS', 'Segoe UI', sans-serif; color: #073654; background: #80d2ff; }
 * { box-sizing: border-box; }
-body { margin: 0; min-height: 100vh; padding: 30px 20px; background: #80d2ff url('/assets/aero-landscape.svg') center / cover fixed; }
+body { margin: 0; min-height: 100vh; padding: 30px 20px; background: #0879b8 url('/assets/frutiger-aero-ocean.webp') center / cover fixed; }
 a { color: #064d82; }
 .guide-nav, .game-guide, .guide-footer { width: min(100%, 1040px); margin: 0 auto; }
 .guide-nav { display: flex; flex-wrap: wrap; gap: 12px; padding: 0 0 18px; }
