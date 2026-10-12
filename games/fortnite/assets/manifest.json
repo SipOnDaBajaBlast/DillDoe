@@ -1,0 +1,66 @@
+{
+  "character": [
+    "./assets/body.glb",
+    "./assets/head.glb"
+  ],
+  "gun": "./assets/rifle.glb",
+  "props": [
+    {
+      "url": "./assets/tree.glb",
+      "category": "tree"
+    },
+    {
+      "url": "./assets/rock.glb",
+      "category": "rock"
+    }
+  ],
+  "grass": "./assets/grass.png",
+  "clips": {
+    "idle": "./assets/idle.json",
+    "run": "./assets/run.json",
+    "melee": "./assets/melee.json",
+    "swing1": "./assets/swing1.json",
+    "swing2": "./assets/swing2.json"
+  },
+  "weaponSocket": {
+    "bone": "weapon_r",
+    "position": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "yaw": 1.5707963267948966,
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "models": {
+    "pickaxe": "./assets/pickaxe.glb",
+    "shotgun": "./assets/shotgun.glb",
+    "sniper": "./assets/sniper.glb",
+    "wall": "./assets/wall.glb",
+    "window": "./assets/window.glb",
+    "roof": "./assets/roof.glb",
+    "cliff": "./assets/cliff.glb",
+    "foliage": "./assets/foliage.glb",
+    "pine": "./assets/pine.glb",
+    "oak": "./assets/oak.glb",
+    "ammo": "./assets/ammo.glb",
+    "shells": "./assets/shells.glb",
+    "heavy": "./assets/heavy.glb",
+    "shield": "./assets/shield.glb",
+    "medkit": "./assets/medkit.glb",
+    "bandage": "./assets/bandage.glb",
+    "wood": "./assets/wood.glb",
+    "chest": "./assets/chest.glb",
+    "chestOpen": "./assets/chestOpen.glb",
+    "ammoBox": "./assets/ammoBox.glb",
+    "ammoBoxOpen": "./assets/ammoBoxOpen.glb",
+    "buildWall": "./assets/buildWall.glb",
+    "buildFloor": "./assets/buildFloor.glb",
+    "buildStair": "./assets/buildStair.glb",
+    "buildRoof": "./assets/buildRoof.glb"
+  }
+}
