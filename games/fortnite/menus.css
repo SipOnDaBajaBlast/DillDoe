@@ -8,3 +8,5 @@ body.lobby{background:radial-gradient(ellipse at 50% 68%,#195b9b,#123c78 35%,#0b
 #lobbyMode #play{background:#ffea31;border:2px solid #fff278;border-radius:0;box-shadow:0 4px #b99c16;color:#172749;text-align:center;font-family:Burbank;font-size:clamp(24px,3vw,42px)}
 #lobbyMode #play:disabled{opacity:.55;cursor:wait}
 #lobbyMode #play:hover:not(:disabled){background:#fff46b}
+
+#keybindList{display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;max-height:60vh;overflow:auto}#keybindList label{width:100%;margin:0;padding:5px 10px;font-size:13px}#keybindList button{min-width:95px;padding:5px!important}#bindingsSettings>p{font-size:12px;color:#c7d9f1}#slots button.empty{background:#183a4b55;border-color:#8495a455;cursor:default}#slots button.empty img,#slots button.empty .slot-ammo{display:none}@media(max-width:650px){#keybindList{grid-template-columns:1fr}}

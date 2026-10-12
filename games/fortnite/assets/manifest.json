@@ -30,7 +30,13 @@
     "shotgunHip": "./assets/shotgunHip.json",
     "shotgunAim": "./assets/shotgunAim.json",
     "sniperHip": "./assets/sniperHip.json",
-    "sniperAim": "./assets/sniperAim.json"
+    "sniperAim": "./assets/sniperAim.json",
+    "healInto": "./assets/healInto.json",
+    "healLoop": "./assets/healLoop.json",
+    "healOut": "./assets/healOut.json",
+    "drinkInto": "./assets/drinkInto.json",
+    "drinkLoop": "./assets/drinkLoop.json",
+    "drinkOut": "./assets/drinkOut.json"
   },
   "weaponSocket": {
     "bone": "weapon_r",

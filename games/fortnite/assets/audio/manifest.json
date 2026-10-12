@@ -1,0 +1,372 @@
+{
+  "source": "Original Fortnite 1.8 cooked SoundCue graphs rendered by fn-audio; browser copies encoded as Vorbis.",
+  "sounds": {
+    "arFire": {
+      "source": "/Game/Athena/Sounds/Weapons/Striker_Auto/Weapon_ASLT_AutoSF_Striker_Athena_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/arFire-0.ogg",
+        "./assets/audio/arFire-1.ogg"
+      ]
+    },
+    "arReloadStart": {
+      "source": "/Game/Sounds/Fort_Weapons/AutoRifle/Weapon_ASLT_Auto_Reload_Start_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/arReloadStart-0.ogg"
+      ]
+    },
+    "arReloadCartridge": {
+      "source": "/Game/Sounds/Fort_Weapons/AutoRifle/Weapon_ASLT_Auto_Reload_Insert_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/arReloadCartridge-0.ogg"
+      ]
+    },
+    "arReloadEnd": {
+      "source": "/Game/Sounds/Fort_Weapons/AutoRifle/Weapon_ASLT_Auto_Reload_End_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/arReloadEnd-0.ogg"
+      ]
+    },
+    "arEmpty": {
+      "source": "/Game/Sounds/Fort_Weapons/Rifle/Rifle_Empty_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/arEmpty-0.ogg"
+      ]
+    },
+    "shotgunFire": {
+      "source": "/Game/Sounds/Fort_Weapons/Shotgun/Weapon_Pump_Shotgun_Fire_Athena_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/shotgunFire-0.ogg",
+        "./assets/audio/shotgunFire-1.ogg"
+      ]
+    },
+    "shotgunReloadStart": {
+      "source": "/Game/Sounds/Fort_Weapons/Shotgun/Weapon_Shotgun_Open2_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/shotgunReloadStart-0.ogg"
+      ]
+    },
+    "shotgunReloadCartridge": {
+      "source": "/Game/Sounds/Fort_Weapons/Shotgun/Weapon_Shotgun_InsertSingle2_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/shotgunReloadCartridge-0.ogg"
+      ]
+    },
+    "shotgunReloadEnd": {
+      "source": "/Game/Sounds/Fort_Weapons/Shotgun/Weapon_Shotgun_Cock2_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/shotgunReloadEnd-0.ogg"
+      ]
+    },
+    "shotgunEmpty": {
+      "source": "/Game/Sounds/Fort_Weapons/Shotgun/Shotgun_Empty_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/shotgunEmpty-0.ogg"
+      ]
+    },
+    "sniperFire": {
+      "source": "/Game/Sounds/Fort_Weapons/Rifle/Weapon_RFL_Sniper_Athena_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/sniperFire-0.ogg",
+        "./assets/audio/sniperFire-1.ogg"
+      ]
+    },
+    "sniperReloadStart": {
+      "source": "/Game/Sounds/Fort_Weapons/AutoRifle/Weapon_ASLT_Auto_Reload_Start_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/sniperReloadStart-0.ogg"
+      ]
+    },
+    "sniperReloadCartridge": {
+      "source": "/Game/Sounds/Fort_Weapons/AutoRifle/Weapon_ASLT_Auto_Reload_Insert_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/sniperReloadCartridge-0.ogg"
+      ]
+    },
+    "sniperReloadEnd": {
+      "source": "/Game/Sounds/Fort_Weapons/AutoRifle/Weapon_ASLT_Auto_Reload_End_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/sniperReloadEnd-0.ogg"
+      ]
+    },
+    "sniperEmpty": {
+      "source": "/Game/Sounds/Fort_Weapons/Rifle/Rifle_Empty_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/sniperEmpty-0.ogg"
+      ]
+    },
+    "bandagePickup": {
+      "source": "/Game/Sounds/Fort_Gadgets/Teleporter/bandage_pickup_Athena_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/bandagePickup-0.ogg"
+      ]
+    },
+    "medkitPickup": {
+      "source": "/Game/Sounds/Fort_Gadgets/Teleporter/medkit_pickup_Athena_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/medkitPickup-0.ogg"
+      ]
+    },
+    "shieldPickup": {
+      "source": "/Game/Sounds/Fort_Gadgets/Teleporter/shield_pickup_Athena_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/shieldPickup-0.ogg"
+      ]
+    },
+    "equip": {
+      "source": "/Game/Sounds/Fort_GamePlay_Sounds/Player/Player_Equip_Projectile_Equip_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/equip-0.ogg"
+      ]
+    },
+    "healApply": {
+      "source": "/Game/Sounds/Fort_GamePlay_Sounds/Player/Bandage_Apply_Athena_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/healApply-0.ogg"
+      ]
+    },
+    "healthRestore": {
+      "source": "/Game/Sounds/Fort_GamePlay_Sounds/Loot/EatHealth_Restore_Athena_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/healthRestore-0.ogg"
+      ]
+    },
+    "shieldRestore": {
+      "source": "/Game/Sounds/Fort_GamePlay_Sounds/Loot/Sheild_Restore_Athena_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/shieldRestore-0.ogg"
+      ]
+    },
+    "scopeIn": {
+      "source": "/Game/Sounds/Fort_Foley_Sounds/Moves/Player_Scope_ZoomIn_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/scopeIn-0.ogg"
+      ]
+    },
+    "scopeOut": {
+      "source": "/Game/Sounds/Fort_Foley_Sounds/Moves/Player_Scope_ZoomOut_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/scopeOut-0.ogg"
+      ]
+    },
+    "swing": {
+      "source": "/Game/Athena/Sounds/Weapons/PickAxe_Swing_Athena_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/swing-0.ogg",
+        "./assets/audio/swing-1.ogg",
+        "./assets/audio/swing-2.ogg"
+      ]
+    },
+    "axeEquip": {
+      "source": "/Game/Athena/Sounds/Weapons/PickAxe_Ready_Athena_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/axeEquip-0.ogg"
+      ]
+    },
+    "treeHit": {
+      "source": "/Game/Sounds/Fort_Impact_Sounds/Demolition/Wood/Demo_Tree_Impact_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/treeHit-0.ogg",
+        "./assets/audio/treeHit-1.ogg"
+      ]
+    },
+    "oakHit": {
+      "source": "/Game/Sounds/Fort_Impact_Sounds/Demolition/Wood/Demo_OakTree_Impact_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/oakHit-0.ogg",
+        "./assets/audio/oakHit-1.ogg"
+      ]
+    },
+    "pineHit": {
+      "source": "/Game/Sounds/Fort_Impact_Sounds/Demolition/Wood/Demo_PineTree_Impact_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/pineHit-0.ogg",
+        "./assets/audio/pineHit-1.ogg"
+      ]
+    },
+    "treeBreak": {
+      "source": "/Game/Sounds/Fort_Impact_Sounds/Demolition/Wood/Demo_Tree_Destroyed_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/treeBreak-0.ogg",
+        "./assets/audio/treeBreak-1.ogg"
+      ]
+    },
+    "oakBreak": {
+      "source": "/Game/Sounds/Fort_Impact_Sounds/Demolition/Wood/Demo_OakTree_Destroyed_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/oakBreak-0.ogg",
+        "./assets/audio/oakBreak-1.ogg"
+      ]
+    },
+    "rockHit": {
+      "source": "/Game/Sounds/Fort_Impact_Sounds/Demolition/Defaults/Demo_Rock_Impact_MLTI_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/rockHit-0.ogg",
+        "./assets/audio/rockHit-1.ogg"
+      ]
+    },
+    "rockBreak": {
+      "source": "/Game/Sounds/Fort_Impact_Sounds/Demolition/Defaults/Demo_Rock_ImpactFinal_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/rockBreak-0.ogg",
+        "./assets/audio/rockBreak-1.ogg"
+      ]
+    },
+    "impact": {
+      "source": "/Game/Sounds/Fort_Weapons/PickAxe/PickAxe_Impact_Default_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/impact-0.ogg",
+        "./assets/audio/impact-1.ogg"
+      ]
+    },
+    "chestOpen": {
+      "source": "/Game/Sounds/Foley_Loot/Containers/Treasure_Chest/Tiered_Chest_Open_T01_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/chestOpen-0.ogg"
+      ]
+    },
+    "chestSearch": {
+      "source": "/Game/Sounds/Foley_Loot/Containers/Treasure_Chest/Tiered_Chest_Search_cue",
+      "loop": true,
+      "files": [
+        "./assets/audio/chestSearch-0.ogg"
+      ]
+    },
+    "chestHum": {
+      "source": "/Game/Sounds/Foley_Loot/Containers/Treasure_Chest/Tiered_Chest_Ambient_Cue",
+      "loop": true,
+      "files": [
+        "./assets/audio/chestHum-0.ogg"
+      ]
+    },
+    "ammoPickup": {
+      "source": "/Game/Sounds/Fort_GamePlay_Sounds/Loot/Pickup_Ammo_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/ammoPickup-0.ogg"
+      ]
+    },
+    "woodPickup": {
+      "source": "/Game/Sounds/Fort_GamePlay_Sounds/Loot/Wood_Collect_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/woodPickup-0.ogg"
+      ]
+    },
+    "build": {
+      "source": "/Game/Sounds/Fort_UI_Sounds/Gameplay/Fort_Build_StartWood_Lev1_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/build-0.ogg"
+      ]
+    },
+    "footstep": {
+      "source": "/Game/Athena/Sounds/Character/Athena_Character_Walk_Footstep_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/footstep-0.ogg",
+        "./assets/audio/footstep-1.ogg",
+        "./assets/audio/footstep-2.ogg"
+      ]
+    },
+    "jump": {
+      "source": "/Game/Athena/Sounds/Character/Athena_Character_Jump_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/jump-0.ogg"
+      ]
+    },
+    "land": {
+      "source": "/Game/Athena/Sounds/Character/Athena_Character_Land_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/land-0.ogg",
+        "./assets/audio/land-1.ogg"
+      ]
+    },
+    "hit": {
+      "source": "/Game/Sounds/Fort_Weapons/Impacts/Bullet_Player_Impact_Athena_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/hit-0.ogg",
+        "./assets/audio/hit-1.ogg"
+      ]
+    },
+    "shieldHit": {
+      "source": "/Game/Sounds/Fort_Gadgets/Shield/Cons_Shield_Impacts_Athena_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/shieldHit-0.ogg"
+      ]
+    },
+    "shieldBreak": {
+      "source": "/Game/Sounds/Fort_Gadgets/Shield/Cons_Shield_Deactivate_Athena_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/shieldBreak-0.ogg"
+      ]
+    },
+    "menuClick": {
+      "source": "/Game/Sounds/Fort_UI_Sounds/FrontEnd/Fort_UI_MenuButtonClick_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/menuClick-0.ogg"
+      ]
+    },
+    "storm": {
+      "source": "/Game/Athena/Sounds/Shield/SafeZone_BeginShrinking_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/storm-0.ogg"
+      ]
+    },
+    "stormLoop": {
+      "source": "/Game/Athena/Sounds/Shield/SafeZone_Storm_Loop_Cue",
+      "loop": true,
+      "files": [
+        "./assets/audio/stormLoop-0.ogg"
+      ]
+    },
+    "ambience": {
+      "source": "/Game/Athena/Sounds/Ambient/Temperate_Grasslands_Hills_Day_Athena_Cue",
+      "loop": true,
+      "files": [
+        "./assets/audio/ambience-0.ogg"
+      ]
+    }
+  }
+}
