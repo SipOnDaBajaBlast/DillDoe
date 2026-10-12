@@ -20,7 +20,17 @@
     "run": "./assets/run.json",
     "melee": "./assets/melee.json",
     "swing1": "./assets/swing1.json",
-    "swing2": "./assets/swing2.json"
+    "swing2": "./assets/swing2.json",
+    "aim": "./assets/aim.json",
+    "hip": "./assets/hip.json",
+    "rifleFire": "./assets/rifleFire.json",
+    "hipFire": "./assets/hipFire.json",
+    "shotgunFire": "./assets/shotgunFire.json",
+    "sniperFire": "./assets/sniperFire.json",
+    "shotgunHip": "./assets/shotgunHip.json",
+    "shotgunAim": "./assets/shotgunAim.json",
+    "sniperHip": "./assets/sniperHip.json",
+    "sniperAim": "./assets/sniperAim.json"
   },
   "weaponSocket": {
     "bone": "weapon_r",
