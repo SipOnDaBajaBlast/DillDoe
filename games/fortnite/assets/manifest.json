@@ -36,7 +36,8 @@
     "healOut": "./assets/healOut.json",
     "drinkInto": "./assets/drinkInto.json",
     "drinkLoop": "./assets/drinkLoop.json",
-    "drinkOut": "./assets/drinkOut.json"
+    "drinkOut": "./assets/drinkOut.json",
+    "lobbyIdle": "./assets/lobbyIdle.json"
   },
   "weaponSocket": {
     "bone": "weapon_r",

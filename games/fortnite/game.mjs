@@ -1,3 +1,4 @@
+import {groupDamage} from './feedback.mjs';
 import {OriginalAudio} from './audio.mjs';
 import {installBindings} from './bindings.mjs';
 import {alignWeapon,upperBody,applyFirePose,applyAimPitch,shotDirection,poseCache,restorePose,savePose} from './combat.mjs';
@@ -23,7 +24,7 @@ function fatal(error){console.error(error);running=false;overlay.hidden=false;pl
 
 function setup(){
   renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,touch?1.25:1.75));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.18;
-  scene=new THREE.Scene();scene.background=new THREE.Color('#b8d4ed');scene.fog=new THREE.Fog('#b8cbd9',180,650);camera=new THREE.PerspectiveCamera(80,1,.1,750);
+  scene=new THREE.Scene();scene.background=new THREE.Color('#b8d4ed');scene.fog=new THREE.Fog('#b8cbd9',180,650);camera=new THREE.PerspectiveCamera(68,1,.1,750);
   scene.add(new THREE.HemisphereLight('#d0efff','#637c36',2.4));const sun=new THREE.DirectionalLight('#fff2d0',3.1);sun.position.set(-35,70,35);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-65;sun.shadow.camera.right=65;sun.shadow.camera.top=65;sun.shadow.camera.bottom=-65;sun.shadow.camera.far=170;sun.shadow.normalBias=.04;scene.add(sun);
   resize();window.addEventListener('resize',resize);
 }
@@ -96,7 +97,7 @@ function syncWorld(dt){
 }
 function updateCamera(dt){
   if(!match){camera.position.set(12,12,25);camera.lookAt(0,1,0);return;}
-  const p=match.player,ads=aim&&match.selected>=0&&match.selected<3,dist=ads?1.8:2.8;direction.set(-Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),-Math.cos(yaw)*Math.cos(pitch));const anchor=new THREE.Vector3(p.x,p.y+1.45,p.z),desired=anchor.clone().addScaledVector(direction,-dist).add(new THREE.Vector3(Math.cos(yaw)*.45,.05,-Math.sin(yaw)*.45));desired.y=Math.max(desired.y,terrain(desired.x,desired.z)+.4);camera.position.lerp(desired,1-Math.exp(-18*dt));camera.lookAt(camera.position.clone().addScaledVector(direction,100));camera.fov=THREE.MathUtils.damp(camera.fov,ads?(match.selected===2?30:58):80,14,dt);camera.updateProjectionMatrix();
+  const p=match.player,ads=aim&&match.selected>=0&&match.selected<3,dist=ads?1.65:2.35;direction.set(-Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),-Math.cos(yaw)*Math.cos(pitch));const anchor=new THREE.Vector3(p.x,p.y+1.45,p.z),desired=anchor.clone().addScaledVector(direction,-dist).add(new THREE.Vector3(Math.cos(yaw)*(ads?.36:.45),.08,-Math.sin(yaw)*(ads?.36:.45)));desired.y=Math.max(desired.y,terrain(desired.x,desired.z)+.4);camera.position.lerp(desired,1-Math.exp(-18*dt));camera.lookAt(camera.position.clone().addScaledVector(direction,100));camera.fov=THREE.MathUtils.damp(camera.fov,ads?(match.selected===2?22:50):68,14,dt);camera.updateProjectionMatrix();
 }
 function alignPlayerWeapon(){
   if(match.selected<0||match.selected>=3||actors.get(0).outKind&&match.time-actors.get(0).outStart<1.3)return;
@@ -121,12 +122,12 @@ function fireWeapon(){
   const muzzle=muzzlePosition();
   match.fire(muzzle,shotDirection(muzzle,target),aim&&match.selected>=0);
 }
-function events(){for(const e of match.events.splice(0)){
+function events(){const queued=match.events.splice(0);for(const e of groupDamage(queued))showDamage(e);for(const e of queued){
   originalAudio.event(e);
   if(e.type==='fire'){
     const v=actors.get(0);if(e.weapon<0){v.attackStart=match.time;v.swing=1-v.swing;for(const m of v.mixers)m.swings[v.swing].reset().play();}
     else{v.fireStart=match.time;v.fireSlot=e.weapon;v.fireClip=e.weapon===1?'shotgunFire':e.weapon===2?'sniperFire':aim?'rifleFire':'hipFire';gunKick=e.weapon===1?.025:e.weapon===2?.018:.008;pitch=THREE.MathUtils.clamp(pitch+gunKick*(aim?.55:1),-1.1,.7);}
-    if(e.hit)hitUntil=performance.now()+150;
+    
   }
   if(e.type==='hurt')damageUntil=performance.now()+180;
   if(e.type==='pickup')notify((itemNames[e.kind]||e.kind.toUpperCase())+' PICKED UP');
@@ -137,7 +138,10 @@ function events(){for(const e of match.events.splice(0)){
   if(e.type==='elimination'&&e.source===0)notify('ELIMINATED · '+match.eliminations);
   if(e.type==='end')finish(e.won);
 }}
-function hud(now){updateHud(match,yaw,controls);document.body.classList.toggle('melee',match.selected<0);$('hit').style.opacity=now<hitUntil?1:0;$('damage').style.opacity=now<damageUntil?.6:0;if(now>toastUntil)$('toast').textContent='';}
+const damageLabels=[];
+function showDamage(event){hitUntil=performance.now()+220;const node=document.createElement('span');node.className='damage-number'+(event.shield?' shield-damage':'');node.textContent=Math.round(event.amount);$('hud').append(node);damageLabels.push({node,point:new THREE.Vector3(event.position.x,event.position.y,event.position.z),born:performance.now()});$('hit').style.color=event.shield?'#65d9ff':'#fff';}
+function updateDamageLabels(now){for(let i=damageLabels.length-1;i>=0;i--){const d=damageLabels[i],age=(now-d.born)/1000;if(age>1.05||!running){d.node.remove();damageLabels.splice(i,1);continue;}const projected=d.point.clone();projected.y+=age*.75;projected.project(camera);d.node.hidden=projected.z>1||projected.z< -1;d.node.style.left=(projected.x*.5+.5)*innerWidth+'px';d.node.style.top=(-projected.y*.5+.5)*innerHeight+'px';d.node.style.opacity=Math.min(1,(1.05-age)*3);d.node.style.transform=`translate(-50%,-50%) scale(${1+Math.max(0,.15-age)*2})`;}}
+function hud(now){updateDamageLabels(now);updateHud(match,yaw,controls);document.body.classList.toggle('melee',match.selected<0);$('hit').style.opacity=now<hitUntil?1:0;$('damage').style.opacity=now<damageUntil?.6:0;if(now>toastUntil)$('toast').textContent='';}
 function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,(now-last)/1000||1/60);last=now;if(running){accumulator+=dt;while(accumulator>=1/60){const f=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0)-stick.y,s=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0)+stick.x;match.step(1/60,{x:-Math.sin(yaw)*f+Math.cos(yaw)*s,z:-Math.cos(yaw)*f-Math.sin(yaw)*s,yaw,jump:keys.has('Space')});updateInteraction(1/60);syncWorld(1/60);updateCamera(1/60);alignPlayerWeapon();if(fire)fireWeapon();events();originalAudio.update(match,1/60,{yaw,aim,searching:interaction?.type==='chest'&&keys.has('KeyE')&&!interaction.item.opened&&interaction.item.health!==0});accumulator-=1/60;if(!running)break;}hud(now);}else updateCamera(dt);gunKick=Math.max(0,gunKick-dt);if(menuMode==='lobby'){for(const m of lobbyMixers)m.update(dt);renderer.render(lobbyScene,lobbyCamera);}else renderer.render(scene,camera);}
 async function captureMouse(){try{await canvas.requestPointerLock({unadjustedMovement:true});}catch{try{await canvas.requestPointerLock();}catch{}}return document.pointerLockElement===canvas;}
 async function start(){try{if(!match||match.phase!=='playing')reset();const unlockAudio=originalAudio.unlock();if(!touch){await captureMouse();if(document.pointerLockElement!==canvas){status('Mouse capture was blocked. Open this game in Chrome or Edge, then click Play.');return;}}await unlockAudio;running=true;document.body.classList.add('playing');showMenu('game');$('hud').hidden=false;$('touch').hidden=!touch;last=performance.now();if(freeMouse)notify('HOLD RIGHT MOUSE TO LOOK · ESC TO PAUSE');}catch(e){status('Unable to start the match. Please reload the page.');console.error(e);}}
@@ -175,6 +179,6 @@ function addLandscapeDetails(){
 
 
 
-function setupLobby(){lobbyScene=new THREE.Scene();lobbyCamera=new THREE.PerspectiveCamera(40,innerWidth/innerHeight,.1,30);lobbyCamera.position.set(0,1.05,4.9);lobbyCamera.lookAt(0,1,0);lobbyScene.add(new THREE.HemisphereLight('#b8dfff','#17316a',3));const key=new THREE.DirectionalLight('#e8f6ff',3);key.position.set(3,5,4);lobbyScene.add(key);for(const template of assets.character){const root=clone(template);lobbyScene.add(root);const mixer=new THREE.AnimationMixer(root);mixer.clipAction(animation(root,assets.clips.idle)).play();lobbyMixers.push(mixer);}const platform=new THREE.Mesh(new THREE.CylinderGeometry(.8,.85,.08,64),new THREE.MeshStandardMaterial({color:'#21324b',metalness:.7,roughness:.4}));platform.position.y=-.05;lobbyScene.add(platform);const disk=new THREE.Mesh(new THREE.CircleGeometry(.65,64),new THREE.MeshBasicMaterial({color:'#6eeeff',transparent:true,opacity:.85}));disk.rotation.x=-Math.PI/2;disk.position.y=.005;lobbyScene.add(disk);const beam=new THREE.Mesh(new THREE.CylinderGeometry(.42,.62,1.8,32,1,true),new THREE.MeshBasicMaterial({color:'#28c9ff',transparent:true,opacity:.075,depthWrite:false,side:THREE.DoubleSide}));beam.position.y=.85;lobbyScene.add(beam);window.addEventListener('resize',()=>{lobbyCamera.aspect=innerWidth/innerHeight;lobbyCamera.updateProjectionMatrix();});}
+function setupLobby(){lobbyScene=new THREE.Scene();lobbyCamera=new THREE.PerspectiveCamera(40,innerWidth/innerHeight,.1,30);lobbyCamera.position.set(0,1.05,4.9);lobbyCamera.lookAt(0,1,0);lobbyScene.add(new THREE.HemisphereLight('#b8dfff','#17316a',3));const key=new THREE.DirectionalLight('#e8f6ff',3);key.position.set(3,5,4);lobbyScene.add(key);for(const template of assets.character){const root=clone(template);lobbyScene.add(root);const mixer=new THREE.AnimationMixer(root);mixer.clipAction(animation(root,assets.clips.lobbyIdle)).play();lobbyMixers.push(mixer);}const platform=new THREE.Mesh(new THREE.CylinderGeometry(.8,.85,.08,64),new THREE.MeshStandardMaterial({color:'#21324b',metalness:.7,roughness:.4}));platform.position.y=-.05;lobbyScene.add(platform);const disk=new THREE.Mesh(new THREE.CircleGeometry(.65,64),new THREE.MeshBasicMaterial({color:'#6eeeff',transparent:true,opacity:.85}));disk.rotation.x=-Math.PI/2;disk.position.y=.005;lobbyScene.add(disk);const beam=new THREE.Mesh(new THREE.CylinderGeometry(.42,.62,1.8,32,1,true),new THREE.MeshBasicMaterial({color:'#28c9ff',transparent:true,opacity:.075,depthWrite:false,side:THREE.DoubleSide}));beam.position.y=.85;lobbyScene.add(beam);window.addEventListener('resize',()=>{lobbyCamera.aspect=innerWidth/innerHeight;lobbyCamera.updateProjectionMatrix();});}
 
 document.addEventListener('click',e=>{if(e.target.closest('#overlay button'))originalAudio.unlock().then(()=>originalAudio.play('menuClick')).catch(console.error);});
