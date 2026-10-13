@@ -42,8 +42,7 @@
     "crouchWalk": "./assets/crouchWalk.json",
     "skydive": "./assets/skydive.json",
     "glide": "./assets/glide.json",
-    "dance": "./assets/dance.json",
-    "lobbyCross": "./assets/lobbyCross.json"
+    "dance": "./assets/dance.json"
   },
   "weaponSocket": {
     "bone": "weapon_r",
