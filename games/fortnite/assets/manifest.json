@@ -37,7 +37,9 @@
     "drinkInto": "./assets/drinkInto.json",
     "drinkLoop": "./assets/drinkLoop.json",
     "drinkOut": "./assets/drinkOut.json",
-    "lobbyIdle": "./assets/lobbyIdle.json"
+    "lobbyIdle": "./assets/lobbyIdle.json",
+    "crouchIdle": "./assets/crouchIdle.json",
+    "crouchWalk": "./assets/crouchWalk.json"
   },
   "weaponSocket": {
     "bone": "weapon_r",
