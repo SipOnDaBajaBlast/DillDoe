@@ -367,6 +367,48 @@
       "files": [
         "./assets/audio/ambience-0.ogg"
       ]
+    },
+    "busLoop": {
+      "source": "/Game/Athena/Sounds/Vehicles/Athena_Bus_Flying_Loop_Cue",
+      "loop": true,
+      "files": [
+        "./assets/audio/busLoop-0.ogg"
+      ]
+    },
+    "busJump": {
+      "source": "/Game/Athena/Sounds/Bus/FlyingBus_Drop_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/busJump-0.ogg"
+      ]
+    },
+    "diveLoop": {
+      "source": "/Game/Athena/Sounds/Wind_Falling/Wind_UmbrellaClosed_Loop_01_Cue",
+      "loop": true,
+      "files": [
+        "./assets/audio/diveLoop-0.ogg"
+      ]
+    },
+    "glideLoop": {
+      "source": "/Game/Athena/Sounds/Wind_Falling/Wind_UmbrellaOpen_Loop_01_Cue",
+      "loop": true,
+      "files": [
+        "./assets/audio/glideLoop-0.ogg"
+      ]
+    },
+    "gliderOpen": {
+      "source": "/Game/Sounds/Fort_Gadgets/Athena/Athena_Glider_Open_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/gliderOpen-0.ogg"
+      ]
+    },
+    "gliderClose": {
+      "source": "/Game/Sounds/Fort_Gadgets/Athena/Athena_Glider_Close_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/gliderClose-0.ogg"
+      ]
     }
   }
 }

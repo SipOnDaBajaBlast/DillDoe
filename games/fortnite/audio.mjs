@@ -2,7 +2,7 @@ const guns=['ar','shotgun','sniper'];
 export class OriginalAudio{
   constructor(){this.raw=new Map();this.buffers=new Map();this.loops=new Map();this.voices=new Set();this.enabled=true;this.previous=null;this.footstep=0;this.reloadInsert=false;}
   async load(){
-    const r=await fetch('./assets/audio/manifest.json');if(!r.ok)throw Error('Original audio manifest missing');this.manifest=await r.json();
+    const r=await fetch('./assets/audio/manifest.json?v=7');if(!r.ok)throw Error('Original audio manifest missing');this.manifest=await r.json();
     const files=Object.values(this.manifest.sounds).flatMap(s=>s.files);
     // Limit parallel requests so audio does not starve model downloads.
     for(let i=0;i<files.length;i+=6)await Promise.all(files.slice(i,i+6).map(async url=>{const r=await fetch(url);if(!r.ok)throw Error('Missing original sound: '+url);this.raw.set(url,await r.arrayBuffer());}));
@@ -27,7 +27,7 @@ export class OriginalAudio{
   stop(){for(const voice of this.voices)this.stopVoice(voice);this.loops.clear();this.previous=null;this.footstep=0;}
   event(e){
     if(e.type==='fire'){this.play(e.weapon<0?'swing':guns[e.weapon]+'Fire');if(e.hit&&e.weapon>=0)this.play('hit',{volume:1.8});}
-    if(e.type==='empty')this.play(guns[e.weapon]+'Empty');
+    if(['busJump','gliderOpen','gliderClose'].includes(e.type))this.play(e.type);if(e.type==='empty')this.play(guns[e.weapon]+'Empty');
     if(e.type==='botFire')this.play('arFire',{position:e.position,volume:.7});
     if(e.type==='worldHit'){const key=e.surface==='tree'?(e.destroyed?(e.variant===1?'oakBreak':'treeBreak'):(e.variant===1?'oakHit':e.variant===2?'pineHit':'treeHit')):e.surface==='rock'?(e.destroyed?'rockBreak':'rockHit'):e.destroyed?'treeBreak':'impact';this.play(key,{position:e.position});}
     if(e.type==='hurt')this.play(e.shieldBreak?'shieldBreak':e.shield?'shieldHit':'hit',{volume:1.5});
@@ -41,9 +41,9 @@ export class OriginalAudio{
     if(e.type==='jump'||e.type==='land')this.play(e.type);
   }
   update(match,dt,{searching=false,yaw=0,aim=false}={}){
-    if(!this.context)return;const p=match.player,l=this.context.listener;
+    if(!this.context)return;this.loop('busLoop',match.deployment?.stage==='bus',{volume:.8});this.loop('diveLoop',match.deployment?.stage==='dive',{volume:.8});this.loop('glideLoop',match.deployment?.stage==='glide',{volume:.8});const p=match.spectatedActor||match.player,l=this.context.listener;
     if(l.positionX){l.positionX.value=p.x;l.positionY.value=p.y+1.5;l.positionZ.value=p.z;l.forwardX.value=-Math.sin(yaw);l.forwardY.value=0;l.forwardZ.value=-Math.cos(yaw);l.upX.value=0;l.upY.value=1;l.upZ.value=0;}
-    const previous=this.previous;if(previous){const moved=Math.hypot(p.x-previous.x,p.z-previous.z);this.footstep+=moved;if(this.footstep>.0&&this.footstep>=1.65&&Math.abs(p.vy)<.1){this.play('footstep',{volume:2});this.footstep=0;}
+    const previous=this.previous;if(previous){const moved=Math.hypot(p.x-previous.x,p.z-previous.z);this.footstep+=moved;if(!match.deployment&&this.footstep>.0&&this.footstep>=1.65&&Math.abs(p.vy)<.1){this.play('footstep',{volume:2});this.footstep=0;}
       if(!previous.using&&match.useItem)this.healVoice=this.play('healApply');if(previous.using&&!match.useItem)this.stopVoice(this.healVoice);
       if(aim!==previous.aim&&match.selected===2)this.play(aim?'scopeIn':'scopeOut');
       if(previous.time<25&&match.time>=25)this.play('storm');
