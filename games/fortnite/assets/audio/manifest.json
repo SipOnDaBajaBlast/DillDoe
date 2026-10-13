@@ -409,6 +409,13 @@
       "files": [
         "./assets/audio/gliderClose-0.ogg"
       ]
+    },
+    "dance": {
+      "source": "/Game/Sounds/Fort_Music/Dance/fort_dance_01_Cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/dance-0.ogg"
+      ]
     }
   }
 }

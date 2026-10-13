@@ -2,7 +2,7 @@ const $=id=>document.getElementById(id);
 export let menuMode='lobby';
 let hooks;
 export function installMenus(callbacks){hooks=callbacks;const overlay=$('overlay');overlay.innerHTML=`
-<div id="lobby"><h1 id="lobbyBrand">FORTNITE</h1><div id="seasonLabel">SEASON 1</div>
+<div id="lobby"><h1 id="lobbyBrand">FORTNITE</h1><div id="seasonLabel">BATTLE ROYALE</div>
 <div id="lobbyPlayer">Player 1<br><small>Not Ready</small></div><div id="lobbyMode"><label>Match Type <b>Solo</b></label><button id="play" disabled>Loading…</button></div>
 <div id="lobbyBottom"><span>Fan project · Offline solo</span><button id="menuSettings">⚙ Settings</button><a href="/games">Back to library</a></div></div>
 <div id="loadStatus"><div id="progress"><i></i></div><p id="status" role="status">Loading…</p></div>

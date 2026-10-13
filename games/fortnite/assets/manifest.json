@@ -41,7 +41,9 @@
     "crouchIdle": "./assets/crouchIdle.json",
     "crouchWalk": "./assets/crouchWalk.json",
     "skydive": "./assets/skydive.json",
-    "glide": "./assets/glide.json"
+    "glide": "./assets/glide.json",
+    "dance": "./assets/dance.json",
+    "lobbyCross": "./assets/lobbyCross.json"
   },
   "weaponSocket": {
     "bone": "weapon_r",
@@ -83,9 +85,9 @@
     "buildFloor": "./assets/buildFloor.glb",
     "buildStair": "./assets/buildStair.glb",
     "buildRoof": "./assets/buildRoof.glb",
-    "bus": "./assets/bus.glb",
-    "busFrame": "./assets/busFrame.glb",
-    "busBalloon": "./assets/busBalloon.glb",
+    "bus": "./assets/bus.glb?v=9",
+    "busFrame": "./assets/busFrame.glb?v=9",
+    "busBalloon": "./assets/busBalloon.glb?v=9",
     "glider": "./assets/glider.glb"
   }
 }

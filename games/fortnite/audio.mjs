@@ -2,7 +2,7 @@ const guns=['ar','shotgun','sniper'];
 export class OriginalAudio{
   constructor(){this.raw=new Map();this.buffers=new Map();this.loops=new Map();this.voices=new Set();this.enabled=true;this.previous=null;this.footstep=0;this.reloadInsert=false;}
   async load(){
-    const r=await fetch('./assets/audio/manifest.json?v=7');if(!r.ok)throw Error('Original audio manifest missing');this.manifest=await r.json();
+    const r=await fetch('./assets/audio/manifest.json?v=9');if(!r.ok)throw Error('Original audio manifest missing');this.manifest=await r.json();
     const files=Object.values(this.manifest.sounds).flatMap(s=>s.files);
     // Limit parallel requests so audio does not starve model downloads.
     for(let i=0;i<files.length;i+=6)await Promise.all(files.slice(i,i+6).map(async url=>{const r=await fetch(url);if(!r.ok)throw Error('Missing original sound: '+url);this.raw.set(url,await r.arrayBuffer());}));
@@ -27,7 +27,7 @@ export class OriginalAudio{
   stop(){for(const voice of this.voices)this.stopVoice(voice);this.loops.clear();this.previous=null;this.footstep=0;}
   event(e){
     if(e.type==='fire'){this.play(e.weapon<0?'swing':guns[e.weapon]+'Fire');if(e.hit&&e.weapon>=0)this.play('hit',{volume:1.8});}
-    if(['busJump','gliderOpen','gliderClose'].includes(e.type))this.play(e.type);if(e.type==='empty')this.play(guns[e.weapon]+'Empty');
+    if(e.type==='danceStart')this.danceVoice=this.play('dance');if(e.type==='danceStop')this.stopVoice(this.danceVoice);if(['busJump','gliderOpen','gliderClose'].includes(e.type))this.play(e.type);if(e.type==='empty')this.play(guns[e.weapon]+'Empty');
     if(e.type==='botFire')this.play('arFire',{position:e.position,volume:.7});
     if(e.type==='worldHit'){const key=e.surface==='tree'?(e.destroyed?(e.variant===1?'oakBreak':'treeBreak'):(e.variant===1?'oakHit':e.variant===2?'pineHit':'treeHit')):e.surface==='rock'?(e.destroyed?'rockBreak':'rockHit'):e.destroyed?'treeBreak':'impact';this.play(key,{position:e.position});}
     if(e.type==='hurt')this.play(e.shieldBreak?'shieldBreak':e.shield?'shieldHit':'hit',{volume:1.5});
