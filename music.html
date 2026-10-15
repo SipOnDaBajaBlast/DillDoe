@@ -11,17 +11,24 @@
       padding: 0;
       height: 100%;
       overflow: hidden;
+      background-color: #000; /* Dark background to prevent white flash during load */
     }
     iframe {
       width: 100%;
       height: 100%;
       border: none;
+      display: block;
     }
   </style>
 </head>
 <body>
 
-  <iframe src="https://music-player.1623503.workers.dev/" title="Embedded Webpage"></iframe>
+  <iframe 
+    src="https://music-player.1623503.workers.dev/" 
+    title="Embedded Webpage"
+    allow="autoplay; encrypted-media; fullscreen"
+    sandbox="allow-scripts allow-same-origin allow-popups allow-forms">
+  </iframe>
 
 </body>
 </html>
