@@ -1,21 +1,21 @@
-import {createOriginalLobby} from './lobby.mjs?v=16';
-import {captureWorldMap} from './world-map.mjs?v=16';
-import {loadTilted} from './tilted.mjs?v=16';
-import {installProgress} from './progression.mjs?v=16';
-import {OG_CAMERA,verticalFov,busCamera} from './camera.mjs?v=16';
-import {installEmoteWheel} from './emotes.mjs?v=16';
-import {Environment} from './environment.mjs?v=16';
-import {GRAPHICS_QUALITIES,readGraphicsQuality,renderPixelRatio,botAnimationInterval} from './graphics.mjs?v=16';
-import {groupDamage} from './feedback.mjs?v=16';
-import {OriginalAudio} from './audio.mjs?v=16';
-import {installBindings} from './bindings.mjs?v=16';
-import {alignWeapon,upperBody,applyFirePose,applyAimPitch,shotDirection,poseCache,restorePose,savePose} from './combat.mjs?v=16';
-import {installMenus,showMenu,menuBack,menuMode} from './menus.mjs?v=16';
-import {updateHud,setWorldMap} from './hud.mjs?v=16';
+import {createOriginalLobby} from './lobby.mjs?v=17';
+import {loadOriginalWorldMap} from './world-map.mjs?v=17';
+import {loadTilted} from './tilted.mjs?v=17';
+import {installProgress} from './progression.mjs?v=17';
+import {OG_CAMERA,verticalFov,busCamera} from './camera.mjs?v=17';
+import {installEmoteWheel} from './emotes.mjs?v=17';
+import {Environment} from './environment.mjs?v=17';
+import {GRAPHICS_QUALITIES,readGraphicsQuality,renderPixelRatio,botAnimationInterval} from './graphics.mjs?v=17';
+import {groupDamage} from './feedback.mjs?v=17';
+import {OriginalAudio} from './audio.mjs?v=17';
+import {installBindings} from './bindings.mjs?v=17';
+import {alignWeapon,upperBody,applyFirePose,applyAimPitch,shotDirection,poseCache,restorePose,savePose} from './combat.mjs?v=17';
+import {installMenus,showMenu,menuBack,menuMode} from './menus.mjs?v=17';
+import {updateHud,setWorldMap} from './hud.mjs?v=17';
 import * as THREE from 'three';
 import {GLTFLoader} from './vendor/GLTFLoader.js';
 import {clone} from './vendor/utils/SkeletonUtils.js';
-import {Match,WEAPONS,terrain,normalize} from './core.mjs?v=16';
+import {Match,WEAPONS,terrain,normalize} from './core.mjs?v=17';
 
 const $=id=>document.getElementById(id),canvas=$('game'),overlay=$('overlay');let play;
 let renderer,scene,camera,lobbyScene,lobbyCamera,lobbyMixers=[],assets,match,running=false,yaw=Math.PI,pitch=-.12,aim=false,fire=false,last=0,accumulator=0,seed=42,modelRoot,stormMesh,previewWall;
@@ -44,9 +44,9 @@ function applyGraphicsQuality(quality){
 }
 async function json(url){const r=await fetch(url,{cache:'no-cache'});if(r.headers.get('content-type')?.includes('text/html'))throw new Error('Missing game asset: '+url);if(!r.ok)throw new Error(`Missing game asset: ${url} (${r.status})`);return r.json();}
 async function loadAssets(){
-  const audioLoading=originalAudio.load();const manifest=await json('./assets/manifest.json?v=16');const loader=new GLTFLoader(),textureLoader=new THREE.TextureLoader();let done=0;
+  const audioLoading=originalAudio.load();const manifest=await json('./assets/manifest.json?v=17');const loader=new GLTFLoader(),textureLoader=new THREE.TextureLoader();let done=0;
   const requests=[...manifest.character.map(url=>['character',url]),['gun',manifest.gun],...manifest.props.map(p=>['prop',p.url]),['grass',manifest.grass],...Object.entries(manifest.clips).map(([key,url])=>['clip:'+key,url]),...Object.entries(manifest.models||{}).map(([key,url])=>['model:'+key,url])];
-  const result={character:[],props:[],clips:{},models:{}};for(const [kind,sourceUrl]of requests){const url=sourceUrl+(sourceUrl.includes("?")?"&":"?")+"v=16";status(`Loading original assets (${done+1}/${requests.length})…`,done/requests.length*100);let asset;if(kind==='grass')asset=await textureLoader.loadAsync(url);else if(kind.startsWith('clip:'))asset=await json(url);else asset=(await loader.loadAsync(url)).scene;if(kind==='character')result.character.push(asset);else if(kind==='prop')result.props.push(asset);else if(kind.startsWith('clip:'))result.clips[kind.slice(5)]=asset;else if(kind.startsWith('model:'))result.models[kind.slice(6)]=asset;else result[kind]=asset;done++;}
+  const result={character:[],props:[],clips:{},models:{}};for(const [kind,sourceUrl]of requests){const url=sourceUrl+(sourceUrl.includes("?")?"&":"?")+"v=17";status(`Loading original assets (${done+1}/${requests.length})…`,done/requests.length*100);let asset;if(kind==='grass')asset=await textureLoader.loadAsync(url);else if(kind.startsWith('clip:'))asset=await json(url);else asset=(await loader.loadAsync(url)).scene;if(kind==='character')result.character.push(asset);else if(kind==='prop')result.props.push(asset);else if(kind.startsWith('clip:'))result.clips[kind.slice(5)]=asset;else if(kind.startsWith('model:'))result.models[kind.slice(6)]=asset;else result[kind]=asset;done++;}
   await audioLoading;result.manifest=manifest;result.grass.colorSpace=THREE.SRGBColorSpace;result.grass.wrapS=result.grass.wrapT=THREE.RepeatWrapping;result.grass.repeat.set(70,70);result.grass.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
   for(const root of [...result.character,result.gun,...result.props,...Object.values(result.models)])root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;o.frustumCulled=!o.isSkinnedMesh;if(o.material){for(const material of Array.isArray(o.material)?o.material:[o.material])material.vertexColors=false;}}});
   return result;
@@ -83,7 +83,7 @@ function populate(){
   if(tilted)tilted.populate(match);
   for(const actor of match.actors)character(actor);
   for(const obstacle of match.obstacles){const index=obstacle.kind==='tree'?0:Math.min(1,assets.props.length-1),template=obstacle.kind==='tree'?(obstacle.id%3===1?assets.models.oak:obstacle.id%3===2?assets.models.pine:assets.props[0]):assets.props[index],root=template.clone(true),bounds=new THREE.Box3().setFromObject(root),size=bounds.getSize(new THREE.Vector3()),scale=obstacle.height/size.y;root.scale.multiplyScalar(scale);root.position.set(obstacle.x,-bounds.min.y*scale+obstacle.y,obstacle.z);root.rotation.y=match.random()*Math.PI*2;root.updateMatrixWorld(true);const visibleBox=new THREE.Box3().setFromObject(root),center=visibleBox.getCenter(new THREE.Vector3()),extent=visibleBox.getSize(new THREE.Vector3());if(obstacle.kind==='rock'){obstacle.collider={x:center.x,y:center.y,z:center.z,hx:extent.x/2,hy:extent.y/2,hz:extent.z/2};obstacle.collisionRadius=Math.min(extent.x,extent.z)/2;}root.userData.distanceCull=true;scene.add(root);props.push(root);}
-  if(!tilted)addRuins();if(tilted&&!worldMinimap){worldMinimap=captureWorldMap(renderer,groundView,tilted.root);setWorldMap(worldMinimap);}refreshPickups();const worldRay=new THREE.Raycaster();match.worldRaycast=(wall,origin,direction)=>{const view=wallViews.get(wall.id);if(!view)return Infinity;view.updateWorldMatrix(true,true);worldRay.ray.set(new THREE.Vector3(origin.x,origin.y,origin.z),new THREE.Vector3(direction.x,direction.y,direction.z));return worldRay.intersectObject(view,true)[0]?.distance??Infinity;};
+  if(!tilted)addRuins();refreshPickups();const worldRay=new THREE.Raycaster();match.worldRaycast=(wall,origin,direction)=>{const view=wallViews.get(wall.id);if(!view)return Infinity;view.updateWorldMatrix(true,true);worldRay.ray.set(new THREE.Vector3(origin.x,origin.y,origin.z),new THREE.Vector3(direction.x,direction.y,direction.z));return worldRay.intersectObject(view,true)[0]?.distance??Infinity;};
 }
 const pickupColors={ammo:'#e8e9df',shells:'#e8e9df',heavy:'#e8e9df',shield:'#368aff',medkit:'#62c83b',bandage:'#ddd',wood:'#ddd'};
 const itemNames={ammo:'AMMO: MEDIUM BULLETS',shells:'AMMO: SHELLS',heavy:'AMMO: HEAVY BULLETS',shield:'SHIELD POTION',medkit:'MED KIT',bandage:'BANDAGE',wood:'WOOD'};
@@ -200,7 +200,7 @@ window.addEventListener('keydown',e=>{if(e.target.matches('input'))return;if(e.c
 window.addEventListener('keyup',e=>actionUp(controls.action(e.code)));
 window.addEventListener('blur',pause);document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});document.addEventListener('pointerlockchange',()=>{if(document.pointerLockElement===canvas){hadLock=true;freeMouse=false;}else if(hadLock){hadLock=false;pause();}});document.addEventListener('mousemove',e=>{if(!running||touch||document.pointerLockElement!==canvas)return;yaw-=e.movementX*.002*settings.sensitivity;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.002*settings.sensitivity,-1.1,.7);});canvas.addEventListener('mousedown',e=>{if(!running)return;if(!touch&&document.pointerLockElement!==canvas){captureMouse();return;}actionDown(controls.action('Mouse'+e.button));});window.addEventListener('mouseup',e=>{actionUp(controls.action('Mouse'+e.button));});window.addEventListener('contextmenu',e=>e.preventDefault());window.addEventListener('wheel',e=>{if(running)match.cycle(e.deltaY>0?1:-1);},{passive:true});document.querySelectorAll('[data-slot]').forEach(b=>b.addEventListener('click',()=>match?.select(+b.dataset.slot)));
 if(touch){document.body.classList.add('touch');let stickId=null,lookId=null,lx=0,ly=0;const pad=$('stick');pad.addEventListener('pointerdown',e=>{stickId=e.pointerId;pad.setPointerCapture(stickId);moveStick(e);});pad.addEventListener('pointermove',e=>{if(e.pointerId===stickId)moveStick(e);});function moveStick(e){const r=pad.getBoundingClientRect(),dx=(e.clientX-r.left-r.width/2)/45,dy=(e.clientY-r.top-r.height/2)/45,l=Math.max(1,Math.hypot(dx,dy));stick.x=dx/l;stick.y=dy/l;pad.firstElementChild.style.transform=`translate(${stick.x*30}px,${stick.y*30}px)`;}const release=()=>{stickId=null;stick.x=stick.y=0;pad.firstElementChild.style.transform='';};pad.addEventListener('pointerup',release);pad.addEventListener('pointercancel',release);const look=$('lookzone');look.addEventListener('pointerdown',e=>{lookId=e.pointerId;lx=e.clientX;ly=e.clientY;look.setPointerCapture(lookId);});look.addEventListener('pointermove',e=>{if(e.pointerId!==lookId)return;yaw-=(e.clientX-lx)*.005*settings.sensitivity;pitch=THREE.MathUtils.clamp(pitch-(e.clientY-ly)*.005*settings.sensitivity,-1.1,.7);lx=e.clientX;ly=e.clientY;});look.addEventListener('pointerup',()=>lookId=null);look.addEventListener('pointercancel',()=>lookId=null);function hold(id,on,off){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);on();});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,off);}hold('touchFire',()=>fire=true,()=>fire=false);hold('touchAim',()=>aim=true,()=>aim=false);hold('touchJump',()=>keys.add('Space'),()=>keys.delete('Space'));$('touchBuild').onclick=()=>match.build(yaw);$('touchReload').onclick=()=>match.reload();$('touchPause').onclick=pause;}
-try{setup();assets=await loadAssets();meleeRunData=makeMeleeRun();tilted=await loadTilted(status);tilted.addTo(scene);world();reset();await setupLobby();syncWorld(1/60);updateCamera(1);status('Ready. Click Play to start.',100);play.disabled=false;play.textContent='PLAY';$('loadStatus').hidden=true;requestAnimationFrame(frame);}catch(error){fatal(error);}
+try{setup();assets=await loadAssets();meleeRunData=makeMeleeRun();tilted=await loadTilted(status);tilted.addTo(scene);worldMinimap=await loadOriginalWorldMap();setWorldMap(worldMinimap);world();reset();await setupLobby();syncWorld(1/60);updateCamera(1);status('Ready. Click Play to start.',100);play.disabled=false;play.textContent='PLAY';$('loadStatus').hidden=true;requestAnimationFrame(frame);}catch(error){fatal(error);}
 
 
 
@@ -218,7 +218,7 @@ function addLandscapeDetails(){
 
 
 
-async function setupLobby(){const lobby=await createOriginalLobby({character:assets.character,clip:assets.clips.lobbyIdle,makeAnimation:animation,version:'16'});lobbyScene=lobby.scene;lobbyCamera=lobby.camera;lobbyMixers=lobby.mixers;}
+async function setupLobby(){const lobby=await createOriginalLobby({character:assets.character,clip:assets.clips.lobbyIdle,makeAnimation:animation,version:'17'});lobbyScene=lobby.scene;lobbyCamera=lobby.camera;lobbyMixers=lobby.mixers;}
 
 
 document.addEventListener('click',e=>{if(e.target.closest('#overlay button'))originalAudio.unlock().then(()=>originalAudio.play('menuClick')).catch(console.error);});

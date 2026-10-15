@@ -1,16 +1,16 @@
-import {ViewCuller} from './visibility.mjs?v=16';
+import {ViewCuller} from './visibility.mjs?v=17';
 import * as THREE from 'three';
 import {GLTFLoader} from './vendor/GLTFLoader.js';
 import {setHeightfield,originalHeight} from './heightfield.mjs';
 import {mergeGeometries} from './vendor/utils/BufferGeometryUtils.js';
-import {loadTiltedMaterials} from './tilted-materials.mjs?v=16';
-import {loadCityAtlas} from './city-performance.mjs?v=16';
-import {cityDetailKind,cityGroundMesh,rayGridCells} from './city-policy.mjs?v=16';
-import {readGraphicsQuality} from './graphics.mjs?v=16';
+import {loadTiltedMaterials} from './tilted-materials.mjs?v=17';
+import {loadCityAtlas} from './city-performance.mjs?v=17';
+import {cityDetailKind,cityGroundMesh,rayGridCells} from './city-policy.mjs?v=17';
+import {readGraphicsQuality} from './graphics.mjs?v=17';
 
-async function catalogs(performanceMode){return Promise.all([0,1,2].map(i=>new GLTFLoader().loadAsync(`./assets/tilted/${performanceMode?'performance-':''}city-${i}.glb?v=16`)));}
+async function catalogs(performanceMode){return Promise.all([0,1,2].map(i=>new GLTFLoader().loadAsync(`./assets/tilted/${performanceMode?'performance-':''}city-${i}.glb?v=17`)));}
 export async function loadTilted(status){
-  const checked=async path=>{const r=await fetch(path+'?v=16');if(!r.ok)throw new Error(`Original city asset missing: ${path}`);return r.json();};
+  const checked=async path=>{const r=await fetch(path+'?v=17');if(!r.ok)throw new Error(`Original city asset missing: ${path}`);return r.json();};
   status('Loading original Tilted Towers…',88);const quality=readGraphicsQuality(),performanceMode=quality==='performance';
   const [layout,height,correctMaterial,bundles,atlas]=await Promise.all([checked('./assets/tilted/layout.json'),checked('./assets/tilted/terrain.json'),loadTiltedMaterials(),catalogs(performanceMode),performanceMode?loadCityAtlas():null]);
   setHeightfield(height);return new Tilted(layout,height,bundles,correctMaterial,{quality,atlas,fullMaterials:!performanceMode});

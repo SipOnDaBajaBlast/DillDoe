@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import {ViewCuller} from './visibility.mjs?v=16';
-import {GRAPHICS_QUALITIES,clampViewDistance} from './graphics.mjs?v=16';
+import {ViewCuller} from './visibility.mjs?v=17';
+import {GRAPHICS_QUALITIES,clampViewDistance} from './graphics.mjs?v=17';
 export class Environment{
  constructor(scene,camera,renderer,{quality='performance',onQualityChange=()=>{}}={}){
  this.scene=scene;this.camera=camera;this.renderer=renderer;this.outside=0;this.quality=quality;this.distance=GRAPHICS_QUALITIES[quality].viewDistance;this.shadowTime=1;this.customDistance=false;this.viewCuller=new ViewCuller();

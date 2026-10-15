@@ -2,7 +2,7 @@ const guns=['ar','shotgun','sniper'];
 export class OriginalAudio{
   constructor(){this.raw=new Map();this.buffers=new Map();this.loops=new Map();this.voices=new Set();this.enabled=true;this.previous=null;this.footstep=0;this.reloadInsert=false;}
   async load(){
-    const r=await fetch('./assets/audio/manifest.json?v=16');if(!r.ok)throw Error('Original audio manifest missing');this.manifest=await r.json();
+    const r=await fetch('./assets/audio/manifest.json?v=17');if(!r.ok)throw Error('Original audio manifest missing');this.manifest=await r.json();
     const files=Object.values(this.manifest.sounds).flatMap(s=>s.files);
     // Limit parallel requests so audio does not starve model downloads.
     for(let i=0;i<files.length;i+=6)await Promise.all(files.slice(i,i+6).map(async url=>{const r=await fetch(url);if(!r.ok)throw Error('Missing original sound: '+url);this.raw.set(url,await r.arrayBuffer());}));

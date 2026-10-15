@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import {citySurfaceMode} from './tilted-materials.mjs?v=16';
+import {citySurfaceMode} from './tilted-materials.mjs?v=17';
 
 export async function loadCityAtlas(){
-  const r=await fetch('./assets/tilted/performance-atlas.json?v=16');if(!r.ok)throw Error('Missing Performance texture catalog');
+  const r=await fetch('./assets/tilted/performance-atlas.json?v=17');if(!r.ok)throw Error('Missing Performance texture catalog');
   const catalog=await r.json(),loader=new THREE.TextureLoader(),pages=await Promise.all(catalog.pages.map(async page=>{
     const [color,alpha]=await Promise.all([loader.loadAsync('./assets/tilted/'+page.color),loader.loadAsync('./assets/tilted/'+page.alpha)]);
     color.colorSpace=THREE.SRGBColorSpace;for(const map of [color,alpha]){map.flipY=false;map.anisotropy=1;}

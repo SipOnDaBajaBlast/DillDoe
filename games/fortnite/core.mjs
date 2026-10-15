@@ -1,5 +1,5 @@
 import {originalHeight} from './heightfield.mjs';
-import {canEmote} from './emotes.mjs?v=16';
+import {canEmote} from './emotes.mjs?v=17';
 import {Deployment} from './deployment.mjs';
 import {structureSurface,rayStructure,overlapsWall,rayActor} from './collision.mjs';
 // Browser match simulation. No network services or executable game binaries.

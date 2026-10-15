@@ -1,4 +1,4 @@
-# Fortnite browser continuation — release 16
+# Fortnite browser continuation — release 17
 
 Release15 was deployed successfully in App commit `91ab5cc497211e82cd314a12bfc5543b1fb0f469`, Actions38683679061. Local source: outputs/fortnite-browser/games/fortnite. Site: https://dilldoe-games.pages.dev/games/fortnite/.
 
@@ -8,7 +8,7 @@ Added saved45–260m view-distance slider (5m increments), padded camera-frustum
 
 Victory now plays `/Game/Sounds/Fort_Music/Menu/fortnite_victory_music_stinger_cue`, exported from local1.8 original files to assets/audio/victory-0.ogg. This is an original Fortnite cue; the3.5 PlayerUIFeedback.PvPVictory binding is null, so do not claim this is a verified Season4 Battle Royale win binding. Win stops ambient loops, then plays the stinger. Sound search/source limitations must remain explicit in future handoffs.
 
-User requests original Tilted minimap artwork AFTER release16 deployment. Current map is still a world-geometry capture. Need export original3.5 MiniMapAthena, determine original world-to-map transform and normalized Tilted offset, then crop/align correctly. Do not use1.8 map (no Tilted) or claim native imagery is aligned without verification.
+Release16 deployed successfully: f4fa3b58486bc994631dbc1bc0cc63cc3c3752f2. Release17 uses untouched original3.5 MiniMapAthena.png, cropped at draw time using native MapWorldScale290, MapZOffset42000 and Tilted foundation33280,-59904 with its90degree placement. Native Tilted label position .370,.492. World-map capture removed.57 tests passed. User next requests terrain-snapped builds and stacking floors/ramps/walls to crank90s; pending after release17 deployment. Settings native-widget fidelity still remains.
 
 Native3.5 source PAKs are under C:/Users/Aiden/Downloads/Fortnite/G_/Program Files/Epic Games/Fortnite/FortniteGame/Content/Paks. Original archive MD5 c09a1f652decf0faaa82c19c679413c9. Original PAKs and exported assets scanned; do not run old game client. Tools/exports under work. Native UI properties recovered in work/og35-settings-props.txt, og35-slider-props.txt, og35-level-props.txt; UI provenance work/og35-ui-original/asset-provenance.json.
 
