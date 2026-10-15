@@ -1,0 +1,20 @@
+body.lobby.original-lobby{background:#073761 url('./assets/lobby/season4-background.png') center/cover no-repeat fixed}
+body.lobby.original-lobby:before{display:none}body.lobby.original-lobby #game{background:transparent}
+/* Pixel artwork from the supplied original Season 4 UI, used as a sprite sheet. */
+body.original-lobby{--ls:min(calc(100vw / 1280),calc(100vh / 720))}
+body.original-lobby #lobbyBrand{left:6.56%;top:4.86%;width:calc(136 * var(--ls));height:calc(38 * var(--ls));padding:0;margin:0;font-size:0;background:url('./assets/lobby/season4-ui-reference.png') 7.343% 5.132% / 941.176% 1894.737% no-repeat}
+body.original-lobby #seasonLabel{display:none}
+body.original-lobby #lobbyMode{left:auto;right:calc(77 * var(--ls));bottom:calc(78 * var(--ls));width:calc(267 * var(--ls));padding:0;background:none;box-shadow:none}
+body.original-lobby #lobbyMode>label{display:block;width:100%;height:calc(55 * var(--ls));margin:0 0 calc(6 * var(--ls));padding:0;background:url('./assets/lobby/season4-ui-reference.png') 92.497% 77.895% / 479.401% 1309.091% no-repeat;color:transparent;font-size:0}
+body.original-lobby #lobbyMode>label b{display:none}
+body.original-lobby #lobbyMode #play{display:block;width:100%;height:calc(64 * var(--ls));padding:0;border:0;box-shadow:none;border-radius:0;transform:none;color:transparent!important;font-size:0;background:url('./assets/lobby/season4-ui-reference.png') 92.497% 88.110% / 479.401% 1125% no-repeat}
+body.original-lobby #lobbyMode #play:hover:not(:disabled){background:url('./assets/lobby/season4-ui-reference.png') 92.497% 88.110% / 479.401% 1125% no-repeat;filter:brightness(1.06)}
+body.original-lobby #lobbyPlayer{left:50%;transform:translateX(-50%);top:21%;font:700 calc(18 * var(--ls)) Noto,Arial,sans-serif;text-shadow:1px 2px #163347}body.original-lobby #lobbyPlayer small{font-size:calc(15 * var(--ls));color:#ed6d96}
+body.original-lobby #lobby:before{content:'';position:absolute;inset:0 0 auto;height:11.1%;background:url('./assets/lobby/season4-ui-reference.png') left top/100% 2250% no-repeat;pointer-events:none}
+body.original-lobby #levelPanel{left:calc(72 * var(--ls));top:calc(115 * var(--ls));width:calc(308 * var(--ls));height:calc(170 * var(--ls));padding:0;border:0;background:#081e2dba}
+.season-heading{width:100%;height:calc(31 * var(--ls));background:url('./assets/lobby/season4-ui-reference.png') 7.407% 16.691% / 415.584% 2322.58% no-repeat}
+.season-badge{position:absolute;left:calc(36 * var(--ls));top:calc(59 * var(--ls));width:calc(70 * var(--ls));height:calc(89 * var(--ls));background:url('./assets/lobby/season4-ui-reference.png') 8.926% 27.575% / 1828.571% 808.989% no-repeat}
+.level-details{position:absolute;left:calc(139 * var(--ls));top:calc(49 * var(--ls));width:calc(154 * var(--ls))}
+body.original-lobby #levelPanel strong{font:calc(28 * var(--ls)) Burbank;display:flex;align-items:baseline;gap:calc(3 * var(--ls));height:calc(43 * var(--ls))}
+body.original-lobby #levelPanel strong b{font:calc(42 * var(--ls)) Burbank;color:#fff}.native-level-label{display:block!important;width:calc(60 * var(--ls));height:calc(22 * var(--ls));font-size:0!important;background:url('./assets/lobby/season4-ui-reference.png') 17.295% 25.072% / 2133.333% 3272.727% no-repeat}
+body.original-lobby #levelPanel .xp-numbers{font:700 calc(14 * var(--ls)) Noto;color:#fff}body.original-lobby #levelPanel .xp-track{width:calc(100 * var(--ls));height:calc(12 * var(--ls));margin:calc(6 * var(--ls)) 0;border:calc(2 * var(--ls)) solid #c6d9dc;background:#14233d}body.original-lobby #levelPanel .xp-track i{background:#b2ee38}

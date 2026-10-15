@@ -15,3 +15,5 @@ export function botAnimationInterval(distance,quality='performance'){
   const profile=GRAPHICS_QUALITIES[quality]||GRAPHICS_QUALITIES.performance;
   return distance<profile.nearAnimation?0:distance<profile.farAnimation?1/15:1/6;
 }
+
+export function clampViewDistance(value,fallback=110){const n=Number(value);return value===null||value===undefined||value===''||!Number.isFinite(n)?fallback:Math.max(45,Math.min(260,Math.round(n/5)*5));}

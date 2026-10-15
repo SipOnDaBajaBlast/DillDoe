@@ -1,22 +1,23 @@
+import {ViewCuller} from './visibility.mjs?v=16';
 import * as THREE from 'three';
 import {GLTFLoader} from './vendor/GLTFLoader.js';
 import {setHeightfield,originalHeight} from './heightfield.mjs';
 import {mergeGeometries} from './vendor/utils/BufferGeometryUtils.js';
-import {loadTiltedMaterials} from './tilted-materials.mjs?v=15';
-import {loadCityAtlas} from './city-performance.mjs?v=15';
-import {cityDetailKind,cityGroundMesh,rayGridCells} from './city-policy.mjs?v=15';
-import {readGraphicsQuality} from './graphics.mjs?v=15';
+import {loadTiltedMaterials} from './tilted-materials.mjs?v=16';
+import {loadCityAtlas} from './city-performance.mjs?v=16';
+import {cityDetailKind,cityGroundMesh,rayGridCells} from './city-policy.mjs?v=16';
+import {readGraphicsQuality} from './graphics.mjs?v=16';
 
-async function catalogs(performanceMode){return Promise.all([0,1,2].map(i=>new GLTFLoader().loadAsync(`./assets/tilted/${performanceMode?'performance-':''}city-${i}.glb?v=15`)));}
+async function catalogs(performanceMode){return Promise.all([0,1,2].map(i=>new GLTFLoader().loadAsync(`./assets/tilted/${performanceMode?'performance-':''}city-${i}.glb?v=16`)));}
 export async function loadTilted(status){
-  const checked=async path=>{const r=await fetch(path+'?v=15');if(!r.ok)throw new Error(`Original city asset missing: ${path}`);return r.json();};
+  const checked=async path=>{const r=await fetch(path+'?v=16');if(!r.ok)throw new Error(`Original city asset missing: ${path}`);return r.json();};
   status('Loading original Tilted Towers…',88);const quality=readGraphicsQuality(),performanceMode=quality==='performance';
   const [layout,height,correctMaterial,bundles,atlas]=await Promise.all([checked('./assets/tilted/layout.json'),checked('./assets/tilted/terrain.json'),loadTiltedMaterials(),catalogs(performanceMode),performanceMode?loadCityAtlas():null]);
   setHeightfield(height);return new Tilted(layout,height,bundles,correctMaterial,{quality,atlas,fullMaterials:!performanceMode});
 }
 export class Tilted{
   constructor(layout,height,bundles,correctMaterial,{quality='high',atlas=null,fullMaterials=true}={}){
-    this.correctMaterial=correctMaterial;this.quality=quality;this.atlas=atlas;this.fullMaterials=fullMaterials;
+    this.viewCuller=new ViewCuller();this.correctMaterial=correctMaterial;this.quality=quality;this.atlas=atlas;this.fullMaterials=fullMaterials;
     this.layout=layout;this.height=height;this.templates=new Map();this.materials=new Map();this.sourceMaterials=new Map();this.root=new THREE.Group();this.cells=new Map();this.objects=[];this.batches=[];this.ray=new THREE.Raycaster();this.floorCache=new Map();this.canonicalMaterials=new Map();this.dirty=false;
     this.seen=new Set();this.candidateList=[];this.hits=[];this.boxPoint=new THREE.Vector3();this.stats={rays:0,boxTests:0,triangleObjects:0};this.cellSize=6;this.installBundles(bundles);
   }
@@ -98,7 +99,8 @@ export class Tilted{
   floor(x,z,y){const key=Math.round(x*4)+','+Math.round(z*4)+','+Math.floor(y*2),now=performance.now(),cached=this.floorCache.get(key);if(cached&&now-cached.time<180)return cached.y;const hit=this.trace({x,y:y+.6,z},{x:0,y:-1,z:0},Math.max(2,y+60)),height=originalHeight(x,z),floor=hit?Math.max(height,hit.point.y):height;if(this.floorCache.size>4096)this.floorCache.clear();this.floorCache.set(key,{time:now,y:floor});return floor;}
   blocked(actor,dx,dz){const distance=Math.hypot(dx,dz);if(!distance)return false;const direction={x:dx/distance,y:0,z:dz/distance};for(const h of [.55,actor.crouched?1.05:1.5])if(this.trace({x:actor.x,y:actor.y+h,z:actor.z},direction,distance+.3))return true;return false;}
   update(camera,distance){
+    this.viewCuller.update(camera);
     if(this.dirty){this.dirty=false;for(const entity of this.objects)if(entity.health<=0&&!entity.hidden){entity.hidden=true;this.floorCache.clear();for(const part of entity.parts){const index=part.group.mesh.geometry.index,array=index.array;array.fill(array[part.indexStart],part.indexStart,part.indexStart+part.indexCount);index.needsUpdate=true;}}}
-    for(const batch of this.batches){const sphere=batch.mesh.geometry.boundingSphere,limit=this.quality==='performance'?batch.detail==='interior'?28:batch.detail==='foliage'?55:distance:distance,dx=camera.position.x-sphere.center.x,dz=camera.position.z-sphere.center.z;batch.mesh.visible=dx*dx+dz*dz<(limit+sphere.radius)**2;}
+    for(const batch of this.batches){const sphere=batch.mesh.geometry.boundingSphere,limit=this.quality==='performance'?batch.detail==='interior'?28:batch.detail==='foliage'?55:distance:distance,dx=camera.position.x-sphere.center.x,dz=camera.position.z-sphere.center.z;batch.mesh.visible=dx*dx+dz*dz<(limit+sphere.radius)**2&&this.viewCuller.visible(sphere);}
   }
 }

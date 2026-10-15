@@ -416,6 +416,13 @@
       "files": [
         "./assets/audio/dance-0.ogg"
       ]
+    },
+    "victory": {
+      "source": "/Game/Sounds/Fort_Music/Menu/fortnite_victory_music_stinger_cue",
+      "loop": false,
+      "files": [
+        "./assets/audio/victory-0.ogg"
+      ]
     }
   }
 }
