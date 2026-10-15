@@ -1,1 +1,1 @@
-{"version": "og-tilted-14", "features": ["original Tilted assets", "aligned world minimap", "original 3.5 bus and lobby idle", "Chromebook graphics profiles"]}
+{"version": "og-performance-ui-15", "features": ["batched original Tilted textures for Performance mode", "reduced chest lighting and collision cost", "original HUD textures and compass", "original Victory Royale banner and emote wheel style"]}

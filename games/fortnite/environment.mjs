@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {GRAPHICS_QUALITIES} from './graphics.mjs?v=14';
+import {GRAPHICS_QUALITIES} from './graphics.mjs?v=15';
 export class Environment{
  constructor(scene,camera,renderer,{quality='performance',onQualityChange=()=>{}}={}){
  this.scene=scene;this.camera=camera;this.renderer=renderer;this.outside=0;this.quality=quality;this.distance=GRAPHICS_QUALITIES[quality].viewDistance;this.shadowTime=1;this.customDistance=false;
@@ -25,7 +25,7 @@ export class Environment{
   }
   if(this.sky){this.sky.color.copy(c.sky).lerp(c.stormSky,this.outside);this.sky.groundColor.copy(c.ground).lerp(c.stormGround,this.outside);this.sky.intensity=1.25+this.outside*.1;}
   if(this.wall)this.wall.material.uniforms.time.value=match?.time||0;
-  const x=p?.x||0,z=p?.z||0;for(const root of this.scene.children){if(!root.userData.distanceCull)continue;const dx=root.position.x-x,dz=root.position.z-z,distance=this.distance+(root.userData.cullRadius||10);root.visible=root.userData.present!==false&&dx*dx+dz*dz<distance*distance;}
+  const x=p?.x||0,z=p?.z||0;for(const root of this.scene.children){if(!root.userData.distanceCull)continue;const dx=root.position.x-x,dz=root.position.z-z,dy=root.userData.heightCull?root.position.y-(p?.y||0):0,distance=(root.userData.cullDistance||this.distance)+(root.userData.cullRadius||0);root.visible=root.userData.present!==false&&dx*dx+dy*dy+dz*dz<distance*distance;}
  }
 
 }

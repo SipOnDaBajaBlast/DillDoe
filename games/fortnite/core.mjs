@@ -1,5 +1,5 @@
 import {originalHeight} from './heightfield.mjs';
-import {canEmote} from './emotes.mjs?v=14';
+import {canEmote} from './emotes.mjs?v=15';
 import {Deployment} from './deployment.mjs';
 import {structureSurface,rayStructure,overlapsWall,rayActor} from './collision.mjs';
 // Browser match simulation. No network services or executable game binaries.
@@ -72,7 +72,7 @@ export class Match {
   damage(actor,amount,source,ignoreShield=false){if(!actor.alive||!['playing','spectating'].includes(this.phase))return;const healthBefore=actor.health;let left=amount,absorbed=0;if(!ignoreShield){const s=Math.min(actor.shield,left);actor.shield-=s;left-=s;absorbed=s;}actor.health=Math.max(0,actor.health-left);if(source===0&&actor!==this.player){for(const [amount,shield]of [[absorbed,true],[healthBefore-actor.health,false]])if(amount>0)this.events.push({type:'damageDealt',id:actor.id,amount,shield,position:{x:actor.x,y:actor.y+2.05+(shield?.3:0),z:actor.z}});}if(actor===this.player){this.stopDance();this.lastAttacker=source;this.events.push({type:'hurt',direction:this.actors.find(a=>a.id===source),shield:absorbed>0,shieldBreak:absorbed>0&&actor.shield===0});this.useItem=null;}if(actor.health<=0){actor.alive=false;this.events.push({type:'elimination',id:actor.id,source});if(source===0)this.eliminations++;if(actor!==this.player)this.pickups.push({x:actor.x,z:actor.z,y:actor.y+.6,kind:'ammo',taken:false});}}
   trace(origin,dir,shooter){let hit=null,near=240;for(const a of this.actors){if(!a.alive||a.id===shooter)continue;const t=rayActor(origin,dir,a);if(t<near){near=t;hit={actor:a};}}for(const o of this.obstacles){if(o.health===0)continue;const t=o.kind==='tree'?rayBox(origin,dir,{x:o.x,y:o.y+o.height/2,z:o.z,hx:o.trunkRadius??.28,hy:o.height/2,hz:o.trunkRadius??.28}):rayBox(origin,dir,o.collider||{x:o.x,y:o.y+o.height/2,z:o.z,hx:o.radius,hy:o.height/2,hz:o.radius});if(t<near){near=t;hit={obstacle:o};}}for(const w of this.walls){if(w.health<=0)continue;const t=this.worldRaycast?this.worldRaycast(w,origin,dir):rayStructure(origin,dir,w);if(t<near){near=t;hit={wall:w};}}for(const c of this.chests){if(c.health===0)continue;const t=rayBox(origin,dir,{x:c.x,y:c.y+.45,z:c.z,hx:.6,hy:.45,hz:.4});if(t<near){near=t;hit={chest:c};}}const cityHit=this.cityTrace?.(origin,dir,near);if(cityHit){near=cityHit.distance;hit={wall:cityHit.object};}for(let t=1;t<near;t+=1){if(origin.y+dir.y*t<terrain(origin.x+dir.x*t,origin.z+dir.z*t)){near=t;hit=null;break;}}return {hit,distance:near,point:{x:origin.x+dir.x*near,y:origin.y+dir.y*near,z:origin.z+dir.z*near}};}
   damageWorld(object,amount,surface,position){
-    if(object.health===0)return false;object.maxHealth??=object.health??200;object.health=Math.max(0,(object.health??200)-amount);
+    if(object.health===0||object.indestructible)return false;object.maxHealth??=object.health??200;object.health=Math.max(0,(object.health??200)-amount);
     this.events.push({type:'worldHit',surface,destroyed:object.health===0,position:position||{x:object.x,y:object.y+.5,z:object.z},variant:object.kind==='tree'?object.id%3:0});
     return object.health===0;
   }
@@ -81,7 +81,7 @@ export class Match {
     const r=this.trace(origin,dir,0);let hit=false;
     if(r.distance<4&&r.hit){
       const object=r.hit.obstacle||r.hit.wall||r.hit.chest;
-      if(object){const surface=r.hit.chest?'chest':r.hit.wall?'wood':object.kind==='tree'?'tree':'rock';const weak=object.weakPoint&&Math.hypot(r.point.x-object.weakPoint.x,r.point.y-object.weakPoint.y,r.point.z-object.weakPoint.z)<.18;this.damageWorld(object,weak?100:50,surface,r.point);if(object.health>0){const side=this.random()>.5?1:-1;object.weakPoint={x:r.point.x,y:Math.max(object.y-(object.hy||0)+.3,Math.min(object.y+(object.height||object.hy||.8)-.15,r.point.y+.35*side)),z:r.point.z};}else object.weakPoint=null;if(surface==='rock')this.stone+=5;else this.wood+=5;hit=true;}
+      if(object&&!object.indestructible){const surface=r.hit.chest?'chest':r.hit.wall?'wood':object.kind==='tree'?'tree':'rock';const weak=object.weakPoint&&Math.hypot(r.point.x-object.weakPoint.x,r.point.y-object.weakPoint.y,r.point.z-object.weakPoint.z)<.18;this.damageWorld(object,weak?100:50,surface,r.point);if(object.health>0){const side=this.random()>.5?1:-1;object.weakPoint={x:r.point.x,y:Math.max(object.y-(object.hy||0)+.3,Math.min(object.y+(object.height||object.hy||.8)-.15,r.point.y+.35*side)),z:r.point.z};}else object.weakPoint=null;if(surface==='rock')this.stone+=5;else this.wood+=5;hit=true;}
       else if(r.hit.actor){this.damage(r.hit.actor,20,0);hit=true;}
     }
     this.events.push({type:'fire',hit,weapon:-1});return true;
