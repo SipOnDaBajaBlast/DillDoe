@@ -4,6 +4,7 @@ import gtaIndex from './gta-data-index.json' with {type:'json'};
 import {createDataServer} from './gta-data-server.mjs';
 import {createReleaseStore,parseByteRange} from './release-store.mjs';
 import {bootstrap,cleanPath,contentType,isolatedHeaders,rewriteRootPaths} from './migration-paths.mjs';
+import {splitStream} from './split-stream.mjs';
 
 const readPacked=createReleaseStore('https://github.com/MagiczLunchly/gta5-webport-vercel/releases/download/dilldoe-game-assets-v1/',packed.packs);
 const gta=createDataServer(gtaIndex);
@@ -56,7 +57,7 @@ async function rawBody(entry,path,start,end,partial,signal){
 
 async function gameAsset(request,url,game,path) {
  const entry=catalog.games[game];if(!entry)return response('Game not found',404);
- if(!path)path='index.html';
+ if(!path)path=entry.entry||'index.html';
  const special=await specialDownload(request,url,game,path);if(special)return special;
  if(!Object.hasOwn(entry.files,path)) {
   if(Object.hasOwn(entry.files,path+'/index.html'))return Response.redirect(new URL(url.pathname+'/',url),308);
@@ -70,7 +71,9 @@ async function gameAsset(request,url,game,path) {
  if(/\.(wasm|js|data)\.gz$/.test(path))headers['Content-Encoding']='gzip';
  if(request.method==='HEAD')return response(null,partial?206:200,headers);
  if(size===0)return response('',200,headers);
- const body=entry.mode==='raw'?await rawBody(entry,path,start,end,partial,request.signal):await readPacked(packed.files[game+'/'+path],start,end,request.signal);
+ const body=entry.splitFiles?.[path]
+  ?splitStream(entry.splitFiles[path].map(part=>({path:part,size:entry.files[part]})),start,end,(part,a,b,size)=>rawBody(entry,part,a,b,a!==0||b!==size-1,request.signal))
+  :entry.mode==='raw'?await rawBody(entry,path,start,end,partial,request.signal):await readPacked(packed.files[game+'/'+path],start,end,request.signal);
  const textFile=/\.(html|js|mjs|css|json)$/.test(path);
  if(!partial&&textFile&&size<8*1024*1024){
   let text=await new Response(body).text();text=rewriteRootPaths(text,game,entry.files,path);
