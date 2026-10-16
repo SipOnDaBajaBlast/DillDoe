@@ -3,9 +3,9 @@ import packed from './game-assets.json' with {type:'json'};
 import gtaIndex from './gta-data-index.json' with {type:'json'};
 import {createDataServer} from './gta-data-server.mjs';
 import {createReleaseStore,parseByteRange} from './release-store.mjs';
-import {bootstrap,cleanPath,contentType,isolatedHeaders,rewriteRootPaths} from './migration-paths.mjs';
+import {bootstrap,cleanPath,contentType,isolatedHeaders} from './migration-paths.mjs';
 import {splitStream} from './split-stream.mjs';
-import {patchFeedPitHtml} from './feed-pit-loader.mjs';
+import {transformGameText} from './game-text.mjs';
 
 const readPacked=createReleaseStore('https://github.com/MagiczLunchly/gta5-webport-vercel/releases/download/dilldoe-game-assets-v1/',packed.packs);
 const gta=createDataServer(gtaIndex);
@@ -77,15 +77,7 @@ async function gameAsset(request,url,game,path) {
   :entry.mode==='raw'?await rawBody(entry,path,start,end,partial,request.signal):await readPacked(packed.files[game+'/'+path],start,end,request.signal);
  const textFile=/\.(html|js|mjs|css|json)$/.test(path);
  if(!partial&&textFile&&size<8*1024*1024){
-  let text=await new Response(body).text();text=rewriteRootPaths(text,game,entry.files,path);
-  if(game==='feed-the-pit'&&path==='feedthepit.js')text=text.replace('`${loadPath}.wasm`','`${loadPath}.wasm?loader=3`');
-  if(path.endsWith('.html')){
-   if(game==='feed-the-pit')text=patchFeedPitHtml(text,entry);
-   text=text.replace(/<base\b[^>]*>/gi,'');
-   if(entry.files['renpy.wasm'])text=text.replace(/(src=["'])(renpy(?:-pre)?\.js)(["'])/g,'$1$2?paths=2$3');
-   const inject=bootstrap(game);
-   text=/<head\b[^>]*>/i.test(text)?text.replace(/<head\b[^>]*>/i,m=>m+inject):inject+text;
-  }
+  let text=transformGameText(await new Response(body).text(),game,entry,path);
   delete headers['Content-Length'];delete headers.ETag;
   if(path.endsWith('.html')||(entry.files['renpy.wasm']&&/^renpy(?:-pre)?\.js$/.test(path)))headers['Cache-Control']='no-cache';
   return response(text,200,headers);

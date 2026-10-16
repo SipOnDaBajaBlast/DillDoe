@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import {installGtaStaticDataRouting} from './lib/gta-static-routing.mjs';
+test('static GTA metadata bypasses the API while large reads keep range headers',async()=>{
+ const calls=[];
+ const self={fetch:async(input,options)=>{calls.push({input,options});return new Response('ok');}};
+ vm.runInNewContext('('+installGtaStaticDataRouting.toString()+')('+JSON.stringify('/ports/gta5-webport-vercel/data/')+','+JSON.stringify(['small.json'])+')',{self,URL,Request,location:new URL('https://dilldoe-games.pages.dev/ports/gta5-webport-vercel/')});
+ await self.fetch('/ports/gta5-webport-vercel/data/small.json');
+ assert.equal(calls[0].input,'/ports/gta5-webport-vercel/data/small.json');
+ const request=new Request('https://dilldoe-games.pages.dev/ports/gta5-webport-vercel/data/archive.rpf?v=2',{headers:{Range:'bytes=4-12'}});
+ await self.fetch(request);
+ assert.equal(new URL(calls[1].input.url).pathname,'/ports/gta5-webport-vercel/data/file');
+ assert.equal(new URL(calls[1].input.url).searchParams.get('file'),'archive.rpf');
+ assert.equal(new URL(calls[1].input.url).searchParams.get('v'),'2');
+ assert.equal(calls[1].input.headers.get('Range'),'bytes=4-12');
+ await self.fetch('/ports/gta5-webport-vercel/data/batch',{method:'POST',body:'[]'});
+ assert.equal(calls[2].input,'/ports/gta5-webport-vercel/data/batch');assert.equal(calls[2].options.method,'POST');
+ await self.fetch('https://example.com/data/external.bin');assert.equal(calls[3].input,'https://example.com/data/external.bin');
+});

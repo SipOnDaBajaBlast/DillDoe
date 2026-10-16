@@ -43,10 +43,31 @@ export function installSmgShaderCompatibility() {
   return context;
  };
 }
+export function installGameDownloadGuard() {
+ const scope=typeof window==='undefined'?self:window;
+ const original=scope.fetch;
+ const blocked=new Map();
+ scope.fetch=async function(input,options){
+  const url=new URL(input instanceof Request?input.url:String(input),location.href);
+  const local=url.origin===location.origin&&/^\/(?:ports|__game-download)\//.test(url.pathname);
+  const key=url.pathname+'?file='+(url.searchParams.get('file')||'');
+  if(local&&(blocked.get(key)||0)>Date.now())throw new Error('Game download temporarily unavailable. Wait 30 seconds before retrying.');
+  const backoff=()=>{if(blocked.size>=256)blocked.delete(blocked.keys().next().value);blocked.set(key,Date.now()+30000);};
+  try{
+   const result=await original.call(this,input,options);
+   if(local&&(result.status===429||result.status>=500))backoff();
+   const binary=/\.(?:wasm(?:\.(?:br|gz))?|pck|iso|bin|data)$|\/api\/game$|\/data\/(?:file|batch)$/.test(url.pathname);
+   if(local&&binary&&result.headers.get('Content-Type')?.includes('text/html')){
+    backoff();await result.body?.cancel();throw new Error('The game server returned a webpage instead of game data. Please retry later.');
+   }
+   return result;
+  }catch(error){if(local&&error.name!=='AbortError')backoff();throw error;}
+ };
+}
 export function bootstrap(game) {
  const shaderCompatibility = game === 'smg-webport' ? `(${installSmgShaderCompatibility.toString()})();` : '';
  const prefix=`/ports/${game}/`;
  // Only root-relative requests inside this game are rebased. External hosts,
  // sibling games, and page navigation keep their original semantics.
- return `<script>${shaderCompatibility}(()=>{const p=${JSON.stringify(prefix)};const map=v=>{if(typeof v==='string'&&v.startsWith('/')&&!v.startsWith('//')&&!v.startsWith('/ports/'))return p+v.slice(1);return v};const f=window.fetch;window.fetch=function(v,o){return f.call(this,v instanceof Request?new Request(map(v.url.startsWith(location.origin+'/')?v.url.slice(location.origin.length):v.url),v):map(v),o)};const open=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u,...a){return open.call(this,m,map(u),...a)};for(const n of ['Worker','SharedWorker'])if(window[n]){const C=window[n];window[n]=new Proxy(C,{construct(t,a){a[0]=map(a[0]);return Reflect.construct(t,a)}})}if(navigator.serviceWorker){const r=navigator.serviceWorker.register.bind(navigator.serviceWorker);navigator.serviceWorker.register=(u,o)=>r(map(u),o&&{...o,scope:o.scope?map(o.scope):o.scope})}})();<\/script>`;
+ return `<script>${shaderCompatibility}(${installGameDownloadGuard.toString()})();(()=>{const p=${JSON.stringify(prefix)};const map=v=>{if(typeof v==='string'&&v.startsWith('/')&&!v.startsWith('//')&&!v.startsWith('/ports/')&&!v.startsWith('/__game-download/'))return p+v.slice(1);return v};const f=window.fetch;window.fetch=function(v,o){return f.call(this,v instanceof Request?new Request(map(v.url.startsWith(location.origin+'/')?v.url.slice(location.origin.length):v.url),v):map(v),o)};const open=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u,...a){return open.call(this,m,map(u),...a)};for(const n of ['Worker','SharedWorker'])if(window[n]){const C=window[n];window[n]=new Proxy(C,{construct(t,a){a[0]=map(a[0]);return Reflect.construct(t,a)}})}if(navigator.serviceWorker){const r=navigator.serviceWorker.register.bind(navigator.serviceWorker);navigator.serviceWorker.register=(u,o)=>r(map(u),o&&{...o,scope:o.scope?map(o.scope):o.scope})}})();<\/script>`;
 }

@@ -1,9 +1,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {createRequire} from 'node:module';
 import {execFileSync} from 'node:child_process';
 import {buildGamePages} from '../vercel/game-pages.mjs';
-const {build}=createRequire(import.meta.url)('esbuild');
+import {buildStaticGames} from './static-games.mjs';
+import {installGameDownloadGuard} from './lib/migration-paths.mjs';
+import {finalizeBuild} from './finalize-build.mjs';
 const project=process.cwd(),output=path.join(project,'dist');
 if(path.resolve(output)!==path.resolve(project,'dist')||path.dirname(output)!==project)throw new Error('Unsafe build directory');
 await fs.rm(output,{recursive:true,force:true});
@@ -26,6 +27,7 @@ if(await fs.stat(path.join(repository,'games.html')).catch(()=>null)){
   const target=path.join(output,file);await fs.mkdir(path.dirname(target),{recursive:true});
   if(file.endsWith('.html')){
    let text=rewrite(await fs.readFile(path.join(repository,file),'utf8'));
+   if(file.startsWith('games/'))text=text.replace(/<head\b[^>]*>/i,head=>head+'<script src="/assets/game-download-guard.js?v=1"></script>');
    if(text.includes('/ports/')){
     if(!catalog.mainIsolation.includes(file))catalog.mainIsolation.push(file);
     text=text.replace(/<iframe\b([^>]*)>/gi,(whole,attrs)=>/\ballow=/.test(attrs)?whole:'<iframe'+attrs+' allow="cross-origin-isolated; fullscreen; autoplay; gamepad" allowfullscreen>');
@@ -35,13 +37,10 @@ if(await fs.stat(path.join(repository,'games.html')).catch(()=>null)){
  }
 }
 await buildGamePages(output);
-await fs.writeFile(path.join(output,'website-version.json'),JSON.stringify({commit:process.env.GITHUB_SHA||null,builtAt:new Date().toISOString()}));
-await build({entryPoints:['worker.mjs'],outfile:path.join(output,'_worker.js'),bundle:true,format:'esm',platform:'browser',target:'es2022',minify:true});
-await fs.writeFile(path.join(output,'_routes.json'),JSON.stringify({version:1,include:['/ports/*','/__migration/*','/halo-mobile/*'],exclude:[]},null,2));
-let headers='/*\n  X-Content-Type-Options: nosniff\n';
-for(const file of catalog.mainIsolation)for(const route of ['/'+file,'/'+file.replace(/\.html$/,'')])headers+=`\n${route}\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp\n  Cross-Origin-Resource-Policy: same-origin\n`;
-await fs.writeFile(path.join(output,'_headers'),headers);
-async function inspect(directory){for(const file of await fs.readdir(directory,{withFileTypes:true})){const filename=path.join(directory,file.name);if(file.isDirectory())await inspect(filename);else if((await fs.stat(filename)).size>25*1024*1024)throw new Error('Cloudflare asset limit exceeded: '+filename);}}
-await inspect(output);
-console.log('Cloudflare Pages build ready: '+Object.keys(catalog.games).length+' game ports.');
+await fs.mkdir(path.join(output,'assets'),{recursive:true});
+await fs.writeFile(path.join(output,'assets','game-download-guard.js'),'('+installGameDownloadGuard.toString()+')();');
+const staticGames=await buildStaticGames(output,catalog);
+await fs.mkdir(path.join(output,'__migration'),{recursive:true});
+await fs.writeFile(path.join(output,'__migration','health'),JSON.stringify({site:'DillDoe',games:Object.keys(catalog.games),missingSources:catalog.missingSources,staticFiles:staticGames.staticFiles}));
+await finalizeBuild(output,catalog);
 

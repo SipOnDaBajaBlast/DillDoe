@@ -1,4 +1,4 @@
-const origin='https://dilldoe-games.pages.dev';
+const origin=process.env.SITE_ORIGIN||'https://dilldoe-games.pages.dev';
 const expected=process.env.GITHUB_SHA;
 if(!expected)throw new Error('Expected website commit is missing');
 let published=false;
@@ -15,4 +15,25 @@ const health=await fetch(origin+'/__migration/health',{signal:AbortSignal.timeou
 if(!health.ok)throw new Error('The game server check failed');
 const data=await health.json();
 if(data.missingSources.length)throw new Error('Some migrated game sources are missing');
-console.log('Live website updated to '+expected+'; '+data.games.length+' game launchers configured.');
+const {default:catalog}=await import('./lib/game-catalog.json',{with:{type:'json'}});
+const {isSecondaryFile,STATIC_LIMIT,STATIC_ORIGIN}=await import('./lib/static-plan.mjs');
+const dataOrigin=process.env.STATIC_DATA_ORIGIN||STATIC_ORIGIN;
+const report=await(await fetch(origin+'/static-game-report.json',{signal:AbortSignal.timeout(15000)})).json();
+const isStatic=(game,file)=>entrySize(game,file)<=STATIC_LIMIT||report.compressedFiles.includes('/ports/'+game+'/'+file);
+const entrySize=(game,file)=>catalog.games[game].files[file]??Infinity;
+let checked=0;
+for(const [game,entry]of Object.entries(catalog.games)){
+ const candidates=[entry.entry||'index.html',Object.keys(entry.files).find(file=>isSecondaryFile(file)&&isStatic(game,file)),Object.keys(entry.files).find(file=>/\.wasm(?:\.(?:gz|br))?$/.test(file)&&isStatic(game,file))].filter(Boolean);
+ for(const file of new Set(candidates)){
+  if(!Object.hasOwn(entry.files,file)||!isStatic(game,file))continue;
+  const url=origin+'/ports/'+game+'/'+file.split('/').map(encodeURIComponent).join('/');
+  const result=await fetch(url,{method:'HEAD',signal:AbortSignal.timeout(30000)});
+  if(!result.ok)throw new Error('Static game check failed: '+game+'/'+file+' HTTP '+result.status);
+  if(isSecondaryFile(file)&&(!result.url.startsWith(dataOrigin+'/')||result.headers.get('access-control-allow-origin')!=='*'))throw new Error('Static game CORS/redirect check failed: '+game+'/'+file);
+  if(/\.wasm(?:\.(?:gz|br))?$/.test(file)&&!result.headers.get('content-type')?.includes('application/wasm'))throw new Error('WebAssembly MIME check failed: '+game+'/'+file);
+  if(/\.(gz|br)$/.test(file)&&result.headers.get('content-encoding')!==file.split('.').at(-1))throw new Error('Compressed game encoding check failed: '+game+'/'+file);
+  if(report.compressedFiles.includes('/ports/'+game+'/'+file)&&result.headers.get('content-encoding')!=='gzip')throw new Error('Static runtime gzip check failed: '+game+'/'+file);
+  checked++;
+ }
+}
+console.log('Live website updated to '+expected+'; '+data.games.length+' game ports configured; '+checked+' static entry/data/runtime checks passed.');

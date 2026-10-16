@@ -1,5 +1,7 @@
 node_modules/
 dist/
+dist-games/
+.asset-cache/
 .wrangler/
 .dev.vars
 .env*
