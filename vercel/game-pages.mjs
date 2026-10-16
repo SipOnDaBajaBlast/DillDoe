@@ -19,9 +19,10 @@ export async function buildGamePages(output) {
     for (const game of games) {
         if (!game.title || game.file.includes('..') || game.slug.includes('/')) throw new Error('Invalid game entry');
         await fs.access(path.join(output, game.file));
-        const note = notes[game.slug];
-const note = gameGuides[game.slug] || 'No guide available for this game yet.';
+
+        const note = notes[game.slug] || ['Casual', 'Play ' + game.title + ' in your browser.', 'Follow on-screen prompts and controls to play.'];
         const [category, description, tip] = note;
+
         const guideRoute = '/game/' + encodeURIComponent(game.slug) + '.html';
         const playRoute = '/' + game.file.split('/').map(encodeURIComponent).join('/');
         const related = games.filter(other => other !== game && notes[other.slug]?.[0] === category).slice(0, 3);
