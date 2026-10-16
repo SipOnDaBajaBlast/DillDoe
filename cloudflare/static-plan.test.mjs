@@ -15,11 +15,9 @@ test('every game file is static or explicitly retains a function route',()=>{
  assert.ok(primary<=19000);assert.ok(secondary<19000);assert.ok(plan.routes.length<=100);
  // Thousands of GTA shaders and Hit & Run textures must bypass functions.
  assert.equal(plan.routes.some(p=>p==='/ports/*'),false);
- assert.ok(!plan.games['gta5-webport-vercel'].secondaryFiles.some(p=>/\.(html|js|wasm)$/.test(p)));
  assert.equal(plan.games['kisakcodfork1'].large.length,0);
- assert.equal(plan.routes.includes('/ports/gta5-webport-vercel/data/*'),false);
- assert.ok(plan.routes.includes('/ports/gta5-webport-vercel/data/batch'));
- for(const game of Object.values(plan.games))assert.ok(!game.secondaryFiles.some(file=>/\.(html|js|mjs|png|webp|jpg|ogg|mp3|wasm)$/.test(file)));
+ assert.ok(plan.routes.includes('/ports/gta5-webport-vercel/data/*'));
+ for(const[name,game]of Object.entries(plan.games))assert.ok(!game.secondaryFiles.some(file=>/\.(html|js|mjs|png|webp|jpg|ogg|mp3|wasm)$/.test(file)&&!(name==='gta5-webport-vercel'&&file.startsWith('data/'))));
 });
 test('static and dynamic text retain game scoping and RenPy filesystem paths',()=>{
  const entry={files:{'index.html':100,'assets/game.js':100,'renpy.wasm':100}};

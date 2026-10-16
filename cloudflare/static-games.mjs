@@ -8,7 +8,7 @@ import {createHash} from 'node:crypto';
 import {createGzip} from 'node:zlib';
 import {execFileSync} from 'node:child_process';
 import {transformGameText} from './lib/game-text.mjs';
-import {staticPlan,STATIC_ORIGIN,isSecondaryFile} from './lib/static-plan.mjs';
+import {staticPlan,STATIC_ORIGIN,isSecondaryFile,isSecondaryGameFile} from './lib/static-plan.mjs';
 import gtaStaticData from './lib/gta-static-data.json' with {type:'json'};
 
 const cache=path.resolve(process.env.GAME_ASSET_CACHE||'.asset-cache');
@@ -74,7 +74,7 @@ export async function buildStaticGames(output,catalog){
   const wasmCandidates=game.large.filter(file=>file.endsWith('.wasm'));
   const source=entry.mode==='raw'?await rawSource(name,entry,[...game.files,...wasmCandidates]):null;
   await parallel(game.files,8,async file=>{
-   const root=isSecondaryFile(file)?overflow:output;
+   const root=isSecondaryGameFile(name,file)?overflow:output;
    if(isSecondaryFile(file))extensions.add(file.split('.').at(-1));
    let bytes;
    if(entry.files[file]===0)bytes=Buffer.alloc(0);
