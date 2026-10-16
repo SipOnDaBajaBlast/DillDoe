@@ -20,7 +20,7 @@ export async function buildGamePages(output) {
         if (!game.title || game.file.includes('..') || game.slug.includes('/')) throw new Error('Invalid game entry');
         await fs.access(path.join(output, game.file));
         const note = notes[game.slug];
-        if (!note) throw new Error('Add a guide to vercel/game-guides.mjs for ' + game.slug);
+const note = gameGuides[game.slug] || 'No guide available for this game yet.';
         const [category, description, tip] = note;
         const guideRoute = '/game/' + encodeURIComponent(game.slug) + '.html';
         const playRoute = '/' + game.file.split('/').map(encodeURIComponent).join('/');
