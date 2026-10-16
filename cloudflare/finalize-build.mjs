@@ -16,7 +16,7 @@ export async function finalizeBuild(output=path.resolve('dist'),catalog){
  await build({entryPoints:['worker.mjs'],outfile:path.join(output,'_worker.js'),bundle:true,format:'esm',platform:'browser',target:'es2022',minify:true});
  await fs.writeFile(path.join(output,'_routes.json'),JSON.stringify({version:1,include:routes,exclude:[]},null,2));
  let headers='/*\n  X-Content-Type-Options: nosniff\n';
- const isolatedRoutes=new Set(catalog.mainIsolation.flatMap(file=>file.startsWith('games/')?['/games/*']:['/'+file,'/'+file.replace(/\.html$/,'')]));
+ const isolatedRoutes=new Set(catalog.mainIsolation.flatMap(file=>['/'+file,'/'+file.replace(/\.html$/,'')]).map(encodeURI));
  for(const route of isolatedRoutes)headers+=`\n${route}\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp\n  Cross-Origin-Resource-Policy: same-origin\n`;
  headers+='\n/__migration/health\n  Content-Type: application/json\n  Cache-Control: no-store\n\n'+await fs.readFile(path.join(overflow,'_headers'),'utf8');
  for(const file of compressed)headers+='\n'+encodeURI(file)+'\n  Content-Encoding: gzip\n  Content-Type: application/wasm\n';
