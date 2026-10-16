@@ -1,6 +1,9 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {startFeedThePit} from './lib/feed-pit-loader.mjs';
+import {readFile} from 'node:fs/promises';
+import {runInThisContext} from 'node:vm';
+const source = await readFile(new URL('../assets/feed-pit-loader.js', import.meta.url), 'utf8');
+const startFeedThePit = runInThisContext('(function(){' + source + ';return startFeedThePit;})()');
 
 const data = Uint8Array.of(71, 68, 80, 67, 4, 5, 6, 7);
 const parts = [{path: 'a', size: 4}, {path: 'b', size: 4}];

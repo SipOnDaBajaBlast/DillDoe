@@ -78,6 +78,7 @@ async function gameAsset(request,url,game,path) {
  const textFile=/\.(html|js|mjs|css|json)$/.test(path);
  if(!partial&&textFile&&size<8*1024*1024){
   let text=await new Response(body).text();text=rewriteRootPaths(text,game,entry.files,path);
+  if(game==='feed-the-pit'&&path==='feedthepit.js')text=text.replace('`${loadPath}.wasm`','`${loadPath}.wasm?loader=3`');
   if(path.endsWith('.html')){
    if(game==='feed-the-pit')text=patchFeedPitHtml(text,entry);
    text=text.replace(/<base\b[^>]*>/gi,'');
