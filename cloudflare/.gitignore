@@ -2,6 +2,7 @@ node_modules/
 dist/
 dist-games/
 .asset-cache/
+.static-build/
 .wrangler/
 .dev.vars
 .env*

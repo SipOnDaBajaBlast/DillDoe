@@ -5,6 +5,7 @@ import {buildGamePages} from '../vercel/game-pages.mjs';
 import {buildStaticGames} from './static-games.mjs';
 import {installGameDownloadGuard} from './lib/migration-paths.mjs';
 import {finalizeBuild} from './finalize-build.mjs';
+import {staticFingerprint,validateBaseline} from './lib/static-build-state.mjs';
 const project=process.cwd(),output=path.join(project,'dist');
 if(path.resolve(output)!==path.resolve(project,'dist')||path.dirname(output)!==project)throw new Error('Unsafe build directory');
 await fs.rm(output,{recursive:true,force:true});
@@ -39,8 +40,15 @@ if(await fs.stat(path.join(repository,'games.html')).catch(()=>null)){
 await buildGamePages(output);
 await fs.mkdir(path.join(output,'assets'),{recursive:true});
 await fs.writeFile(path.join(output,'assets','game-download-guard.js'),'('+installGameDownloadGuard.toString()+')();');
-const staticGames=await buildStaticGames(output,catalog);
+const baseline=process.env.FAST_WEBSITE_BUILD==='1'?validateBaseline(JSON.parse(await fs.readFile('.static-build/baseline.json','utf8')),await staticFingerprint()):null;
+let staticGames;
+if(baseline){
+ await fs.writeFile(path.join(output,'static-game-report.json'),JSON.stringify(baseline.report,null,2));
+ await fs.writeFile(path.join(output,'_redirects'),baseline.redirects);
+ staticGames={staticFiles:baseline.report.staticFiles};
+ console.log('Reusing '+Object.keys(baseline.gameManifest).length+' existing game assets; no game downloads or rebuild.');
+}else staticGames=await buildStaticGames(output,catalog);
 await fs.mkdir(path.join(output,'__migration'),{recursive:true});
 await fs.writeFile(path.join(output,'__migration','health'),JSON.stringify({site:'DillDoe',games:Object.keys(catalog.games),missingSources:catalog.missingSources,staticFiles:staticGames.staticFiles}));
-await finalizeBuild(output,catalog);
+await finalizeBuild(output,catalog,{baseline});
 
