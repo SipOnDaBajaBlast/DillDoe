@@ -1,9 +1,20 @@
 import fs from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
 import {BASELINE_PATH,staticFingerprint,validateBaseline} from './lib/static-build-state.mjs';
 
 const fingerprint=await staticFingerprint();
 let baseline;
-if(process.env.REBUILD_GAMES!=='true'){
+// A fast publish reuses the last deployment's game-file hashes. If a bundled
+// port changed, those hashes would silently serve the old build instead.
+let changedGameFiles=false;
+try{
+ const changed=execFileSync('git',['diff','--name-only','HEAD^','HEAD','--','cloudflare/public/ports/'],{encoding:'utf8'});
+ changedGameFiles=changed.trim().length>0;
+}catch{
+ // A shallow checkout without a parent cannot prove that assets are unchanged.
+ changedGameFiles=true;
+}
+if(process.env.REBUILD_GAMES!=='true'&&!changedGameFiles){
  try{const response=await fetch('https://dilldoe-games.pages.dev'+BASELINE_PATH+'?fingerprint='+fingerprint,{signal:AbortSignal.timeout(15000),cache:'no-store'});if(response.ok)baseline=validateBaseline(await response.json(),fingerprint);}catch{}
  if(!baseline)try{baseline=validateBaseline(JSON.parse(await fs.readFile('lib/static-build-bootstrap.json','utf8')),fingerprint);}catch{}
  if(baseline&&process.env.CLOUDFLARE_API_TOKEN){
@@ -21,6 +32,7 @@ if(process.env.REBUILD_GAMES!=='true'){
   }
  }
 }
+if(changedGameFiles)console.log('Bundled game files changed; selecting the full game build.');
 await fs.mkdir('.static-build',{recursive:true});
 if(baseline)await fs.writeFile('.static-build/baseline.json',JSON.stringify(baseline));
 else await fs.rm('.static-build/baseline.json',{force:true});
