@@ -26,7 +26,7 @@
     let instance;
     document.getElementById('fullscreen').onclick=()=>instance&&instance.SetFullscreen(1);
     (async()=>{
-      const response=await fetch('Build/data-parts.json');
+      const response=await fetch('Build/data-parts.txt');
       if(!response.ok)throw new Error('Game manifest could not load (HTTP '+response.status+').');
       const manifest=await response.json();
       const chunks=[];

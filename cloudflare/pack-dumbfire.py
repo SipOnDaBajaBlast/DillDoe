@@ -33,7 +33,7 @@ def main():
         shutil.copyfile(build / name, target / "Build" / name)
     shutil.copytree(source / "TemplateData", target / "TemplateData", dirs_exist_ok=True)
     manifest = {"parts": paths, "size": len(raw), "sha256": hashlib.sha256(raw).hexdigest()}
-    (target / "Build" / "data-parts.json").write_text(json.dumps(manifest), encoding="utf-8")
+    (target / "Build" / "data-parts.txt").write_text(json.dumps(manifest), encoding="utf-8")
     print(f"Packaged {len(raw):,} bytes in {len(paths)} parts; sha256 {manifest['sha256']}")
 
 
