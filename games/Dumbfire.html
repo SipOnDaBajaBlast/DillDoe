@@ -11,7 +11,7 @@
     a{color:#a8edff}header strong{color:#ffdf35;letter-spacing:.12em}
     main{max-width:1120px;margin:2rem auto;padding:0 1rem}.panel{border:1px solid #95eaff88;border-radius:18px;background:#ffffff16;box-shadow:0 20px 70px #0009;overflow:hidden}
     .intro{padding:clamp(1.5rem,5vw,3rem)}.tag{color:#ffdf35;font-weight:700;letter-spacing:.15em;text-transform:uppercase}h1{font-size:clamp(2.5rem,8vw,5rem);line-height:.95;margin:.5rem 0 1.4rem;font-style:italic;text-shadow:4px 5px #000}
-    p{max-width:60ch;line-height:1.5}button{border:2px solid #fff686;border-radius:12px;padding:.85rem 1.4rem;font:700 1.1rem Trebuchet MS,Arial,sans-serif;color:#181203;background:linear-gradient(#fff072,#edba24);cursor:pointer}button:hover{filter:brightness(1.15)}
+    p{max-width:60ch;line-height:1.5}#play{display:inline-block;text-decoration:none;border:2px solid #fff686;border-radius:12px;padding:.85rem 1.4rem;font:700 1.1rem Trebuchet MS,Arial,sans-serif;color:#181203;background:linear-gradient(#fff072,#edba24);cursor:pointer}#play:hover{filter:brightness(1.15)}
     #status{color:#b6dbec;font-size:.9rem}#stage{display:none;background:#000;aspect-ratio:16/9;width:100%}#stage iframe{display:block;width:100%;height:100%;border:0}
     .tips{padding:1rem 1.4rem;color:#d4edfa;font-size:.95rem}kbd{background:#1a3441;padding:.12rem .35rem;border-radius:4px}
   </style>
@@ -23,13 +23,14 @@
       <p>Fly the rocket through the demo courses. This browser port is still being tested: steering, visuals and audio may differ from the Windows game.</p>
       <p>The first launch downloads about 80 MB of game data. Later visits can use your browser cache            </p>           
         Note from aiden: " hello porting newer games from steam to wasm is really fucking dificult so bare with me while i troubleshoot".</p>
-      <button id="play" type="button">Download &amp; play</button><p id="status" role="status">The download starts when you press Play.</p>
+      <a id="play" href="/ports/dumbfire/">Download &amp; play</a><p id="status" role="status">The download starts when you press Play.</p>
     </section>
     <div id="stage" aria-label="Dumbfire game"></div>
     <div class="tips">Controls: <kbd>Space</kbd> launch/thrust · <kbd>W A S D</kbd> steer · <kbd>Ctrl</kbd> align with travel direction · <kbd>R</kbd> restart · <kbd>Tab</kbd> pause. Click the game to focus it.</div>
   </div></main>
   <script>
-    document.getElementById('play').addEventListener('click', () => {
+    document.getElementById('play').addEventListener('click', (event) => {
+      event.preventDefault();
       const frame=document.createElement('iframe');
       frame.src='/ports/dumbfire/'; frame.title='Dumbfire Demo';
       frame.allow='fullscreen; autoplay; gamepad'; frame.setAttribute('allowfullscreen','');
