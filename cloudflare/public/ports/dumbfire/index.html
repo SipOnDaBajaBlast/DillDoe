@@ -26,13 +26,14 @@
     let instance;
     document.getElementById('fullscreen').onclick=()=>instance&&instance.SetFullscreen(1);
     (async()=>{
-      const response=await fetch('Build/data-parts.txt');
+      const response=await fetch('Build/data-parts.txt',{cache:'no-store'});
       if(!response.ok)throw new Error('Game manifest could not load (HTTP '+response.status+').');
       const manifest=await response.json();
+      const version='?v='+encodeURIComponent(manifest.sha256);
       const chunks=[];
       for(let i=0;i<manifest.parts.length;i++){
         status.textContent=`Downloading game data ${i+1} of ${manifest.parts.length}…`;
-        const part=await fetch('Build/'+manifest.parts[i]);
+        const part=await fetch('Build/'+manifest.parts[i]+version);
         if(!part.ok)throw new Error('Game data part '+(i+1)+' failed (HTTP '+part.status+').');
         chunks.push(await part.blob());
         progress.value=(i+1)/manifest.parts.length*.75;
@@ -41,8 +42,8 @@
       status.textContent='Starting Unity game…';
       instance=await createUnityInstance(canvas,{
         dataUrl,
-        frameworkUrl:'Build/WebGL-preview.framework.js.br',
-        codeUrl:'Build/WebGL-preview.wasm.br',
+        frameworkUrl:'Build/WebGL-preview.framework.js.br'+version,
+        codeUrl:'Build/WebGL-preview.wasm.br'+version,
         streamingAssetsUrl:'StreamingAssets',
         companyName:'DefaultCompany',productName:'DumbfireDemo',productVersion:'0.1.0',
         autoSyncPersistentDataPath:true,
