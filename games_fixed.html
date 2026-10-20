@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALL GAMES</title>
+    <meta name="description" content="Browse the DillDoe game library, find a game, read playing tips, and open it in your browser.">
+    <meta name="google-adsense-account" content="ca-pub-6483528780801608">
+    <link rel="canonical" href="https://dilldoe-games.pages.dev/games">
+    <link rel="stylesheet" href="/assets/site-ads.css">
+    <script src="/assets/site-ads.js" defer></script>
+
+    <style>
+        .library-display-ad { width: 234px; height: 60px; margin: 0 auto; }
+        @media (min-width: 400px) { .library-display-ad { width: 320px; height: 100px; } }
+        @media (min-width: 600px) { .library-display-ad { width: 468px; height: 60px; } }
+        @media (min-width: 900px) { .library-display-ad { width: 728px; height: 90px; } }
+        /* Frutiger Aero theme */
+        
+        :root {
+            --aqua-light: #d6f5ff;
+            --aqua-bright: #00d2ff;
+            --aqua-deep: #0072ff;
+            --aqua-dark: #003366;
+            --gel-green: #3cd070;
+            --glass-white: rgba(255, 255, 255, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.85);
+            --glass-shadow: rgba(0, 100, 200, 0.35);
+            
+            /* Classic early 2000s font stacks */
+            --font-heading: 'Trebuchet MS', 'Lucida Grande', 'Segoe UI', Tahoma, sans-serif;
+            --font-body: 'Lucida Grande', Tahoma, 'Segoe UI', Verdana, sans-serif;
+        }
+
+        /* CUSTOM AQUA CLEAR BLUE MOUSE CURSOR (SVG Base64 inspired by early 2000s liquid mouse) */
+        body, a, button, input {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><linearGradient id="aqua" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%2380e5ff" stop-opacity="0.9"/><stop offset="60%" stop-color="%230088ff" stop-opacity="0.85"/><stop offset="100%" stop-color="%230044aa" stop-opacity="0.95"/></linearGradient><linearGradient id="shine" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.95"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0.1"/></linearGradient><filter id="drop"><feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-color="%23002255" flood-opacity="0.4"/></filter></defs><g filter="url(%23drop)"><path d="M 4 2 L 18 16 L 11 17 L 16 27 L 12 29 L 7 19 L 2 23 Z" fill="url(%23aqua)" stroke="%23ffffff" stroke-width="1.2" stroke-linejoin="round"/><ellipse cx="8" cy="10" rx="3.5" ry="5" fill="url(%23shine)" transform="rotate(-25 8 10)"/><circle cx="10" cy="14" r="1.5" fill="%23ffffff" opacity="0.8"/><circle cx="12" cy="20" r="1" fill="%23ffffff" opacity="0.6"/></g></svg>'), auto !important;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            /* Authentic Frutiger Aero Background image + gradient tint */
+            background: linear-gradient(180deg, rgba(0, 110, 200, 0.25) 0%, rgba(0, 190, 255, 0.15) 100%),
+                        url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWn06EKF4l8vPj4NNF6Da7XtkAnR3tWl_K3fZQLjvSwSJVmlqV6jLgFHX6&s=10") center/cover no-repeat fixed;
+            color: var(--aqua-dark);
+            min-height: 100vh;
+            font-family: var(--font-body);
+            padding: 25px 20px 60px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        #bubbleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .bg-meme-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        .nyan-cat {
+            position: absolute;
+            top: 10%;
+            width: 180px;
+            height: auto;
+            filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.9));
+            animation: flyNyan 11s linear infinite;
+        }
+
+        @keyframes flyNyan {
+            0% { left: -220px; transform: translateY(0px) scale(0.95); }
+            50% { transform: translateY(25px) scale(1.05); }
+            100% { left: 100vw; transform: translateY(0px) scale(0.95); }
+        }
+
+        .doge-meme {
+            position: absolute;
+            bottom: 4%;
+            left: 2%;
+            width: 135px;
+            opacity: 0.88;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
+            animation: floatDoge 5s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatDoge {
+            0% { transform: translateY(0) rotate(-6deg); }
+            100% { transform: translateY(-22px) rotate(6deg); }
+        }
+
+        .troll-face {
+            position: absolute;
+            top: 18%;
+            right: 3%;
+            width: 125px;
+            opacity: 0.8;
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.85));
+            animation: floatTroll 4.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatTroll {
+            0% { transform: translateY(0) scale(0.98); }
+            100% { transform: translateY(22px) scale(1.08); }
+        }
+
+        .sad-bart {
+            position: absolute;
+            bottom: 5%;
+            right: 3%;
+            width: 115px;
+            opacity: 0.8;
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.85));
+            animation: floatBart 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatBart {
+            0% { transform: translateY(0) rotate(4deg); }
+            100% { transform: translateY(-18px) rotate(-4deg); }
+        }
+
+        header, main, .search-container, .top-nav {
+            position: relative;
+            z-index: 3;
+        }
+
+        .top-nav {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        /* Early 2000s Aqua Capsule Button */
+        .back-btn {
+            font-family: var(--font-heading);
+            color: #003055;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 24px;
+            background: linear-gradient(180deg, #ffffff 0%, #d4f2ff 45%, #7bd7ff 50%, #20b0ff 85%, #0088e0 100%);
+            border-radius: 20px;
+            border: 1.5px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 70, 150, 0.35), inset 0 1px 1px #ffffff, inset 0 -2px 3px rgba(0, 50, 120, 0.4);
+            transition: all 0.2s ease;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(180deg, #ffffff 0%, #e8f8ff 45%, #9ee3ff 50%, #4cc3ff 85%, #00a0f0 100%);
+            box-shadow: 0 6px 18px rgba(0, 170, 255, 0.6), inset 0 1px 2px #ffffff;
+            transform: translateY(-2px);
+        }
+
+        /* Early 2000s Trebuchet MS Glass Banner Title */
+        header {
+            text-align: center;
+            margin-bottom: 22px;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 18px 45px;
+            border-radius: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 10px 30px rgba(0, 90, 180, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.9);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Title Gloss Reflection Overlay */
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 50%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 100%);
+            border-radius: 40px 40px 0 0;
+            pointer-events: none;
+        }
+
+        .aero-title {
+            font-family: var(--font-heading);
+            font-size: 3.2rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(180deg, #ffffff 0%, #e0f4ff 35%, #1ac0ff 65%, #0055b8 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 3px 6px rgba(0, 40, 100, 0.4)) drop-shadow(0 1px 0 #ffffff);
+        }
+
+        .search-container {
+            width: 100%;
+            max-width: 520px;
+            margin-bottom: 35px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 14px 28px;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(230, 245, 255, 0.6) 100%);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            color: #003366;
+            border-radius: 30px;
+            outline: none;
+            transition: all 0.25s ease;
+            box-shadow: inset 0 2px 5px rgba(0, 60, 130, 0.25), 0 8px 20px rgba(0, 100, 200, 0.2);
+            text-align: center;
+        }
+
+        .search-bar::placeholder {
+            color: rgba(0, 60, 120, 0.65);
+            font-weight: 600;
+        }
+
+        .search-bar:focus {
+            background: linear-gradient(180deg, #ffffff 0%, #e6f7ff 100%);
+            border-color: #00d2ff;
+            box-shadow: inset 0 2px 4px rgba(0, 60, 130, 0.15), 0 0 25px rgba(0, 210, 255, 0.8);
+            transform: scale(1.02);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 28px;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        /* Skeuomorphic Glass Card */
+        .game-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(210, 240, 255, 0.25) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            padding: 14px;
+            text-decoration: none;
+            color: #003366;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-radius: 22px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 25px rgba(0, 70, 150, 0.25), inset 0 2px 2px rgba(255, 255, 255, 0.95);
+        }
+
+        /* 2000s Gel/Glass Top Sheen Reflector */
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 48%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 100%);
+            border-radius: 20px 20px 0 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(180, 230, 255, 0.45) 100%);
+            border-color: #ffffff;
+            box-shadow: 0 18px 38px rgba(0, 140, 255, 0.4), 0 0 22px rgba(0, 210, 255, 0.6), inset 0 2px 4px #ffffff;
+        }
+
+        .img-wrapper {
+            width: 100%;
+            height: 160px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 14px;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.3), 0 3px 8px rgba(0, 50, 100, 0.2);
+            border: 1.5px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .game-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background-color: #cbeaff;
+            transition: transform 0.4s ease;
+        }
+
+        .game-card:hover img {
+            transform: scale(1.08);
+        }
+
+        /* Sweep lens light beam */
+        .img-wrapper::after {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: -100%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(25deg);
+            transition: all 0.6s ease;
+            pointer-events: none;
+        }
+
+        .game-card:hover .img-wrapper::after {
+            top: 50%;
+            left: 50%;
+        }
+
+        /* Early 2000s Typography: Lucida Grande / Tahoma with bevel shadow */
+        .game-title {
+            margin-top: 14px;
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 1.05rem;
+            text-align: center;
+            line-height: 1.3;
+            color: #002b55;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+            transition: color 0.2s ease;
+        }
+
+        .game-card:hover .game-title {
+            color: #0066d6;
+        }
+        .library-count {
+            position: relative; z-index: 3;
+            display: flex; align-items: center; justify-content: center;
+            flex-wrap: wrap; gap: 9px; margin: -18px 0 25px;
+            padding: 11px 26px; border-radius: 30px;
+            color: #003b70; font-family: var(--font-heading);
+            font-size: 1.05rem; font-weight: 700;
+            background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(156,222,255,.65) 50%, rgba(48,167,239,.65));
+            border: 2px solid rgba(255,255,255,.95);
+            box-shadow: 0 7px 20px rgba(0,75,150,.25), inset 0 2px 3px #fff;
+            text-shadow: 0 1px 0 rgba(255,255,255,.8);
+        }
+        .library-count strong { font-size: 1.25em; }
+        .count-orb { color: #008ed6; }
+        .count-search { font-size: .88rem; font-weight: 600; opacity: .85; }
+        .count-search[hidden], .no-results[hidden] { display: none; }
+        .no-results { position: relative; z-index: 3; padding: 25px; font-weight: 700; text-align: center; }
+        .site-ad, .library-privacy { position: relative; z-index: 3; }
+        .site-ad { max-width: 100%; margin-bottom: 28px; text-align: center; }
+        .library-privacy { margin-top: 35px; }
+        .library-privacy a { color: #003366; }
+        @media (max-width: 600px) {
+            body { padding: 18px 12px 45px; }
+            header { padding: 16px 24px; max-width: 100%; }
+            .aero-title { font-size: clamp(1.7rem, 8vw, 3.2rem); }
+            .games-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+            .game-card { padding: 9px; }
+            .img-wrapper { height: 125px; }
+            .game-title { font-size: .9rem; }
+            .search-container { margin-bottom: 32px; }
+            .library-display-ad { max-width: 100%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .nyan-cat, .doge-meme, .troll-face, .sad-bart { animation: none; }
+            .game-card, .game-card img { transition: none; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Water Bubbles Background Canvas -->
+    <canvas id="bubbleCanvas"></canvas>
+
+    <div class="bg-meme-container">
+        <img class="nyan-cat" src="https://freepngimg.com/save/15407-nyan-cat-picture/512x512" alt="Nyan Cat">
+        <img class="doge-meme" src="https://pngimg.com/uploads/doge_meme/doge_meme_PNG112723.png" alt="Doge">
+        <img class="troll-face" src="https://www.pngkey.com/png/full/22-226917_memes-unhappy-troll-sticker-sad-trollface.png" alt="Sad Trollface">
+        <img class="sad-bart" src="https://www.nicepng.com/png/full/136-1362322_sad-simpsons-and-bart-image-bart-simpson-sad.png" alt="Sad Bart Simpson">
+    </div>
+
+    <!-- NAVIGATION BAR -->
+    <div class="top-nav">
+        <a href="/" class="back-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Home
+        </a>
+    </div>
+
+    <header>
+        <h1 class="aero-title">GAME LIBRARY</h1>
+    </header>
+
+    <!-- SEARCH BAR -->
+    <div class="search-container">
+        <input 
+            type="text" 
+            id="searchInput" 
+            class="search-bar" 
+            placeholder="🔍 Search game collection..." 
+            autocomplete="off" aria-label="Search games"
+        >
+    </div>
+
+    <div class="library-count" id="libraryCount" role="status" aria-live="polite">
+        <span class="count-orb" aria-hidden="true">✦</span>
+        <span><strong id="gameCount">0</strong> Games Available</span>
+        <span class="count-search" id="searchCount" hidden></span>
+    </div>
+
+    <aside class="site-ad site-ad-banner" aria-label="Advertisement">
+        <span class="site-ad-label">Advertisements</span>
+        <ins class="adsbygoogle library-display-ad" data-site-ad data-ad-client="ca-pub-6483528780801608" data-ad-slot="3349064473" style="display:block"></ins>
+    </aside>
+
+    <main class="games-grid" id="gamesGrid">
+
+
+
+        <a href="games/Submit.html" class="game-card" data-not-game="true">
+            <div class="img-wrapper">
+                <img loading="eager" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Frutiger_Aero_%282%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original" alt="Request a game">
+            </div>
+            <div class="game-title">Request ANY game</div>
+        </a>
+        <a href="games/SuperMarioGalaxy.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="eager" decoding="async" src="https://universonintendo.com/wp-content/uploads/2025/09/QUAD-Super-Mario-Galaxy-1.jpg" alt="Super Mario Galaxy">
+            </div>
+            <div class="game-title">Super Mario Galaxy</div>
+        </a>
+        <a href="games/GTA5.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="eager" decoding="async" src="https://wallpapers.com/images/featured/grand-theft-auto-v-naej4yiap4gnxh2o.jpg" alt="Grand Theft Auto 5">
+            </div>
+            <div class="game-title">Grand Theft Auto 5</div>
+        </a>
+
+        <!-- 1. COD 4 -->
+        <a href="games/Cod4.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="eager" decoding="async" src="https://upload.wikimedia.org/wikipedia/en/5/5f/Call_of_Duty_4_Modern_Warfare.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original" alt="Call of Duty 4">
+            </div>
+            <div class="game-title">Call Of Duty 4: Modern Warfare</div>
+        </a>
+
+        <!-- 2. PERSONA 3 PORTABLE -->
+        <a href="games/p3p.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="eager" decoding="async" src="https://www.gamespot.com/a/uploads/scale_landscape/43/434805/4094344-1298817349-hero.jpg" alt="Persona 3 Portable Thumbnail">
+            </div>
+            <div class="game-title">Persona 3 Portable</div>
+        </a>
+
+        <!-- 3. TEAM FORTRESS 2 -->
+        <a href="games/Tf2.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="eager" decoding="async" src="https://upload.wikimedia.org/wikipedia/en/5/5f/Tf2_standalonebox.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original" alt="Team Fortress 2">
+            </div>
+            <div class="game-title">Team Fortress 2</div>
+        </a>
+
+        <a href="games/Skate3.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://assets-prd.ignimgs.com/2022/01/07/skate-3-button-1641599749809.jpg" alt="Skate 3">
+            </div>
+            <div class="game-title">Skate 3</div>
+        </a>
+        <!-- 4. NATURAL DISASTER -->
+        <a href="games/NaturalD.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://tse2.mm.bing.net/th/id/OIP.vEY1HA_PakuovieO4zwaUQHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Natural Disaster Thumbnail">
+            </div>
+            <div class="game-title">Natural Disaster</div>
+        </a>
+        <a href="games/SpiderManWebOfShadows.html" class="game-card">
+            <div class="img-wrapper"><img loading="lazy" decoding="async" src="https://i.ytimg.com/vi/Lo4p8S1b9tk/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGFUgRihlMA8=&rs=AOn4CLDf561FOGpOt6ItpkE_Nr9QXUPL7w" alt="Spider-Man: Web of Shadows — PSP"></div>
+            <div class="game-title">Spider-Man: Web of Shadows</div>
+        </a>
+        <!-- 5. GANG BEASTS -->
+        <a href="games/GangBeast.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://image.api.playstation.com/vulcan/ap/rnd/202012/0912/DaMDXP75LV9pti5nA2IALzhO.png" alt="Gang Beasts Thumbnail">
+            </div>
+            <div class="game-title">Gang Beasts</div>
+        </a>
+        <a href="games/Dumbfire.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/4944600/9260cdbc443465e25ba1ba03b1a7c8f7e3676c4e/header.jpg?t=1791998366" alt="DumbFire">
+            </div>
+            <div class="game-title">Dumbfire Demo (work in progress)</div>
+        </a>
+
+        <!-- 6. PORTAL 1 -->
+        <a href="games/portal1.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://sm.ign.com/ign_nordic/cover/p/portal/portal_h2g3.jpg" alt="Portal 1">
+            </div>
+            <div class="game-title">Portal 1</div>
+        </a>
+
+         <a href="games/Fortnite.html" class="game-card">
+            <div class="img-wrapper"><img loading="lazy" decoding="async" src="https://i0.wp.com/www.aberrantliterature.com/wp-content/uploads/2017/10/Fortnite_20171002100730.jpg?resize=1024%2C576" alt="Fortnite Browser Arena"></div>
+            <div class="game-title">Fortnite OG Wasm Remake(TESTING)</div>
+        </a>
+
+        <!-- 8. MINECRAFT -->
+        <a href="games/wasm-gc 1.20.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZgdMVkTgOaJ_5_r_XOcFzFDCDbhUCeLm6mfEHSUwP3yPR0u85pjXIjVw&s=10" alt="Minecraft Thumbnail">
+            </div>
+            <div class="game-title">Minecraft (v26)</div>
+        </a>
+          <a href="games/FeedThePit.html" class="game-card">
+            <div class="img-wrapper"><img loading="lazy" decoding="async" src="https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co95mq.jpg" alt="Feed the Pit"></div>
+            <div class="game-title">Feed the Pit</div>
+        </a>
+        <a href="games/HaloCE.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/06/wp4163632-halo-combat-evolved-wallpapers-1.jpg?q=49&fit=crop&w=360&h=240&dpr=2" alt="Halo: Combat Evolved">
+            </div>
+            <div class="game-title">Halo: Combat Evolved</div>
+        </a>
+        <a href="games/GeomotryDash.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://geodash.org/images/game-images/Geometry-Dash-Cover.webp" alt="Geometry Dash">
+            </div>
+            <div class="game-title">Geometry Dash</div>
+        </a>
+        <!-- 9. ZELDA: OCARINA OF TIME - MASTER QUEST -->
+        <a href="games/master-quest.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://m.media-amazon.com/images/M/MV5BMTAxOTE2NDEwMTNeQTJeQWpwZ15BbWU4MDI3NTY5NTUz._V1_.jpg" alt="Zelda: Ocarina of Time - Master Quest">
+            </div>
+            <div class="game-title">Zelda: Ocarina of Time</div>
+        </a>
+
+        <!-- 10. SMASH BROS N64 -->
+        <a href="games/Smash.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRuRpGQMUYYx8r_LjRwNnhSneqB02qejOlX0jeIMuq1lCeBRnixwZ_PO2P&s=10" alt="Smash Bros Thumbnail">
+            </div>
+            <div class="game-title">Smash Bros N64</div>
+        </a>
+
+        <!-- 11. THE SIMPSONS: HIT & RUN -->
+        <a href="games/Simpsons.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://static0.gamerantimages.com/wordpress/wp-content/uploads/2023/11/simpsons-hit-and-run.jpg?q=50&fit=crop&w=825&dpr=1.5" alt="Simpsons Hit & Run Thumbnail">
+            </div>
+            <div class="game-title">The Simpsons: Hit & Run</div>
+        </a>
+
+        <!-- 12. DELTARUNE -->
+        <a href="games/Deltarune.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://media.tenor.com/gLqK62ZQVRQAAAAe/sans-undertale.png" alt="Deltarune Thumbnail">
+            </div>
+            <div class="game-title">Deltarune</div>
+        </a>
+        <a href="games/Horseygame.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3602570/945b3e12201603882fedbbf7abcb5fc3f3ad3fcb/header.jpg?t=1777070557" alt="Horsey Game">
+            </div>
+            <div class="game-title">Horsey Game</div>
+        </a>
+
+        <!-- 13. SUPER MONKEY BALL -->
+        <a href="games/SuperMonkey.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxqmwLw8JqBvMrzIj3f7d2YmOEghu6D9VV1tD25-2hmUh0NR_-v1XHCcU&s=10" alt="Super Monkey Ball Thumbnail">
+            </div>
+            <div class="game-title">Super Monkey Ball</div>
+        </a>
+
+        <!-- 14. SONIC THE HEDGEHOG -->
+        <a href="games/Sonic.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/en/b/ba/Sonic_the_Hedgehog_1_Genesis_box_art.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original" alt="Sonic Thumbnail">
+            </div>
+            <div class="game-title">Sonic</div>
+        </a>
+
+        <!-- 15. ANIMAL CROSSING -->
+        <a href="games/AnimalCrossing.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://i.ebayimg.com/00/s/OTk3WDEzMTI=/z/AkwAAOSw6NNfZcRl/$_57.PNG?set_id=8800005007" alt="Animal Crossing Thumbnail">
+            </div>
+            <div class="game-title">Animal Crossing</div>
+        </a>
+
+        <!-- 16. FNAF: DAYBREAK -->
+        <a href="games/DayBreak.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://kbhgames.com/wp-content/uploads/2026/07/fnaf-daybreak.webp" alt="FNaF DAYBREAK Thumbnail">
+            </div>
+            <div class="game-title">FNaF: DAYBREAK</div>
+        </a>
+
+        <!-- 17. FNAF 1 -->
+        <a href="games/fnaf.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://images.immediate.co.uk/production/volatile/sites/3/2023/08/FNAF-games-in-order-cd67434.jpg?quality=90" alt="FNAF Game Thumbnail">
+            </div>
+            <div class="game-title">FNAF 1</div>
+        </a>
+
+        <!-- 18. IRON LUNG -->
+        <a href="games/iron lung.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://i.ytimg.com/vi/WPiCSsW-2as/maxresdefault.jpg" alt="Iron Lung Thumbnail">
+            </div>
+            <div class="game-title">Iron Lung</div>
+        </a>
+
+        <!-- 19. CLASS OF 09 -->
+        <a href="games/ClassOf09.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://media.tenor.com/CS98TshZEzgAAAAe/class-of-09.png" alt="Class Of 09 Thumbnail">
+            </div>
+            <div class="game-title">Class Of 09 The Flip Side</div>
+        </a>
+
+        <!-- 20. TROMBONE CHAMP -->
+        <a href="games/Tromebone.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://repacklab.com/wp-content/uploads/2024/12/Trombone-Champ-Unflattened-Video-Game-Free-Download-Repacklab-1.jpg" alt="Trombone Champ Thumbnail">
+            </div>
+            <div class="game-title">Trombone Champ</div>
+        </a>
+
+        <!-- 21. FRIDAY NIGHT FUNKIN' -->
+        <a href="games/FNF.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/0cd0c8bc4dc15c069dba7ccfb6809f6d/friday-night-funkin-logo.png" alt="Friday Night Funkin Logo">
+            </div>
+            <div class="game-title">Friday Night Funkin'</div>
+        </a>
+
+        <!-- 22. SUPER FLIGHT -->
+        <a href="games/superflightt.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://tse4.mm.bing.net/th/id/OIP.iQUaHZ6PulAViiVB8lsyEgHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Super Flight Thumbnail">
+            </div>
+            <div class="game-title">Super Flight</div>
+        </a>
+
+        <!-- 23. BALDI'S BASICS -->
+        <a href="games/baldi.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://i.pinimg.com/474x/4e/65/16/4e6516685214ca21e7c6086c01a44d73.jpg" alt="Baldi's Basics Thumbnail">
+            </div>
+            <div class="game-title">Baldi's Basics</div>
+        </a>
+
+        <!-- 24. HAPPY WHEELS -->
+        <a href="games/HappyWheels.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://serafimgaming.com/wp-content/themes/yootheme/cache/d3/Happy-Wheels-d3edff8f.png" alt="Happy Wheels">
+            </div>
+            <div class="game-title">Happy Wheels</div>
+        </a>
+
+        <!-- 25. ANGRY BIRDS -->
+        <a href="games/AngryBirds.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://m.gjcdn.net/fireside-post-image/900/25359106-caj975da-v4.webp" alt="Angry Birds Thumbnail">
+            </div>
+            <div class="game-title">Angry Birds</div>
+        </a>
+
+        <!-- 26. BITLIFE -->
+        <a href="games/bitlife.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://m.media-amazon.com/images/I/61jpZBYLFWL.png" alt="BitLife Thumbnail">
+            </div>
+            <div class="game-title">BitLife</div>
+        </a>
+
+        <!-- 27. DUMB WAYS TO DIE -->
+        <a href="games/DumbWay.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://img.gamepix.com/games/dumb-ways-to-die/cover/dumb-ways-to-die.png?w=1200&ar=16:10" alt="Dumb Ways To Die Thumbnail">
+            </div>
+            <div class="game-title">Dumb Ways To Die</div>
+        </a>
+
+        <!-- 28. FLAPPY BIRD -->
+        <a href="games/Flappy.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://th.bing.com/th/id/R.7482ed9dad08f48b9f6db70b274fe675?rik=6Z3yms%2bFt3gxxA&riu=http%3a%2f%2fstudents.com.miami.edu%2freporting%2fwp-content%2fuploads%2f2014%2f02%2fphoto.png&ehk=4onSifMV1r73Q57jOY4TtZEmAmEf%2fT%2bqovb6XWVXKak%3d&risl=&pid=ImgRaw&r=0" alt="Flappy Bird Thumbnail">
+            </div>
+            <div class="game-title">Flappy Bird</div>
+        </a>
+
+        <!-- 29. NYAN CAT: LOST IN SPACE -->
+        <a href="games/nyan-cat.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://play-lh.googleusercontent.com/rKLMwthaxMG2wXoSRI7gyuoZWkuIUagkFhRh4pFWqKquwzXx5R8w7aS148LzgeDlqWZs" alt="Nyan Cat: Lost in Space">
+            </div>
+            <div class="game-title">Nyan Cat: Lost in Space</div>
+        </a>
+
+        <!-- 30. METEOR 60 SECONDS -->
+        <a href="games/meteor.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://play-lh.googleusercontent.com/FwW4g5DfsHgRPMVvVXiTr0B-c4vHRqLAe2ViOIAHrRKp5aatPFdmOer-I7m1P8gXwUmTrFyw7eVKGQrSzXabxQ=w526-h296-rw" alt="Meteor 60 Seconds Thumbnail">
+            </div>
+            <div class="game-title">Meteor 60 Seconds</div>
+        </a>
+
+        <!-- 31. FLYING GORILLA -->
+        <a href="games/flyingg.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://img.itch.zone/aW1nLzIwODYwNDAucG5n/original/3%2BS1Jr.png" alt="Flying Gorilla Thumbnail">
+            </div>
+            <div class="game-title">Flying Gorilla</div>
+        </a>
+
+        <!-- 32. DOKI DOKI KOMBAT KLUB -->
+        <a href="games/DokiDokiKombatKlub.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://tse4.mm.bing.net/th/id/OIP.PFmT61emJCaQ0nElh2B9kwAAAA?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Doki Doki Kombat Klub Thumbnail">
+            </div>
+            <div class="game-title">Doki Doki Kombat Klub</div>
+        </a>
+
+        <!-- 33. STEWIE KILLS THE GRIFFINS -->
+        <a href="games/StewieKILLSTheGriffins.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co9f51.jpg" alt="Stewie KILLS The Griffins Thumbnail">
+            </div>
+            <div class="game-title">Stewie KILLS The Griffins</div>
+        </a>
+
+        <!-- 34. FEAR ME (JEFF DATING SIM) -->
+        <a href="games/DateJeff.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://img.qizhilu.org/website-builder/2025-11-04/images/1762240129440-ejvylc.avif" alt="Fear Me Thumbnail">
+            </div>
+            <div class="game-title">Fear Me [Jeff the Killer's Dating Sim]</div>
+        </a>
+
+        <!-- 35. VERITY DATING SIMULATOR -->
+        <a href="games/VdatingSim.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://th.bing.com/th?id=OVF.9ovpC56CcC97C8J2LNbP%2bw&w=354&h=199&c=7&rs=1&qlt=70&o=7&dpr=1.3&pid=2.1&rm=3" alt="Verity Dating Simulator Thumbnail">
+            </div>
+            <div class="game-title">Verity Dating Simulator</div>
+        </a>
+
+        <!-- 36. BARTBASH -->
+        <a href="games/BartBash.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBU3Lsv14l1Wd_Dz2nXuN854vY2Fh2i-vx6Ctpp8A7gMp1s9XPojalopYz&s=10" alt="BartBash Thumbnail">
+            </div>
+            <div class="game-title">BartBash</div>
+        </a>
+
+        <!-- 37. FISH -->
+        <a href="games/fish.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://i.etsystatic.com/56181984/r/il/b67efa/7168666349/il_1080xN.7168666349_ozuc.jpg" alt="Fish Thumbnail">
+            </div>
+            <div class="game-title">Fish</div>
+        </a>
+
+    </main>
+    <p id="noResults" class="no-results" hidden>No games found. Try another search.</p>
+    <footer class="library-privacy"><a href="/privacy.html">Privacy &amp; advertising</a></footer>
+
+    <script>
+        // Count actual game cards automatically, including cards added later.
+        // Mark non-game cards with data-not-game="true".
+        const gamesGrid = document.getElementById('gamesGrid');
+        const searchInput = document.getElementById('searchInput');
+        const gameCount = document.getElementById('gameCount');
+        const searchCount = document.getElementById('searchCount');
+        const noResults = document.getElementById('noResults');
+
+        function filterGames() {
+            const query = searchInput.value.trim().toLocaleLowerCase();
+            const cards = gamesGrid.querySelectorAll('.game-card');
+            let total = 0;
+            let matching = 0;
+            cards.forEach(card => {
+                const isGame = card.dataset.notGame !== 'true';
+                if (isGame) total++;
+                const title = (card.querySelector('.game-title')?.textContent || '').toLocaleLowerCase();
+                const visible = title.includes(query);
+                card.style.display = visible ? 'flex' : 'none';
+                if (visible && isGame) matching++;
+            });
+            gameCount.textContent = total.toLocaleString();
+            searchCount.hidden = !query;
+            searchCount.textContent = query ? `• ${matching} matching` : '';
+            noResults.hidden = !query || [...cards].some(card => card.style.display !== 'none');
+        }
+        searchInput.addEventListener('input', filterGames);
+        new MutationObserver(filterGames).observe(gamesGrid, { childList: true, subtree: false });
+        filterGames();
+
+        // Audio is initialized after the first user interaction to avoid autoplay restrictions.
+        let audioCtx;
+        function playAquaSound() {
+            try {
+                if (!audioCtx) {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContextClass) return;
+                    audioCtx = new AudioContextClass();
+                }
+                if (audioCtx.state !== 'running') return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(900, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1800, audioCtx.currentTime + 0.07);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.07);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.07);
+            } catch (error) { /* Audio is optional. */ }
+        }
+        document.addEventListener('pointerdown', () => {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            if (audioCtx?.state === 'suspended') audioCtx.resume().catch(() => {});
+        }, { passive: true });
+        document.addEventListener('mouseover', event => {
+            const target = event.target.closest?.('.game-card, .back-btn');
+            if (target && !target.contains(event.relatedTarget)) playAquaSound();
+        });
+
+        // --- FLOATING CLEAR BLUE WATER BUBBLES ---
+        const canvas = document.getElementById('bubbleCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let bubbles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        for (let i = 0; i < 30; i++) {
+            bubbles.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                radius: Math.random() * 16 + 5,
+                vy: - (Math.random() * 0.75 + 0.25),
+                vx: (Math.random() - 0.5) * 0.4,
+                opacity: Math.random() * 0.45 + 0.25
+            });
+        }
+
+        function animateBubbles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            bubbles.forEach((b) => {
+                b.y += b.vy;
+                b.x += b.vx;
+
+                if (b.y + b.radius < 0) {
+                    b.y = canvas.height + b.radius;
+                    b.x = Math.random() * canvas.width;
+                }
+
+                // Render Glassy Water Bubble with High Gloss Highlight
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                
+                let grad = ctx.createRadialGradient(
+                    b.x - b.radius * 0.35, b.y - b.radius * 0.35, b.radius * 0.1,
+                    b.x, b.y, b.radius
+                );
+                grad.addColorStop(0, `rgba(255, 255, 255, ${b.opacity + 0.35})`);
+                grad.addColorStop(0.5, `rgba(0, 210, 255, ${b.opacity * 0.4})`);
+                grad.addColorStop(1, `rgba(0, 100, 220, ${b.opacity * 0.65})`);
+
+                ctx.fillStyle = grad;
+                ctx.fill();
+
+                ctx.lineWidth = 1.2;
+                ctx.strokeStyle = `rgba(255, 255, 255, ${b.opacity * 0.9})`;
+                ctx.stroke();
+            });
+
+            requestAnimationFrame(animateBubbles);
+        }
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) animateBubbles();
+    </script>
+</body>
+</html>
+
