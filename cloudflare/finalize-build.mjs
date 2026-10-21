@@ -9,8 +9,12 @@ export async function finalizeBuild(output=path.resolve('dist'),catalog,{baselin
  const report=JSON.parse(await fs.readFile(path.join(output,'static-game-report.json'),'utf8'));
  if(Object.keys(report.games).length!==Object.keys(catalog.games).length)throw new Error('Incomplete static game build');
  const overflow=path.resolve('dist-games');
+ // Pages serves the uploaded gzip bytes for these runtimes without their
+ // Content-Encoding header. Route large WASM through the existing game worker,
+ // which returns the original bytes with a valid WebAssembly content type.
  const compressed=new Set(report.compressedFiles);
- const routes=staticPlan(catalog).routes.filter(route=>!compressed.has(decodeURI(route)));
+ const routes=staticPlan(catalog).routes;
+ report.compressedFiles=[];
  report.remainingFunctionRoutes=routes.length;
  await fs.writeFile(path.join(output,'static-game-report.json'),JSON.stringify(report,null,2));
  await build({entryPoints:['worker.mjs'],outfile:path.join(output,'_worker.js'),bundle:true,format:'esm',platform:'browser',target:'es2022',minify:true});
@@ -19,7 +23,7 @@ export async function finalizeBuild(output=path.resolve('dist'),catalog,{baselin
  const isolatedRoutes=new Set(catalog.mainIsolation.flatMap(file=>['/'+file,'/'+file.replace(/\.html$/,'')]).map(encodeURI));
  for(const route of isolatedRoutes)headers+=`\n${route}\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp\n  Cross-Origin-Resource-Policy: same-origin\n`;
  headers+='\n/__migration/health\n  Content-Type: application/json\n  Cache-Control: no-store\n\n'+(baseline?baseline.staticHeaders:await fs.readFile(path.join(overflow,'_headers'),'utf8'));
- for(const file of compressed)headers+='\n'+encodeURI(file)+'\n  Content-Encoding: gzip\n  Content-Type: application/wasm\n';
+ if(compressed.size)console.log('Serving '+compressed.size+' large WebAssembly runtimes through the game router.');
  if(headers.split('\n').filter(line=>line.startsWith('/')).length>100)throw new Error('Static header rule limit exceeded');
  await fs.writeFile(path.join(output,'_headers'),headers);
  await fs.writeFile(path.join(output,'website-version.json'),JSON.stringify({commit:process.env.GITHUB_SHA||null,builtAt:new Date().toISOString()}));

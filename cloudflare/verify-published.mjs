@@ -35,5 +35,12 @@ for(const [game,entry]of Object.entries(catalog.games)){
   if(report.compressedFiles.includes('/ports/'+game+'/'+file)&&result.headers.get('content-encoding')!=='gzip')throw new Error('Static runtime gzip check failed: '+game+'/'+file);
   checked++;
  }
+ const largeWasm=Object.keys(entry.files).find(file=>file.endsWith('.wasm')&&!isStatic(game,file));
+ if(largeWasm){
+  const url=origin+'/ports/'+game+'/'+largeWasm.split('/').map(encodeURIComponent).join('/');
+  const result=await fetch(url,{method:'HEAD',signal:AbortSignal.timeout(30000)});
+  if(!result.ok||result.headers.get('content-type')!=='application/wasm'||result.headers.has('content-encoding'))throw new Error('Large WebAssembly route check failed: '+game+'/'+largeWasm);
+  checked++;
+ }
 }
 console.log('Live website updated to '+expected+'; '+data.games.length+' game ports configured; '+checked+' static entry/data/runtime checks passed.');
