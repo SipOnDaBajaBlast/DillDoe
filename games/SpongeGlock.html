@@ -8,14 +8,16 @@
     *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;color:#102b44;background:linear-gradient(160deg,#77e7f1,#d7fbd8 55%,#f8e49b)}
     header{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.4rem;background:#ffffffa8}a{color:#06437e}main{max-width:1100px;margin:3rem auto;padding:1rem;text-align:center}
     h1{font-size:clamp(2.5rem,7vw,5rem);margin:.5rem 0}p{line-height:1.5}button{border:2px solid #174c72;border-radius:12px;background:#ffe346;color:#173047;font-size:1.25rem;font-weight:bold;padding:.85rem 1.5rem;cursor:pointer}
-    #stage{display:none;position:relative;overflow:hidden;aspect-ratio:16/9;background:#000;margin:1.5rem auto}iframe{width:1280px;height:720px;border:0;position:absolute;left:0;top:0;transform-origin:top left}
+    #stage{display:none;position:relative;overflow:hidden;aspect-ratio:16/9;background:#000;margin:1.5rem auto}#stage:fullscreen{width:100vw;height:100vh;aspect-ratio:auto;margin:0}iframe{width:1280px;height:720px;border:0;position:absolute;left:0;top:0;transform-origin:top left}#fullscreen{font-size:.95rem;padding:.5rem .8rem}#fullscreen[hidden]{display:none}
   </style>
 </head>
 <body>
-  <header><a href="/games">← Game Library</a><strong>SpongeGlock SquarePants</strong><span>Browser game</span></header>
+  <header><a href="/games">← Game Library</a><strong>SpongeGlock SquarePants</strong><button id="fullscreen" type="button" hidden>Fullscreen</button></header>
   <main><section id="intro"><h1>SpongeGlock SquarePants</h1><p>Launch the WebGL game. The first play downloads the game files; your browser may cache them for later visits.</p><button id="play">Play game</button><p>Source: <a href="https://github.com/SipOnDaBajaBlast/SpongeGlock-WASM">SpongeGlock-WASM</a>, based on the game by MixMorris.</p></section><div id="stage" aria-label="SpongeGlock game"></div></main>
   <script>
-    document.getElementById('play').addEventListener('click',()=>{const frame=document.createElement('iframe');const stage=document.getElementById('stage');frame.src='/ports/spongeglock-wasm/';frame.title='SpongeGlock SquarePants';frame.allow='fullscreen; autoplay; gamepad';frame.allowFullscreen=true;stage.append(frame);stage.style.display='block';document.getElementById('intro').hidden=true;const resize=()=>{frame.style.transform=`scale(${stage.clientWidth/1280})`};resize();new ResizeObserver(resize).observe(stage);frame.focus();});
+    const stage=document.getElementById('stage');
+    document.getElementById('fullscreen').addEventListener('click',()=>stage.requestFullscreen());
+    document.getElementById('play').addEventListener('click',()=>{const frame=document.createElement('iframe');frame.src='/ports/spongeglock-wasm/';frame.title='SpongeGlock SquarePants';frame.allow='fullscreen; autoplay; gamepad';frame.allowFullscreen=true;stage.append(frame);stage.style.display='block';document.getElementById('intro').hidden=true;document.getElementById('fullscreen').hidden=false;const resize=()=>{const scale=Math.min(stage.clientWidth/1280,stage.clientHeight/720);frame.style.transform=`scale(${scale})`;frame.style.left=`${(stage.clientWidth-1280*scale)/2}px`;frame.style.top=`${(stage.clientHeight-720*scale)/2}px`};resize();new ResizeObserver(resize).observe(stage);frame.focus();});
   </script>
 </body>
 </html>
