@@ -28,7 +28,7 @@ function rangeError(size){return response('Invalid byte range',416,{'Content-Ran
 async function specialDownload(request,url,game,path) {
  if(game==='sms-siteisoinclude'&&path==='api/game'){
   const start=Number(url.searchParams.get('start')),end=Number(url.searchParams.get('end'));
-  if(!url.searchParams.has('start')||!url.searchParams.has('end')||!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start<0||end<start||end>=sunshineSize||end-start+1>4194304)return response('Invalid game range',400);
+  if(!url.searchParams.has('start')||!url.searchParams.has('end')||!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start<0||end<start||end>=sunshineSize||end-start+1>16777216)return response('Invalid game range',400);
   return response(request.method==='HEAD'?null:await sunshineStore([0,0,sunshineSize],start,end,request.signal),200,{'Content-Type':'application/octet-stream','Content-Length':String(end-start+1),'Cache-Control':'public, max-age=31536000, immutable'});
  }
  if(emulatorStores[game]&&path==='api/game'){
