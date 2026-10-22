@@ -19,11 +19,18 @@ const haloSize=1857797028;
 const haloStore=createReleaseStore('https://github.com/MagiczLunchly/Halo-Mobile/releases/download/halo-game-data-v1/',[{name:'halo-maps.bin.gz',size:haloSize}]);
 const spiderSize=436830208;
 const spiderStore=createReleaseStore('https://github.com/MagiczLunchly/gta5-webport-vercel/releases/download/spiderman-psp-v1/',[{name:'webofshadows.iso',size:spiderSize}]);
+const sunshineSize=1180729920;
+const sunshineStore=createReleaseStore('https://github.com/SipOnDaBajaBlast/SMS-SiteIsoInclude/releases/download/game-data-v1/',[{name:'sms-gmse01-rev0.ciso',size:sunshineSize}]);
 
 function response(body,status=200,headers={}){return new Response(body,{status,headers:{...isolatedHeaders,...headers}});}
 function rangeHeaders(size,start,end,partial){return {'Accept-Ranges':'bytes','Content-Length':String(Math.max(0,end-start+1)),'Vary':'Range','Cache-Control':partial?'no-store':'public, max-age=86400',...(partial?{'Content-Range':`bytes ${start}-${end}/${size}`}:{})};}
 function rangeError(size){return response('Invalid byte range',416,{'Content-Range':`bytes */${size}`,'Cache-Control':'no-store'});}
 async function specialDownload(request,url,game,path) {
+ if(game==='sms-siteisoinclude'&&path==='api/game'){
+  const start=Number(url.searchParams.get('start')),end=Number(url.searchParams.get('end'));
+  if(!url.searchParams.has('start')||!url.searchParams.has('end')||!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start<0||end<start||end>=sunshineSize||end-start+1>4194304)return response('Invalid game range',400);
+  return response(request.method==='HEAD'?null:await sunshineStore([0,0,sunshineSize],start,end,request.signal),200,{'Content-Type':'application/octet-stream','Content-Length':String(end-start+1),'Cache-Control':'public, max-age=31536000, immutable'});
+ }
  if(emulatorStores[game]&&path==='api/game'){
   const start=Number(url.searchParams.get('start')),end=Number(url.searchParams.get('end')),size=emulatorGames[game][1];
   if(!url.searchParams.has('start')||!url.searchParams.has('end')||!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start<0||end<start||end>=size||end-start+1>4194304)return response('Invalid game range',400);

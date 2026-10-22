@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Super Mario Sunshine · DillDoe</title>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;color:#fff;background:linear-gradient(160deg,#075da2,#28b8df 55%,#fbd66b)}
+    header{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.8rem 1rem;background:#07539b}a{color:#fff}button{cursor:pointer;border:0;border-radius:9px;padding:.7rem 1.1rem;background:#ffe36e;color:#102740;font-weight:700}main{max-width:1000px;margin:3rem auto;padding:1rem;text-align:center}.panel{background:#083d76e8;border:2px solid #fff9;border-radius:18px;padding:2rem;box-shadow:0 15px 45px #002f6766}h1{font-size:clamp(2rem,5vw,4rem);margin:.3rem}p{line-height:1.5}#stage{display:none;position:fixed;inset:0;z-index:10;background:#000}#stage.active{display:block}iframe{width:100%;height:100%;border:0}#back{position:absolute;top:10px;right:10px;z-index:2}#stage:fullscreen{inset:0}
+  </style>
+</head>
+<body>
+  <header><a href="/games">← Game Library</a><strong>Super Mario Sunshine</strong></header>
+  <main><div class="panel"><h1>Super Mario Sunshine</h1><p>Play the original game in your browser. The game data downloads once on first visit and stays in your browser. A keyboard or controller works.</p><button id="play">Play</button><p>First launch downloads about 1.1 GB. Leave this tab open until the progress bar finishes.</p></div></main>
+  <div id="stage"><button id="back" type="button">Back to page</button><iframe title="Super Mario Sunshine browser game" allow="fullscreen; autoplay; gamepad; cross-origin-isolated" allowfullscreen></iframe></div>
+  <script>
+    const stage=document.getElementById('stage');
+    document.getElementById('play').addEventListener('click',()=>{stage.classList.add('active');const frame=stage.querySelector('iframe');if(!frame.src)frame.src='/ports/sms-siteisoinclude/';});
+    document.getElementById('back').addEventListener('click',()=>stage.classList.remove('active'));
+  </script>
+</body>
+</html>

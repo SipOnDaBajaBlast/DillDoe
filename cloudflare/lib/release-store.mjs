@@ -15,7 +15,7 @@ export function parseByteRange(value, size) {
 }
 
 export function createReleaseStore(release, packs, fetcher = fetch) {
-  if (!/^https:\/\/github\.com\/MagiczLunchly\/[^/]+\/releases\/download\/[^/]+\/$/.test(release)) throw new Error('Unexpected release');
+  if (!/^https:\/\/github\.com\/(?:MagiczLunchly|SipOnDaBajaBlast)\/[^/]+\/releases\/download\/[^/]+\/$/.test(release)) throw new Error('Unexpected release');
   const redirects = new Map();
   async function location(pack) {
     const cached = redirects.get(pack.name);
