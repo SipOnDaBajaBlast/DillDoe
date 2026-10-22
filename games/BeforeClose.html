@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Before Close · DillDoe</title>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;color:#fff;background:#090a10}header{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.8rem 1rem;background:#161823}a{color:#f3e567}button{cursor:pointer;border:1px solid #9b914d;border-radius:6px;padding:.5rem .8rem;background:#ecdc37;color:#141414;font-weight:700}main{max-width:1280px;margin:1rem auto;padding:0 1rem}#stage{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#000}#stage:fullscreen{width:100vw;height:100vh;aspect-ratio:auto}iframe{position:absolute;left:0;top:0;width:1280px;height:720px;border:0;transform-origin:top left}p{color:#b7bac4}
+  </style>
+</head>
+<body>
+  <header><a href="/games">← Game Library</a><strong>Before Close</strong><button id="fullscreen" type="button">Fullscreen</button></header>
+  <main><div id="stage"><iframe src="/ports/before-close-webport/" title="Before Close" allow="fullscreen; autoplay; gamepad" allowfullscreen></iframe></div><p>Source: <a href="https://github.com/xxuep/before-close-webport">Before Close web port</a>.</p></main>
+  <script>
+    const stage=document.getElementById('stage'),frame=stage.querySelector('iframe');
+    document.getElementById('fullscreen').addEventListener('click',()=>stage.requestFullscreen());
+    const resize=()=>{const scale=Math.min(stage.clientWidth/1280,stage.clientHeight/720);frame.style.transform=`scale(${scale})`;frame.style.left=`${(stage.clientWidth-1280*scale)/2}px`;frame.style.top=`${(stage.clientHeight-720*scale)/2}px`};
+    resize();new ResizeObserver(resize).observe(stage);
+  </script>
+</body>
+</html>

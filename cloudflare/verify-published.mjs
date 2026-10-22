@@ -38,8 +38,14 @@ for(const [game,entry]of Object.entries(catalog.games)){
  const largeWasm=Object.keys(entry.files).find(file=>file.endsWith('.wasm')&&!isStatic(game,file));
  if(largeWasm){
   const url=origin+'/ports/'+game+'/'+largeWasm.split('/').map(encodeURIComponent).join('/');
-  const result=await fetch(url,{method:'HEAD',signal:AbortSignal.timeout(30000)});
-  if(!result.ok||result.headers.get('content-type')!=='application/wasm'||result.headers.has('content-encoding'))throw new Error('Large WebAssembly route check failed: '+game+'/'+largeWasm);
+  let ready=false;
+  for(let attempt=0;attempt<10;attempt++){
+   const result=await fetch(url+'?publish-check='+expected+'&attempt='+attempt,{method:'HEAD',cache:'no-store',signal:AbortSignal.timeout(30000)});
+   ready=result.ok&&result.headers.get('content-type')==='application/wasm'&&!result.headers.has('content-encoding');
+   if(ready)break;
+   await new Promise(resolve=>setTimeout(resolve,3000));
+  }
+  if(!ready)throw new Error('Large WebAssembly route check failed: '+game+'/'+largeWasm);
   checked++;
  }
 }

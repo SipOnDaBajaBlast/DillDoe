@@ -21,11 +21,19 @@ export function createReleaseStore(release, packs, fetcher = fetch) {
     const cached = redirects.get(pack.name);
     if (cached && cached.expires > Date.now()) return cached.promise;
     const promise = (async () => {
-      const response = await fetcher(release + encodeURIComponent(pack.name), {redirect:'manual',headers:{Range:'bytes=0-0'}});
-      const target = response.headers.get('Location');
-      await response.body?.cancel();
-      if (![301,302,303,307,308].includes(response.status) || !target || new URL(target).origin !== 'https://release-assets.githubusercontent.com') throw new Error('Game download unavailable');
-      return target;
+      let url=release + encodeURIComponent(pack.name);
+      // GitHub redirects old repository names before it redirects to the asset.
+      for (let hop=0;hop<3;hop++) {
+        const response = await fetcher(url, {redirect:'manual',headers:{Range:'bytes=0-0'}});
+        const target = response.headers.get('Location');
+        await response.body?.cancel();
+        if (![301,302,303,307,308].includes(response.status) || !target) break;
+        const next=new URL(target,url);
+        if(next.origin==='https://release-assets.githubusercontent.com')return next.href;
+        if(next.origin!=='https://github.com'||!next.pathname.endsWith('/releases/download/'+release.split('/releases/download/')[1]+encodeURIComponent(pack.name)))break;
+        url=next.href;
+      }
+      throw new Error('Game download unavailable');
     })();
     redirects.set(pack.name, {promise,expires:Date.now()+240000});
     try { return await promise; } catch(e) { redirects.delete(pack.name);throw e; }
