@@ -39,11 +39,16 @@ for(const [game,entry]of Object.entries(catalog.games)){
  if(largeWasm){
   const url=origin+'/ports/'+game+'/'+largeWasm.split('/').map(encodeURIComponent).join('/');
   let ready=false;
-  for(let attempt=0;attempt<10;attempt++){
-   const result=await fetch(url+'?publish-check='+expected+'&attempt='+attempt,{method:'HEAD',cache:'no-store',signal:AbortSignal.timeout(30000)});
-   ready=result.ok&&result.headers.get('content-type')==='application/wasm'&&!result.headers.has('content-encoding');
+  for(let attempt=0;attempt<40;attempt++){
+   let detail='no response';
+   try{
+    const result=await fetch(url+'?publish-check='+expected+'&attempt='+attempt,{method:'HEAD',cache:'no-store',signal:AbortSignal.timeout(30000)});
+    detail=`HTTP ${result.status}, ${result.headers.get('content-type')||'no content type'}, ${result.headers.get('content-encoding')||'uncompressed'}`;
+    ready=result.ok&&result.headers.get('content-type')==='application/wasm'&&!result.headers.has('content-encoding');
+   }catch(error){detail=error.message;}
    if(ready)break;
-   await new Promise(resolve=>setTimeout(resolve,3000));
+   console.log('Waiting for large WebAssembly route '+game+'/'+largeWasm+': '+detail);
+   await new Promise(resolve=>setTimeout(resolve,5000));
   }
   if(!ready)throw new Error('Large WebAssembly route check failed: '+game+'/'+largeWasm);
   checked++;
