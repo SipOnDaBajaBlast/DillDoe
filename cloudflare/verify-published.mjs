@@ -56,7 +56,16 @@ for(const [game,entry]of Object.entries(catalog.games)){
 }
 const haloManifest=await fetch(origin+'/ports/halo-mobile/local-maps.json',{signal:AbortSignal.timeout(15000)});
 if(!haloManifest.ok||!(await haloManifest.json()).files?.some(file=>file.name==='ui.map'))throw new Error('Halo streamed map manifest check failed');
-const haloMap=await fetch(origin+'/downloaded-maps//ui.map',{headers:{Range:'bytes=0-7'},signal:AbortSignal.timeout(15000)});
-if(haloMap.status!==206||!haloMap.headers.get('content-range')?.startsWith('bytes 0-7/'))throw new Error('Halo streamed map range check failed');
-await haloMap.body?.cancel();
+let haloReady=false;
+for(let attempt=0;attempt<10;attempt++){
+ try{
+  const haloMap=await fetch(origin+'/downloaded-maps//ui.map?publish-check='+expected+'&attempt='+attempt,{headers:{Range:'bytes=0-7'},cache:'no-store',signal:AbortSignal.timeout(15000)});
+  haloReady=haloMap.status===206&&haloMap.headers.get('content-range')?.startsWith('bytes 0-7/');
+  if(!haloReady)console.log('Waiting for Halo map route: HTTP '+haloMap.status+', '+(haloMap.headers.get('content-range')||'no byte range'));
+  await haloMap.body?.cancel();
+  if(haloReady)break;
+ }catch(error){console.log('Waiting for Halo map route: '+error.message);}
+ await new Promise(resolve=>setTimeout(resolve,5000));
+}
+if(!haloReady)throw new Error('Halo streamed map range check failed');
 console.log('Live website updated to '+expected+'; '+data.games.length+' game ports configured; '+checked+' static entry/data/runtime checks passed.');
