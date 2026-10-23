@@ -1,6 +1,7 @@
 import catalog from './game-catalog.json' with {type:'json'};
 import packed from './game-assets.json' with {type:'json'};
 import gtaIndex from './gta-data-index.json' with {type:'json'};
+import haloStreamManifest from './halo-stream-manifest.json' with {type:'json'};
 import {createDataServer} from './gta-data-server.mjs';
 import {createReleaseStore,parseByteRange} from './release-store.mjs';
 import {bootstrap,cleanPath,contentType,isolatedHeaders} from './migration-paths.mjs';
@@ -17,6 +18,8 @@ const emulatorGames={
 const emulatorStores=Object.fromEntries(Object.entries(emulatorGames).map(([name,[file,size]])=>[name,createReleaseStore(`https://github.com/MagiczLunchly/${name}/releases/download/game-v1/`,[{name:file,size}])]));
 const haloSize=1857797028;
 const haloStore=createReleaseStore('https://github.com/MagiczLunchly/Halo-Mobile/releases/download/halo-game-data-v1/',[{name:'halo-maps.bin.gz',size:haloSize}]);
+const haloMapSizes=Object.fromEntries(haloStreamManifest.files.map(file=>[file.name,file.size]));
+const haloMapStore=createReleaseStore('https://github.com/SipOnDaBajaBlast/Halo-Mobile/releases/download/halo-streamed-maps-v1/',haloStreamManifest.files);
 const spiderSize=436830208;
 const spiderStore=createReleaseStore('https://github.com/MagiczLunchly/gta5-webport-vercel/releases/download/spiderman-psp-v1/',[{name:'webofshadows.iso',size:spiderSize}]);
 const sunshineSize=1180729920;
@@ -26,6 +29,9 @@ function response(body,status=200,headers={}){return new Response(body,{status,h
 function rangeHeaders(size,start,end,partial){return {'Accept-Ranges':'bytes','Content-Length':String(Math.max(0,end-start+1)),'Vary':'Range','Cache-Control':partial?'no-store':'public, max-age=86400',...(partial?{'Content-Range':`bytes ${start}-${end}/${size}`}:{})};}
 function rangeError(size){return response('Invalid byte range',416,{'Content-Range':`bytes */${size}`,'Cache-Control':'no-store'});}
 async function specialDownload(request,url,game,path) {
+ if(game==='halo-mobile'&&path==='local-maps.json')return response(JSON.stringify(haloStreamManifest),200,{'Content-Type':'application/json','Cache-Control':'public, max-age=3600'});
+ // Stream maps as needed, so first-time play does not require a 1.86 GB browser install.
+ if(game==='halo-mobile'&&path==='game-download.json')return response('{"url":""}',200,{'Content-Type':'application/json','Cache-Control':'no-store'});
  if(game==='sms-siteisoinclude'&&path==='api/game'){
   const start=Number(url.searchParams.get('start')),end=Number(url.searchParams.get('end'));
   if(!url.searchParams.has('start')||!url.searchParams.has('end')||!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start<0||end<start||end>=sunshineSize||end-start+1>16777216)return response('Invalid game range',400);
@@ -100,6 +106,17 @@ async function gameAsset(request,url,game,path) {
 
 export async function migrationRouter(request,env){
  const url=new URL(request.url);
+ if(url.pathname.startsWith('/downloaded-maps/')){
+  if(!['GET','HEAD'].includes(request.method))return response('Method not allowed',405,{'Allow':'GET, HEAD'});
+  const name=url.pathname.slice('/downloaded-maps/'.length),size=haloMapSizes[name];
+  if(!size)return response('Map not found',404);
+  let start,end;try{[start,end]=parseByteRange(request.headers.get('Range'),size);}catch{return rangeError(size);}
+  const partial=request.headers.has('Range');
+  try{
+   const body=request.method==='HEAD'?null:await haloMapStore([haloStreamManifest.files.findIndex(file=>file.name===name),0,size],start,end,request.signal);
+   return response(body,partial?206:200,{'Content-Type':'application/octet-stream',...rangeHeaders(size,start,end,partial),'Cache-Control':'public, max-age=86400'});
+  }catch(e){console.error('Halo map download failed',name,e instanceof Error?e.message:String(e));return response('Map temporarily unavailable. Please retry.',503,{'Cache-Control':'no-store','Retry-After':'2'});}
+ }
  if(url.pathname==='/ports/spiderman-psp/api/game'){
   if(!['GET','HEAD'].includes(request.method))return response('Method not allowed',405,{'Allow':'GET, HEAD'});
   const start=Number(url.searchParams.get('start')),end=Number(url.searchParams.get('end'));

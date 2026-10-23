@@ -28,4 +28,6 @@ test('static and dynamic text retain game scoping and RenPy filesystem paths',()
  assert.equal(transformGameText(renpy,'example',entry,'renpy.js'),renpy);
  const gtaData='{"path":"/data/a.rpf"}';
  assert.equal(transformGameText(gtaData,'gta5-webport-vercel',entry,'data/example.json'),gtaData);
+ const haloData="const dataRoot='/data/streamed';";
+ assert.equal(transformGameText(haloData,'halo-mobile',entry,'stream-maps.js'),haloData);
 });

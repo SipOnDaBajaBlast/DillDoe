@@ -10,6 +10,7 @@ export const specialRoutes=[
  '/ports/gta5-webport-vercel/data/*','/ports/gta5-webport-vercel/deployment-status.json',
  '/ports/master-quest-browser/api/*','/ports/persona3-browser/api/*','/ports/ghost-sparta-browser/api/*',
  '/ports/spiderman-psp/api/*','/ports/halo-mobile/game-data/*',
+ '/ports/halo-mobile/local-maps.json','/ports/halo-mobile/game-download.json','/downloaded-maps/*',
  '/ports/sms-siteisoinclude/api/*',
 ];
 export function staticPlan(catalog,budget=19000){
