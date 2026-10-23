@@ -32,6 +32,8 @@ test('Halo streamed map routes advertise correct byte ranges',async()=>{
  const response=await migrationRouter(new Request('https://dilldoe-games.pages.dev/downloaded-maps/'+first.name,{method:'HEAD',headers:{Range:'bytes=0-1023'}}),{});
  assert.equal(response.status,206);
  assert.equal(response.headers.get('Content-Range'),`bytes 0-1023/${first.size}`);
+ const wasmfs=await migrationRouter(new Request('https://dilldoe-games.pages.dev/downloaded-maps//'+first.name,{method:'HEAD',headers:{Range:'bytes=0-1023'}}),{});
+ assert.equal(wasmfs.status,206);
  const manifest=await migrationRouter(new Request('https://dilldoe-games.pages.dev/ports/halo-mobile/local-maps.json'),{});
  assert.equal(manifest.status,200);
  assert.deepEqual((await manifest.json()).files,haloMaps.files);

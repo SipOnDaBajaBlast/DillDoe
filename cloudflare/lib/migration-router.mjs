@@ -108,7 +108,8 @@ export async function migrationRouter(request,env){
  const url=new URL(request.url);
  if(url.pathname.startsWith('/downloaded-maps/')){
   if(!['GET','HEAD'].includes(request.method))return response('Method not allowed',405,{'Allow':'GET, HEAD'});
-  const name=url.pathname.slice('/downloaded-maps/'.length),size=haloMapSizes[name];
+  // WasmFS joins its backend prefix and absolute map name with two slashes.
+  const name=url.pathname.slice('/downloaded-maps/'.length).replace(/^\/+/,''),size=haloMapSizes[name];
   if(!size)return response('Map not found',404);
   let start,end;try{[start,end]=parseByteRange(request.headers.get('Range'),size);}catch{return rangeError(size);}
   const partial=request.headers.has('Range');
