@@ -23,13 +23,20 @@ export function createDataServer(index, fetcher = fetch) {
     const cached = redirects.get(pack.name);
     if (cached && cached.expires > Date.now()) return cached.promise;
     const promise = (async () => {
-      const response = await fetcher(RELEASE + pack.name, {redirect:'manual',headers:{Range:'bytes=0-0'}});
-      const target = response.headers.get('Location');
-      if (response.body) await response.body.cancel();
-      if (![301,302,303,307,308].includes(response.status) || !target || new URL(target).origin !== 'https://release-assets.githubusercontent.com') {
-        throw new Error('The game-data pack is unavailable.');
+      let url = RELEASE + encodeURIComponent(pack.name);
+      // GitHub redirects old repository names before redirecting to the asset.
+      for (let hop = 0; hop < 3; hop++) {
+        const response = await fetcher(url, {redirect:'manual',headers:{Range:'bytes=0-0'}});
+        const target = response.headers.get('Location');
+        await response.body?.cancel();
+        if (![301,302,303,307,308].includes(response.status) || !target) break;
+        const next = new URL(target, url);
+        if (next.origin === 'https://release-assets.githubusercontent.com') return next.href;
+        if (next.origin !== 'https://github.com' ||
+            !next.pathname.endsWith('/releases/download/game-data-v2/' + encodeURIComponent(pack.name))) break;
+        url = next.href;
       }
-      return target;
+      throw new Error('The game-data pack is unavailable.');
     })();
     redirects.set(pack.name, {promise, expires:Date.now() + 5 * 60 * 1000});
     try { return await promise; }
