@@ -23,7 +23,7 @@ const isStatic=(game,file)=>entrySize(game,file)<=STATIC_LIMIT||report.compresse
 const entrySize=(game,file)=>catalog.games[game].files[file]??Infinity;
 let checked=0;
 for(const [game,entry]of Object.entries(catalog.games)){
- const candidates=[entry.entry||'index.html',Object.keys(entry.files).find(file=>isSecondaryFile(file)&&isStatic(game,file)),Object.keys(entry.files).find(file=>/\.wasm(?:\.(?:gz|br))?$/.test(file)&&isStatic(game,file))].filter(Boolean);
+ const candidates=[entry.entry||'index.html',Object.keys(entry.files).find(file=>isSecondaryFile(file)&&isStatic(game,file)&&!(game==='halo-mobile'&&file==='game-download.json')),Object.keys(entry.files).find(file=>/\.wasm(?:\.(?:gz|br))?$/.test(file)&&isStatic(game,file))].filter(Boolean);
  for(const file of new Set(candidates)){
   if(!Object.hasOwn(entry.files,file)||!isStatic(game,file))continue;
   const url=origin+'/ports/'+game+'/'+file.split('/').map(encodeURIComponent).join('/');
@@ -54,4 +54,9 @@ for(const [game,entry]of Object.entries(catalog.games)){
   checked++;
  }
 }
+const haloManifest=await fetch(origin+'/ports/halo-mobile/local-maps.json',{signal:AbortSignal.timeout(15000)});
+if(!haloManifest.ok||!(await haloManifest.json()).files?.some(file=>file.name==='ui.map'))throw new Error('Halo streamed map manifest check failed');
+const haloMap=await fetch(origin+'/downloaded-maps/ui.map',{headers:{Range:'bytes=0-7'},signal:AbortSignal.timeout(15000)});
+if(haloMap.status!==206||!haloMap.headers.get('content-range')?.startsWith('bytes 0-7/'))throw new Error('Halo streamed map range check failed');
+await haloMap.body?.cancel();
 console.log('Live website updated to '+expected+'; '+data.games.length+' game ports configured; '+checked+' static entry/data/runtime checks passed.');
