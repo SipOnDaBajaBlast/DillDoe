@@ -5,6 +5,12 @@ import {gtaRoutingScript} from './gta-static-routing.mjs';
 // Share exactly the same compatibility fixes between static builds and downloads.
 export function transformGameText(text,game,entry,path) {
  if(game==='gta5-webport-vercel'&&path.startsWith('data/'))return text;
+ // Bump Halo's shell version when its mounted-map paths change, so its
+ // service worker offers existing visitors the corrected files.
+ if(game==='halo-mobile'&&path==='version.json'){
+  const version=JSON.parse(text);
+  return JSON.stringify({...version,version:version.version+'-dilldoe-stream2'});
+ }
  // Halo's /data paths are virtual WasmFS mount points, not network URLs.
  if(!(game==='halo-mobile'&&['app.js','stream-maps.js'].includes(path)))text=rewriteRootPaths(text,game,entry.files,path);
  if(game==='gta5-webport-vercel'&&path.endsWith('/loader.js'))text=text.replace("new Worker(B + '/io_worker.js')","new Worker(B + '/io_worker.js?assets=static-v2')");
