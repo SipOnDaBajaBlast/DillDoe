@@ -114,7 +114,14 @@ export async function migrationRouter(request,env){
   let start,end;try{[start,end]=parseByteRange(request.headers.get('Range'),size);}catch{return rangeError(size);}
   const partial=request.headers.has('Range');
   try{
-   const body=request.method==='HEAD'?null:await haloMapStore([haloStreamManifest.files.findIndex(file=>file.name===name),0,size],start,end,request.signal);
+   let body=null;
+   if(request.method!=='HEAD'){
+    const record=[haloStreamManifest.files.findIndex(file=>file.name===name),0,size];
+    for(let attempt=0;attempt<3;attempt++){
+     try{body=await haloMapStore(record,start,end,request.signal);break;}
+     catch(error){if(attempt===2||request.signal.aborted)throw error;await new Promise(resolve=>setTimeout(resolve,250*2**attempt));}
+    }
+   }
    return response(body,partial?206:200,{'Content-Type':'application/octet-stream',...rangeHeaders(size,start,end,partial),'Cache-Control':'public, max-age=86400'});
   }catch(e){console.error('Halo map download failed',name,e instanceof Error?e.message:String(e));return response('Map temporarily unavailable. Please retry.',503,{'Cache-Control':'no-store','Retry-After':'2'});}
  }
