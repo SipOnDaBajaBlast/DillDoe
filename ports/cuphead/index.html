@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <base href="https://cdn.jsdelivr.net/gh/web-ports/cuphead@08a62227c742d74092f739b168ee4be1993f8ba5/">
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | Cuphead</title>
+    <style>
+      body {
+        background-color: black;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      #gameContainer {
+        width: 100vw !important;
+        height: 100vh !important;
+      }
+      canvas {
+        width: 100% !important;
+        height: 100% !important;
+      }
+#loading-text {
+  font-weight: bold;
+  background: linear-gradient(
+    270deg,
+    #ff0000,
+    #ff7f00,
+    #ffff00,
+    #00ff00,
+    #0000ff,
+    #4b0082,
+    #8f00ff
+  );
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbow 3s ease infinite;
+}
+
+@keyframes rainbow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+    </style>
+  </head>
+  <body>
+<div id="loading-text"
+    style="color: white; font-size: 48px; font-family: cursive; text-align: center; margin-top: 20px;"> LOADING…
+  </div>
+    <div id="gameContainer"></div>
+    <script src="Build/UnityLoader.js"></script>
+    <script>
+var loadingText = document.querySelector("#loading-text");
+    let totalBytes = 0;
+    let loadedBytes = 0;
+
+    async function fetchWithProgress(url) {
+      let response;
+      for (const source of [url, 'https://raw.githubusercontent.com/web-ports/cuphead/08a62227c742d74092f739b168ee4be1993f8ba5/' + url]) {
+        try { response = await fetch(source); if (response.ok) break; }
+        catch (error) { console.warn('Game part download failed; trying another source', error); }
+      }
+      if (!response?.ok || !response.body) throw new Error('Could not download ' + url);
+      const reader = response.body.getReader();
+      let chunks = [];
+      while (true) {
+        const {
+          done,
+          value
+        } = await reader.read();
+        if (done) break;
+        loadedBytes += value.length;
+        chunks.push(value);
+        let mbDone = (loadedBytes / (1024 * 1024)).toFixed(2);
+        let mbTotal = '2101.31';
+        loadingText.textContent = `LOADING… ${mbDone} MB / ${mbTotal} MB`;
+      }
+      return new Blob(chunks);
+    }
+
+    async function mergeFiles(fileParts, cacheKey) {
+      const cache = await caches.open("cuphead-cache");
+      const cachedResponse = await cache.match(cacheKey);
+      if (cachedResponse) {
+        const blob = await cachedResponse.blob();
+        return URL.createObjectURL(blob);
+      }
+      const buffers = [];
+      for (let i = 0; i < fileParts.length; i += 4) {
+        buffers.push(...await Promise.all(fileParts.slice(i, i + 4).map(fetchWithProgress)));
+      }
+      const mergedBlob = new Blob(buffers);
+      // The 2.1 GB data archive exceeds browser cache quotas on many devices.
+      if (mergedBlob.size < 100 * 1024 * 1024) {
+        try { await cache.put(cacheKey, new Response(mergedBlob)); }
+        catch (error) { console.warn('Game cache unavailable', error); }
+      }
+      return URL.createObjectURL(mergedBlob);
+    }
+
+    function getParts(file, start, end) {
+      let parts = [];
+      for (let i = start; i <= end; i++) {
+        parts.push(file + ".part" + i);
+      }
+      return parts;
+    }
+    (async () => {
+      const [wasmUrl, asmUrl] = await Promise.all([
+        mergeFiles(getParts("Build/CupheadPort.wasm.code.unityweb", 1, 2), "CupheadPort.wasm.code.unityweb"),
+        mergeFiles(getParts("Build/CupheadPort.asm.code.unityweb", 1, 3), "CupheadPort.asm.code.unityweb"),
+      ]);
+
+      // Stream the 2.1 GB data archive rather than creating a Blob too large
+      // for Chromium's Blob storage. The worker joins pinned repository parts.
+      if (!navigator.serviceWorker) throw new Error('This browser does not support the game data loader');
+      await navigator.serviceWorker.register(location.origin + '/ports/cuphead/sw.js', { scope: location.origin + '/ports/cuphead/' });
+      if (!navigator.serviceWorker.controller) await new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('Game data loader did not start')), 15000);
+        navigator.serviceWorker.addEventListener('controllerchange', () => { clearTimeout(timer); resolve(); }, { once: true });
+      });
+
+      const originalOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+          if (url.includes("CupheadPort.data.unityweb")) {
+              url = location.origin + '/ports/cuphead/Build/CupheadPort.data.unityweb';
+          } else if (url.includes("CupheadPort.wasm.code.unityweb")) {
+              url = wasmUrl;
+          } else if (url.includes("CupheadPort.asm.code.unityweb")) {
+              url = asmUrl;
+          }
+          return originalOpen.call(this, method, url, ...rest);
+      };
+      var unityInstance = UnityLoader.instantiate("gameContainer", "Build/CupheadPort.json");
+      loadingText.remove();
+    })().catch(error => { loadingText.textContent = 'Cuphead could not load: ' + error.message; console.error(error); });
+    </script>
+  </body>
+</html>
