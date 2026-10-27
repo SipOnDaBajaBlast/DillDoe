@@ -394,6 +394,26 @@
                (min-width: 500px) and (max-width: 640px) {
             .homepage-display-ad { width: 300px; height: 250px; }
         }
+        .mary-dialog {
+            width: min(92vw, 560px);
+            max-height: 90vh;
+            margin: auto;
+            padding: 24px;
+            border: 2px solid #fff;
+            border-radius: 18px;
+            background: linear-gradient(145deg, #ecfaff, #b9dcff);
+            box-shadow: 0 20px 60px #07335e99, inset 0 2px 6px #fff;
+            color: var(--text-dark);
+            text-align: center;
+        }
+        .mary-dialog::backdrop { background: #09243aa8; }
+        .mary-dialog h2 { margin-bottom: 16px; font-size: clamp(1.5rem, 5vw, 2.4rem); }
+        .mary-dialog p { margin: 0 0 12px; }
+        .mary-dialog form { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 12px; }
+        .mary-dialog input { min-width: 0; flex: 1 1 190px; padding: 10px 12px; border: 1px solid #6ba9d6; border-radius: 8px; font: inherit; cursor: text !important; }
+        .mary-dialog button { padding: 10px 16px; border: 1px solid #268ac3; border-radius: 8px; background: #e9f9ff; color: var(--text-dark); font: inherit; font-weight: bold; cursor: pointer !important; }
+        .mary-dialog img { display: block; width: 100%; height: auto; margin: 0 auto 16px; border-radius: 8px; }
+        .mary-dialog [hidden] { display: none; }
     </style>
 </head>
 <body>
@@ -487,6 +507,30 @@
     </div>
     <a class="homepage-privacy" href="privacy.html">Privacy &amp; advertising</a>
 
+    <dialog class="mary-dialog" id="maryDialog" aria-labelledby="maryTitle">
+        <section id="maryPrompt">
+            <h2 id="maryTitle">Enter the code</h2>
+            <p>I have keys but no locks, space but no room, and Enter but no door. What am I?</p>
+            <form id="maryPuzzle">
+                <input id="maryAnswer" type="text" autocomplete="off" aria-label="Puzzle answer">
+                <button type="submit">Solve puzzle</button>
+            </form>
+            <p id="maryHint" role="status" hidden>The code is <strong>Mary&lt;3</strong></p>
+            <p id="maryPuzzleError" role="status" hidden>Try another answer.</p>
+            <form id="maryForm">
+                <input id="maryCode" type="text" autocomplete="off" aria-label="Code">
+                <button type="submit">Enter</button>
+                <button type="button" id="maryCancel">Close</button>
+            </form>
+            <p id="maryError" role="status" hidden>That code didn't work.</p>
+        </section>
+        <section id="maryResult" hidden>
+            <h2>HELLLLOOO MARY</h2>
+            <img src="assets/mary-surprise.png" alt="Chart showing four responses to Any Decompiles?">
+            <button type="button" id="maryDone">Close</button>
+        </section>
+    </dialog>
+
     <script>
         // Loader Transition
         window.addEventListener('DOMContentLoaded', () => {
@@ -505,6 +549,43 @@
             }, 400);
         }
 
+    </script>
+    <script>
+        const maryDialog = document.getElementById('maryDialog');
+        const maryCode = document.getElementById('maryCode');
+        const maryAnswer = document.getElementById('maryAnswer');
+        document.addEventListener('keydown', event => {
+            const target = event.target;
+            if (event.key.toLowerCase() !== 'p' || event.altKey || event.ctrlKey || event.metaKey || event.repeat || maryDialog.open || target.closest('input, textarea, select, [contenteditable="true"]')) return;
+            event.preventDefault();
+            document.getElementById('maryPrompt').hidden = false;
+            document.getElementById('maryResult').hidden = true;
+            document.getElementById('maryError').hidden = true;
+            document.getElementById('maryHint').hidden = true;
+            document.getElementById('maryPuzzleError').hidden = true;
+            maryAnswer.value = '';
+            maryCode.value = '';
+            maryDialog.showModal();
+            maryAnswer.focus();
+        });
+        document.getElementById('maryPuzzle').addEventListener('submit', event => {
+            event.preventDefault();
+            const solved = maryAnswer.value.trim().toLowerCase() === 'keyboard';
+            document.getElementById('maryHint').hidden = !solved;
+            document.getElementById('maryPuzzleError').hidden = solved;
+            if (solved) maryCode.focus();
+        });
+        document.getElementById('maryForm').addEventListener('submit', event => {
+            event.preventDefault();
+            if (maryCode.value.trim().toLowerCase() !== 'mary<3') {
+                document.getElementById('maryError').hidden = false;
+                return;
+            }
+            document.getElementById('maryPrompt').hidden = true;
+            document.getElementById('maryResult').hidden = false;
+        });
+        document.getElementById('maryCancel').addEventListener('click', () => maryDialog.close());
+        document.getElementById('maryDone').addEventListener('click', () => maryDialog.close());
     </script>
     <script>
         
