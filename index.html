@@ -83,7 +83,7 @@
         .bg-cat {
             position: absolute;
             z-index: 3;
-            pointer-events: auto; /* Enabled for interaction */
+            pointer-events: auto;
             user-select: none;
             cursor: pointer !important;
             transition: transform 0.2s ease, filter 0.2s ease;
@@ -388,8 +388,6 @@
             justify-content: space-between;
         }
 
-        /* Explicit responsive ad sizes keep the entire ad above the frame artwork.
-           Keep these rules inline as recommended by the AdSense code guide. */
         .homepage-display-ad { width: 180px; height: 150px; margin: 0 auto; }
         @media (min-width: 400px) and (max-width: 640px),
                (min-width: 800px) and (max-width: 1199px),
@@ -429,91 +427,91 @@
 <body>
 
     <div class="homepage-background" aria-hidden="true">
-    <!-- WATER OVERLAY -->
-    <div class="water-overlay"></div>
+        <!-- WATER OVERLAY -->
+        <div class="water-overlay"></div>
 
-    <!-- GRASS BOTTOM BORDER -->
-    <div class="grass-bottom"></div>
+        <!-- GRASS BOTTOM BORDER -->
+        <div class="grass-bottom"></div>
 
-    <!-- RISING BUBBLES -->
-    <div class="bubble" style="width: 42px; height: 42px; left: 8%; animation-duration: 9s;"></div>
-    <div class="bubble" style="width: 26px; height: 26px; left: 22%; animation-duration: 7s; animation-delay: 2s;"></div>
-    <div class="bubble" style="width: 52px; height: 52px; left: 52%; animation-duration: 11s; animation-delay: 1s;"></div>
-    <div class="bubble" style="width: 32px; height: 32px; left: 74%; animation-duration: 8s; animation-delay: 3s;"></div>
-    <div class="bubble" style="width: 46px; height: 46px; left: 90%; animation-duration: 10s; animation-delay: 0.5s;"></div>
+        <!-- RISING BUBBLES -->
+        <div class="bubble" style="width: 42px; height: 42px; left: 8%; animation-duration: 9s;"></div>
+        <div class="bubble" style="width: 26px; height: 26px; left: 22%; animation-duration: 7s; animation-delay: 2s;"></div>
+        <div class="bubble" style="width: 52px; height: 52px; left: 52%; animation-duration: 11s; animation-delay: 1s;"></div>
+        <div class="bubble" style="width: 32px; height: 32px; left: 74%; animation-duration: 8s; animation-delay: 3s;"></div>
+        <div class="bubble" style="width: 46px; height: 46px; left: 90%; animation-duration: 10s; animation-delay: 0.5s;"></div>
 
-    <!-- BACKGROUND CAT IMAGES -->
-    <img src="https://png.pngtree.com/png-vector/20240917/ourmid/pngtree-funny-kitten-cat-standing-or-dancing-isolated-png-image_13844217.png" alt="Dancing Kitten" class="bg-cat bg-cat-kitten">
-    <img src="https://wallpapers.com/images/featured/nyan-cat-png-az8jeatasi3z7yda.png" alt="Nyan Cat" class="bg-cat bg-cat-nyan">
+        <!-- BACKGROUND CAT IMAGES -->
+        <img src="https://png.pngtree.com/png-vector/20240917/ourmid/pngtree-funny-kitten-cat-standing-or-dancing-isolated-png-image_13844217.png" alt="Dancing Kitten" class="bg-cat bg-cat-kitten">
+        <img src="https://wallpapers.com/images/featured/nyan-cat-png-az8jeatasi3z7yda.png" alt="Nyan Cat" class="bg-cat bg-cat-nyan">
     </div>
 
     <div class="homepage-layout">
-    <!-- Stationary display ads. Each unit is initialized once by home-sponsors.js. -->
-    <aside class="sponsor-background" aria-label="Advertisements">
-        <section class="sponsor-window sponsor-window-one" aria-label="Advertisement">
-            <div class="sponsor-surface"></div>
-            <div class="sponsor-ad-area">
-                <ins class="adsbygoogle homepage-display-ad" style="display:block" data-ad-client="ca-pub-6483528780801608" data-ad-slot="3349064473"></ins>
-            </div>
-            <img class="sponsor-frame" src="assets/sponsor-window.png" alt="" width="720" height="720" decoding="async">
-            <span class="sponsor-title" aria-hidden="true">ADVERTISEMENT</span>
-            <button class="sponsor-close" type="button" aria-label="Hide first advertisement"></button>
-        </section>
-        <section class="sponsor-window sponsor-window-two" aria-label="Advertisement">
-            <div class="sponsor-surface"></div>
-            <div class="sponsor-ad-area">
-                <ins class="adsbygoogle homepage-display-ad" style="display:block" data-ad-client="ca-pub-6483528780801608" data-ad-slot="3349064473"></ins>
-            </div>
-            <img class="sponsor-frame" src="assets/sponsor-window.png" alt="" width="720" height="720" decoding="async">
-            <span class="sponsor-title" aria-hidden="true">ADVERTISEMENT</span>
-            <button class="sponsor-close" type="button" aria-label="Hide second advertisement"></button>
-        </section>
-    </aside>
-
-    <!-- LOADING SCREEN -->
-    <div id="loader-wrapper">
-        <div class="loader-box">
-            <div class="loader-text">DILL DOE</div>
-        </div>
-    </div>
-
-    <!-- AERO GLASS WINDOW CONTAINER -->
-    <div class="aero-window" id="aeroWindow">
-        <!-- Title Bar -->
-        <div class="window-titlebar" id="windowTitlebar" tabindex="0" aria-label="Move main window: drag the title bar or use arrow keys; Home resets its position">
-            <div class="window-title-text">
-                🌐 DillDoe_Unblocked_v2.0.exe
-            </div>
-            <div class="window-controls">
-                <div class="win-btn win-min"></div>
-                <div class="win-btn win-max"></div>
-                <div class="win-btn win-close"></div>
-            </div>
-        </div>
-
-        <!-- Inner Content -->
-        <div class="window-content">
-            <!-- HEADER -->
-            <header>
-                <h1 class="metal-title">DILL DOE | UNBLOCKED GAMES</h1>
-                <p class="subtitle">(very funny name please laugh)</p>
-            </header>
-
-            <!-- MAIN ACTION -->
-            <main>
-                <div class="button-container">
-                    <a href="games.html" class="start-btn" onclick="navigateToPage(event, this.href)">Games</a>
-                    <a href="Tools.html" class="start-btn tools-btn" onclick="navigateToPage(event, this.href)">Fun Stuff!!!😊</a>
+        <!-- Stationary display ads. Each unit is initialized once by home-sponsors.js. -->
+        <aside class="sponsor-background" aria-label="Advertisements">
+            <section class="sponsor-window sponsor-window-one" aria-label="Advertisement">
+                <div class="sponsor-surface"></div>
+                <div class="sponsor-ad-area">
+                    <ins class="adsbygoogle homepage-display-ad" style="display:block" data-ad-client="ca-pub-6483528780801608" data-ad-slot="3349064473"></ins>
                 </div>
-            </main>
+                <img class="sponsor-frame" src="assets/sponsor-window.png" alt="" width="720" height="720" decoding="async">
+                <span class="sponsor-title" aria-hidden="true">ADVERTISEMENT</span>
+                <button class="sponsor-close" type="button" aria-label="Hide first advertisement"></button>
+            </section>
+            <section class="sponsor-window sponsor-window-two" aria-label="Advertisement">
+                <div class="sponsor-surface"></div>
+                <div class="sponsor-ad-area">
+                    <ins class="adsbygoogle homepage-display-ad" style="display:block" data-ad-client="ca-pub-6483528780801608" data-ad-slot="3349064473"></ins>
+                </div>
+                <img class="sponsor-frame" src="assets/sponsor-window.png" alt="" width="720" height="720" decoding="async">
+                <span class="sponsor-title" aria-hidden="true">ADVERTISEMENT</span>
+                <button class="sponsor-close" type="button" aria-label="Hide second advertisement"></button>
+            </section>
+        </aside>
+
+        <!-- LOADING SCREEN -->
+        <div id="loader-wrapper">
+            <div class="loader-box">
+                <div class="loader-text">DILL DOE</div>
+            </div>
         </div>
 
-        <!-- Status Bar -->
-        <div class="window-statusbar">
-            <span>Status: error</span>
-            <span>version 67</span>
+        <!-- AERO GLASS WINDOW CONTAINER -->
+        <div class="aero-window" id="aeroWindow">
+            <!-- Title Bar -->
+            <div class="window-titlebar" id="windowTitlebar" tabindex="0" aria-label="Move main window: drag the title bar or use arrow keys; Home resets its position">
+                <div class="window-title-text">
+                    🌐 DillDoe_Unblocked_v2.0.exe
+                </div>
+                <div class="window-controls">
+                    <div class="win-btn win-min"></div>
+                    <div class="win-btn win-max"></div>
+                    <div class="win-btn win-close"></div>
+                </div>
+            </div>
+
+            <!-- Inner Content -->
+            <div class="window-content">
+                <!-- HEADER -->
+                <header>
+                    <h1 class="metal-title">DILL DOE | UNBLOCKED GAMES</h1>
+                    <p class="subtitle">(very funny name please laugh)</p>
+                </header>
+
+                <!-- MAIN ACTION -->
+                <main>
+                    <div class="button-container">
+                        <a href="games.html" class="start-btn" onclick="navigateToPage(event, this.href)">Games</a>
+                        <a href="Tools.html" class="start-btn tools-btn" onclick="navigateToPage(event, this.href)">Fun Stuff!!!😊</a>
+                    </div>
+                </main>
+            </div>
+
+            <!-- Status Bar -->
+            <div class="window-statusbar">
+                <span>Status: error</span>
+                <span>version 67</span>
+            </div>
         </div>
-    </div>
     </div>
     <a class="homepage-privacy" href="privacy.html">Privacy &amp; advertising</a>
 
@@ -536,11 +534,17 @@
         </section>
         <section id="maryResult" hidden>
             <h2>HELLLLOOO MARY</h2>
-         <h2>HELLLLOOO I MISSS UR SOO COOL</h2>
+            <h2>HELLLLOOO I MISSS UR SOO COOL</h2>
             <img src="assets/mary-surprise.png" alt="Chart showing four responses to Any Decompiles?">
             <button type="button" id="maryDone">Close</button>
         </section>
     </dialog>
+
+    <!-- AUDIO ELEMENTS MATCHING GITHUB REPOSITORY -->
+    <audio id="sound1" src="cleveland-brown---cleveland---ahhhhh!-made-with-Voicemod.mp3" preload="auto"></audio>
+    <audio id="sound2" src="oh-that's-nasty-cleveland-brown-made-with-Voicemod.mp3" preload="auto"></audio>
+    <audio id="sound3" src="cleveland-brown-no-no-no-no-no!-made-with-Voicemod.mp3" preload="auto"></audio>
+    <audio id="sound4" src="my-name-is-cleveland-brown-made-with-Voicemod.mp3" preload="auto"></audio>
 
     <script>
         // Loader Transition
@@ -559,7 +563,6 @@
                 window.location.href = destinationUrl;
             }, 400);
         }
-
     </script>
     <script>
         const maryDialog = document.getElementById('maryDialog');
@@ -593,100 +596,33 @@
                 return;
             }
             document.getElementById('maryPrompt').hidden = true;
-            document.getElementById('maryResult').hidden = true;
             document.getElementById('maryResult').hidden = false;
         });
         document.getElementById('maryCancel').addEventListener('click', () => maryDialog.close());
         document.getElementById('maryDone').addEventListener('click', () => maryDialog.close());
     </script>
     <script>
-        
-  if (!localStorage.getItem('dilldoePopup3Shown')) {
-    alert('Fixed movies and added 4 new games ');
-    localStorage.setItem('dilldoePopup3Shown', 'true');
-  }
-</script>
+        if (!localStorage.getItem('dilldoePopup3Shown')) {
+            alert('Fixed movies and added 4 new games ');
+            localStorage.setItem('dilldoePopup3Shown', 'true');
+        }
+    </script>
 
-    <!-- PET THE CAT & AUDIO SCRIPT -->
+    <!-- PET CAT & AUDIO PLAYBACK -->
     <script>
-        let audioCtx;
+        const petSounds = [
+            document.getElementById('sound1'),
+            document.getElementById('sound2'),
+            document.getElementById('sound3'),
+            document.getElementById('sound4')
+        ];
 
         function playRandomSound() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-
-            const sounds = [
-                // Sound 1: Scream / High Screech
-                () => {
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(1600, audioCtx.currentTime + 0.1);
-                    osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.4);
-                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.4);
-                },
-                // Sound 2: "Oh that's nasty" Low Growl/Scoff
-                () => {
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    osc.type = 'square';
-                    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-                    osc.frequency.linearRampToValueAtTime(80, audioCtx.currentTime + 0.5);
-                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.5);
-                },
-                // Sound 3: "No no no no no!" Rapid chatter
-                () => {
-                    const now = audioCtx.currentTime;
-                    for (let i = 0; i < 5; i++) {
-                        const osc = audioCtx.createOscillator();
-                        const gain = audioCtx.createGain();
-                        osc.type = 'triangle';
-                        osc.frequency.setValueAtTime(400, now + i * 0.1);
-                        osc.frequency.exponentialRampToValueAtTime(200, now + i * 0.1 + 0.08);
-                        gain.gain.setValueAtTime(0.2, now + i * 0.1);
-                        gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.08);
-                        osc.connect(gain);
-                        gain.connect(audioCtx.destination);
-                        osc.start(now + i * 0.1);
-                        osc.stop(now + i * 0.1 + 0.08);
-                    }
-                },
-                // Sound 4: Theme Song Jingle
-                () => {
-                    const notes = [261.63, 329.63, 392.00, 523.25, 392.00, 523.25];
-                    const now = audioCtx.currentTime;
-                    notes.forEach((freq, idx) => {
-                        const osc = audioCtx.createOscillator();
-                        const gain = audioCtx.createGain();
-                        osc.type = 'sine';
-                        osc.frequency.setValueAtTime(freq, now + idx * 0.12);
-                        gain.gain.setValueAtTime(0.2, now + idx * 0.12);
-                        gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.12 + 0.1);
-                        osc.connect(gain);
-                        gain.connect(audioCtx.destination);
-                        osc.start(now + idx * 0.12);
-                        osc.stop(now + idx * 0.12 + 0.1);
-                    });
-                }
-            ];
-
-            const randomIdx = Math.floor(Math.random() * sounds.length);
-            sounds[randomIdx]();
+            const randomSound = petSounds[Math.floor(Math.random() * petSounds.length)];
+            randomSound.currentTime = 0;
+            randomSound.play().catch(err => {
+                console.log("Audio playback error:", err);
+            });
         }
 
         document.querySelectorAll('.bg-cat').forEach(cat => {
