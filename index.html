@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-adsense-account" content="ca-pub-6483528780801608">
     <link rel="canonical" href="https://dilldoe-games.pages.dev/">
-    <title>I LOVE NYAN CAT <3</title>
+    <title>I LOVE NYAN CAT &lt;3</title>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6483528780801608" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="assets/home-sponsors.css">
     <script src="assets/home-sponsors.js" defer></script>
@@ -83,8 +83,14 @@
         .bg-cat {
             position: absolute;
             z-index: 3;
-            pointer-events: none;
+            pointer-events: auto; /* Enabled for interaction */
             user-select: none;
+            cursor: pointer !important;
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+
+        .bg-cat:hover {
+            filter: drop-shadow(0px 0px 15px rgba(255, 255, 255, 0.9)) brightness(1.1);
         }
 
         /* Dancing Kitten - Bottom Left */
@@ -95,6 +101,10 @@
             max-width: 30vw;
             opacity: 0.95;
             filter: drop-shadow(0px 10px 20px rgba(0, 60, 120, 0.4));
+        }
+
+        .bg-cat-kitten:hover {
+            transform: scale(1.05);
         }
 
         /* Nyan Cat - Top Right */
@@ -583,6 +593,7 @@
                 return;
             }
             document.getElementById('maryPrompt').hidden = true;
+            document.getElementById('maryResult').hidden = true;
             document.getElementById('maryResult').hidden = false;
         });
         document.getElementById('maryCancel').addEventListener('click', () => maryDialog.close());
@@ -595,5 +606,95 @@
     localStorage.setItem('dilldoePopup3Shown', 'true');
   }
 </script>
+
+    <!-- PET THE CAT & AUDIO SCRIPT -->
+    <script>
+        let audioCtx;
+
+        function playRandomSound() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const sounds = [
+                // Sound 1: Scream / High Screech
+                () => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1600, audioCtx.currentTime + 0.1);
+                    osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.4);
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                },
+                // Sound 2: "Oh that's nasty" Low Growl/Scoff
+                () => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(80, audioCtx.currentTime + 0.5);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.5);
+                },
+                // Sound 3: "No no no no no!" Rapid chatter
+                () => {
+                    const now = audioCtx.currentTime;
+                    for (let i = 0; i < 5; i++) {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(400, now + i * 0.1);
+                        osc.frequency.exponentialRampToValueAtTime(200, now + i * 0.1 + 0.08);
+                        gain.gain.setValueAtTime(0.2, now + i * 0.1);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.08);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + i * 0.1);
+                        osc.stop(now + i * 0.1 + 0.08);
+                    }
+                },
+                // Sound 4: Theme Song Jingle
+                () => {
+                    const notes = [261.63, 329.63, 392.00, 523.25, 392.00, 523.25];
+                    const now = audioCtx.currentTime;
+                    notes.forEach((freq, idx) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+                        gain.gain.setValueAtTime(0.2, now + idx * 0.12);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.12 + 0.1);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + idx * 0.12);
+                        osc.stop(now + idx * 0.12 + 0.1);
+                    });
+                }
+            ];
+
+            const randomIdx = Math.floor(Math.random() * sounds.length);
+            sounds[randomIdx]();
+        }
+
+        document.querySelectorAll('.bg-cat').forEach(cat => {
+            cat.addEventListener('click', (e) => {
+                e.target.src = 'https://static.vecteezy.com/system/resources/thumbnails/058/038/491/small/curious-kitten-gazing-upward-in-bright-light-transparent-png.png';
+                playRandomSound();
+            });
+        });
+    </script>
 </body>
 </html>
