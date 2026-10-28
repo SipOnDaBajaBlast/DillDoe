@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Games — DillDoe Game Library</title>
+    <title> GAMES</title>
     <meta name="description" content="Browse the DillDoe game library, find a game, read playing tips, and open it in your browser.">
     <meta name="google-adsense-account" content="ca-pub-6483528780801608">
     <link rel="canonical" href="https://dilldoe-games.pages.dev/games">
@@ -11,603 +11,424 @@
     <script src="/assets/site-ads.js" defer></script>
 
     <style>
-        /* ============================================================
-           FRUTIGER AERO THEME — glass, gloss, sky, lime green accents
-           ============================================================ */
-        :root {
-            --sky-top: #7fd3f6;
-            --sky-mid: #c6ecff;
-            --sky-pale: #eefaff;
-            --grass: #9ad47f;
-            --aqua-bright: #00c8ff;
-            --aqua-deep: #0072d6;
-            --ink: #00335c;
-            --ink-soft: #0d4f80;
-            --gel-green-top: #8df0a2;
-            --gel-green-mid: #35c25f;
-            --gel-green-low: #0d8a3c;
+        .library-display-ad { width: 234px; height: 60px; margin: 0 auto; }
+        @media (min-width: 400px) { .library-display-ad { width: 320px; height: 100px; } }
+        @media (min-width: 600px) { .library-display-ad { width: 468px; height: 60px; } }
+        @media (min-width: 900px) { .library-display-ad { width: 728px; height: 90px; } }
+        /* Frutiger Aero theme */
 
+        :root {
+            --aqua-light: #d6f5ff;
+            --aqua-bright: #00d2ff;
+            --aqua-deep: #0072ff;
+            --aqua-dark: #003366;
+            --gel-green: #3cd070;
+            --glass-white: rgba(255, 255, 255, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.85);
+            --glass-shadow: rgba(0, 100, 200, 0.35);
+
+            /* Classic early 2000s font stacks */
             --font-heading: 'Trebuchet MS', 'Lucida Grande', 'Segoe UI', Tahoma, sans-serif;
             --font-body: 'Lucida Grande', Tahoma, 'Segoe UI', Verdana, sans-serif;
-
-            --glass-face: linear-gradient(165deg, rgba(255,255,255,.74) 0%, rgba(226,247,255,.5) 42%, rgba(146,214,250,.34) 74%, rgba(255,255,255,.42) 100%);
-            --glass-edge: rgba(255, 255, 255, .92);
-            --glass-drop: 0 20px 34px -20px rgba(0, 64, 128, .62), 0 2px 6px rgba(0, 70, 140, .16);
-            --glass-inner: inset 0 1px 0 #fff, inset 0 -14px 22px -18px rgba(0, 110, 190, .75);
-
-            --radius-card: 24px;
-            --radius-pill: 999px;
         }
 
-        /* Aqua cursor (SVG data URI, unchanged behaviour) */
-        body, a, button {
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><linearGradient id="aqua" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#00d2ff"/></linearGradient></defs><path d="M6 3 L18 15 L12 18 L15 28 L10 30 L7 19 L2 22 Z" fill="url(#aqua)" stroke="#003366" stroke-width="1.5"/><circle cx="10" cy="10" r="2" fill="#ffffff" opacity="0.8"/></svg>') 4 4, auto;
+        /* CUSTOM AQUA CLEAR BLUE MOUSE CURSOR (SVG Base64 inspired by early 2000s liquid mouse) */
+        body, a, button, input {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><linearGradient id="aqua" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff" stop-opacity="1"/><stop offset="100%" stop-color="#00d2ff" stop-opacity="1"/></linearGradient></defs><path d="M6 3 L18 15 L12 18 L15 28 L10 30 L7 19 L2 22 Z" fill="url(#aqua)" stroke="#003366" stroke-width="1.5"/><circle cx="10" cy="10" r="2" fill="#ffffff" opacity="0.8"/></svg>') 4 4, auto;
         }
-        input, textarea { cursor: text; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        html { color-scheme: light; scroll-behavior: smooth; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
 
         body {
+            /* Authentic Frutiger Aero Background image + gradient tint */
+            background: linear-gradient(180deg, rgba(0, 110, 200, 0.25) 0%, rgba(0, 190, 255, 0.15) 100%),
+                        url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWn06EKF4l8vPj4NNF6Da7XtkAnR3tWl_K3fZQLjvSwSJVmlqV6jLgFHX6&s=10") center/cover no-repeat fixed;
+            color: var(--aqua-dark);
             min-height: 100vh;
             font-family: var(--font-body);
-            color: var(--ink);
-            padding: 22px 20px 64px;
+            padding: 25px 20px 60px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             position: relative;
             overflow-x: hidden;
-            background:
-                radial-gradient(95% 60% at 50% -12%, #ffffff 0%, rgba(216, 245, 255, .6) 34%, rgba(216, 245, 255, 0) 68%),
-                radial-gradient(45% 32% at 84% 6%, rgba(255, 255, 255, .85) 0%, rgba(255, 255, 255, 0) 70%),
-                radial-gradient(120% 55% at 50% 108%, var(--grass) 0%, rgba(154, 212, 127, .35) 42%, rgba(154, 212, 127, 0) 70%),
-                linear-gradient(180deg, var(--sky-top) 0%, #a5e2fb 26%, var(--sky-mid) 48%, var(--sky-pale) 66%, #e4f7ea 84%, #d6f0d4 100%);
-            background-attachment: fixed;
-        }
-
-        /* soft sun glow + horizon haze */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            background:
-                radial-gradient(38% 30% at 16% 4%, rgba(255, 255, 255, .9), rgba(255, 255, 255, 0) 72%),
-                radial-gradient(60% 40% at 50% 100%, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 75%);
-        }
-
-        ::selection { background: rgba(0, 200, 255, .35); color: #002b4d; }
-
-        :focus-visible {
-            outline: 3px solid rgba(0, 132, 214, .85);
-            outline-offset: 3px;
-            border-radius: 8px;
         }
 
         #bubbleCanvas {
             position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             pointer-events: none;
             z-index: 1;
         }
 
         .bg-meme-container {
             position: fixed;
-            inset: 0;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             pointer-events: none;
             z-index: 2;
             overflow: hidden;
         }
-        .nyan-cat, .doge-meme, .troll-face, .sad-bart {
+
+        .nyan-cat {
             position: absolute;
+            top: 10%;
+            width: 180px;
             height: auto;
-            opacity: .82;
-            filter: drop-shadow(0 0 14px rgba(255, 255, 255, .9)) drop-shadow(0 6px 14px rgba(0, 90, 150, .28));
+            filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.9));
+            animation: flyNyan 11s linear infinite;
         }
-        .nyan-cat { top: 9%; width: 170px; animation: flyNyan 13s linear infinite; }
-        .doge-meme { bottom: 4%; left: 2%; width: 128px; animation: floatDoge 5s ease-in-out infinite alternate; }
-        .troll-face { top: 19%; right: 3%; width: 118px; animation: floatTroll 4.5s ease-in-out infinite alternate; }
-        .sad-bart { bottom: 5%; right: 3%; width: 108px; animation: floatBart 6s ease-in-out infinite alternate; }
 
         @keyframes flyNyan {
-            0%   { left: -220px; transform: translateY(0) scale(.95) rotate(-2deg); }
-            50%  { transform: translateY(26px) scale(1.05) rotate(2deg); }
-            100% { left: 100vw; transform: translateY(0) scale(.95) rotate(-2deg); }
+            0% { left: -220px; transform: translateY(0px) scale(0.95); }
+            50% { transform: translateY(25px) scale(1.05); }
+            100% { left: 100vw; transform: translateY(0px) scale(0.95); }
         }
+
+        .doge-meme {
+            position: absolute;
+            bottom: 4%;
+            left: 2%;
+            width: 135px;
+            opacity: 0.88;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
+            animation: floatDoge 5s ease-in-out infinite alternate;
+        }
+
         @keyframes floatDoge {
-            0%   { transform: translateY(0) rotate(-6deg); }
+            0% { transform: translateY(0) rotate(-6deg); }
             100% { transform: translateY(-22px) rotate(6deg); }
         }
+
+        .troll-face {
+            position: absolute;
+            top: 18%;
+            right: 3%;
+            width: 125px;
+            opacity: 0.8;
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.85));
+            animation: floatTroll 4.5s ease-in-out infinite alternate;
+        }
+
         @keyframes floatTroll {
-            0%   { transform: translateY(0) scale(.98); }
+            0% { transform: translateY(0) scale(0.98); }
             100% { transform: translateY(22px) scale(1.08); }
         }
+
+        .sad-bart {
+            position: absolute;
+            bottom: 5%;
+            right: 3%;
+            width: 115px;
+            opacity: 0.8;
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.85));
+            animation: floatBart 6s ease-in-out infinite alternate;
+        }
+
         @keyframes floatBart {
-            0%   { transform: translateY(0) rotate(4deg); }
+            0% { transform: translateY(0) rotate(4deg); }
             100% { transform: translateY(-18px) rotate(-4deg); }
         }
 
-        header, main, .search-container, .top-nav, .library-count, .library-privacy, .site-ad {
+        header, main, .search-container, .top-nav {
             position: relative;
             z-index: 3;
         }
 
-        /* ---------- TOP NAV ---------- */
         .top-nav {
             width: 100%;
-            max-width: 1120px;
+            max-width: 1100px;
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }
 
+        /* Early 2000s Aqua Capsule Button */
         .back-btn {
             font-family: var(--font-heading);
-            color: #02325a;
+            color: #003055;
             font-weight: 700;
             text-decoration: none;
-            font-size: .95rem;
-            display: inline-flex;
+            font-size: 0.95rem;
+            display: flex;
             align-items: center;
             gap: 8px;
-            padding: 9px 22px;
-            border-radius: var(--radius-pill);
-            border: 1.5px solid #fff;
-            background: linear-gradient(180deg, #ffffff 0%, #e2f6ff 44%, #9fe0ff 50%, #38b6f7 86%, #0689dc 100%);
-            box-shadow: var(--glass-drop), inset 0 1px 1px #fff, inset 0 -2px 3px rgba(0, 50, 120, .45);
-            text-shadow: 0 1px 0 rgba(255, 255, 255, .85);
-            transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+            padding: 8px 24px;
+            background: linear-gradient(180deg, #ffffff 0%, #d4f2ff 45%, #7bd7ff 50%, #20b0ff 85%, #0088e0 100%);
+            border-radius: 20px;
+            border: 1.5px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 70, 150, 0.35), inset 0 1px 1px #ffffff, inset 0 -2px 3px rgba(0, 50, 120, 0.4);
+            transition: all 0.2s ease;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
         }
-        .back-btn:hover {
-            transform: translateY(-2px);
-            filter: saturate(1.12) brightness(1.04);
-            box-shadow: 0 14px 26px -12px rgba(0, 150, 230, .85), inset 0 1px 2px #fff;
-        }
-        .back-btn:active { transform: translateY(0) scale(.97); }
 
-        /* ---------- HEADER ---------- */
+        .back-btn:hover {
+            background: linear-gradient(180deg, #ffffff 0%, #e8f8ff 45%, #9ee3ff 50%, #4cc3ff 85%, #00a0f0 100%);
+            box-shadow: 0 6px 18px rgba(0, 170, 255, 0.6), inset 0 1px 2px #ffffff;
+            transform: translateY(-2px);
+        }
+
+        /* Early 2000s Trebuchet MS Glass Banner Title */
         header {
             text-align: center;
-            margin-bottom: 24px;
-            padding: 22px 46px 20px;
-            border-radius: 34px;
-            border: 2px solid var(--glass-edge);
-            background:
-                linear-gradient(180deg, rgba(255, 255, 255, .68) 0%, rgba(255, 255, 255, .18) 46%, rgba(255, 255, 255, .05) 47%, rgba(255, 255, 255, .34) 100%),
-                linear-gradient(150deg, rgba(255, 255, 255, .5), rgba(132, 214, 252, .34));
-            backdrop-filter: blur(18px) saturate(1.15);
-            -webkit-backdrop-filter: blur(18px) saturate(1.15);
-            box-shadow: 0 22px 40px -26px rgba(0, 70, 150, .75), inset 0 2px 3px rgba(255, 255, 255, .95), inset 0 -18px 30px -26px rgba(0, 110, 200, .8);
+            margin-bottom: 22px;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 18px 45px;
+            border-radius: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 10px 30px rgba(0, 90, 180, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.9);
             position: relative;
             overflow: hidden;
         }
-        /* glass rim highlight */
-        header::after {
+
+        /* Title Gloss Reflection Overlay */
+        header::before {
             content: '';
             position: absolute;
-            inset: 5px;
-            border-radius: 28px;
-            border: 1px solid rgba(255, 255, 255, .65);
+            top: 0; left: 0; right: 0; height: 50%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 100%);
+            border-radius: 40px 40px 0 0;
             pointer-events: none;
         }
 
         .aero-title {
             font-family: var(--font-heading);
-            font-size: clamp(2rem, 5.4vw, 3.15rem);
+            font-size: 3.2rem;
             font-weight: 800;
-            letter-spacing: .06em;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            line-height: 1.05;
-            background: linear-gradient(180deg, #ffffff 0%, #e8f8ff 30%, #2fc2ff 62%, #0a5fb8 100%);
-            -webkit-background-clip: text;
+            background: linear-gradient(180deg, #ffffff 0%, #e0f4ff 35%, #1ac0ff 65%, #0055b8 100%);
             background-clip: text;
+            -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            color: transparent;
-            filter: drop-shadow(0 2px 0 rgba(255, 255, 255, .95)) drop-shadow(0 8px 14px rgba(0, 44, 100, .38));
+            filter: drop-shadow(0 3px 6px rgba(0, 40, 100, 0.4)) drop-shadow(0 1px 0 #ffffff);
         }
 
-        .aero-tagline {
-            margin-top: 8px;
-            font-family: var(--font-heading);
-            font-size: .92rem;
-            font-weight: 700;
-            letter-spacing: .16em;
-            text-transform: uppercase;
-            color: #03588f;
-            opacity: .78;
-        }
-
-        /* ---------- SEARCH ---------- */
         .search-container {
             width: 100%;
-            max-width: 560px;
-            margin-bottom: 18px;
-        }
-
-        .search-box { position: relative; display: flex; align-items: center; }
-
-        .search-box svg {
-            position: absolute;
-            left: 18px;
-            width: 19px;
-            height: 19px;
-            color: #0a76b8;
-            opacity: .75;
-            pointer-events: none;
+            max-width: 520px;
+            margin-bottom: 35px;
+            display: flex;
+            justify-content: center;
         }
 
         .search-bar {
             width: 100%;
-            padding: 15px 52px 15px 48px;
+            padding: 14px 28px;
             font-family: var(--font-heading);
             font-weight: 700;
-            font-size: 1.02rem;
-            color: #003a66;
-            border-radius: var(--radius-pill);
-            border: 2px solid rgba(255, 255, 255, .95);
-            background: linear-gradient(180deg, rgba(255, 255, 255, .88) 0%, rgba(232, 247, 255, .72) 100%);
+            font-size: 1.1rem;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(230, 245, 255, 0.6) 100%);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            color: #003366;
+            border-radius: 30px;
             outline: none;
-            box-shadow: inset 0 2px 6px rgba(0, 62, 130, .2), 0 12px 24px -14px rgba(0, 100, 200, .8);
-            transition: box-shadow .25s ease, background .25s ease, border-color .25s ease;
-        }
-        .search-bar::placeholder { color: rgba(0, 62, 120, .6); font-weight: 600; }
-        .search-bar:focus {
-            background: linear-gradient(180deg, #ffffff 0%, #eefaff 100%);
-            border-color: #00cdff;
-            box-shadow: inset 0 2px 4px rgba(0, 60, 130, .14), 0 0 0 4px rgba(0, 205, 255, .22), 0 12px 26px -12px rgba(0, 170, 255, .9);
-        }
-
-        .search-clear {
-            position: absolute;
-            right: 10px;
-            width: 30px;
-            height: 30px;
-            border: 1px solid rgba(255, 255, 255, .9);
-            border-radius: 50%;
-            font-family: var(--font-heading);
-            font-size: 1rem;
-            font-weight: 800;
-            line-height: 1;
-            color: #06456f;
-            background: linear-gradient(180deg, #ffffff, #cbeaff 60%, #8ed4f7);
-            box-shadow: 0 3px 8px rgba(0, 80, 140, .28), inset 0 1px 0 #fff;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-        .search-clear.is-visible { display: flex; }
-        .search-clear:hover { filter: brightness(1.06); }
-
-        /* ---------- COUNT PILL ---------- */
-        .library-count {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 9px;
-            margin-bottom: 24px;
-            padding: 10px 24px;
-            border-radius: var(--radius-pill);
-            font-family: var(--font-heading);
-            font-size: 1rem;
-            font-weight: 700;
-            color: #023d70;
-            background: linear-gradient(180deg, rgba(255, 255, 255, .92) 0%, rgba(178, 231, 255, .72) 50%, rgba(62, 178, 240, .72) 100%);
-            border: 2px solid rgba(255, 255, 255, .95);
-            box-shadow: 0 12px 22px -14px rgba(0, 75, 150, .8), inset 0 2px 3px #fff;
-            text-shadow: 0 1px 0 rgba(255, 255, 255, .85);
-        }
-        .library-count strong { font-size: 1.22em; }
-        .count-orb { color: #00a3e6; }
-        .count-search { font-size: .86rem; font-weight: 600; opacity: .85; }
-        .count-search[hidden], .no-results[hidden] { display: none; }
-
-        .no-results {
-            z-index: 3;
-            margin: 10px 0 30px;
-            padding: 22px 26px;
-            border-radius: 20px;
-            font-family: var(--font-heading);
-            font-weight: 700;
+            transition: all 0.25s ease;
+            box-shadow: inset 0 2px 5px rgba(0, 60, 130, 0.25), 0 8px 20px rgba(0, 100, 200, 0.2);
             text-align: center;
-            color: #023c6b;
-            background: rgba(255, 255, 255, .6);
-            border: 2px solid rgba(255, 255, 255, .9);
-            box-shadow: var(--glass-drop), var(--glass-inner);
         }
 
-        .site-ad { max-width: 100%; margin-bottom: 26px; text-align: center; }
-        .library-display-ad { width: 234px; height: 60px; margin: 0 auto; }
-        @media (min-width: 400px) { .library-display-ad { width: 320px; height: 100px; } }
-        @media (min-width: 600px) { .library-display-ad { width: 468px; height: 60px; } }
-        @media (min-width: 900px) { .library-display-ad { width: 728px; height: 90px; } }
+        .search-bar::placeholder {
+            color: rgba(0, 60, 120, 0.65);
+            font-weight: 600;
+        }
 
-        /* ---------- GRID ---------- */
+        .search-bar:focus {
+            background: linear-gradient(180deg, #ffffff 0%, #e6f7ff 100%);
+            border-color: #00d2ff;
+            box-shadow: inset 0 2px 4px rgba(0, 60, 130, 0.15), 0 0 25px rgba(0, 210, 255, 0.8);
+            transform: scale(1.02);
+        }
+
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
-            gap: 26px;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 28px;
             width: 100%;
-            max-width: 1120px;
+            max-width: 1100px;
         }
 
-        /* ---------- CARD ---------- */
+        /* Skeuomorphic Glass Card */
         .game-card {
-            position: relative;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(210, 240, 255, 0.25) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            padding: 14px;
+            text-decoration: none;
+            color: #003366;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 13px 13px 16px;
-            border-radius: var(--radius-card);
-            text-decoration: none;
-            color: var(--ink);
-            background: var(--glass-face);
-            border: 1.5px solid var(--glass-edge);
-            backdrop-filter: blur(16px) saturate(1.1);
-            -webkit-backdrop-filter: blur(16px) saturate(1.1);
-            box-shadow: var(--glass-drop), var(--glass-inner);
-            transition: transform .32s cubic-bezier(.2, .8, .3, 1.1), box-shadow .32s ease, border-color .32s ease;
-            will-change: transform;
+            border-radius: 22px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 25px rgba(0, 70, 150, 0.25), inset 0 2px 2px rgba(255, 255, 255, 0.95);
         }
 
-        /* top gloss sheet */
+        /* 2000s Gel/Glass Top Sheen Reflector */
         .game-card::before {
             content: '';
             position: absolute;
-            top: 1px;
-            left: 1px;
-            right: 1px;
-            height: 46%;
-            border-radius: 22px 22px 60% 60% / 22px 22px 26px 26px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, .72) 0%, rgba(255, 255, 255, .16) 62%, rgba(255, 255, 255, 0) 100%);
+            top: 0; left: 0; right: 0; height: 48%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 100%);
+            border-radius: 20px 20px 0 0;
             pointer-events: none;
             z-index: 2;
         }
 
-        /* pop shockwave ring (only animates while .is-popping) */
-        .game-card::after {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            border-radius: calc(var(--radius-card) + 2px);
-            border: 2px solid rgba(255, 255, 255, .95);
-            box-shadow: 0 0 26px rgba(0, 214, 255, .85), inset 0 0 22px rgba(255, 255, 255, .9);
-            opacity: 0;
-            pointer-events: none;
-            z-index: 4;
-        }
-
-        .game-card[hidden] { display: none; }
-
-        .game-card:hover,
-        .game-card:focus-visible {
-            transform: translateY(-8px) scale(1.025);
-            border-color: #fff;
-            box-shadow:
-                0 26px 44px -22px rgba(0, 120, 210, .9),
-                0 0 24px rgba(0, 205, 255, .45),
-                inset 0 2px 3px #fff,
-                inset 0 -16px 26px -20px rgba(0, 110, 190, .8);
+        .game-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(180, 230, 255, 0.45) 100%);
+            border-color: #ffffff;
+            box-shadow: 0 18px 38px rgba(0, 140, 255, 0.4), 0 0 22px rgba(0, 210, 255, 0.6), inset 0 2px 4px #ffffff;
         }
 
         .img-wrapper {
-            position: relative;
             width: 100%;
-            height: 158px;
-            border-radius: 16px;
+            height: 160px;
+            position: relative;
             overflow: hidden;
-            border: 1.5px solid rgba(255, 255, 255, .85);
-            box-shadow: inset 0 0 10px rgba(0, 40, 80, .35), 0 6px 14px -8px rgba(0, 50, 100, .8);
-            background: #cfeeff;
-            z-index: 1;
+            border-radius: 14px;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.3), 0 3px 8px rgba(0, 50, 100, 0.2);
+            border: 1.5px solid rgba(255, 255, 255, 0.8);
         }
 
         .game-card img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            background-color: #cfeeff;
-            transition: transform .45s ease, filter .3s ease;
+            background-color: #cbeaff;
+            transition: transform 0.4s ease;
         }
-        .game-card:hover img { transform: scale(1.08); filter: saturate(1.1); }
 
-        /* lens sweep */
+        .game-card:hover img {
+            transform: scale(1.08);
+        }
+
+        /* Sweep lens light beam */
         .img-wrapper::after {
             content: '';
             position: absolute;
-            top: -120%;
-            left: -120%;
-            width: 220%;
-            height: 220%;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, .55) 50%, rgba(255, 255, 255, 0) 100%);
-            transform: rotate(24deg);
-            transition: top .65s ease, left .65s ease;
+            top: -100%;
+            left: -100%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(25deg);
+            transition: all 0.6s ease;
             pointer-events: none;
         }
-        .game-card:hover .img-wrapper::after { top: 40%; left: 40%; }
 
-        /* "PLAY" gel chip */
-        .img-wrapper::before {
-            content: 'PLAY';
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 10px;
-            width: max-content;
-            margin-inline: auto;
-            padding: 8px 18px;
-            border-radius: var(--radius-pill);
-            font-family: var(--font-heading);
-            font-size: .72rem;
-            font-weight: 800;
-            letter-spacing: .18em;
-            color: #fff;
-            text-shadow: 0 1px 1px rgba(0, 70, 30, .55);
-            background: linear-gradient(180deg, var(--gel-green-top) 0%, var(--gel-green-mid) 52%, var(--gel-green-low) 100%);
-            border: 1px solid rgba(255, 255, 255, .9);
-            box-shadow: 0 8px 16px -6px rgba(0, 80, 35, .8), inset 0 1px 1px rgba(255, 255, 255, .9);
-            opacity: 0;
-            transform: translateY(10px) scale(.9);
-            transition: opacity .28s ease, transform .28s cubic-bezier(.2, .8, .3, 1.4);
-            pointer-events: none;
-            z-index: 3;
+        .game-card:hover .img-wrapper::after {
+            top: 50%;
+            left: 50%;
         }
-        .game-card:hover .img-wrapper::before,
-        .game-card:focus-visible .img-wrapper::before { opacity: 1; transform: translateY(0) scale(1); }
 
+        /* Early 2000s Typography: Lucida Grande / Tahoma with bevel shadow */
         .game-title {
-            position: relative;
-            z-index: 3;
-            margin-top: 13px;
-            font-family: var(--font-heading);
+            margin-top: 14px;
+            font-family: var(--font-body);
             font-weight: 700;
-            font-size: 1.02rem;
-            line-height: 1.32;
+            font-size: 1.05rem;
             text-align: center;
-            color: #002c53;
-            text-shadow: 0 1px 0 rgba(255, 255, 255, .95);
-            transition: color .2s ease;
-        }
-        .game-card:hover .game-title { color: #0072c8; }
-
-        /* ---------- CLICK POP ANIMATION ---------- */
-        @keyframes cardPop {
-            0%   { transform: scale(1); }
-            28%  { transform: scale(.93) rotate(-.6deg); filter: brightness(1.12) saturate(1.15); }
-            62%  { transform: scale(1.05) rotate(.5deg); filter: brightness(1.05); }
-            100% { transform: scale(1); filter: brightness(1); }
-        }
-        @keyframes ringPop {
-            0%   { opacity: .95; transform: scale(.94); }
-            75%  { opacity: .35; }
-            100% { opacity: 0; transform: scale(1.14); }
-        }
-        @keyframes glowPop {
-            0%   { opacity: 0; transform: scale(.9); }
-            25%  { opacity: .9; }
-            100% { opacity: 0; transform: scale(1.5); }
+            line-height: 1.3;
+            color: #002b55;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+            transition: color 0.2s ease;
         }
 
-        .game-card.is-popping {
-            animation: cardPop .46s cubic-bezier(.2, .8, .3, 1.15) both;
-            z-index: 4;
+        .game-card:hover .game-title {
+            color: #0066d6;
         }
-        .game-card.is-popping::after { animation: ringPop .5s ease-out both; }
-        .game-card.is-popping .img-wrapper::before {
-            opacity: 1;
-            transform: translateY(0) scale(1.1);
-            background: linear-gradient(180deg, #b6ffc6, #46dd74 52%, #0f9a44);
+        .library-count {
+            position: relative; z-index: 3;
+            display: flex; align-items: center; justify-content: center;
+            flex-wrap: wrap; gap: 9px; margin: -18px 0 25px;
+            padding: 11px 26px; border-radius: 30px;
+            color: #003b70; font-family: var(--font-heading);
+            font-size: 1.05rem; font-weight: 700;
+            background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(156,222,255,.65) 50%, rgba(48,167,239,.65));
+            border: 2px solid rgba(255,255,255,.95);
+            box-shadow: 0 7px 20px rgba(0,75,150,.25), inset 0 2px 3px #fff;
+            text-shadow: 0 1px 0 rgba(255,255,255,.8);
         }
-        .game-card.is-popping .img-wrapper { box-shadow: 0 0 0 2px rgba(255, 255, 255, .9), 0 0 24px rgba(0, 210, 255, .8); }
-
-        /* droplet burst particles injected by JS */
-        #popLayer { position: fixed; inset: 0; pointer-events: none; z-index: 60; overflow: hidden; }
-        .droplet {
-            position: absolute;
-            width: var(--size, 8px);
-            height: var(--size, 8px);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            background: radial-gradient(circle at 32% 28%, #ffffff 0%, rgba(178, 240, 255, .95) 42%, rgba(0, 145, 230, .85) 100%);
-            box-shadow: 0 0 10px rgba(120, 225, 255, .95), inset 0 -1px 2px rgba(0, 110, 190, .55);
-            animation: dropletFly .66s cubic-bezier(.16, .72, .3, 1) forwards;
+        .library-count strong { font-size: 1.25em; }
+        .count-orb { color: #008ed6; }
+        .count-search { font-size: .88rem; font-weight: 600; opacity: .85; }
+        .count-search[hidden], .no-results[hidden] { display: none; }
+        .no-results { position: relative; z-index: 3; padding: 25px; font-weight: 700; text-align: center; }
+        .site-ad, .library-privacy { position: relative; z-index: 3; }
+        .site-ad { max-width: 100%; margin-bottom: 28px; text-align: center; }
+        .library-privacy { margin-top: 35px; }
+        .library-privacy a { color: #003366; }
+        @media (max-width: 600px) {
+            body { padding: 18px 12px 45px; }
+            header { padding: 16px 24px; max-width: 100%; }
+            .aero-title { font-size: clamp(1.7rem, 8vw, 3.2rem); }
+            .games-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+            .game-card { padding: 9px; }
+            .img-wrapper { height: 125px; }
+            .game-title { font-size: .9rem; }
+            .search-container { margin-bottom: 32px; }
+            .library-display-ad { max-width: 100%; }
         }
-        @keyframes dropletFly {
-            0%   { opacity: 0; transform: translate(-50%, -50%) scale(.35); }
-            18%  { opacity: 1; }
-            100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.85); }
-        }
-
-        /* ---------- FOOTER ---------- */
-        .library-privacy { margin-top: 40px; }
-        .library-privacy a {
-            display: inline-block;
-            padding: 10px 22px;
-            border-radius: var(--radius-pill);
-            font-family: var(--font-heading);
-            font-size: .9rem;
-            font-weight: 700;
-            text-decoration: none;
-            color: #023c6b;
-            background: linear-gradient(180deg, rgba(255, 255, 255, .62), rgba(198, 236, 255, .45));
-            border: 1.5px solid rgba(255, 255, 255, .9);
-            box-shadow: 0 10px 20px -14px rgba(0, 80, 150, .9), inset 0 1px 0 #fff;
-            transition: transform .2s ease, background .2s ease;
-        }
-        .library-privacy a:hover { transform: translateY(-2px); background: linear-gradient(180deg, #fff, rgba(190, 236, 255, .6)); }
-
-        /* ---------- RESPONSIVE ---------- */
-        @media (max-width: 860px) {
-            .doge-meme, .sad-bart, .troll-face { display: none; }
-            .nyan-cat { opacity: .5; }
-        }
-        @media (max-width: 640px) {
-            body { padding: 16px 12px 48px; }
-            header { padding: 18px 22px 16px; border-radius: 26px; }
-            .aero-tagline { font-size: .76rem; letter-spacing: .12em; }
-            .games-grid { grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 14px; }
-            .game-card { padding: 9px 9px 13px; border-radius: 19px; }
-            .img-wrapper { height: 118px; border-radius: 13px; }
-            .game-title { font-size: .88rem; margin-top: 10px; }
-            .library-count { font-size: .92rem; padding: 9px 18px; }
-            .img-wrapper::before { font-size: .64rem; padding: 7px 14px; }
-        }
-
         @media (prefers-reduced-motion: reduce) {
-            html { scroll-behavior: auto; }
             .nyan-cat, .doge-meme, .troll-face, .sad-bart { animation: none; }
-            .game-card, .game-card img, .img-wrapper::after, .img-wrapper::before, .back-btn { transition: none; }
-            .game-card:hover, .game-card:focus-visible { transform: none; }
-            .game-card.is-popping, .game-card.is-popping::after, .droplet { animation: none; }
+            .game-card, .game-card img { transition: none; }
         }
     </style>
 </head>
 
 <body>
 
-    <!-- Decorative layers -->
-    <canvas id="bubbleCanvas" aria-hidden="true"></canvas>
-    <div class="bg-meme-container" aria-hidden="true">
-        <img class="nyan-cat" src="https://freepngimg.com/save/15407-nyan-cat-picture/512x512" alt="">
-        <img class="doge-meme" src="https://pngimg.com/uploads/doge_meme/doge_meme_PNG112723.png" alt="">
-        <img class="troll-face" src="https://www.pngkey.com/png/full/22-226917_memes-unhappy-troll-sticker-sad-trollface.png" alt="">
-        <img class="sad-bart" src="https://www.nicepng.com/png/full/136-1362322_sad-simpsons-and-bart-image-bart-simpson-sad.png" alt="">
-    </div>
-    <div id="popLayer" aria-hidden="true"></div>
+    <!-- Water Bubbles Background Canvas -->
+    <canvas id="bubbleCanvas"></canvas>
 
+    <div class="bg-meme-container">
+        <img class="nyan-cat" src="https://freepngimg.com/save/15407-nyan-cat-picture/512x512" alt="Nyan Cat">
+        <img class="doge-meme" src="https://pngimg.com/uploads/doge_meme/doge_meme_PNG112723.png" alt="Doge">
+        <img class="troll-face" src="https://www.pngkey.com/png/full/22-226917_memes-unhappy-troll-sticker-sad-trollface.png" alt="Sad Trollface">
+        <img class="sad-bart" src="https://www.nicepng.com/png/full/136-1362322_sad-simpsons-and-bart-image-bart-simpson-sad.png" alt="Sad Bart Simpson">
+    </div>
+
+    <!-- NAVIGATION BAR -->
     <div class="top-nav">
         <a href="/" class="back-btn">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Home
         </a>
     </div>
 
     <header>
-        <h1 class="aero-title">Game Library</h1>
-        <p class="aero-tagline">Gay ass games LMAOOO</p>
+        <h1 class="aero-title">GAME LIBRARY</h1>
     </header>
 
+    <!-- SEARCH BAR -->
     <div class="search-container">
-        <div class="search-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
-            <input
-                type="search"
-                id="searchInput"
-                class="search-bar"
-                placeholder="Search game collection…"
-                autocomplete="off"
-                aria-label="Search games"
-            >
-            <button type="button" class="search-clear" id="searchClear" aria-label="Clear search">×</button>
-        </div>
+        <input 
+            type="text" 
+            id="searchInput" 
+            class="search-bar" 
+            placeholder="🔍 Search game collection..." 
+            autocomplete="off" aria-label="Search games"
+        >
     </div>
 
     <div class="library-count" id="libraryCount" role="status" aria-live="polite">
@@ -622,406 +443,422 @@
     </aside>
 
     <main class="games-grid" id="gamesGrid">
-        <a href="games/Submit.html" class="game-card" data-not-game="true" aria-label="Request any game">
+        <a href="games/Submit.html" class="game-card" data-not-game="true">
             <div class="img-wrapper">
-                <img loading="eager" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Frutiger_Aero_%282%29.jpg" alt="Custom request thumbnail">
+                <img loading="eager" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Frutiger_Aero_%282%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original" alt="Custom request thumbnail">
             </div>
             <div class="game-title">Request ANY game</div>
         </a>
 
-        <a href="games/SuperMarioGalaxy.html" class="game-card" aria-label="Play Super Mario Galaxy">
+        <a href="games/SuperMarioGalaxy.html" class="game-card">
             <div class="img-wrapper">
                 <img loading="eager" decoding="async" src="https://universonintendo.com/wp-content/uploads/2025/09/QUAD-Super-Mario-Galaxy-1.jpg" alt="Super Mario Galaxy">
             </div>
             <div class="game-title">Super Mario Galaxy</div>
         </a>
-        <a href="games/SuperMarioSunshine.html" class="game-card" aria-label="Play Super Mario Sunshine">
+        <a href="games/SuperMarioSunshine.html" class="game-card">
             <div class="img-wrapper">
                 <img loading="eager" decoding="async" src="https://mario.wiki.gallery/images/thumb/5/51/Box_NA_Super_Mario_Sunshine.png/1200px-Box_NA_Super_Mario_Sunshine.png" alt="Super Mario Sunshine">
             </div>
             <div class="game-title">Super Mario Sunshine</div>
         </a>
-        <a href="games/SuperMarioOdyssey.html" class="game-card" aria-label="Play Super Mario Odyssey">
+        <a href="games/SuperMarioOdyssey.html" class="game-card">
             <div class="img-wrapper">
                 <img loading="lazy" decoding="async" src="https://assets.nintendo.com/image/upload/q_auto/f_auto/store/software/switch/70010000001130/c42553b4fd0312c31e70ec7468c6c9bccd739f340152925b9600631f2d29f8b5" alt="Super Mario Odyssey">
             </div>
-            <div class="game-title">Super Mario Odyssey (very laggy)</div>
+            <div class="game-title">Super Mario Odyssey(VERY LAGGY)</div>
         </a>
 
-        <a href="games/GTA5.html" class="game-card" aria-label="Play Grand Theft Auto 5">
+        <a href="games/GTA5.html" class="game-card">
             <div class="img-wrapper">
                 <img loading="eager" decoding="async" src="https://wallpapers.com/images/featured/grand-theft-auto-v-naej4yiap4gnxh2o.jpg" alt="Grand Theft Auto 5">
             </div>
             <div class="game-title">Grand Theft Auto 5</div>
         </a>
 
-        <a href="games/Cod4.html" class="game-card" aria-label="Play Call of Duty 4: Modern Warfare">
+        <!-- 1. COD 4 -->
+        <a href="games/Cod4.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="eager" decoding="async" src="https://upload.wikimedia.org/wikipedia/en/5/5f/Call_of_Duty_4_Modern_Warfare.jpg" alt="Call of Duty 4 thumbnail">
+                <img loading="eager" decoding="async" src="https://upload.wikimedia.org/wikipedia/en/5/5f/Call_of_Duty_4_Modern_Warfare.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original" alt="Call of Duty 4 Thumbnail">
             </div>
             <div class="game-title">Call Of Duty 4: Modern Warfare</div>
         </a>
 
-        <a href="games/p3p.html" class="game-card" aria-label="Play Persona 3 Portable">
+        <!-- 2. PERSONA 3 PORTABLE -->
+        <a href="games/p3p.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="eager" decoding="async" src="https://www.gamespot.com/a/uploads/scale_landscape/43/434805/4094344-1298817349-hero.jpg" alt="Persona 3 Portable thumbnail">
+                <img loading="eager" decoding="async" src="https://www.gamespot.com/a/uploads/scale_landscape/43/434805/4094344-1298817349-hero.jpg" alt="Persona 3 Portable Thumbnail">
             </div>
             <div class="game-title">Persona 3 Portable</div>
         </a>
 
-        <a href="games/Tf2.html" class="game-card" aria-label="Play Team Fortress 2">
+        <!-- 3. TEAM FORTRESS 2 -->
+        <a href="games/Tf2.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="eager" decoding="async" src="https://upload.wikimedia.org/wikipedia/en/5/5f/Tf2_standalonebox.jpg" alt="Team Fortress 2 thumbnail">
+                <img loading="eager" decoding="async" src="https://upload.wikimedia.org/wikipedia/en/5/5f/Tf2_standalonebox.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original" alt="Team Fortress 2 Thumbnail">
             </div>
             <div class="game-title">Team Fortress 2</div>
         </a>
 
-        <a href="games/Skate3.html" class="game-card" aria-label="Play Skate 3">
+        <a href="games/Skate3.html" class="game-card">
             <div class="img-wrapper">
                 <img loading="lazy" decoding="async" src="https://assets-prd.ignimgs.com/2022/01/07/skate-3-button-1641599749809.jpg" alt="Skate 3">
             </div>
             <div class="game-title">Skate 3</div>
         </a>
-
-        <a href="games/NaturalD.html" class="game-card" aria-label="Play Natural Disaster">
+        <!-- 4. NATURAL DISASTER -->
+        <a href="games/NaturalD.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://tse2.mm.bing.net/th/id/OIP.vEY1HA_PakuovieO4zwaUQHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Natural Disaster thumbnail">
+                <img loading="lazy" decoding="async" src="https://tse2.mm.bing.net/th/id/OIP.vEY1HA_PakuovieO4zwaUQHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Natural Disaster Thumbnail">
             </div>
             <div class="game-title">Natural Disaster</div>
         </a>
-
-        <a href="games/SpiderManWebOfShadows.html" class="game-card" aria-label="Play Spider-Man: Web of Shadows">
-            <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://i.ytimg.com/vi/Lo4p8S1b9tk/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGFUgRihlMA8" alt="Spider-Man: Web of Shadows">
-            </div>
+        <a href="games/SpiderManWebOfShadows.html" class="game-card">
+            <div class="img-wrapper"><img loading="lazy" decoding="async" src="https://i.ytimg.com/vi/Lo4p8S1b9tk/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGFUgRihlMA8" alt="Spider-Man: Web of Shadows"></div>
             <div class="game-title">Spider-Man: Web of Shadows</div>
         </a>
-
-        <a href="games/GangBeast.html" class="game-card" aria-label="Play Gang Beasts">
+        <!-- 5. GANG BEASTS -->
+        <a href="games/GangBeast.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://image.api.playstation.com/vulcan/ap/rnd/202012/0912/DaMDXP75LV9pti5nA2IALzhO.png" alt="Gang Beasts thumbnail">
+                <img loading="lazy" decoding="async" src="https://image.api.playstation.com/vulcan/ap/rnd/202012/0912/DaMDXP75LV9pti5nA2IALzhO.png" alt="Gang Beasts Thumbnail">
             </div>
             <div class="game-title">Gang Beasts</div>
         </a>
-
-        <a href="games/Dumbfire.html" class="game-card" aria-label="Play Dumbfire Demo">
+        <a href="games/Dumbfire.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/4944600/9260cdbc443465e25ba1ba03b1a7c8f7e3676c4e/header.jpg?t=17919983" alt="Dumbfire Demo thumbnail">
+                <img loading="lazy" decoding="async" src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/4944600/9260cdbc443465e25ba1ba03b1a7c8f7e3676c4e/header.jpg?t=17919983" alt="Dumbfire Demo Thumbnail">
             </div>
             <div class="game-title">Dumbfire Demo (work in progress)</div>
         </a>
-
-        <a href="games/Ktane.html" class="game-card" aria-label="Play Keep Talking and Nobody Explodes">
+         <a href="games/Ktane.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://keeptalkinggame.com/wp-content/uploads/2019/12/4_bomb_600x338.jpg" alt="Keep Talking and Nobody Explodes">
+                <img loading="lazy" decoding="async" src="https://keeptalkinggame.com/wp-content/uploads/2019/12/4_bomb_600x338.jpg" alt="Ktane">
             </div>
             <div class="game-title">Keep Talking and Nobody Explodes</div>
         </a>
-
-        <a href="games/portal1.html" class="game-card" aria-label="Play Portal 1">
+        <!-- 6. PORTAL 1 -->
+        <a href="games/portal1.html" class="game-card">
             <div class="img-wrapper">
                 <img loading="lazy" decoding="async" src="https://sm.ign.com/ign_nordic/cover/p/portal/portal_h2g3.jpg" alt="Portal 1">
             </div>
             <div class="game-title">Portal 1</div>
         </a>
 
-        <a href="games/Fortnite.html" class="game-card" aria-label="Play Fortnite OG Wasm Remake">
-            <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuqyFzAoWTABW5MFy85bgC4yIHT5dipTaWV7s9e_bRmtDZHUHt9HUCwXGC&s=10" alt="Fortnite thumbnail">
-            </div>
-            <div class="game-title">Fortnite OG Wasm Remake (testing)</div>
+        <a href="games/Fortnite.html" class="game-card">
+            <div class="img-wrapper"><img loading="lazy" decoding="async" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuqyFzAoWTABW5MFy85bgC4yIHT5dipTaWV7s9e_bRmtDZHUHt9HUCwXGC&s=10" alt="Fortnite Thumbnail"></div>
+            <div class="game-title">Fortnite OG Wasm Remake(TESTING)</div>
         </a>
 
-        <a href="games/wasm-gc 1.20.html" class="game-card" aria-label="Play Minecraft v26">
+        <!-- 8. MINECRAFT -->
+        <a href="games/wasm-gc 1.20.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZgdMVkTgOaJ_5_r_XOcFzFDCDbhUCeLm6mfEHSUwP3yPR0u85pjXIjVw&s=10" alt="Minecraft thumbnail">
+                <img loading="lazy" decoding="async" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZgdMVkTgOaJ_5_r_XOcFzFDCDbhUCeLm6mfEHSUwP3yPR0u85pjXIjVw&s=10" alt="Minecraft Thumbnail">
             </div>
             <div class="game-title">Minecraft (v26)</div>
         </a>
-
-        <a href="games/FeedThePit.html" class="game-card" aria-label="Play Feed the Pit">
-            <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co95mq.jpg" alt="Feed the Pit">
-            </div>
+        <a href="games/FeedThePit.html" class="game-card">
+            <div class="img-wrapper"><img loading="lazy" decoding="async" src="https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co95mq.jpg" alt="Feed the Pit"></div>
             <div class="game-title">Feed the Pit</div>
         </a>
-
-        <a href="games/HaloCE.html" class="game-card" aria-label="Play Halo: Combat Evolved">
+        <a href="games/HaloCE.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/06/wp4163632-halo-combat-evolved-wallpapers-1.jpg?q=49&fit=crop&w=3600" alt="Halo thumbnail">
+                <img loading="lazy" decoding="async" src="https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/06/wp4163632-halo-combat-evolved-wallpapers-1.jpg?q=49&fit=crop&w=3600" alt="Halo Thumbnail">
             </div>
             <div class="game-title">Halo: Combat Evolved</div>
         </a>
-
-        <a href="games/SpongeGlock.html" class="game-card" aria-label="Play SpongeGlock">
-            <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co4ezc.jpg" alt="SpongeGlock">
-            </div>
+        <a href="games/SpongeGlock.html" class="game-card">
+            <div class="img-wrapper"><img loading="lazy" decoding="async" src="https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co4ezc.jpg" alt="SpongeGlock"></div>
             <div class="game-title">SpongeGlock</div>
         </a>
-
-        <a href="games/BeforeClose.html" class="game-card" aria-label="Play Before Close">
-            <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://img.itch.zone/aW1nLzI0NzYzMjU0LnBuZw==/original/iY8IPz.png" alt="Before Close">
-            </div>
+        <a href="games/BeforeClose.html" class="game-card">
+            <div class="img-wrapper"><img loading="lazy" decoding="async" src="https://img.itch.zone/aW1nLzI0NzYzMjU0LnBuZw==/original/iY8IPz.png" alt="Before Close"></div>
             <div class="game-title">Before Close</div>
         </a>
-
-        <a href="games/SallyFace.html" class="game-card" aria-label="Play Sally Face">
+          <a href="games/SallyFace.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRVYHF30Swr0kmegQOsTMV9yk0OX9pqHnzGATSehz2XUBe7i3hiK1bDgo&s=10" alt="Sally Face thumbnail">
+                <img loading="lazy" decoding="async" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRVYHF30Swr0kmegQOsTMV9yk0OX9pqHnzGATSehz2XUBe7i3hiK1bDgo&s=10" alt="Sally Face Thumbnail">
             </div>
             <div class="game-title">Sally Face</div>
         </a>
 
-        <a href="games/Cuphead.html" class="game-card" aria-label="Play Cuphead">
+          <a href="games/Cuphead.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://i.ytimg.com/vi/a-GtiV0drHw/maxresdefault.jpg" alt="Cuphead thumbnail">
+                <img loading="lazy" decoding="async" src="https://i.ytimg.com/vi/a-GtiV0drHw/maxresdefault.jpg" alt="Cuphead Thumbnail">
             </div>
             <div class="game-title">Cuphead</div>
         </a>
 
-        <a href="games/EggsForBart.html" class="game-card" aria-label="Play Eggs For Bart">
+          <a href="games/EggsForBart.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://images.steamusercontent.com/ugc/16522517163227564698/A115EC0AAF02D90B93C58D4B0745C8161C9B4E88/?imw=512&&ima=fit&impolicy=Letterbox" alt="Eggs For Bart thumbnail">
+                <img loading="lazy" decoding="async" src="https://images.steamusercontent.com/ugc/16522517163227564698/A115EC0AAF02D90B93C58D4B0745C8161C9B4E88/?imw=512&&ima=fit&impolicy=Letterbox" alt="Eggs For Bart Thumbnail">
             </div>
             <div class="game-title">Eggs For Bart</div>
         </a>
 
-        <a href="games/GeomotryDash.html" class="game-card" aria-label="Play Geometry Dash">
+        <a href="games/GeomotryDash.html" class="game-card">
             <div class="img-wrapper">
                 <img loading="lazy" decoding="async" src="https://geodash.org/images/game-images/Geometry-Dash-Cover.webp" alt="Geometry Dash">
             </div>
             <div class="game-title">Geometry Dash</div>
         </a>
-
-        <a href="games/master-quest.html" class="game-card" aria-label="Play Zelda: Ocarina of Time">
+        <!-- 9. ZELDA: OCARINA OF TIME - MASTER QUEST -->
+        <a href="games/master-quest.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://m.media-amazon.com/images/M/MV5BMTAxOTE2NDEwMTNeQTJeQWpwZ15BbWU4MDI3NTY5NTUz._V1_.jpg" alt="Zelda thumbnail">
+                <img loading="lazy" decoding="async" src="https://m.media-amazon.com/images/M/MV5BMTAxOTE2NDEwMTNeQTJeQWpwZ15BbWU4MDI3NTY5NTUz._V1_.jpg" alt="Zelda Thumbnail">
             </div>
             <div class="game-title">Zelda: Ocarina of Time</div>
         </a>
 
-        <a href="games/Smash.html" class="game-card" aria-label="Play Smash Bros N64">
+        <!-- 10. SMASH BROS N64 -->
+        <a href="games/Smash.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRuRpGQMUYYx8r_LjRwNnhSneqB02qejOlX0jeIMuq1lCeBRnixwZ_PO2P&s=10" alt="Smash Bros thumbnail">
+                <img loading="lazy" decoding="async" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRuRpGQMUYYx8r_LjRwNnhSneqB02qejOlX0jeIMuq1lCeBRnixwZ_PO2P&s=10" alt="Smash Bros Thumbnail">
             </div>
             <div class="game-title">Smash Bros N64</div>
         </a>
 
-        <a href="games/Simpsons.html" class="game-card" aria-label="Play The Simpsons: Hit &amp; Run">
+        <!-- 11. THE SIMPSONS: HIT & RUN -->
+        <a href="games/Simpsons.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://static0.gamerantimages.com/wordpress/wp-content/uploads/2023/11/simpsons-hit-and-run.jpg?q=50&fit=crop&w=825&dpr=1.5" alt="The Simpsons thumbnail">
+                <img loading="lazy" decoding="async" src="https://static0.gamerantimages.com/wordpress/wp-content/uploads/2023/11/simpsons-hit-and-run.jpg?q=50&fit=crop&w=825&dpr=1.5" alt="The Simpsons Thumbnail">
             </div>
             <div class="game-title">The Simpsons: Hit &amp; Run</div>
         </a>
 
-        <a href="games/Deltarune.html" class="game-card" aria-label="Play Deltarune">
+        <!-- 12. DELTARUNE -->
+        <a href="games/Deltarune.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://media.tenor.com/gLqK62ZQVRQAAAAe/sans-undertale.png" alt="Deltarune thumbnail">
+                <img loading="lazy" decoding="async" src="https://media.tenor.com/gLqK62ZQVRQAAAAe/sans-undertale.png" alt="Deltarune Thumbnail">
             </div>
             <div class="game-title">Deltarune</div>
         </a>
-
-        <a href="games/Horseygame.html" class="game-card" aria-label="Play Horsey Game">
+        <a href="games/Horseygame.html" class="game-card">
             <div class="img-wrapper">
                 <img loading="lazy" decoding="async" src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3602570/945b3e12201603882fedbbf7abcb5fc3f3ad3fcb/header.jpg?t=17770705" alt="Horsey Game">
             </div>
             <div class="game-title">Horsey Game</div>
         </a>
 
-        <a href="games/SuperMonkey.html" class="game-card" aria-label="Play Super Monkey Ball">
+        <!-- 13. SUPER MONKEY BALL -->
+        <a href="games/SuperMonkey.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxqmwLw8JqBvMrzIj3f7d2YmOEghu6D9VV1tD25-2hmUh0NR_-v1XHCcU&s=10" alt="Super Monkey Ball thumbnail">
+                <img loading="lazy" decoding="async" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxqmwLw8JqBvMrzIj3f7d2YmOEghu6D9VV1tD25-2hmUh0NR_-v1XHCcU&s=10" alt="Super Monkey Ball Thumbnail">
             </div>
             <div class="game-title">Super Monkey Ball</div>
         </a>
 
-        <a href="games/Sonic.html" class="game-card" aria-label="Play Sonic">
+        <!-- 14. SONIC THE HEDGEHOG -->
+        <a href="games/Sonic.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/en/b/ba/Sonic_the_Hedgehog_1_Genesis_box_art.jpg" alt="Sonic thumbnail">
+                <img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/en/b/ba/Sonic_the_Hedgehog_1_Genesis_box_art.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original" alt="Sonic Thumbnail">
             </div>
             <div class="game-title">Sonic</div>
         </a>
 
-        <a href="games/AnimalCrossing.html" class="game-card" aria-label="Play Animal Crossing">
+        <!-- 15. ANIMAL CROSSING -->
+        <a href="games/AnimalCrossing.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://i.ebayimg.com/00/s/OTk3WDEzMTI=/z/AkwAAOSw6NNfZcRl/$_57.PNG?set_id=8800005007" alt="Animal Crossing thumbnail">
+                <img loading="lazy" decoding="async" src="https://i.ebayimg.com/00/s/OTk3WDEzMTI=/z/AkwAAOSw6NNfZcRl/$_57.PNG?set_id=8800005007" alt="Animal Crossing Thumbnail">
             </div>
             <div class="game-title">Animal Crossing</div>
         </a>
 
-        <a href="games/DayBreak.html" class="game-card" aria-label="Play FNaF: DAYBREAK">
+        <!-- 16. FNAF: DAYBREAK -->
+        <a href="games/DayBreak.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://kbhgames.com/wp-content/uploads/2026/07/fnaf-daybreak.webp" alt="FNaF DAYBREAK thumbnail">
+                <img loading="lazy" decoding="async" src="https://kbhgames.com/wp-content/uploads/2026/07/fnaf-daybreak.webp" alt="FNaF DAYBREAK Thumbnail">
             </div>
             <div class="game-title">FNaF: DAYBREAK</div>
         </a>
 
-        <a href="games/fnaf.html" class="game-card" aria-label="Play FNAF 1">
+        <!-- 17. FNAF 1 -->
+        <a href="games/fnaf.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://images.immediate.co.uk/production/volatile/sites/3/2023/08/FNAF-games-in-order-cd67434.jpg?quality=90" alt="FNAF Game thumbnail">
+                <img loading="lazy" decoding="async" src="https://images.immediate.co.uk/production/volatile/sites/3/2023/08/FNAF-games-in-order-cd67434.jpg?quality=90" alt="FNAF Game Thumbnail">
             </div>
             <div class="game-title">FNAF 1</div>
         </a>
 
-        <a href="games/iron lung.html" class="game-card" aria-label="Play Iron Lung">
+        <!-- 18. IRON LUNG -->
+        <a href="games/iron lung.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://i.ytimg.com/vi/WPiCSsW-2as/maxresdefault.jpg" alt="Iron Lung thumbnail">
+                <img loading="lazy" decoding="async" src="https://i.ytimg.com/vi/WPiCSsW-2as/maxresdefault.jpg" alt="Iron Lung Thumbnail">
             </div>
             <div class="game-title">Iron Lung</div>
         </a>
 
-        <a href="games/ClassOf09.html" class="game-card" aria-label="Play Class Of 09 The Flip Side">
+        <!-- 19. CLASS OF 09 -->
+        <a href="games/ClassOf09.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://media.tenor.com/CS98TshZEzgAAAAe/class-of-09.png" alt="Class Of 09 thumbnail">
+                <img loading="lazy" decoding="async" src="https://media.tenor.com/CS98TshZEzgAAAAe/class-of-09.png" alt="Class Of 09 Thumbnail">
             </div>
             <div class="game-title">Class Of 09 The Flip Side</div>
         </a>
 
-        <a href="games/Tromebone.html" class="game-card" aria-label="Play Trombone Champ">
+        <!-- 20. TROMBONE CHAMP -->
+        <a href="games/Tromebone.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://repacklab.com/wp-content/uploads/2024/12/Trombone-Champ-Unflattened-Video-Game-Free-Download-Repacklab-1.jpg" alt="Trombone Champ thumbnail">
+                <img loading="lazy" decoding="async" src="https://repacklab.com/wp-content/uploads/2024/12/Trombone-Champ-Unflattened-Video-Game-Free-Download-Repacklab-1.jpg" alt="Trombone Champ Thumbnail">
             </div>
             <div class="game-title">Trombone Champ</div>
         </a>
 
-        <a href="games/FNF.html" class="game-card" aria-label="Play Friday Night Funkin'">
+        <!-- 21. FRIDAY NIGHT FUNKIN' -->
+        <a href="games/FNF.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://imgs.crazygames.com/auto-covers/friday-night-funkin_1x1.png?format=auto&quality=70&metadata=none" alt="Friday Night Funkin thumbnail">
+                <img loading="lazy" decoding="async" src="https://imgs.crazygames.com/auto-covers/friday-night-funkin_1x1.png?format=auto&quality=70&metadata=none" alt="Friday Night Funkin Thumbnail">
             </div>
             <div class="game-title">Friday Night Funkin'</div>
         </a>
 
-        <a href="games/superflightt.html" class="game-card" aria-label="Play Super Flight">
+        <!-- 22. SUPER FLIGHT -->
+        <a href="games/superflightt.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://tse4.mm.bing.net/th/id/OIP.iQUaHZ6PulAViiVB8lsyEgHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Super Flight thumbnail">
+                <img loading="lazy" decoding="async" src="https://tse4.mm.bing.net/th/id/OIP.iQUaHZ6PulAViiVB8lsyEgHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Super Flight Thumbnail">
             </div>
             <div class="game-title">Super Flight</div>
         </a>
 
-        <a href="games/baldi.html" class="game-card" aria-label="Play Baldi's Basics">
+        <!-- 23. BALDI'S BASICS -->
+        <a href="games/baldi.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://i.pinimg.com/474x/4e/65/16/4e6516685214ca21e7c6086c01a44d73.jpg" alt="Baldi's Basics thumbnail">
+                <img loading="lazy" decoding="async" src="https://i.pinimg.com/474x/4e/65/16/4e6516685214ca21e7c6086c01a44d73.jpg" alt="Baldi's Basics Thumbnail">
             </div>
             <div class="game-title">Baldi's Basics</div>
         </a>
 
-        <a href="games/HappyWheels.html" class="game-card" aria-label="Play The Happy Hills Homicide">
+        <!-- 24. THE HAPPY HILLS HOMICIDE -->
+        <a href="games/HappyWheels.html" class="game-card">
             <div class="img-wrapper">
                 <img loading="lazy" decoding="async" src="assets/game-thumbnails/happy-hills.png" alt="The Happy Hills Homicide">
             </div>
             <div class="game-title">The Happy Hills Homicide</div>
         </a>
 
-        <a href="games/LasVegas.html" class="game-card" aria-label="Play Subway Surfers: Las Vegas">
+        <!-- SUBWAY SURFERS: LAS VEGAS -->
+        <a href="games/LasVegas.html" class="game-card">
             <div class="img-wrapper">
                 <img loading="lazy" decoding="async" src="assets/game-thumbnails/las-vegas.png" alt="Subway Surfers: Las Vegas">
             </div>
             <div class="game-title">Subway Surfers: Las Vegas</div>
         </a>
 
-        <a href="games/CatGoesFishing.html" class="game-card" aria-label="Play Cat Goes Fishing">
+        <!-- CAT GOES FISHING -->
+        <a href="games/CatGoesFishing.html" class="game-card">
             <div class="img-wrapper">
                 <img loading="lazy" decoding="async" src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/343780/capsule_616x353.jpg?t=1722198432" alt="Cat Goes Fishing">
             </div>
             <div class="game-title">Cat Goes Fishing</div>
         </a>
 
-        <a href="games/GambleWithYourFriends.html" class="game-card" aria-label="Play Gamble With Your Friends">
+        <!-- GAMBLE WITH YOUR FRIENDS -->
+        <a href="games/GambleWithYourFriends.html" class="game-card">
             <div class="img-wrapper">
                 <img loading="lazy" decoding="async" src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3892270/78a9deef0ef784825518781a668724e219099d1f/capsule_616x353.jpg?t=179" alt="Gamble With Your Friends">
             </div>
             <div class="game-title">Gamble With Your Friends</div>
         </a>
 
-        <a href="games/AngryBirds.html" class="game-card" aria-label="Play Angry Birds">
+        <!-- 25. ANGRY BIRDS -->
+        <a href="games/AngryBirds.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://m.gjcdn.net/fireside-post-image/900/25359106-caj975da-v4.webp" alt="Angry Birds thumbnail">
+                <img loading="lazy" decoding="async" src="https://m.gjcdn.net/fireside-post-image/900/25359106-caj975da-v4.webp" alt="Angry Birds Thumbnail">
             </div>
             <div class="game-title">Angry Birds</div>
         </a>
 
-        <a href="games/bitlife.html" class="game-card" aria-label="Play BitLife">
+        <!-- 26. BITLIFE -->
+        <a href="games/bitlife.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://m.media-amazon.com/images/I/61jpZBYLFWL.png" alt="BitLife thumbnail">
+                <img loading="lazy" decoding="async" src="https://m.media-amazon.com/images/I/61jpZBYLFWL.png" alt="BitLife Thumbnail">
             </div>
             <div class="game-title">BitLife</div>
         </a>
 
-        <a href="games/DumbWay.html" class="game-card" aria-label="Play Dumb Ways To Die">
+        <!-- 27. DUMB WAYS TO DIE -->
+        <a href="games/DumbWay.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://img.gamepix.com/games/dumb-ways-to-die/cover/dumb-ways-to-die.png?w=1200&ar=16:10" alt="Dumb Ways To Die thumbnail">
+                <img loading="lazy" decoding="async" src="https://img.gamepix.com/games/dumb-ways-to-die/cover/dumb-ways-to-die.png?w=1200&ar=16:10" alt="Dumb Ways To Die Thumbnail">
             </div>
             <div class="game-title">Dumb Ways To Die</div>
         </a>
 
-        <a href="games/Flappy.html" class="game-card" aria-label="Play Flappy Bird">
+        <!-- 28. FLAPPY BIRD -->
+        <a href="games/Flappy.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://th.bing.com/th/id/R.7482ed9dad08f48b9f6db70b274fe675?rik=6Z3yms%2bFt3gxxA&riu=http%3a%2f%2fstudents.com.miami.edu%2freporting%2fw" alt="Flappy Bird thumbnail">
+                <img loading="lazy" decoding="async" src="https://th.bing.com/th/id/R.7482ed9dad08f48b9f6db70b274fe675?rik=6Z3yms%2bFt3gxxA&riu=http%3a%2f%2fstudents.com.miami.edu%2freporting%2fw" alt="Flappy Bird Thumbnail">
             </div>
             <div class="game-title">Flappy Bird</div>
         </a>
 
-        <a href="games/nyan-cat.html" class="game-card" aria-label="Play Nyan Cat: Lost in Space">
+        <!-- 29. NYAN CAT: LOST IN SPACE -->
+        <a href="games/nyan-cat.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://play-lh.googleusercontent.com/rKLMwthaxMG2wXoSRI7gyuoZWkuIUagkFhRh4pFWqKquwzXx5R8w7aS148LzgeDlqWZs" alt="Nyan Cat: Lost in Space thumbnail">
+                <img loading="lazy" decoding="async" src="https://play-lh.googleusercontent.com/rKLMwthaxMG2wXoSRI7gyuoZWkuIUagkFhRh4pFWqKquwzXx5R8w7aS148LzgeDlqWZs" alt="Nyan Cat: Lost in Space Thumbnail">
             </div>
             <div class="game-title">Nyan Cat: Lost in Space</div>
         </a>
 
-        <a href="games/meteor.html" class="game-card" aria-label="Play Meteor 60 Seconds">
+        <!-- 30. METEOR 60 SECONDS -->
+        <a href="games/meteor.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://play-lh.googleusercontent.com/FwW4g5DfsHgRPMVvVXiTr0B-c4vHRqLAe2ViOIAHrRKp5aatPFdmOer-I7m1P8gXwUmTrFyw7eVKGQrSzXabxQ=w526-h296-rw" alt="Meteor 60 Seconds thumbnail">
+                <img loading="lazy" decoding="async" src="https://play-lh.googleusercontent.com/FwW4g5DfsHgRPMVvVXiTr0B-c4vHRqLAe2ViOIAHrRKp5aatPFdmOer-I7m1P8gXwUmTrFyw7eVKGQrSzXabxQ=w526-h296-rw" alt="Meteor 60 Seconds Thumbnail">
             </div>
             <div class="game-title">Meteor 60 Seconds</div>
         </a>
 
-        <a href="games/flyingg.html" class="game-card" aria-label="Play Flying Gorilla">
+        <!-- 31. FLYING GORILLA -->
+        <a href="games/flyingg.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://img.itch.zone/aW1nLzIwODYwNDAucG5n/original/3%2BS1Jr.png" alt="Flying Gorilla thumbnail">
+                <img loading="lazy" decoding="async" src="https://img.itch.zone/aW1nLzIwODYwNDAucG5n/original/3%2BS1Jr.png" alt="Flying Gorilla Thumbnail">
             </div>
             <div class="game-title">Flying Gorilla</div>
         </a>
 
-        <a href="games/DokiDokiKombatKlub.html" class="game-card" aria-label="Play Doki Doki Kombat Klub">
+        <!-- 32. DOKI DOKI KOMBAT KLUB -->
+        <a href="games/DokiDokiKombatKlub.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://tse4.mm.bing.net/th/id/OIP.PFmT61emJCaQ0nElh2B9kwAAAA?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Doki Doki Kombat Klub thumbnail">
+                <img loading="lazy" decoding="async" src="https://tse4.mm.bing.net/th/id/OIP.PFmT61emJCaQ0nElh2B9kwAAAA?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Doki Doki Kombat Klub Thumbnail">
             </div>
             <div class="game-title">Doki Doki Kombat Klub</div>
         </a>
 
-        <a href="games/StewieKILLSTheGriffins.html" class="game-card" aria-label="Play Stewie KILLS The Griffins">
+        <!-- 33. STEWIE KILLS THE GRIFFINS -->
+        <a href="games/StewieKILLSTheGriffins.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co9f51.jpg" alt="Stewie KILLS The Griffins thumbnail">
+                <img loading="lazy" decoding="async" src="https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co9f51.jpg" alt="Stewie KILLS The Griffins Thumbnail">
             </div>
             <div class="game-title">Stewie KILLS The Griffins</div>
         </a>
 
-        <a href="games/DateJeff.html" class="game-card" aria-label="Play Fear Me, the Jeff the Killer dating sim">
+        <!-- 34. FEAR ME (JEFF DATING SIM) -->
+        <a href="games/DateJeff.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://img.qizhilu.org/website-builder/2025-11-04/images/1762240129440-ejvylc.avif" alt="Fear Me thumbnail">
+                <img loading="lazy" decoding="async" src="https://img.qizhilu.org/website-builder/2025-11-04/images/1762240129440-ejvylc.avif" alt="Fear Me Thumbnail">
             </div>
             <div class="game-title">Fear Me [Jeff the Killer's Dating Sim]</div>
         </a>
 
-        <a href="games/VdatingSim.html" class="game-card" aria-label="Play Verity Dating Simulator">
+        <!-- 35. VERITY DATING SIMULATOR -->
+        <a href="games/VdatingSim.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://pbs.twimg.com/media/HTwHUKfXIAMkBe0?format=webp&name=large" alt="Verity Dating Simulator thumbnail">
+                <img loading="lazy" decoding="async" src="https://pbs.twimg.com/media/HTwHUKfXIAMkBe0?format=webp&name=large" alt="Verity Dating Simulator Thumbnail">
             </div>
             <div class="game-title">Verity Dating Simulator</div>
         </a>
 
-        <a href="games/BartBash.html" class="game-card" aria-label="Play BartBash">
+        <!-- 36. BARTBASH -->
+        <a href="games/BartBash.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBU3Lsv14l1Wd_Dz2nXuN854vY2Fh2i-vx6Ctpp8A7gMp1s9XPojalopYz&s=10" alt="BartBash thumbnail">
+                <img loading="lazy" decoding="async" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBU3Lsv14l1Wd_Dz2nXuN854vY2Fh2i-vx6Ctpp8A7gMp1s9XPojalopYz&s=10" alt="BartBash Thumbnail">
             </div>
             <div class="game-title">BartBash</div>
         </a>
 
-        <a href="games/fish.html" class="game-card" aria-label="Play Fish">
+        <!-- 37. FISH -->
+        <a href="games/fish.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://i.etsystatic.com/56181984/r/il/b67efa/7168666349/il_1080xN.7168666349_ozuc.jpg" alt="Fish thumbnail">
+                <img loading="lazy" decoding="async" src="https://i.etsystatic.com/56181984/r/il/b67efa/7168666349/il_1080xN.7168666349_ozuc.jpg" alt="Fish Thumbnail">
             </div>
             <div class="game-title">Fish</div>
         </a>
@@ -1031,237 +868,131 @@
     <footer class="library-privacy"><a href="/privacy.html">Privacy &amp; advertising</a></footer>
 
     <script>
-        (() => {
-            'use strict';
+        // Count actual game cards automatically, including cards added later.
+        // Mark non-game cards with data-not-game="true".
+        const gamesGrid = document.getElementById('gamesGrid');
+        const searchInput = document.getElementById('searchInput');
+        const gameCount = document.getElementById('gameCount');
+        const searchCount = document.getElementById('searchCount');
+        const noResults = document.getElementById('noResults');
 
-            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-            const gamesGrid = document.getElementById('gamesGrid');
-            const searchInput = document.getElementById('searchInput');
-            const searchClear = document.getElementById('searchClear');
-            const gameCount = document.getElementById('gameCount');
-            const searchCount = document.getElementById('searchCount');
-            const noResults = document.getElementById('noResults');
-
-            /* ---------- SEARCH + COUNT ---------- */
-            function filterGames() {
-                const query = searchInput.value.trim().toLocaleLowerCase();
-                const cards = gamesGrid.querySelectorAll('.game-card');
-                let total = 0;
-                let matching = 0;
-                let visibleAny = false;
-
-                cards.forEach(card => {
-                    const isGame = card.dataset.notGame !== 'true';
-                    if (isGame) total++;
-                    const title = (card.querySelector('.game-title')?.textContent || '').toLocaleLowerCase();
-                    const visible = title.includes(query);
-                    card.hidden = !visible;
-                    if (visible) {
-                        visibleAny = true;
-                        if (isGame) matching++;
-                    }
-                });
-
-                gameCount.textContent = total.toLocaleString();
-                searchCount.hidden = !query;
-                searchCount.textContent = query ? `• ${matching} matching` : '';
-                noResults.hidden = !query || visibleAny;
-                searchClear.classList.toggle('is-visible', query.length > 0);
-            }
-
-            searchInput.addEventListener('input', filterGames);
-            searchClear.addEventListener('click', () => {
-                searchInput.value = '';
-                filterGames();
-                searchInput.focus();
+        function filterGames() {
+            const query = searchInput.value.trim().toLocaleLowerCase();
+            const cards = gamesGrid.querySelectorAll('.game-card');
+            let total = 0;
+            let matching = 0;
+            cards.forEach(card => {
+                const isGame = card.dataset.notGame !== 'true';
+                if (isGame) total++;
+                const title = (card.querySelector('.game-title')?.textContent || '').toLocaleLowerCase();
+                const visible = title.includes(query);
+                card.style.display = visible ? 'flex' : 'none';
+                if (visible && isGame) matching++;
             });
-            new MutationObserver(filterGames).observe(gamesGrid, { childList: true });
-            filterGames();
+            gameCount.textContent = total.toLocaleString();
+            searchCount.hidden = !query;
+            searchCount.textContent = query ? `• ${matching} matching` : '';
+            noResults.hidden = !query || [...cards].some(card => card.style.display !== 'none');
+        }
+        searchInput.addEventListener('input', filterGames);
+        new MutationObserver(filterGames).observe(gamesGrid, { childList: true, subtree: false });
+        filterGames();
 
-            /* ---------- AQUA UI SOUNDS (optional, user-gesture only) ---------- */
-            let audioCtx = null;
-
-            function getAudioContext() {
-                if (audioCtx) return audioCtx;
-                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContextClass) return null;
-                try { audioCtx = new AudioContextClass(); } catch (error) { audioCtx = null; }
-                return audioCtx;
-            }
-
-            function tone(from, to, duration, volume, type) {
-                const ctx = audioCtx;
-                if (!ctx || ctx.state !== 'running') return;
-                try {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    const now = ctx.currentTime;
-                    osc.type = type || 'sine';
-                    osc.frequency.setValueAtTime(from, now);
-                    osc.frequency.exponentialRampToValueAtTime(to, now + duration);
-                    gain.gain.setValueAtTime(volume, now);
-                    gain.gain.exponentialRampToValueAtTime(0.0008, now + duration);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(now);
-                    osc.stop(now + duration);
-                } catch (error) { /* audio is decorative */ }
-            }
-
-            const playHoverSound = () => tone(900, 1750, 0.07, 0.045, 'sine');
-            const playPopSound = () => {
-                tone(320, 980, 0.16, 0.07, 'triangle');
-                tone(140, 60, 0.12, 0.05, 'sine');
-            };
-
-            document.addEventListener('pointerdown', () => {
-                const ctx = getAudioContext();
-                if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {});
-            }, { passive: true });
-
-            document.addEventListener('mouseover', event => {
-                const target = event.target.closest?.('.game-card, .back-btn');
-                if (target && !target.contains(event.relatedTarget)) playHoverSound();
-            });
-
-            /* ---------- CLICK POP: card squeeze + shockwave + droplet burst ---------- */
-            const popLayer = document.getElementById('popLayer');
-            const POP_DELAY = 330;
-            let navigating = false;
-
-            function burstDroplets(x, y) {
-                if (reduceMotion.matches || !popLayer) return;
-                const count = 12;
-                for (let i = 0; i < count; i++) {
-                    const droplet = document.createElement('span');
-                    droplet.className = 'droplet';
-                    const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
-                    const distance = 46 + Math.random() * 78;
-                    droplet.style.setProperty('--dx', `${(Math.cos(angle) * distance).toFixed(1)}px`);
-                    droplet.style.setProperty('--dy', `${(Math.sin(angle) * distance).toFixed(1)}px`);
-                    droplet.style.setProperty('--size', `${(5 + Math.random() * 9).toFixed(1)}px`);
-                    droplet.style.left = `${x}px`;
-                    droplet.style.top = `${y}px`;
-                    popLayer.appendChild(droplet);
-                    droplet.addEventListener('animationend', () => droplet.remove(), { once: true });
+        // Audio is initialized after the first user interaction to avoid autoplay restrictions.
+        let audioCtx;
+        function playAquaSound() {
+            try {
+                if (!audioCtx) {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContextClass) return;
+                    audioCtx = new AudioContextClass();
                 }
+                if (audioCtx.state !== 'running') return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(900, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1800, audioCtx.currentTime + 0.07);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.07);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.07);
+            } catch (error) { /* Audio is optional. */ }
+        }
+        document.addEventListener('pointerdown', () => {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
             }
+            if (audioCtx?.state === 'suspended') audioCtx.resume().catch(() => {});
+        }, { passive: true });
+        document.addEventListener('mouseover', event => {
+            const target = event.target.closest?.('.game-card, .back-btn');
+            if (target && !target.contains(event.relatedTarget)) playAquaSound();
+        });
 
-            gamesGrid.addEventListener('click', event => {
-                const card = event.target.closest('.game-card');
-                if (!card) return;
+        // --- FLOATING CLEAR BLUE WATER BUBBLES ---
+        const canvas = document.getElementById('bubbleCanvas');
+        const ctx = canvas.getContext('2d');
 
-                const href = card.getAttribute('href');
-                const isModified = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0;
-                if (!href || href.startsWith('#') || isModified || navigating) return;
+        let bubbles = [];
 
-                event.preventDefault();
-                navigating = true;
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
 
-                playPopSound();
-                card.classList.add('is-popping');
-
-                // Keyboard activation reports no pointer position, so burst from the card centre.
-                const rect = card.getBoundingClientRect();
-                const hasPointer = event.clientX > 0 || event.clientY > 0;
-                burstDroplets(
-                    hasPointer ? event.clientX : rect.left + rect.width / 2,
-                    hasPointer ? event.clientY : rect.top + rect.height / 2
-                );
-
-                const delay = reduceMotion.matches ? 0 : POP_DELAY;
-                window.setTimeout(() => { window.location.href = href; }, delay);
+        for (let i = 0; i < 30; i++) {
+            bubbles.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                radius: Math.random() * 16 + 5,
+                vy: - (Math.random() * 0.75 + 0.25),
+                vx: (Math.random() - 0.5) * 0.4,
+                opacity: Math.random() * 0.45 + 0.25
             });
+        }
 
-            /* ---------- FLOATING AERO BUBBLES ---------- */
-            const canvas = document.getElementById('bubbleCanvas');
-            const ctx2d = canvas.getContext('2d');
-            let bubbles = [];
-            let bubbleFrame = null;
-            let dpr = 1;
+        function animateBubbles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            function bubbleCount() {
-                if (window.innerWidth < 640) return 14;
-                if (window.innerWidth < 1100) return 22;
-                return 30;
-            }
+            bubbles.forEach((b) => {
+                b.y += b.vy;
+                b.x += b.vx;
 
-            function makeBubble(width, height, seeded) {
-                return {
-                    x: Math.random() * width,
-                    y: seeded ? Math.random() * height : height + 20,
-                    radius: Math.random() * 16 + 5,
-                    vy: -(Math.random() * 0.7 + 0.22),
-                    vx: (Math.random() - 0.5) * 0.4,
-                    opacity: Math.random() * 0.42 + 0.22
-                };
-            }
+                if (b.y + b.radius < 0) {
+                    b.y = canvas.height + b.radius;
+                    b.x = Math.random() * canvas.width;
+                }
 
-            function resizeCanvas() {
-                dpr = Math.min(window.devicePixelRatio || 1, 2);
-                canvas.width = Math.floor(window.innerWidth * dpr);
-                canvas.height = Math.floor(window.innerHeight * dpr);
-                ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
-                bubbles = Array.from({ length: bubbleCount() }, () => makeBubble(window.innerWidth, window.innerHeight, true));
-            }
+                // Render Glassy Water Bubble with High Gloss Highlight
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
 
-            function drawBubble(b) {
-                ctx2d.beginPath();
-                ctx2d.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-                const grad = ctx2d.createRadialGradient(
+                let grad = ctx.createRadialGradient(
                     b.x - b.radius * 0.35, b.y - b.radius * 0.35, b.radius * 0.1,
                     b.x, b.y, b.radius
                 );
                 grad.addColorStop(0, `rgba(255, 255, 255, ${b.opacity + 0.35})`);
-                grad.addColorStop(0.5, `rgba(0, 210, 255, ${b.opacity * 0.38})`);
-                grad.addColorStop(1, `rgba(0, 100, 220, ${b.opacity * 0.6})`);
-                ctx2d.fillStyle = grad;
-                ctx2d.fill();
-                ctx2d.lineWidth = 1.2;
-                ctx2d.strokeStyle = `rgba(255, 255, 255, ${b.opacity * 0.9})`;
-                ctx2d.stroke();
-            }
+                grad.addColorStop(0.5, `rgba(0, 210, 255, ${b.opacity * 0.4})`);
+                grad.addColorStop(1, `rgba(0, 100, 220, ${b.opacity * 0.65})`);
 
-            function animateBubbles() {
-                ctx2d.clearRect(0, 0, window.innerWidth, window.innerHeight);
-                for (const b of bubbles) {
-                    b.y += b.vy;
-                    b.x += b.vx;
-                    if (b.y + b.radius < 0) {
-                        b.y = window.innerHeight + b.radius;
-                        b.x = Math.random() * window.innerWidth;
-                    }
-                    drawBubble(b);
-                }
-                bubbleFrame = requestAnimationFrame(animateBubbles);
-            }
+                ctx.fillStyle = grad;
+                ctx.fill();
 
-            function startBubbles() {
-                if (bubbleFrame !== null || reduceMotion.matches) return;
-                bubbleFrame = requestAnimationFrame(animateBubbles);
-            }
-
-            function stopBubbles() {
-                if (bubbleFrame === null) return;
-                cancelAnimationFrame(bubbleFrame);
-                bubbleFrame = null;
-            }
-
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-            document.addEventListener('visibilitychange', () => {
-                document.hidden ? stopBubbles() : startBubbles();
+                ctx.lineWidth = 1.2;
+                ctx.strokeStyle = `rgba(255, 255, 255, ${b.opacity * 0.9})`;
+                ctx.stroke();
             });
-            reduceMotion.addEventListener?.('change', () => {
-                if (reduceMotion.matches) {
-                    stopBubbles();
-                    ctx2d.clearRect(0, 0, window.innerWidth, window.innerHeight);
-                } else {
-                    startBubbles();
-                }
-            });
-            startBubbles();
-        })();
+
+            requestAnimationFrame(animateBubbles);
+        }
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) animateBubbles();
     </script>
 </body>
 </html>
+
