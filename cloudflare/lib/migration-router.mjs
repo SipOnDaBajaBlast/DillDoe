@@ -24,6 +24,8 @@ const spiderSize=436830208;
 const spiderStore=createReleaseStore('https://github.com/MagiczLunchly/gta5-webport-vercel/releases/download/spiderman-psp-v1/',[{name:'webofshadows.iso',size:spiderSize}]);
 const sunshineSize=1180729920;
 const sunshineStore=createReleaseStore('https://github.com/SipOnDaBajaBlast/SMS-SiteIsoInclude/releases/download/game-data-v1/',[{name:'sms-gmse01-rev0.ciso',size:sunshineSize}]);
+const odysseyParts=[1072944659,1073228093,1073081242,1063485423,1069098616,346686727].map((size,index)=>({name:`game_${String(index).padStart(2,'0')}.data`,size}));
+const odysseyStore=createReleaseStore('https://github.com/SipOnDaBajaBlast/gta5-webport-vercel/releases/download/smo-game-data-v1/',odysseyParts);
 
 function response(body,status=200,headers={}){return new Response(body,{status,headers:{...isolatedHeaders,...headers}});}
 function rangeHeaders(size,start,end,partial){return {'Accept-Ranges':'bytes','Content-Length':String(Math.max(0,end-start+1)),'Vary':'Range','Cache-Control':partial?'no-store':'public, max-age=86400',...(partial?{'Content-Range':`bytes ${start}-${end}/${size}`}:{})};}
@@ -106,6 +108,16 @@ async function gameAsset(request,url,game,path) {
 
 export async function migrationRouter(request,env){
  const url=new URL(request.url);
+ if(url.pathname.startsWith('/ports/smo-webport/')){
+  if(!['GET','HEAD'].includes(request.method))return response('Method not allowed',405,{'Allow':'GET, HEAD'});
+  const part=/^\/ports\/smo-webport\/gamedata\/game_(0[0-5])\.data$/.exec(url.pathname);
+  if(!part)return null;
+  const index=Number(part[1]),size=odysseyParts[index].size;
+  let start,end;try{[start,end]=parseByteRange(request.headers.get('Range'),size);}catch{return rangeError(size);}
+  const partial=request.headers.has('Range');
+  try{return response(request.method==='HEAD'?null:await odysseyStore([index,0,size],start,end,request.signal),partial?206:200,{'Content-Type':'application/octet-stream',...rangeHeaders(size,start,end,partial)});}
+  catch(error){console.error('Odyssey data download failed',part[1],error instanceof Error?error.message:String(error));return response('Game data temporarily unavailable. Please retry.',503,{'Cache-Control':'no-store','Retry-After':'2'});}
+ }
  if(url.pathname.startsWith('/downloaded-maps/')){
   if(!['GET','HEAD'].includes(request.method))return response('Method not allowed',405,{'Allow':'GET, HEAD'});
   // WasmFS joins its backend prefix and absolute map name with two slashes.

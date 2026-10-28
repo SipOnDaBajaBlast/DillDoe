@@ -12,6 +12,7 @@ export const specialRoutes=[
  '/ports/spiderman-psp/api/*','/ports/halo-mobile/game-data/*',
  '/ports/halo-mobile/local-maps.json','/ports/halo-mobile/game-download.json','/downloaded-maps/*',
  '/ports/sms-siteisoinclude/api/*',
+ '/ports/smo-webport/gamedata/*',
 ];
 export function staticPlan(catalog,budget=19000){
  let used=0;const games={},routes=[...specialRoutes];

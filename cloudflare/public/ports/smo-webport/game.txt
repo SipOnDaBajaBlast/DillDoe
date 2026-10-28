@@ -1,0 +1,1 @@
+{"title": "Super Mario Odyssey", "script": "Super Mario Odyssey.js", "gl": true}
