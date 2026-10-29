@@ -11,20 +11,12 @@ To update the website, edit files on the **App** branch and save your changes. T
 
 Cloudflare serves the website and streams game files from the existing GitHub releases. The build entry point is `cloudflare/build.mjs`. Static pages and game download routes use the existing Cloudflare configuration. Free-plan Function limits still apply to game routes.
 
-## Homepage sponsor frames
+## Homepage and game pages
 
-The homepage has two stationary display ad frames beside the main window on wide screens, stacking below it on smaller screens. Both use the owner's AdSense unit `3349064473`. Their styling and initialization are in `assets/home-sponsors.css` and `assets/home-sponsors.js`. The supplied artwork is `assets/sponsor-window.png`. Inline ad-size rules in `index.html` use Google's documented responsive-code customization so ads stay within the frame. The title bar moves the main window, including its navigation buttons, below the ads; arrow keys move it and Home resets it.
+The homepage uses `assets/home-layout.css`. Its title bar moves the main window, including the navigation buttons; arrow keys move it and Home resets it.
 
-Display ads stay in document flow and are initialized once each. They do not move, refresh automatically, or sit beneath artwork or the draggable window. The AdSense library is loaded only once on the homepage.
+The site has no advertising placements or AdSense scripts. `privacy.html` describes browser storage and external services.
 
-The homepage includes the owner's AdSense loader and verification meta tag for publisher `ca-pub-6483528780801608`. The root `ads.txt` authorizes that publisher, and `privacy.html` describes advertising and browser storage. Site approval, optional Auto ads settings, and any required Google consent messages are managed in AdSense. Empty ad areas before approval do not mean that a paid ad was served.
+`vercel/game-pages.mjs` generates game start pages from the game cards in root `games.html` during every Cloudflare build. Edit game notes in `vercel/game-guides.mjs`. The build checks that every linked game page exists and produces `sitemap.xml` and `robots.txt`.
 
-## Library and game-page advertising
-
-The library has one clearly labeled banner. Its cards open game pages under `/game/` with a description, playing tips, troubleshooting, related games, and one responsive display ad using unit `3349064473`. Play opens the original `/games/` page directly. Playable files and their isolation headers remain intact; there are no ads over gameplay, timers, or required ad clicks.
-
-`vercel/game-pages.mjs` generates these pages from the game cards in root `games.html` during every Cloudflare build. Edit game notes in `vercel/game-guides.mjs`; add notes there when adding a new game card. The build checks that every linked game exists and has notes. It also produces `sitemap.xml` and `robots.txt` so the library and game pages can be discovered by search engines. These do not guarantee indexing or traffic.
-
-Game start pages use the Frutiger Aero theme in `assets/game-guide.css` with the owner's supplied `assets/frutiger-aero-ocean.webp` background. The glass window, green Play button, and information panels adapt to phones while the Google ad stays in a separate labeled area.
-
-
+Game start pages use the Frutiger Aero theme in `assets/game-guide.css` with `assets/frutiger-aero-ocean.webp`. The glass window, green Play button, and information panels adapt to phones.

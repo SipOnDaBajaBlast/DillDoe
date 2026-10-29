@@ -1,0 +1,16 @@
+html { overflow-x: clip; }
+html body { min-height: 100dvh; height: auto; padding: 24px; overflow: visible; }
+.homepage-background { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.homepage-layout { position: relative; display: grid; grid-template-columns: minmax(0, 680px); justify-content: center; gap: 16px; width: 100%; align-items: center; }
+body .aero-window { position: relative; grid-column: 1; grid-row: 1; width: 100%; touch-action: auto; z-index: 3; }
+body .window-titlebar { cursor: grab !important; touch-action: none; }
+body .window-titlebar:active { cursor: grabbing !important; }
+body .window-titlebar:focus-visible { outline: 2px solid #005aa8; outline-offset: -3px; }
+.homepage-privacy { position: relative; z-index: 5; margin-top: 16px; padding: 5px 12px; background: #e7f5ffdf; border-radius: 12px; font-size: 12px; color: #073a62; }
+@media (max-width: 640px) {
+  html body { padding: 20px 16px; }
+  body .metal-title { font-size: clamp(1.8rem, 7vw, 3rem); }
+  body .window-content { padding: 28px 16px; }
+  body .start-btn { font-size: 1.25rem; padding: 14px 20px; width: 90%; }
+  body .window-title-text { font-size: .72rem; }
+}

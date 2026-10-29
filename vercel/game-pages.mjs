@@ -32,14 +32,11 @@ export async function buildGamePages(output) {
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escape(game.title)} — Play &amp; Tips | DillDoe</title>
 <meta name="description" content="${escape(description)}">
-<meta name="google-adsense-account" content="ca-pub-6483528780801608">
 <link rel="canonical" href="${publicOrigin}${guideRoute}">
 <meta property="og:title" content="${escape(game.title)} | DillDoe">
 <meta property="og:description" content="${escape(description)}">
 <meta property="og:type" content="website"><meta property="og:url" content="${publicOrigin}${guideRoute}">
-<link rel="stylesheet" href="/assets/game-guide.css"><link rel="stylesheet" href="/assets/site-ads.css">
-<style>.game-display-ad{width:250px;height:250px;margin:0 auto}@media(min-width:480px){.game-display-ad{width:300px;height:250px}}</style>
-<script src="/assets/site-ads.js" defer></script>
+<link rel="stylesheet" href="/assets/game-guide.css">
 </head><body>
 <nav class="guide-nav" aria-label="Main navigation"><a href="/games">← Game library</a><a href="/index.html">Home</a></nav>
 <main class="game-guide">
@@ -50,16 +47,13 @@ export async function buildGamePages(output) {
 <div class="guide-intro"><div><p>${escape(description)}</p>
 <a class="guide-play" href="${playRoute}"><span class="guide-play-icon" aria-hidden="true">▶</span><span>Play ${escape(game.title)}</span></a>
 <p class="guide-note">Opens the game directly.</p></div>
-<aside class="site-ad site-ad-rectangle guide-ad" aria-label="Advertisement">
-<span class="site-ad-label">Advertisements</span>
-<ins class="adsbygoogle game-display-ad" style="display:block" data-site-ad data-ad-client="ca-pub-6483528780801608" data-ad-slot="3349064473"></ins>
-</aside></div>
+</div>
 <div class="guide-details"><section class="guide-panel guide-panel-wide"><h2>Getting started</h2>
 <ol class="guide-instructions"><li>Choose Play to open the game. The first load can take longer while game files download.</li><li>Use the game’s title screen or settings to check its keyboard, touch, or controller support.</li><li>For more room, use the game’s fullscreen control when available. Use your browser’s Back button to return here.</li></ol>
 </section><section class="guide-panel"><h2>Playing tips</h2><p>${escape(tip)}</p></section>
 <section class="guide-panel"><h2>If the game does not load</h2><p>Check your connection and wait for any download progress to finish. Some games need a recent browser and enough free device storage. If controls do not respond, give the game focus and review its settings. Avoid clearing browser site data if you want to keep locally stored saves.</p></section>
 <section class="guide-panel guide-panel-wide"><h2>More to explore</h2><ul class="guide-related">${suggestions.map(other => `<li><a href="/game/${encodeURIComponent(other.slug)}.html">${escape(other.title)}</a></li>`).join('')}</ul></section></div>
-</div></main><footer class="guide-footer"><span><a href="/privacy.html">Privacy &amp; advertising</a> · <a href="/games">All games</a></span></footer>
+</div></main><footer class="guide-footer"><span><a href="/privacy.html">Privacy</a> · <a href="/games">All games</a></span></footer>
 </body></html>`;
         await fs.writeFile(path.join(output, 'game', game.slug + '.html'), html);
         library = library.replace(`href="${game.sourceHref}" class="game-card"`, `href="${guideRoute}" class="game-card"`);
@@ -68,5 +62,5 @@ export async function buildGamePages(output) {
     await fs.writeFile(libraryPath, library);
     await fs.writeFile(path.join(output, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls.map(url => `  <url><loc>${escape(publicOrigin + url)}</loc></url>`).join('\n') + '\n</urlset>\n');
     await fs.writeFile(path.join(output, 'robots.txt'), 'User-agent: *\nAllow: /\n\nSitemap: ' + publicOrigin + '/sitemap.xml\n');
-    console.log('Prepared ' + games.length + ' game pages with ads and direct Play links.');
+    console.log('Prepared ' + games.length + ' game pages with direct Play links.');
 }

@@ -63,7 +63,8 @@ async function specialDownload(request,url,game,path) {
 }
 
 async function rawBody(entry,path,start,end,partial,signal){
- const target=`https://raw.githubusercontent.com/${entry.repo}/${entry.sha}/${(entry.directory||'')+path.split('/').map(encodeURIComponent).join('/')}`;
+ const host=entry.lfsFiles?.includes(path)?'media.githubusercontent.com/media':'raw.githubusercontent.com';
+ const target=`https://${host}/${entry.repo}/${entry.sha}/${(entry.directory||'')+path.split('/').map(encodeURIComponent).join('/')}`;
  const upstream=await fetch(target,{headers:{'Accept-Encoding':'identity',...(partial?{Range:`bytes=${start}-${end}`}:{})},signal});
  if(!upstream.ok||!upstream.body){await upstream.body?.cancel();throw new Error('Game asset unavailable');}
  if(!partial)return upstream.body;

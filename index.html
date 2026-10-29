@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-adsense-account" content="ca-pub-6483528780801608">
     <link rel="canonical" href="https://dilldoe-games.pages.dev/">
     <title>I LOVE NYAN CAT &lt;3</title>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6483528780801608" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="assets/home-sponsors.css">
-    <script src="assets/home-sponsors.js" defer></script>
+    <link rel="stylesheet" href="assets/home-layout.css">
     <script src="assets/home-window.js" defer></script>
     
     <!-- Early 2000s Frutiger Aero / Web 2.0 Fonts -->
@@ -408,20 +405,6 @@
             justify-content: space-between;
         }
 
-        .homepage-display-ad { width: 180px; height: 150px; margin: 0 auto; }
-        @media (min-width: 400px) and (max-width: 640px),
-               (min-width: 800px) and (max-width: 1199px),
-               (min-width: 1440px) and (max-width: 1619px) {
-            .homepage-display-ad { width: 200px; height: 200px; }
-        }
-        @media (min-width: 1200px) and (max-width: 1279px) {
-            .homepage-display-ad { width: 125px; height: 125px; }
-        }
-        @media (min-width: 1620px),
-               (min-width: 1000px) and (max-width: 1199px),
-               (min-width: 500px) and (max-width: 640px) {
-            .homepage-display-ad { width: 300px; height: 250px; }
-        }
         .mary-dialog {
             width: min(92vw, 560px);
             max-height: 90vh;
@@ -470,28 +453,6 @@
     </button>
 
     <div class="homepage-layout">
-        <!-- Stationary display ads. Each unit is initialized once by home-sponsors.js. -->
-        <aside class="sponsor-background" aria-label="Advertisements">
-            <section class="sponsor-window sponsor-window-one" aria-label="Advertisement">
-                <div class="sponsor-surface"></div>
-                <div class="sponsor-ad-area">
-                    <ins class="adsbygoogle homepage-display-ad" style="display:block" data-ad-client="ca-pub-6483528780801608" data-ad-slot="3349064473"></ins>
-                </div>
-                <img class="sponsor-frame" src="assets/sponsor-window.png" alt="" width="720" height="720" decoding="async">
-                <span class="sponsor-title" aria-hidden="true">ADVERTISEMENT</span>
-                <button class="sponsor-close" type="button" aria-label="Hide first advertisement"></button>
-            </section>
-            <section class="sponsor-window sponsor-window-two" aria-label="Advertisement">
-                <div class="sponsor-surface"></div>
-                <div class="sponsor-ad-area">
-                    <ins class="adsbygoogle homepage-display-ad" style="display:block" data-ad-client="ca-pub-6483528780801608" data-ad-slot="3349064473"></ins>
-                </div>
-                <img class="sponsor-frame" src="assets/sponsor-window.png" alt="" width="720" height="720" decoding="async">
-                <span class="sponsor-title" aria-hidden="true">ADVERTISEMENT</span>
-                <button class="sponsor-close" type="button" aria-label="Hide second advertisement"></button>
-            </section>
-        </aside>
-
         <!-- LOADING SCREEN -->
         <div id="loader-wrapper">
             <div class="loader-box">
@@ -537,7 +498,7 @@
             </div>
         </div>
     </div>
-    <a class="homepage-privacy" href="privacy.html">Privacy &amp; advertising</a>
+    <a class="homepage-privacy" href="privacy.html">Privacy</a>
 
     <dialog class="mary-dialog" id="maryDialog" aria-labelledby="maryTitle">
         <section id="maryPrompt">

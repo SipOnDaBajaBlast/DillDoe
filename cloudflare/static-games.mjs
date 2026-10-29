@@ -51,7 +51,8 @@ async function rawSource(name,entry,files){
  }else await parallel(wanted,8,async file=>{
   const relative=(entry.directory||'')+file;
   const target=path.join(directory,relative);
-  await download(`https://raw.githubusercontent.com/${entry.repo}/${entry.sha}/${relative.split('/').map(encodeURIComponent).join('/')}`,target,entry.files[file]);
+  const host=entry.lfsFiles?.includes(file)?'media.githubusercontent.com/media':'raw.githubusercontent.com';
+  await download(`https://${host}/${entry.repo}/${entry.sha}/${relative.split('/').map(encodeURIComponent).join('/')}`,target,entry.files[file]);
  });
  return file=>path.join(directory,(entry.directory||'')+file);
 }

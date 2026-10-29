@@ -5,16 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> GAMES</title>
     <meta name="description" content="Browse the DillDoe game library, find a game, read playing tips, and open it in your browser.">
-    <meta name="google-adsense-account" content="ca-pub-6483528780801608">
     <link rel="canonical" href="https://dilldoe-games.pages.dev/games">
-    <link rel="stylesheet" href="/assets/site-ads.css">
-    <script src="/assets/site-ads.js" defer></script>
-
     <style>
-        .library-display-ad { width: 234px; height: 60px; margin: 0 auto; }
-        @media (min-width: 400px) { .library-display-ad { width: 320px; height: 100px; } }
-        @media (min-width: 600px) { .library-display-ad { width: 468px; height: 60px; } }
-        @media (min-width: 900px) { .library-display-ad { width: 728px; height: 90px; } }
         /* Frutiger Aero theme */
 
         :root {
@@ -374,8 +366,8 @@
         .count-search { font-size: .88rem; font-weight: 600; opacity: .85; }
         .count-search[hidden], .no-results[hidden] { display: none; }
         .no-results { position: relative; z-index: 3; padding: 25px; font-weight: 700; text-align: center; }
-        .site-ad, .library-privacy { position: relative; z-index: 3; }
-        .site-ad { max-width: 100%; margin-bottom: 28px; text-align: center; }
+        .library-privacy { position: relative; z-index: 3; margin: 32px 0 0; }
+        .library-privacy a { color: #003366; background: #edf8fff2; padding: 8px 14px; border-radius: 14px; }
         .library-privacy { margin-top: 35px; }
         .library-privacy a { color: #003366; }
         @media (max-width: 600px) {
@@ -387,7 +379,6 @@
             .img-wrapper { height: 125px; }
             .game-title { font-size: .9rem; }
             .search-container { margin-bottom: 32px; }
-            .library-display-ad { max-width: 100%; }
         }
         @media (prefers-reduced-motion: reduce) {
             .nyan-cat, .doge-meme, .troll-face, .sad-bart { animation: none; }
@@ -436,11 +427,6 @@
         <span><strong id="gameCount">0</strong> Games Available</span>
         <span class="count-search" id="searchCount" hidden></span>
     </div>
-
-    <aside class="site-ad site-ad-banner" aria-label="Advertisement">
-        <span class="site-ad-label">Advertisements</span>
-        <ins class="adsbygoogle library-display-ad" data-site-ad data-ad-client="ca-pub-6483528780801608" data-ad-slot="3349064473" style="display:block"></ins>
-    </aside>
 
     <main class="games-grid" id="gamesGrid">
         <a href="games/Submit.html" class="game-card" data-not-game="true">
@@ -883,10 +869,17 @@
             </div>
             <div class="game-title">Fish</div>
         </a>
+
+        <a href="games/JustVolleyball.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="/assets/game-thumbnails/just-volleyball.png" alt="Just Volleyball">
+            </div>
+            <div class="game-title">Just Volleyball</div>
+        </a>
     </main>
 
     <p id="noResults" class="no-results" hidden>No games found. Try another search.</p>
-    <footer class="library-privacy"><a href="/privacy.html">Privacy &amp; advertising</a></footer>
+    <footer class="library-privacy"><a href="/privacy.html">Privacy</a></footer>
 
     <script>
         // Count actual game cards automatically, including cards added later.

@@ -22,9 +22,7 @@ p { max-width: 75ch; }
 .guide-play-icon { display: grid; place-items: center; width: 34px; height: 34px; flex-shrink: 0; border: 1px solid #fff; border-radius: 50%; color: #fff; text-shadow: 0 1px 2px #317421; background: radial-gradient(ellipse at 35% 15%, white, #b7ef86 30%, #54a726 70%, #307e28); box-shadow: 0 1px 3px #34781b70; }
 .guide-play:focus-visible, a:focus-visible { outline: 3px solid #005aa8; outline-offset: 4px; }
 .guide-note { font-size: 13px; color: #35536a; }
-.guide-intro { display: grid; grid-template-columns: minmax(0, 1fr) 336px; gap: 160px; align-items: start; }
-.guide-intro .guide-ad { margin: 0; }
-.guide-intro .guide-ad { background: #fff; border: 1px solid #c3dce5; box-shadow: 0 3px 12px #00536e12; }
+.guide-intro { display: block; }
 .guide-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 30px; }
 .guide-panel { padding: 22px; border: 1px solid white; border-radius: 16px; background: linear-gradient(#ffffffc9, #e2f4fa9c); box-shadow: 0 3px 9px #1b789b16, inset 0 0 0 1px #bcdee782; }
 .guide-panel-wide { grid-column: 1 / -1; }
@@ -34,11 +32,7 @@ p { max-width: 75ch; }
 .guide-related a { display: inline-block; padding: 10px 16px; border: 1px solid #85bfd5; border-radius: 22px; background: linear-gradient(#fff, #d3effa 48%, #b8e0f1 49%, #e6faff); box-shadow: inset 0 1px #fff, 0 2px 4px #07577c1a; text-decoration: none; }
 .guide-footer { padding: 24px 0; text-align: center; font-size: 13px; }
 .guide-footer span { display: inline-block; padding: 10px 18px; border: 1px solid #ffffffab; border-radius: 22px; background: #effcffd9; }
-@media (max-width: 960px) {
-    .guide-intro { grid-template-columns: minmax(0, 1fr); gap: 48px; }
-    .guide-intro .guide-ad { margin: 0 auto; max-width: 336px; }
-}
 @media (max-width: 600px) { .guide-details { grid-template-columns: minmax(0, 1fr); } .guide-panel { padding: 18px; } }
 @media (max-width: 480px) { body { padding: 18px 10px; } .game-guide { padding: 5px; } .guide-content { padding: 22px 14px; } .guide-titlebar { padding: 8px; font-size: 11px; } .guide-window-dots { gap: 3px; } .guide-window-dots i { width: 10px; } .guide-play { font-size: 1rem; } }
-@media (max-width: 360px) { body { padding: 14px 6px; } .game-guide { padding: 4px; } .guide-content { padding: 18px 8px; } .guide-intro .guide-ad { padding-left: 6px; padding-right: 6px; } .guide-titlebar { gap: 6px; padding: 8px 4px; } }
+@media (max-width: 360px) { body { padding: 14px 6px; } .game-guide { padding: 4px; } .guide-content { padding: 18px 8px; } .guide-titlebar { gap: 6px; padding: 8px 4px; } }
 @media (prefers-reduced-motion: reduce) { .guide-play { transition: none; } }
