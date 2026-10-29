@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Persona 4 · DillDoe</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;font:16px/1.5 Arial,Helvetica,sans-serif;color:#fff;background:radial-gradient(120% 90% at 15% 0%,#3b2a63 0%,#171226 45%,#0b0a12 100%)}
+  header{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1rem;background:#0008;position:sticky;top:0;z-index:2;backdrop-filter:blur(6px)}
+  a{color:#f7dc49}
+  main{max-width:1180px;margin:1.4rem auto;padding:0 1rem}
+  h1{font-size:clamp(2.2rem,6vw,4rem);line-height:1;margin:.2rem 0 .6rem}
+  h1 em{font-style:normal;color:#f7dc49}
+  p{color:#d7d3e6;max-width:64ch}
+  .meta{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0}
+  .meta span{border:1px solid #ffffff2a;border-radius:999px;padding:.25rem .7rem;font-size:.8rem;letter-spacing:.04em;text-transform:uppercase;color:#cfc9e6}
+  button{cursor:pointer;background:#f7dc49;color:#1c1541;border:0;border-radius:.6rem;padding:.85rem 1.3rem;font-weight:700;font-size:1rem}
+  button.secondary{background:#ffffff1a;color:#fff}
+  .row{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}
+  .note{margin-top:1.6rem;border-left:3px solid #f7dc49;background:#ffffff0d;padding:.85rem 1rem;border-radius:0 .6rem .6rem 0;font-size:.92rem}
+  #stage{display:none;width:100%;aspect-ratio:16/9;background:#000;overflow:hidden;border-radius:.8rem;box-shadow:0 20px 60px #000a}
+  #stage:fullscreen{width:100vw;height:100vh;aspect-ratio:auto;border-radius:0}
+  iframe{width:100%;height:100%;border:0;display:block}
+  #fullscreen[hidden]{display:none}
+  #status{font-size:.9rem;color:#9d97b5}
+  kbd{background:#ffffff1f;border-radius:.3rem;padding:.05rem .35rem;font-size:.85em}
+</style>
+</head>
+<body>
+<header>
+  <a href="/games">← Game Library</a>
+  <strong>Persona 4</strong>
+  <button id="fullscreen" type="button" hidden>Fullscreen</button>
+</header>
+<main>
+  <section id="intro">
+    <h1>Persona 4<br><em>browser port</em></h1>
+    <div class="meta">
+      <span>PS2 · 2008</span><span>WebAssembly</span><span>WebGPU</span><span>Bring your own disc</span>
+    </div>
+    <p>The original PlayStation 2 release, recompiled from its own executable into WebAssembly and run by a browser-native PS2 runtime. Emotion Engine code, VU1 microprograms, the Graphics Synthesizer and SPU2 audio all execute locally in this tab — nothing is streamed from a server.</p>
+    <p>This page does not ship the game. Choose your own Persona 4 (USA v1.00, <code>SLUS_217.82</code>) disc image and it is read straight from your device; the file is never uploaded.</p>
+    <div class="row">
+      <button id="play" type="button">Choose disc &amp; play</button>
+      <button id="controls" class="secondary" type="button" disabled>Controls &amp; keys</button>
+      <a class="secondary" style="padding:.85rem 1.3rem;font-weight:700;border-radius:.6rem;background:#ffffff12;text-decoration:none;color:#fff" href="/ports/persona4/" target="_blank" rel="noopener">Open full page</a>
+    </div>
+    <div class="note">
+      <strong>Default keys</strong> — <kbd>Z</kbd> Cross · <kbd>X</kbd> Circle · <kbd>A</kbd> Square · <kbd>S</kbd> Triangle · arrow keys D-pad · <kbd>Enter</kbd> Start · <kbd>Backspace</kbd> Select · <kbd>Q</kbd> L1 · <kbd>W</kbd> R1 · <kbd>1</kbd> L2 · <kbd>2</kbd> R2 · <kbd>I</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> left stick.
+      Every button can be rebound inside the game page from <em>Menu → Controls…</em>, or from this page's <em>Controls &amp; keys</em> button; bindings are saved in your browser. Gamepads are picked up automatically.
+    </div>
+    <div class="note">
+      If you host your own copy of the disc image and it supports HTTP range requests, open <code>/ports/persona4/?disc=&lt;url&gt;</code> and the game streams straight from there and starts on its own, no file picker.
+    </div>
+  </section>
+  <div id="stage" aria-label="Persona 4 game"></div>
+  <p id="status" role="status" aria-live="polite"></p>
+</main>
+<script>
+const stage = document.getElementById('stage');
+const frameSrc = '/ports/persona4/?local';
+let frame = null;
+document.getElementById('fullscreen').onclick = () => stage.requestFullscreen();
+document.getElementById('controls').onclick = () => {
+  if (!frame || !frame.contentWindow) return;
+  frame.contentWindow.postMessage({ type: 'ps2web-controls' }, location.origin);
+};
+document.getElementById('play').onclick = () => {
+  frame = document.createElement('iframe');
+  frame.src = frameSrc;
+  frame.title = 'Persona 4';
+  frame.allow = 'cross-origin-isolated; fullscreen; autoplay; gamepad; clipboard-write';
+  frame.allowFullscreen = true;
+  frame.onload = () => {
+    document.getElementById('status').textContent = 'Player loaded. The game starts as soon as a disc image is chosen; nothing leaves your device.';
+    document.getElementById('controls').disabled = false;
+    frame.focus();
+  };
+  frame.onerror = () => {
+    document.getElementById('status').textContent = 'The player could not load. Please retry.';
+  };
+  stage.append(frame);
+  stage.style.display = 'block';
+  document.getElementById('intro').hidden = true;
+  document.getElementById('fullscreen').hidden = false;
+  document.getElementById('status').textContent = 'Loading the WebAssembly runtime…';
+  stage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>

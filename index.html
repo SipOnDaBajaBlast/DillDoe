@@ -103,9 +103,29 @@
             filter: drop-shadow(0px 10px 20px rgba(0, 60, 120, 0.4));
         }
 
-        .bg-cat-kitten:hover {
-            transform: scale(1.05);
+        .pet-kitten {
+            position: fixed;
+            bottom: 15px;
+            left: 25px;
+            z-index: 4;
+            width: min(180px, 15vh, 30vw);
+            aspect-ratio: 2 / 3;
+            padding: 0;
+            border: 0;
+            background: none;
+            filter: drop-shadow(0 10px 20px rgba(0, 60, 120, .4));
+            transform-origin: 50% 100%;
+            cursor: pointer !important;
         }
+        .pet-kitten img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; user-select: none; }
+        .pet-kitten .jump-pose { opacity: 0; }
+        .pet-kitten:hover { filter: drop-shadow(0 10px 20px rgba(0, 60, 120, .4)) brightness(1.08); }
+        .pet-kitten.is-jumping { animation: kitten-hop .8s ease-in-out; }
+        .pet-kitten.is-jumping .rest-pose { opacity: 0; }
+        .pet-kitten.is-jumping .jump-pose { opacity: 1; }
+        .pet-kitten:focus-visible { outline: 3px solid white; outline-offset: 4px; border-radius: 12px; }
+        @keyframes kitten-hop { 0%,100% { transform: translateY(0); } 43% { transform: translateY(-65px) rotate(-5deg); } 70% { transform: translateY(-20px) rotate(3deg); } }
+        @media (prefers-reduced-motion: reduce) { .pet-kitten.is-jumping { animation: none; } }
 
         /* Nyan Cat - Top Right */
         .bg-cat-nyan {
@@ -441,9 +461,13 @@
         <div class="bubble" style="width: 46px; height: 46px; left: 90%; animation-duration: 10s; animation-delay: 0.5s;"></div>
 
         <!-- BACKGROUND CAT IMAGES -->
-        <img src="https://png.pngtree.com/png-vector/20240917/ourmid/pngtree-funny-kitten-cat-standing-or-dancing-isolated-png-image_13844217.png" alt="Dancing Kitten" class="bg-cat bg-cat-kitten">
         <img src="https://wallpapers.com/images/featured/nyan-cat-png-az8jeatasi3z7yda.png" alt="Nyan Cat" class="bg-cat bg-cat-nyan">
     </div>
+
+    <button class="pet-kitten" type="button" aria-label="Pet the kitten" title="Pet the kitten">
+        <img class="rest-pose" src="assets/home-kitten-rest.png" alt="" width="1024" height="1536" decoding="async">
+        <img class="jump-pose" src="assets/home-kitten-jump.png" alt="" width="1024" height="1536" decoding="async">
+    </button>
 
     <div class="homepage-layout">
         <!-- Stationary display ads. Each unit is initialized once by home-sponsors.js. -->
@@ -547,6 +571,15 @@
     <audio id="sound4" src="my-name-is-cleveland-brown-made-with-Voicemod.mp3" preload="auto"></audio>
 
     <script>
+        const petKitten = document.querySelector('.pet-kitten');
+        let kittenTimer;
+        petKitten.addEventListener('click', () => {
+            petKitten.classList.remove('is-jumping');
+            void petKitten.offsetWidth;
+            petKitten.classList.add('is-jumping');
+            clearTimeout(kittenTimer);
+            kittenTimer = setTimeout(() => petKitten.classList.remove('is-jumping'), 800);
+        });
         // Loader Transition
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
@@ -625,12 +658,7 @@
             });
         }
 
-        document.querySelectorAll('.bg-cat').forEach(cat => {
-            cat.addEventListener('click', (e) => {
-                e.target.src = 'https://static.vecteezy.com/system/resources/thumbnails/058/038/491/small/curious-kitten-gazing-upward-in-bright-light-transparent-png.png';
-                playRandomSound();
-            });
-        });
+        document.querySelector('.pet-kitten').addEventListener('click', playRandomSound);
     </script>
 </body>
 </html>

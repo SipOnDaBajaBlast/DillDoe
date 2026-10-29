@@ -20,7 +20,9 @@ export async function finalizeBuild(output=path.resolve('dist'),catalog,{baselin
  await build({entryPoints:['worker.mjs'],outfile:path.join(output,'_worker.js'),bundle:true,format:'esm',platform:'browser',target:'es2022',minify:true});
  await fs.writeFile(path.join(output,'_routes.json'),JSON.stringify({version:1,include:routes,exclude:[]},null,2));
  let headers='/*\n  X-Content-Type-Options: nosniff\n';
- const isolatedRoutes=new Set(catalog.mainIsolation.flatMap(file=>['/'+file,'/'+file.replace(/\.html$/,'')]).map(encodeURI));
+ // A trailing wildcard covers both /games/Name and /games/Name.html, keeping
+ // the Pages _headers rule count below its 100-rule limit as games are added.
+ const isolatedRoutes=new Set(catalog.mainIsolation.map(file=>'/'+file.replace(/\.html$/,'')+'*').map(encodeURI));
  for(const route of isolatedRoutes)headers+=`\n${route}\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp\n  Cross-Origin-Resource-Policy: same-origin\n`;
  headers+='\n/__migration/health\n  Content-Type: application/json\n  Cache-Control: no-store\n\n'+(baseline?baseline.staticHeaders:await fs.readFile(path.join(overflow,'_headers'),'utf8'));
  if(compressed.size)console.log('Serving '+compressed.size+' large WebAssembly runtimes through the game router.');
