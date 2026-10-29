@@ -13,6 +13,7 @@ export const specialRoutes=[
  '/ports/halo-mobile/local-maps.json','/ports/halo-mobile/game-download.json','/downloaded-maps/*',
  '/ports/sms-siteisoinclude/api/*',
  '/ports/smo-webport/gamedata/*',
+ '/ports/persona4/disc.iso',
 ];
 export function staticPlan(catalog,budget=19000){
  let used=0;const games={},routes=[...specialRoutes];

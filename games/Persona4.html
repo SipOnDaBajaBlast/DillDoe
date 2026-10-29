@@ -37,21 +37,21 @@
   <section id="intro">
     <h1>Persona 4<br><em>browser port</em></h1>
     <div class="meta">
-      <span>PS2 · 2008</span><span>WebAssembly</span><span>WebGPU</span><span>Bring your own disc</span>
+      <span>PS2 · 2008</span><span>WebAssembly</span><span>WebGPU</span><span>Automatic disc loading</span>
     </div>
     <p>The original PlayStation 2 release, recompiled from its own executable into WebAssembly and run by a browser-native PS2 runtime. Emotion Engine code, VU1 microprograms, the Graphics Synthesizer and SPU2 audio all execute locally in this tab — nothing is streamed from a server.</p>
-    <p>This page does not ship the game. Choose your own Persona 4 (USA v1.00, <code>SLUS_217.82</code>) disc image and it is read straight from your device; the file is never uploaded.</p>
+    <p>The Persona 4 (USA) disc loads automatically as you play. The browser requests only the parts it needs, so you do not have to download the entire 4.4 GB image before starting. Your memory card stays in this browser.</p>
     <div class="row">
-      <button id="play" type="button">Choose disc &amp; play</button>
+      <button id="play" type="button">Play Persona 4</button>
       <button id="controls" class="secondary" type="button" disabled>Controls &amp; keys</button>
-      <a class="secondary" style="padding:.85rem 1.3rem;font-weight:700;border-radius:.6rem;background:#ffffff12;text-decoration:none;color:#fff" href="/ports/persona4/" target="_blank" rel="noopener">Open full page</a>
+      <a class="secondary" style="padding:.85rem 1.3rem;font-weight:700;border-radius:.6rem;background:#ffffff12;text-decoration:none;color:#fff" href="/ports/persona4/?disc=disc.iso" target="_blank" rel="noopener">Open full page</a>
     </div>
     <div class="note">
       <strong>Default keys</strong> — <kbd>Z</kbd> Cross · <kbd>X</kbd> Circle · <kbd>A</kbd> Square · <kbd>S</kbd> Triangle · arrow keys D-pad · <kbd>Enter</kbd> Start · <kbd>Backspace</kbd> Select · <kbd>Q</kbd> L1 · <kbd>W</kbd> R1 · <kbd>1</kbd> L2 · <kbd>2</kbd> R2 · <kbd>I</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> left stick.
       Every button can be rebound inside the game page from <em>Menu → Controls…</em>, or from this page's <em>Controls &amp; keys</em> button; bindings are saved in your browser. Gamepads are picked up automatically.
     </div>
     <div class="note">
-      If you host your own copy of the disc image and it supports HTTP range requests, open <code>/ports/persona4/?disc=&lt;url&gt;</code> and the game streams straight from there and starts on its own, no file picker.
+      A current Chrome or Edge browser with WebGPU gives the best performance. If the automatic disc stream is unavailable, <a href="/ports/persona4/?local">open the personal import player</a> and select your own disc image.
     </div>
   </section>
   <div id="stage" aria-label="Persona 4 game"></div>
@@ -59,7 +59,7 @@
 </main>
 <script>
 const stage = document.getElementById('stage');
-const frameSrc = '/ports/persona4/?local';
+const frameSrc = '/ports/persona4/?disc=disc.iso';
 let frame = null;
 document.getElementById('fullscreen').onclick = () => stage.requestFullscreen();
 document.getElementById('controls').onclick = () => {
@@ -73,7 +73,7 @@ document.getElementById('play').onclick = () => {
   frame.allow = 'cross-origin-isolated; fullscreen; autoplay; gamepad; clipboard-write';
   frame.allowFullscreen = true;
   frame.onload = () => {
-    document.getElementById('status').textContent = 'Player loaded. The game starts as soon as a disc image is chosen; nothing leaves your device.';
+    document.getElementById('status').textContent = 'Player loaded. Press Start inside the game window when the engine is ready.';
     document.getElementById('controls').disabled = false;
     frame.focus();
   };

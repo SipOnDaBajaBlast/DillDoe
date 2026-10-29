@@ -26,6 +26,9 @@ const sunshineSize=1180729920;
 const sunshineStore=createReleaseStore('https://github.com/SipOnDaBajaBlast/SMS-SiteIsoInclude/releases/download/game-data-v1/',[{name:'sms-gmse01-rev0.ciso',size:sunshineSize}]);
 const odysseyParts=[1072944659,1073228093,1073081242,1063485423,1069098616,346686727].map((size,index)=>({name:`game_${String(index).padStart(2,'0')}.data`,size}));
 const odysseyStore=createReleaseStore('https://github.com/SipOnDaBajaBlast/gta5-webport-vercel/releases/download/smo-game-data-v1/',odysseyParts);
+const personaParts=[1500000000,1500000000,1405952512].map((size,index)=>({name:`persona4-usa.iso.part${index}`,size,path:String(index)}));
+const personaSize=personaParts.reduce((sum,part)=>sum+part.size,0);
+const personaStore=createReleaseStore('https://github.com/SipOnDaBajaBlast/gta5-webport-vercel/releases/download/persona4-ps2-v1/',personaParts);
 
 function response(body,status=200,headers={}){return new Response(body,{status,headers:{...isolatedHeaders,...headers}});}
 function rangeHeaders(size,start,end,partial){return {'Accept-Ranges':'bytes','Content-Length':String(Math.max(0,end-start+1)),'Vary':'Range','Cache-Control':partial?'no-store':'public, max-age=86400',...(partial?{'Content-Range':`bytes ${start}-${end}/${size}`}:{})};}
@@ -108,6 +111,16 @@ async function gameAsset(request,url,game,path) {
 
 export async function migrationRouter(request,env){
  const url=new URL(request.url);
+ if(url.pathname==='/ports/persona4/disc.iso'){
+  if(!['GET','HEAD'].includes(request.method))return response('Method not allowed',405,{'Allow':'GET, HEAD'});
+  const partial=request.headers.has('Range');
+  let start,end;try{[start,end]=parseByteRange(request.headers.get('Range'),personaSize);}catch{return rangeError(personaSize);}
+  if(request.method==='GET'&&(!partial||end-start+1>4194304))return rangeError(personaSize);
+  try{
+   const body=request.method==='HEAD'?null:splitStream(personaParts,start,end,(path,from,to,size)=>personaStore([Number(path),0,size],from,to,request.signal));
+   return response(body,partial?206:200,{'Content-Type':'application/octet-stream',...rangeHeaders(personaSize,start,end,partial)});
+  }catch(error){console.error('Persona 4 disc download failed',error instanceof Error?error.message:String(error));return response('Game data temporarily unavailable. Please retry.',503,{'Cache-Control':'no-store','Retry-After':'2'});}
+ }
  if(url.pathname.startsWith('/ports/smo-webport/')){
   if(!['GET','HEAD'].includes(request.method))return response('Method not allowed',405,{'Allow':'GET, HEAD'});
   const part=/^\/ports\/smo-webport\/gamedata\/game_(0[0-5])\.data$/.exec(url.pathname);
