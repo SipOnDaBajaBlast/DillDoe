@@ -6,8 +6,19 @@
     <title> GAMES</title>
     <meta name="description" content="Browse the DillDoe game library, find a game, read playing tips, and open it in your browser.">
     <link rel="canonical" href="https://dilldoe-games.pages.dev/games">
+    <script>
+        // Apply the saved theme before first paint so there is no flash of the wrong colors.
+        (function () {
+            try {
+                var saved = localStorage.getItem('dilldoe-theme');
+                if (saved === 'frutiger' || saved === 'halloween' || saved === 'dark') {
+                    document.documentElement.setAttribute('data-theme', saved);
+                }
+            } catch (error) { /* Storage may be blocked; the default theme still works. */ }
+        })();
+    </script>
     <style>
-        /* Frutiger Aero theme */
+        /* Frutiger Aero theme (default) */
 
         :root {
             --aqua-light: #d6f5ff;
@@ -141,8 +152,9 @@
             width: 100%;
             max-width: 1100px;
             display: flex;
-            justify-content: flex-start;
+            justify-content: space-between;
             align-items: center;
+            gap: 12px;
             margin-bottom: 20px;
         }
 
@@ -384,6 +396,511 @@
             .nyan-cat, .doge-meme, .troll-face, .sad-bart { animation: none; }
             .game-card, .game-card img { transition: none; }
         }
+
+        /* ============================= THEME MENU ============================= */
+
+        .theme-menu {
+            position: relative;
+            font-family: var(--font-heading);
+            margin-left: auto;
+        }
+
+        .theme-btn {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 0.92rem;
+            color: #003055;
+            padding: 8px 16px 8px 12px;
+            background: linear-gradient(180deg, #ffffff 0%, #d4f2ff 45%, #7bd7ff 50%, #20b0ff 85%, #0088e0 100%);
+            border-radius: 20px;
+            border: 1.5px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 70, 150, 0.35), inset 0 1px 1px #ffffff, inset 0 -2px 3px rgba(0, 50, 120, 0.4);
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+            transition: all 0.2s ease;
+        }
+
+        .theme-btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(180deg, #ffffff 0%, #e8f8ff 45%, #9ee3ff 50%, #4cc3ff 85%, #00a0f0 100%);
+            box-shadow: 0 6px 18px rgba(0, 170, 255, 0.6), inset 0 1px 2px #ffffff;
+        }
+
+        .theme-btn .chevron { transition: transform 0.2s ease; }
+        .theme-btn[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+        .theme-swatch {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex: 0 0 auto;
+            border: 1.5px solid #ffffff;
+            box-shadow: 0 0 0 1px rgba(0, 60, 120, 0.3), 0 0 9px rgba(0, 210, 255, 0.9);
+            background: linear-gradient(135deg, #9fe8ff 0%, #00a2ff 60%, #0058c8 100%);
+        }
+
+        .theme-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            z-index: 30;
+            min-width: 250px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 20px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(214, 242, 255, 0.95) 100%);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 18px 40px rgba(0, 60, 140, 0.35), inset 0 2px 2px #ffffff;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px) scale(0.97);
+            transform-origin: top right;
+            transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+        }
+
+        .theme-dropdown.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+
+        .theme-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 9px 12px;
+            border-radius: 14px;
+            border: 1.5px solid transparent;
+            background: transparent;
+            color: #003055;
+            font-family: var(--font-heading);
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-align: left;
+            transition: all 0.18s ease;
+        }
+
+        .theme-option:hover {
+            background: rgba(255, 255, 255, 0.85);
+            border-color: #8fd8ff;
+            transform: translateX(2px);
+        }
+
+        .theme-option.active {
+            background: linear-gradient(180deg, #ffffff 0%, #bfe9ff 100%);
+            border-color: #3aa6ff;
+            box-shadow: 0 3px 10px rgba(0, 140, 255, 0.3), inset 0 1px 0 #ffffff;
+        }
+
+        .theme-option .dot {
+            width: 16px;
+            height: 16px;
+            flex: 0 0 auto;
+            border-radius: 50%;
+            border: 1.5px solid #ffffff;
+            box-shadow: 0 0 0 1px rgba(0, 50, 120, 0.3), 0 0 7px rgba(0, 0, 0, 0.25);
+        }
+
+        .theme-option .meta {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            line-height: 1.2;
+        }
+
+        .theme-option small {
+            font-size: 0.72rem;
+            font-weight: 600;
+            opacity: 0.7;
+        }
+
+        .theme-option .check {
+            margin-left: auto;
+            color: #0088e0;
+            font-size: 0.95rem;
+            opacity: 0;
+            transition: opacity 0.18s ease;
+        }
+
+        .theme-option.active .check { opacity: 1; }
+
+        /* ============================= HALLOWEEN THEME ============================= */
+
+        html[data-theme="halloween"] body {
+            background: linear-gradient(180deg, rgba(24, 4, 40, 0.55) 0%, rgba(70, 16, 40, 0.30) 45%, rgba(10, 2, 18, 0.70) 100%),
+                        url("https://preview.redd.it/my-first-halloween-frutiger-aero-artwork-is-finally-here-v0-1rfa54f7ggyf1.jpeg?auto=webp&s=1acff76dceb7eddae58de1589cb99b227cad771c") center/cover no-repeat fixed;
+            color: #ffe9cd;
+        }
+
+        html[data-theme="halloween"] .back-btn {
+            color: #2b0a00;
+            background: linear-gradient(180deg, #fff4dd 0%, #ffd9a4 45%, #ffab52 50%, #ff8318 85%, #d95a00 100%);
+            border-color: rgba(255, 240, 220, 0.95);
+            box-shadow: 0 4px 14px rgba(120, 20, 90, 0.5), 0 0 18px rgba(255, 138, 30, 0.35), inset 0 1px 1px #fff8ea, inset 0 -2px 3px rgba(120, 40, 0, 0.45);
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+        }
+
+        html[data-theme="halloween"] .back-btn:hover {
+            background: linear-gradient(180deg, #fffaf0 0%, #ffe7c2 45%, #ffb96e 50%, #ff9224 85%, #e86600 100%);
+            box-shadow: 0 6px 20px rgba(255, 130, 20, 0.55), 0 0 26px rgba(180, 60, 220, 0.45), inset 0 1px 2px #ffffff;
+        }
+
+        html[data-theme="halloween"] header {
+            background: linear-gradient(180deg, rgba(72, 20, 92, 0.55) 0%, rgba(46, 10, 62, 0.45) 100%);
+            border: 2px solid rgba(255, 158, 62, 0.55);
+            box-shadow: 0 10px 32px rgba(20, 0, 30, 0.55), 0 0 26px rgba(255, 140, 40, 0.22), inset 0 2px 4px rgba(255, 226, 190, 0.35);
+        }
+
+        html[data-theme="halloween"] header::before {
+            background: linear-gradient(180deg, rgba(255, 226, 190, 0.35) 0%, rgba(255, 226, 190, 0) 100%);
+        }
+
+        html[data-theme="halloween"] .aero-title {
+            background: linear-gradient(180deg, #fff6e4 0%, #ffdca6 35%, #ff9a2e 65%, #c2410c 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 3px 7px rgba(60, 0, 20, 0.7)) drop-shadow(0 0 18px rgba(255, 140, 30, 0.45));
+        }
+
+        html[data-theme="halloween"] .search-bar {
+            background: linear-gradient(180deg, rgba(58, 14, 76, 0.72) 0%, rgba(34, 6, 48, 0.62) 100%);
+            border-color: rgba(255, 176, 90, 0.65);
+            color: #ffe9cd;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.45), 0 8px 22px rgba(20, 0, 30, 0.45);
+        }
+
+        html[data-theme="halloween"] .search-bar::placeholder { color: rgba(255, 214, 168, 0.75); }
+
+        html[data-theme="halloween"] .search-bar:focus {
+            background: linear-gradient(180deg, rgba(70, 18, 90, 0.92) 0%, rgba(40, 8, 56, 0.88) 100%);
+            border-color: #ff9a2e;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4), 0 0 26px rgba(255, 140, 40, 0.75);
+        }
+
+        html[data-theme="halloween"] .game-card {
+            background: linear-gradient(135deg, rgba(76, 20, 92, 0.55) 0%, rgba(30, 6, 44, 0.45) 100%);
+            border-color: rgba(255, 168, 76, 0.5);
+            box-shadow: 0 10px 26px rgba(16, 0, 26, 0.55), inset 0 2px 2px rgba(255, 224, 186, 0.25);
+        }
+
+        html[data-theme="halloween"] .game-card::before {
+            background: linear-gradient(180deg, rgba(255, 226, 190, 0.25) 0%, rgba(255, 226, 190, 0) 100%);
+        }
+
+        html[data-theme="halloween"] .game-card:hover {
+            background: linear-gradient(135deg, rgba(104, 30, 120, 0.68) 0%, rgba(44, 10, 60, 0.62) 100%);
+            border-color: #ffb04d;
+            box-shadow: 0 18px 40px rgba(30, 0, 40, 0.6), 0 0 26px rgba(255, 140, 40, 0.55), inset 0 2px 4px rgba(255, 234, 200, 0.4);
+        }
+
+        html[data-theme="halloween"] .img-wrapper {
+            border-color: rgba(255, 176, 90, 0.6);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5), 0 3px 10px rgba(20, 0, 30, 0.5);
+        }
+
+        html[data-theme="halloween"] .game-card img { background-color: #2a0a38; }
+
+        html[data-theme="halloween"] .game-title {
+            color: #ffe6c7;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.65), 0 0 12px rgba(255, 140, 40, 0.35);
+        }
+
+        html[data-theme="halloween"] .game-card:hover .game-title { color: #ffb14d; }
+
+        html[data-theme="halloween"] .library-count {
+            color: #ffe9cd;
+            background: linear-gradient(180deg, rgba(255, 196, 122, 0.92) 0%, rgba(242, 132, 30, 0.9) 50%, rgba(180, 68, 0, 0.92) 100%);
+            border-color: rgba(255, 232, 200, 0.85);
+            box-shadow: 0 7px 22px rgba(30, 0, 30, 0.5), 0 0 20px rgba(255, 130, 20, 0.35), inset 0 2px 3px rgba(255, 255, 255, 0.5);
+            text-shadow: 0 1px 0 rgba(90, 30, 0, 0.55);
+        }
+
+        html[data-theme="halloween"] .count-orb { color: #ffe9a8; }
+        html[data-theme="halloween"] .no-results { color: #ffe9cd; }
+
+        html[data-theme="halloween"] .library-privacy a {
+            color: #ffe9cd;
+            background: rgba(40, 8, 54, 0.82);
+            border: 1px solid rgba(255, 168, 76, 0.45);
+        }
+
+        html[data-theme="halloween"] .theme-btn {
+            color: #2b0a00;
+            background: linear-gradient(180deg, #fff4dd 0%, #ffd9a4 45%, #ffab52 50%, #ff8318 85%, #d95a00 100%);
+            border-color: rgba(255, 240, 220, 0.95);
+            box-shadow: 0 4px 14px rgba(120, 20, 90, 0.5), 0 0 18px rgba(255, 138, 30, 0.35), inset 0 1px 1px #fff8ea, inset 0 -2px 3px rgba(120, 40, 0, 0.45);
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+        }
+
+        html[data-theme="halloween"] .theme-btn:hover {
+            box-shadow: 0 6px 20px rgba(255, 130, 20, 0.55), inset 0 1px 2px #ffffff;
+        }
+
+        html[data-theme="halloween"] .theme-swatch {
+            background: linear-gradient(135deg, #ffcf8a 0%, #ff8a1e 55%, #7b2cbf 100%);
+            box-shadow: 0 0 0 1px rgba(60, 20, 0, 0.35), 0 0 10px rgba(255, 140, 40, 0.95);
+        }
+
+        html[data-theme="halloween"] .theme-dropdown {
+            background: linear-gradient(180deg, rgba(62, 16, 78, 0.97) 0%, rgba(30, 6, 44, 0.97) 100%);
+            border-color: rgba(255, 168, 76, 0.6);
+            box-shadow: 0 18px 44px rgba(0, 0, 0, 0.65), 0 0 24px rgba(255, 130, 20, 0.3), inset 0 2px 2px rgba(255, 224, 186, 0.25);
+        }
+
+        html[data-theme="halloween"] .theme-option { color: #ffe9cd; }
+        html[data-theme="halloween"] .theme-option small { opacity: 0.72; }
+
+        html[data-theme="halloween"] .theme-option:hover {
+            background: rgba(255, 158, 62, 0.18);
+            border-color: rgba(255, 168, 76, 0.6);
+        }
+
+        html[data-theme="halloween"] .theme-option.active {
+            background: linear-gradient(180deg, rgba(255, 178, 92, 0.35) 0%, rgba(160, 60, 10, 0.35) 100%);
+            border-color: #ffab52;
+            box-shadow: 0 3px 12px rgba(255, 120, 20, 0.35), inset 0 1px 0 rgba(255, 236, 210, 0.35);
+        }
+
+        html[data-theme="halloween"] .theme-option .check { color: #ffcf8a; }
+
+        html[data-theme="halloween"] .bg-meme-container { opacity: 0.55; }
+        html[data-theme="halloween"] .nyan-cat,
+        html[data-theme="halloween"] .doge-meme,
+        html[data-theme="halloween"] .troll-face,
+        html[data-theme="halloween"] .sad-bart {
+            filter: drop-shadow(0 0 16px rgba(255, 140, 40, 0.85)) sepia(0.35) saturate(1.4);
+        }
+
+        /* ============================= DARK AERO THEME (Xbox 360) ============================= */
+
+        html[data-theme="dark"] body {
+            /* Lighter tint so the wallpaper actually reads through the layers */
+            background: linear-gradient(180deg, rgba(3, 12, 5, 0.62) 0%, rgba(5, 22, 10, 0.34) 45%, rgba(1, 8, 3, 0.68) 100%),
+                        url("https://i.redd.it/tzkuzsy5oup81.jpg") center/cover no-repeat fixed;
+            color: #d9ffd2;
+        }
+
+        html[data-theme="dark"] .back-btn {
+            color: #e6ffdb;
+            background: linear-gradient(180deg, #3c4a38 0%, #26301f 45%, #1a231a 50%, #101710 85%, #060a06 100%);
+            border-color: rgba(146, 208, 80, 0.55);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65), 0 0 16px rgba(126, 200, 40, 0.25), inset 0 1px 1px rgba(220, 255, 200, 0.35), inset 0 -2px 3px rgba(0, 0, 0, 0.7);
+            text-shadow: 0 0 10px rgba(150, 230, 70, 0.55);
+        }
+
+        html[data-theme="dark"] .back-btn:hover {
+            background: linear-gradient(180deg, #55684d 0%, #35442c 45%, #24311f 50%, #16211a 85%, #0a120a 100%);
+            border-color: #9be04a;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), 0 0 24px rgba(140, 220, 60, 0.55), inset 0 1px 2px rgba(230, 255, 210, 0.45);
+        }
+
+        html[data-theme="dark"] header {
+            background: linear-gradient(180deg, rgba(22, 34, 22, 0.78) 0%, rgba(6, 14, 8, 0.72) 100%);
+            border: 2px solid rgba(140, 210, 70, 0.45);
+            box-shadow: 0 10px 34px rgba(0, 0, 0, 0.7), 0 0 28px rgba(120, 200, 40, 0.22), inset 0 2px 4px rgba(200, 255, 170, 0.18);
+        }
+
+        html[data-theme="dark"] header::before {
+            background: linear-gradient(180deg, rgba(200, 255, 170, 0.16) 0%, rgba(200, 255, 170, 0) 100%);
+        }
+
+        html[data-theme="dark"] .aero-title {
+            background: linear-gradient(180deg, #f2fff0 0%, #cdf79a 35%, #86e01a 65%, #3f8f00 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 18px rgba(140, 220, 60, 0.5));
+        }
+
+        html[data-theme="dark"] .search-bar {
+            background: linear-gradient(180deg, rgba(14, 24, 14, 0.9) 0%, rgba(4, 10, 4, 0.85) 100%);
+            border-color: rgba(140, 210, 70, 0.45);
+            color: #d9ffd2;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8), 0 8px 22px rgba(0, 0, 0, 0.55);
+        }
+
+        html[data-theme="dark"] .search-bar::placeholder { color: rgba(190, 240, 160, 0.55); }
+
+        html[data-theme="dark"] .search-bar:focus {
+            background: linear-gradient(180deg, rgba(20, 34, 18, 0.96) 0%, rgba(6, 14, 6, 0.94) 100%);
+            border-color: #9be04a;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.75), 0 0 26px rgba(140, 220, 60, 0.65);
+            color: #eaffdf;
+        }
+
+        html[data-theme="dark"] .game-card {
+            background: linear-gradient(135deg, rgba(24, 38, 24, 0.78) 0%, rgba(6, 14, 8, 0.7) 100%);
+            border-color: rgba(140, 210, 70, 0.42);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7), inset 0 2px 2px rgba(200, 255, 170, 0.14);
+            color: #d9ffd2;
+        }
+
+        html[data-theme="dark"] .game-card::before {
+            background: linear-gradient(180deg, rgba(200, 255, 170, 0.12) 0%, rgba(200, 255, 170, 0) 100%);
+        }
+
+        html[data-theme="dark"] .game-card:hover {
+            background: linear-gradient(135deg, rgba(34, 54, 30, 0.85) 0%, rgba(10, 22, 10, 0.8) 100%);
+            border-color: #9be04a;
+            box-shadow: 0 18px 42px rgba(0, 0, 0, 0.75), 0 0 26px rgba(140, 220, 60, 0.5), inset 0 2px 4px rgba(210, 255, 180, 0.2);
+        }
+
+        html[data-theme="dark"] .img-wrapper {
+            border-color: rgba(140, 210, 70, 0.4);
+            box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.85), 0 3px 10px rgba(0, 0, 0, 0.7);
+        }
+
+        html[data-theme="dark"] .game-card img { background-color: #0a140a; }
+
+        html[data-theme="dark"] .img-wrapper::after {
+            background: linear-gradient(135deg, rgba(190, 255, 170, 0) 0%, rgba(200, 255, 170, 0.35) 50%, rgba(190, 255, 170, 0) 100%);
+        }
+
+        html[data-theme="dark"] .game-title {
+            color: #cdf3bd;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.9), 0 0 12px rgba(130, 220, 60, 0.35);
+        }
+
+        html[data-theme="dark"] .game-card:hover .game-title { color: #a8ef5c; }
+
+        html[data-theme="dark"] .library-count {
+            color: #eaffdf;
+            background: linear-gradient(180deg, rgba(58, 92, 34, 0.95) 0%, rgba(32, 56, 18, 0.95) 50%, rgba(12, 26, 8, 0.95) 100%);
+            border-color: rgba(150, 220, 80, 0.55);
+            box-shadow: 0 7px 24px rgba(0, 0, 0, 0.7), 0 0 22px rgba(120, 200, 40, 0.3), inset 0 2px 3px rgba(210, 255, 180, 0.2);
+            text-shadow: 0 0 10px rgba(150, 230, 70, 0.5);
+        }
+
+        html[data-theme="dark"] .count-orb { color: #9be04a; }
+        html[data-theme="dark"] .no-results { color: #d9ffd2; }
+
+        html[data-theme="dark"] .library-privacy a {
+            color: #cdf3bd;
+            background: rgba(8, 16, 8, 0.88);
+            border: 1px solid rgba(140, 210, 70, 0.4);
+        }
+
+        html[data-theme="dark"] .theme-btn {
+            color: #e6ffdb;
+            background: linear-gradient(180deg, #3c4a38 0%, #26301f 45%, #1a231a 50%, #101710 85%, #060a06 100%);
+            border-color: rgba(146, 208, 80, 0.55);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65), 0 0 16px rgba(126, 200, 40, 0.25), inset 0 1px 1px rgba(220, 255, 200, 0.35), inset 0 -2px 3px rgba(0, 0, 0, 0.7);
+            text-shadow: 0 0 10px rgba(150, 230, 70, 0.55);
+        }
+
+        html[data-theme="dark"] .theme-btn:hover {
+            border-color: #9be04a;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), 0 0 24px rgba(140, 220, 60, 0.55), inset 0 1px 2px rgba(230, 255, 210, 0.45);
+        }
+
+        html[data-theme="dark"] .theme-swatch {
+            background: linear-gradient(135deg, #cdf79a 0%, #86e01a 55%, #16350a 100%);
+            box-shadow: 0 0 0 1px rgba(0, 20, 0, 0.6), 0 0 10px rgba(140, 220, 60, 0.95);
+        }
+
+        html[data-theme="dark"] .theme-dropdown {
+            background: linear-gradient(180deg, rgba(18, 30, 18, 0.98) 0%, rgba(4, 12, 6, 0.98) 100%);
+            border-color: rgba(140, 210, 70, 0.5);
+            box-shadow: 0 18px 44px rgba(0, 0, 0, 0.8), 0 0 26px rgba(120, 200, 40, 0.28), inset 0 2px 2px rgba(200, 255, 170, 0.14);
+        }
+
+        html[data-theme="dark"] .theme-option { color: #d9ffd2; }
+        html[data-theme="dark"] .theme-option small { opacity: 0.68; }
+
+        html[data-theme="dark"] .theme-option:hover {
+            background: rgba(140, 210, 70, 0.16);
+            border-color: rgba(140, 210, 70, 0.55);
+        }
+
+        html[data-theme="dark"] .theme-option.active {
+            background: linear-gradient(180deg, rgba(120, 190, 60, 0.3) 0%, rgba(20, 40, 10, 0.4) 100%);
+            border-color: #9be04a;
+            box-shadow: 0 3px 12px rgba(100, 180, 30, 0.3), inset 0 1px 0 rgba(220, 255, 190, 0.25);
+        }
+
+        html[data-theme="dark"] .theme-option .check { color: #9be04a; }
+
+        /* Dark Aero drops the nyan cat and troll face and uses its own backdrop characters */
+        html[data-theme="dark"] .nyan-cat,
+        html[data-theme="dark"] .troll-face { display: none; }
+
+        html[data-theme="dark"] .doge-meme,
+        html[data-theme="dark"] .sad-bart {
+            opacity: 0.3;
+            filter: drop-shadow(0 0 16px rgba(140, 220, 60, 0.65)) saturate(0.75) brightness(0.85);
+        }
+
+        /* Xbox-era backdrop characters (Dark Aero only) */
+        .xbox-hero,
+        .xbox-sackboy {
+            position: absolute;
+            display: none;
+            height: auto;
+            pointer-events: none;
+        }
+
+        .xbox-hero { left: 1%; bottom: 18%; width: 320px; }
+        .xbox-sackboy { right: 1%; bottom: 16%; width: 200px; }
+
+        html[data-theme="dark"] .xbox-hero,
+        html[data-theme="dark"] .xbox-sackboy { display: block; }
+
+        html[data-theme="dark"] .xbox-hero {
+            opacity: 0.92;
+            filter: drop-shadow(0 0 20px rgba(140, 220, 60, 0.6)) contrast(1.05);
+            animation: floatHero 7s ease-in-out infinite alternate;
+        }
+
+        html[data-theme="dark"] .xbox-sackboy {
+            opacity: 0.88;
+            filter: drop-shadow(0 0 18px rgba(140, 220, 60, 0.55)) contrast(1.05);
+            animation: floatSackboy 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatHero {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-16px); }
+        }
+
+        @keyframes floatSackboy {
+            0% { transform: translateY(0) rotate(-2deg); }
+            100% { transform: translateY(14px) rotate(2deg); }
+        }
+
+        /* Dark Aero gets sharper, more angular surfaces */
+        html[data-theme="dark"] header { border-radius: 8px; }
+        html[data-theme="dark"] header::before { border-radius: 6px 6px 0 0; }
+        html[data-theme="dark"] .search-bar { border-radius: 5px; }
+        html[data-theme="dark"] .back-btn,
+        html[data-theme="dark"] .theme-btn { border-radius: 6px; }
+        html[data-theme="dark"] .game-card { border-radius: 8px; }
+        html[data-theme="dark"] .game-card::before { border-radius: 6px 6px 0 0; }
+        html[data-theme="dark"] .img-wrapper { border-radius: 3px; }
+        html[data-theme="dark"] .library-count { border-radius: 6px; }
+        html[data-theme="dark"] .theme-dropdown { border-radius: 8px; }
+        html[data-theme="dark"] .theme-option { border-radius: 3px; }
+        html[data-theme="dark"] .library-privacy a { border-radius: 4px; }
+
+        @media (prefers-reduced-motion: reduce) {
+            html[data-theme="dark"] .xbox-hero,
+            html[data-theme="dark"] .xbox-sackboy { animation: none; }
+        }
+
+        @media (max-width: 600px) {
+            .theme-btn { font-size: 0.82rem; padding: 7px 12px 7px 10px; }
+            .theme-dropdown { min-width: 215px; }
+            .theme-option { font-size: 0.85rem; padding: 8px 10px; }
+            .xbox-hero { width: 170px; left: 0; bottom: 22%; }
+            .xbox-sackboy { width: 110px; right: 0; bottom: 20%; }
+        }
     </style>
 </head>
 
@@ -397,6 +914,8 @@
         <img class="doge-meme" src="https://pngimg.com/uploads/doge_meme/doge_meme_PNG112723.png" alt="Doge">
         <img class="troll-face" src="https://www.pngkey.com/png/full/22-226917_memes-unhappy-troll-sticker-sad-trollface.png" alt="Sad Trollface">
         <img class="sad-bart" src="https://www.nicepng.com/png/full/136-1362322_sad-simpsons-and-bart-image-bart-simpson-sad.png" alt="Sad Bart Simpson">
+        <img class="xbox-hero" src="https://static.wikia.nocookie.net/neoencyclopedia/images/e/e9/Master_Chief_in_Halo_3.png/revision/latest/scale-to-width-down/250?cb=20110821054739" alt="Master Chief">
+        <img class="xbox-sackboy" src="https://static.wikia.nocookie.net/littlebigplanet/images/a/ad/Sackboy.png/revision/latest?cb=20220915190250" alt="Sackboy">
     </div>
 
     <!-- NAVIGATION BAR -->
@@ -405,6 +924,32 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Home
         </a>
+
+        <!-- THEME MENU -->
+        <div class="theme-menu">
+            <button type="button" class="theme-btn" id="themeBtn" aria-haspopup="true" aria-expanded="false" aria-controls="themeDropdown">
+                <span class="theme-swatch" id="themeSwatch" aria-hidden="true"></span>
+                <span id="themeLabel">Frutiger Aero</span>
+                <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="theme-dropdown" id="themeDropdown" role="menu" aria-label="Theme">
+                <button type="button" class="theme-option" role="menuitemradio" data-theme-option="frutiger" aria-checked="true">
+                    <span class="dot" style="background: linear-gradient(135deg, #9fe8ff 0%, #00a2ff 60%, #0058c8 100%);" aria-hidden="true"></span>
+                    <span class="meta">Frutiger Aero<small>Default aqua glass</small></span>
+                    <span class="check" aria-hidden="true">✔</span>
+                </button>
+                <button type="button" class="theme-option" role="menuitemradio" data-theme-option="halloween" aria-checked="false">
+                    <span class="dot" style="background: linear-gradient(135deg, #ffcf8a 0%, #ff8a1e 55%, #7b2cbf 100%);" aria-hidden="true"></span>
+                    <span class="meta">Halloween Aero<small>Pumpkin glass</small></span>
+                    <span class="check" aria-hidden="true">✔</span>
+                </button>
+                <button type="button" class="theme-option" role="menuitemradio" data-theme-option="dark" aria-checked="false">
+                    <span class="dot" style="background: linear-gradient(135deg, #cdf79a 0%, #86e01a 55%, #16350a 100%);" aria-hidden="true"></span>
+                    <span class="meta">Dark Aero<small>Xbox 360 green</small></span>
+                    <span class="check" aria-hidden="true">✔</span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <header>
@@ -947,6 +1492,78 @@
             if (target && !target.contains(event.relatedTarget)) playAquaSound();
         });
 
+        // --- THEME MENU ---
+        const THEME_KEY = 'dilldoe-theme';
+        const THEMES = {
+            frutiger: {
+                label: 'Frutiger Aero',
+                bubbles: { highlight: '255, 255, 255', mid: '0, 210, 255', edge: '0, 100, 220' }
+            },
+            halloween: {
+                label: 'Halloween Aero',
+                bubbles: { highlight: '255, 236, 200', mid: '255, 138, 30', edge: '110, 30, 140' }
+            },
+            dark: {
+                label: 'Dark Aero',
+                bubbles: { highlight: '225, 255, 200', mid: '134, 224, 26', edge: '22, 74, 12' }
+            }
+        };
+        const DEFAULT_THEME = 'frutiger';
+
+        const themeBtn = document.getElementById('themeBtn');
+        const themeDropdown = document.getElementById('themeDropdown');
+        const themeLabel = document.getElementById('themeLabel');
+        const themeSwatch = document.getElementById('themeSwatch');
+        const themeOptions = [...themeDropdown.querySelectorAll('[data-theme-option]')];
+        let activeTheme = THEMES[document.documentElement.getAttribute('data-theme')] ? document.documentElement.getAttribute('data-theme') : DEFAULT_THEME;
+
+        function applyTheme(name, remember) {
+            if (!THEMES[name]) name = DEFAULT_THEME;
+            activeTheme = name;
+            document.documentElement.setAttribute('data-theme', name);
+            themeLabel.textContent = THEMES[name].label;
+            themeOptions.forEach(option => {
+                const active = option.dataset.themeOption === name;
+                option.classList.toggle('active', active);
+                option.setAttribute('aria-checked', active ? 'true' : 'false');
+            });
+            const dot = themeOptions.find(option => option.dataset.themeOption === name)?.querySelector('.dot');
+            if (dot) themeSwatch.style.background = dot.style.background;
+            if (remember) {
+                try { localStorage.setItem(THEME_KEY, name); } catch (error) { /* Storage is optional. */ }
+            }
+        }
+
+        function closeThemeMenu() {
+            themeDropdown.classList.remove('open');
+            themeBtn.setAttribute('aria-expanded', 'false');
+        }
+
+        themeBtn.addEventListener('click', event => {
+            event.stopPropagation();
+            const open = themeDropdown.classList.toggle('open');
+            themeBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+
+        themeOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                applyTheme(option.dataset.themeOption, true);
+                closeThemeMenu();
+            });
+        });
+
+        document.addEventListener('click', event => {
+            if (!themeDropdown.contains(event.target) && !themeBtn.contains(event.target)) closeThemeMenu();
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && themeDropdown.classList.contains('open')) {
+                closeThemeMenu();
+                themeBtn.focus();
+            }
+        });
+
+        applyTheme(activeTheme, false);
+
         // --- FLOATING CLEAR BLUE WATER BUBBLES ---
         const canvas = document.getElementById('bubbleCanvas');
         const ctx = canvas.getContext('2d');
@@ -973,6 +1590,7 @@
 
         function animateBubbles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const palette = (THEMES[activeTheme] || THEMES[DEFAULT_THEME]).bubbles;
 
             bubbles.forEach((b) => {
                 b.y += b.vy;
@@ -991,15 +1609,15 @@
                     b.x - b.radius * 0.35, b.y - b.radius * 0.35, b.radius * 0.1,
                     b.x, b.y, b.radius
                 );
-                grad.addColorStop(0, `rgba(255, 255, 255, ${b.opacity + 0.35})`);
-                grad.addColorStop(0.5, `rgba(0, 210, 255, ${b.opacity * 0.4})`);
-                grad.addColorStop(1, `rgba(0, 100, 220, ${b.opacity * 0.65})`);
+                grad.addColorStop(0, `rgba(${palette.highlight}, ${b.opacity + 0.35})`);
+                grad.addColorStop(0.5, `rgba(${palette.mid}, ${b.opacity * 0.4})`);
+                grad.addColorStop(1, `rgba(${palette.edge}, ${b.opacity * 0.65})`);
 
                 ctx.fillStyle = grad;
                 ctx.fill();
 
                 ctx.lineWidth = 1.2;
-                ctx.strokeStyle = `rgba(255, 255, 255, ${b.opacity * 0.9})`;
+                ctx.strokeStyle = `rgba(${palette.highlight}, ${b.opacity * 0.9})`;
                 ctx.stroke();
             });
 
