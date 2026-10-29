@@ -21,6 +21,11 @@ export function transformGameText(text,game,entry,path) {
  }
  if(game==='feed-the-pit'&&path==='feedthepit.js')text=text.replace('`${loadPath}.wasm`','`${loadPath}.wasm?loader=3`');
  if(path.endsWith('.html')){
+  if(game==='yandere-simulator'&&path==='index.html'){
+   if(!text.includes('const gameInstance = UnityLoader.instantiate'))throw new Error('Yandere loader changed; recheck disc data setup');
+   text=text.replace('const gameInstance = UnityLoader.instantiate','window.dataUrll = dataUrl;\n            const gameInstance = UnityLoader.instantiate');
+   text=text.replace('</div>LOADING...</div>','</div>');
+  }
   if(game==='gta5-webport-vercel')text=text.replace(/(src=["'])([^"']+\.js)(["'])/g,(whole,start,url,end)=>/^https?:|^\/\//.test(url)?whole:start+url+'?assets=static-v2'+end);
   if(game==='feed-the-pit')text=patchFeedPitHtml(text,entry);
   text=text.replace(/<base\b[^>]*>/gi,'');

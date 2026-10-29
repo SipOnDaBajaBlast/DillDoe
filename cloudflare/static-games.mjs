@@ -114,7 +114,7 @@ export async function buildStaticGames(output,catalog){
  // Directory entry points revalidate so website updates do not leave old menus.
  await fs.appendFile(path.join(overflow,'_headers'),'\n/ports/:game/\n  Cache-Control: no-cache\n');
  await fs.writeFile(path.join(overflow,'404.html'),'<!doctype html><title>Game file not found</title><p>This game file is unavailable. Please return to the game library.</p>');
- await fs.writeFile(path.join(output,'_redirects'),[...extensions].sort().map(ext=>`/ports/*.${ext} ${STATIC_ORIGIN}/ports/:splat.${ext} 302`).join('\n')+'\n');
+ await fs.writeFile(path.join(output,'_redirects'),[`/ports/omori/audio/* ${STATIC_ORIGIN}/ports/omori/audio/:splat 302`,...[...extensions].sort().map(ext=>`/ports/*.${ext} ${STATIC_ORIGIN}/ports/:splat.${ext} 302`)].join('\n')+'\n');
  const routes=plan.routes.filter(route=>!compressedFiles.has(decodeURI(route)));
  await fs.writeFile(path.join(output,'static-game-report.json'),JSON.stringify({staticFiles,staticBytes,compressedFiles:[...compressedFiles],secondaryOrigin:STATIC_ORIGIN,remainingFunctionRoutes:routes.length,games:Object.fromEntries(Object.entries(plan.games).map(([n,g])=>[n,{staticFiles:g.files.length+[...compressedFiles].filter(p=>p.startsWith('/ports/'+n+'/')).length,largeFiles:g.large.length-[...compressedFiles].filter(p=>p.startsWith('/ports/'+n+'/')).length,secondaryFiles:g.secondaryFiles.length}]))},null,2));
  return {routes,headers:staticHeaders+'\n/ports/:game/\n  Cache-Control: no-cache\n'+compressedHeaders,overflow,staticFiles};

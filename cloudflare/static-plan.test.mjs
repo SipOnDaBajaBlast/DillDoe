@@ -17,6 +17,8 @@ test('every game file is static or explicitly retains a function route',()=>{
  assert.equal(plan.routes.some(p=>p==='/ports/*'),false);
  assert.equal(plan.games['kisakcodfork1'].large.length,0);
  assert.ok(plan.routes.includes('/ports/gta5-webport-vercel/data/*'));
+ assert.ok(plan.games.omori.secondaryFiles.includes('audio/bgm/002_White_Space.m4a') || plan.games.omori.secondaryFiles.some(file=>file.startsWith('audio/')&&file.endsWith('.m4a')));
+ assert.ok(plan.games.omori.secondaryFiles.includes('asset-manifest.json'));
  for(const[name,game]of Object.entries(plan.games))assert.ok(!game.secondaryFiles.some(file=>/\.(html|js|mjs|png|webp|jpg|ogg|mp3|wasm)$/.test(file)&&!(name==='gta5-webport-vercel'&&file.startsWith('data/'))));
 });
 test('static and dynamic text retain game scoping and RenPy filesystem paths',()=>{
@@ -31,4 +33,7 @@ test('static and dynamic text retain game scoping and RenPy filesystem paths',()
  const haloData="const dataRoot='/data/streamed';";
  assert.equal(transformGameText(haloData,'halo-mobile',entry,'stream-maps.js'),haloData);
  assert.equal(JSON.parse(transformGameText('{"version":"test"}','halo-mobile',entry,'version.json')).version,'test-dilldoe-stream2');
+ const yandere=transformGameText('<html><head><base href="https://invalid.example/"></head><script>const gameInstance = UnityLoader.instantiate("game",{});</script></html>','yandere-simulator',catalog.games['yandere-simulator'],'index.html');
+ assert.ok(!yandere.includes('https://invalid.example/'));
+ assert.ok(yandere.includes('window.dataUrll = dataUrl;'));
 });

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OMORI · DillDoe</title>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;color:#fff;background:#101010}
+    header{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.85rem 1rem;border-bottom:1px solid #555}a{color:#fff}main{max-width:1200px;margin:2rem auto;padding:0 1rem;text-align:center}
+    h1{font-size:clamp(3rem,9vw,6rem);letter-spacing:.12em;margin:1rem 0}p{line-height:1.5}button{cursor:pointer;border:2px solid #fff;background:#fff;color:#111;padding:.75rem 1.5rem;font-size:1rem;font-weight:bold}
+    #stage{display:none;position:relative;width:100%;aspect-ratio:16/9;margin:1.5rem auto;background:#000}#stage iframe{width:100%;height:100%;border:0}#stage:fullscreen{width:100vw;height:100vh;aspect-ratio:auto;margin:0}#fullscreen[hidden]{display:none}
+    #status{color:#d4d4d4}
+  </style>
+</head>
+<body>
+  <header><a href="/games">← Game Library</a><strong>OMORI</strong><button id="fullscreen" type="button" hidden>Fullscreen</button></header>
+  <main>
+    <section id="intro"><h1>OMORI</h1><p>Play the browser port. The game loads its files as needed; the first visit may take longer.</p><button id="play" type="button">Play game</button></section>
+    <div id="stage" aria-label="OMORI game"></div><p id="status" role="status"></p>
+  </main>
+  <script>
+    const stage=document.getElementById('stage'),status=document.getElementById('status');
+    document.getElementById('fullscreen').onclick=()=>stage.requestFullscreen();
+    document.getElementById('play').onclick=()=>{
+      const frame=document.createElement('iframe');frame.src='/ports/omori/';frame.title='OMORI';frame.allow='fullscreen; autoplay; gamepad';frame.allowFullscreen=true;
+      frame.onload=()=>{status.textContent='Game opened. If it is still loading, wait for the in-game progress bar.'};
+      frame.onerror=()=>{status.textContent='The game could not load. Reload this page and try again.'};
+      stage.append(frame);stage.style.display='block';document.getElementById('intro').hidden=true;document.getElementById('fullscreen').hidden=false;status.textContent='Opening the game…';frame.focus();
+    };
+  </script>
+</body>
+</html>
