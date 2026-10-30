@@ -51,6 +51,7 @@ jobs:
             cloudflare/.asset-cache/archives
             cloudflare/.asset-cache/packs
           key: game-sources-v1-${{ hashFiles('cloudflare/lib/game-catalog.json', 'cloudflare/lib/game-assets.json') }}
+          restore-keys: game-sources-v1-
       - name: Build website
         run: |
           if [ '${{ steps.plan.outputs.mode }}' = 'fast' ]; then

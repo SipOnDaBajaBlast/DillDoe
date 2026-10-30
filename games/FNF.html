@@ -1,28 +1,32 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fnf</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="cross-origin-isolation" content="unneeded">
+  <title>FNF: Doki Doki Takeover — Bad Ending · DillDoe</title>
   <style>
-    /* Makes the iframe fill the entire screen */
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-    }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;color:#fff;background:linear-gradient(145deg,#120d19,#48203d)}
+    header{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.85rem 1rem;background:#130b1bbb}a{color:#ffd3eb}main{max-width:1200px;margin:2rem auto;padding:0 1rem;text-align:center}
+    h1{font-size:clamp(2rem,6vw,4rem);margin:.5rem 0;color:#ffc4e2}p{line-height:1.5}button{cursor:pointer;border:0;border-radius:8px;background:#f29aca;color:#291329;padding:.8rem 1.4rem;font-size:1rem;font-weight:bold}
+    #stage{display:none;width:100%;aspect-ratio:16/9;margin:1.5rem auto;background:#000}#stage iframe{width:100%;height:100%;border:0}#stage:fullscreen{width:100vw;height:100vh;aspect-ratio:auto;margin:0}#fullscreen[hidden]{display:none}#status{color:#f5d8ee}
   </style>
 </head>
 <body>
-
-  <iframe src="https://fnfgame-kohl.vercel.app//" title="Embedded Webpage"></iframe>
-
+  <header><a href="/games">← Game Library</a><strong>FNF: Doki Doki Takeover — Bad Ending</strong><button id="fullscreen" type="button" hidden>Fullscreen</button></header>
+  <main>
+    <section id="intro"><h1>Doki Doki Takeover — Bad Ending</h1><p>Press Enter for menus and use the arrow keys for notes.</p><button id="play" type="button">Play game</button></section>
+    <div id="stage" aria-label="FNF Doki Doki Takeover game"></div><p id="status" role="status"></p>
+  </main>
+  <script>
+    const stage=document.getElementById('stage'),status=document.getElementById('status');
+    document.getElementById('fullscreen').onclick=()=>stage.requestFullscreen().catch(()=>{status.textContent='Fullscreen is unavailable in this browser.'});
+    document.getElementById('play').onclick=()=>{
+      const frame=document.createElement('iframe');frame.src='https://fnf.kdata1.com/doki-doki-takeover-bad-ending/1/';frame.title='FNF: Doki Doki Takeover — Bad Ending';frame.allow='fullscreen; autoplay; gamepad';frame.allowFullscreen=true;
+      frame.onload=()=>{status.textContent='Game opened. Wait for its loading screen, then press Enter to begin.'};
+      frame.onerror=()=>{status.textContent='The game could not load. Reload this page and try again.'};
+      stage.append(frame);stage.style.display='block';document.getElementById('intro').hidden=true;document.getElementById('fullscreen').hidden=false;status.textContent='Opening the game…';frame.focus();
+    };
+  </script>
 </body>
 </html>

@@ -21,6 +21,13 @@ export function transformGameText(text,game,entry,path) {
  }
  if(game==='feed-the-pit'&&path==='feedthepit.js')text=text.replace('`${loadPath}.wasm`','`${loadPath}.wasm?loader=3`');
  if(path.endsWith('.html')){
+  if(game==='kindergarten3'&&path==='index.html'){
+   if(!text.includes('Promise.all([')||!text.includes('Kindergarten3Port.loader.js'))throw new Error('Kindergarten 3 loader changed; recheck split file loading');
+   text=text.replace(/<link\b[^>]*href="TemplateData\/[^"]+"[^>]*>/gi,'');
+   text=text.replace('</head>','<style>body{background:#111823;color:#edf4ff}#unity-canvas{display:block;width:100%;height:100%}#loading-text{position:fixed;top:35%;left:5%;width:90%;z-index:3;color:#edf4ff!important;font:24px Arial,sans-serif!important}#unity-loading-bar{position:absolute;bottom:12%;left:15%;width:70%;height:16px;border:1px solid #dcecff;border-radius:8px;overflow:hidden;background:#26354c}#unity-progress-bar-empty,#unity-progress-bar-full{height:100%}#unity-progress-bar-full{background:#72baff;width:0}</style></head>');
+   text=text.replace('.then((response) => response.arrayBuffer())','.then((response) => { if (!response.ok) throw new Error("Download failed (HTTP " + response.status + ")"); return response.arrayBuffer(); })');
+   text=text.replace(/\}\);\s*<\/script>/,'}).catch(error => { document.getElementById("loading-text").textContent = "Unable to load game files. " + error.message + ". Reload to try again."; console.error(error); });</script>');
+  }
   if(game==='yandere-simulator'&&path==='index.html'){
    if(!text.includes('const gameInstance = UnityLoader.instantiate'))throw new Error('Yandere loader changed; recheck disc data setup');
    text=text.replace('const gameInstance = UnityLoader.instantiate','window.dataUrll = dataUrl;\n            const gameInstance = UnityLoader.instantiate');

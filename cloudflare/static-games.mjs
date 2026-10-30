@@ -16,7 +16,11 @@ const packBase='https://github.com/MagiczLunchly/gta5-webport-vercel/releases/do
 const textFile=/\.(html|js|mjs|css|json)$/;
 const exists=async(file,size)=>{const stat=await fs.stat(file).catch(()=>null);return stat?.isFile()&&(size===undefined||stat.size===size);};
 async function download(url,file,size,sha){
- if(await exists(file,size))return;
+ if(await exists(file,size)){
+  if(!sha)return;
+  const hash=createHash('sha256');for await(const chunk of createReadStream(file))hash.update(chunk);
+  if(hash.digest('hex')===sha)return;
+ }
  await fs.mkdir(path.dirname(file),{recursive:true});
  for(let attempt=0;attempt<3;attempt++){
   try{
