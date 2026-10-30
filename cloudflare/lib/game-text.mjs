@@ -1,6 +1,7 @@
 import {bootstrap,rewriteRootPaths,installGameDownloadGuard} from './migration-paths.mjs';
 import {patchFeedPitHtml} from './feed-pit-loader.mjs';
 import {gtaRoutingScript} from './gta-static-routing.mjs';
+import {patchDeathNoteHtml} from './death-note-loader.mjs';
 
 // Share exactly the same compatibility fixes between static builds and downloads.
 export function transformGameText(text,game,entry,path) {
@@ -21,6 +22,7 @@ export function transformGameText(text,game,entry,path) {
  }
  if(game==='feed-the-pit'&&path==='feedthepit.js')text=text.replace('`${loadPath}.wasm`','`${loadPath}.wasm?loader=3`');
  if(path.endsWith('.html')){
+  if(game==='death-note'&&path==='index.html')text=patchDeathNoteHtml(text,entry);
   if(game==='kindergarten3'&&path==='index.html'){
    if(!text.includes('Promise.all([')||!text.includes('Kindergarten3Port.loader.js'))throw new Error('Kindergarten 3 loader changed; recheck split file loading');
    text=text.replace(/<link\b[^>]*href="TemplateData\/[^"]+"[^>]*>/gi,'');
