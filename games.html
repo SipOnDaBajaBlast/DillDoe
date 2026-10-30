@@ -11,7 +11,7 @@
         (function () {
             try {
                 var saved = localStorage.getItem('dilldoe-theme');
-                if (saved === 'frutiger' || saved === 'halloween' || saved === 'dark') {
+                if (saved === 'frutiger' || saved === 'pink' || saved === 'halloween' || saved === 'dark') {
                     document.documentElement.setAttribute('data-theme', saved);
                 }
             } catch (error) { /* Storage may be blocked; the default theme still works. */ }
@@ -21,23 +21,23 @@
         /* Frutiger Aero theme (default) */
 
         :root {
-            --aqua-light: #d6f5ff;
-            --aqua-bright: #00d2ff;
-            --aqua-deep: #0072ff;
-            --aqua-dark: #003366;
+            --aqua-light: #e8fcd9;
+            --aqua-bright: #52e080;
+            --aqua-deep: #25a350;
+            --aqua-dark: #124d24;
             --gel-green: #3cd070;
-            --glass-white: rgba(255, 255, 255, 0.4);
+            --glass-white: rgba(255, 255, 255, 0.45);
             --glass-border: rgba(255, 255, 255, 0.85);
-            --glass-shadow: rgba(0, 100, 200, 0.35);
+            --glass-shadow: rgba(40, 140, 60, 0.25);
 
             /* Classic early 2000s font stacks */
             --font-heading: 'Trebuchet MS', 'Lucida Grande', 'Segoe UI', Tahoma, sans-serif;
             --font-body: 'Lucida Grande', Tahoma, 'Segoe UI', Verdana, sans-serif;
         }
 
-        /* CUSTOM AQUA CLEAR BLUE MOUSE CURSOR (SVG Base64 inspired by early 2000s liquid mouse) */
+        /* CUSTOM PINK/GREEN MOUSE CURSOR */
         body, a, button, input {
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><linearGradient id="aqua" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff" stop-opacity="1"/><stop offset="100%" stop-color="#00d2ff" stop-opacity="1"/></linearGradient></defs><path d="M6 3 L18 15 L12 18 L15 28 L10 30 L7 19 L2 22 Z" fill="url(#aqua)" stroke="#003366" stroke-width="1.5"/><circle cx="10" cy="10" r="2" fill="#ffffff" opacity="0.8"/></svg>') 4 4, auto;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><linearGradient id="pinkgreen" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff" stop-opacity="1"/><stop offset="50%" stop-color="#ffb3da" stop-opacity="1"/><stop offset="100%" stop-color="#5be38c" stop-opacity="1"/></linearGradient></defs><path d="M6 3 L18 15 L12 18 L15 28 L10 30 L7 19 L2 22 Z" fill="url(#pinkgreen)" stroke="#ff419b" stroke-width="1.5"/><circle cx="10" cy="10" r="2" fill="#ffffff" opacity="0.9"/></svg>') 4 4, auto;
         }
 
         * {
@@ -48,10 +48,10 @@
         }
 
         body {
-            /* Authentic Frutiger Aero Background image + gradient tint */
-            background: linear-gradient(180deg, rgba(0, 110, 200, 0.25) 0%, rgba(0, 190, 255, 0.15) 100%),
-                        url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWn06EKF4l8vPj4NNF6Da7XtkAnR3tWl_K3fZQLjvSwSJVmlqV6jLgFHX6&s=10") center/cover no-repeat fixed;
-            color: var(--aqua-dark);
+            /* Light pastel pink and mint green gradient background */
+            background: linear-gradient(180deg, rgba(255, 205, 230, 0.8) 0%, rgba(215, 252, 225, 0.8) 100%),
+                        url("Bg_stream_%281%29.webp") center/cover no-repeat fixed;
+            color: #3b172a;
             min-height: 100vh;
             font-family: var(--font-body);
             padding: 25px 20px 60px 20px;
@@ -158,10 +158,10 @@
             margin-bottom: 20px;
         }
 
-        /* Early 2000s Aqua Capsule Button */
+        /* Pink & Green Aero Capsule Button */
         .back-btn {
             font-family: var(--font-heading);
-            color: #003055;
+            color: #2b5731;
             font-weight: 700;
             text-decoration: none;
             font-size: 0.95rem;
@@ -169,31 +169,31 @@
             align-items: center;
             gap: 8px;
             padding: 8px 24px;
-            background: linear-gradient(180deg, #ffffff 0%, #d4f2ff 45%, #7bd7ff 50%, #20b0ff 85%, #0088e0 100%);
+            background: linear-gradient(180deg, #ffffff 0%, #e2fbe8 45%, #8ae8a9 50%, #46d674 85%, #25a851 100%);
             border-radius: 20px;
             border: 1.5px solid #ffffff;
-            box-shadow: 0 4px 12px rgba(0, 70, 150, 0.35), inset 0 1px 1px #ffffff, inset 0 -2px 3px rgba(0, 50, 120, 0.4);
+            box-shadow: 0 4px 12px rgba(50, 150, 80, 0.35), inset 0 1px 1px #ffffff, inset 0 -2px 3px rgba(20, 100, 40, 0.3);
             transition: all 0.2s ease;
             text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
         }
 
         .back-btn:hover {
-            background: linear-gradient(180deg, #ffffff 0%, #e8f8ff 45%, #9ee3ff 50%, #4cc3ff 85%, #00a0f0 100%);
-            box-shadow: 0 6px 18px rgba(0, 170, 255, 0.6), inset 0 1px 2px #ffffff;
+            background: linear-gradient(180deg, #ffffff 0%, #f0fff4 45%, #abf3c3 50%, #63e38c 85%, #2fc260 100%);
+            box-shadow: 0 6px 18px rgba(70, 210, 120, 0.6), inset 0 1px 2px #ffffff;
             transform: translateY(-2px);
         }
 
-        /* Early 2000s Trebuchet MS Glass Banner Title */
+        /* Glass Banner Title with Pink/Green Glass */
         header {
             text-align: center;
             margin-bottom: 22px;
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.45);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             padding: 18px 45px;
             border-radius: 40px;
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 10px 30px rgba(0, 90, 180, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 10px 30px rgba(230, 110, 170, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.95);
             position: relative;
             overflow: hidden;
         }
@@ -203,7 +203,7 @@
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; height: 50%;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 100%);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 100%);
             border-radius: 40px 40px 0 0;
             pointer-events: none;
         }
@@ -214,11 +214,11 @@
             font-weight: 800;
             letter-spacing: 2px;
             text-transform: uppercase;
-            background: linear-gradient(180deg, #ffffff 0%, #e0f4ff 35%, #1ac0ff 65%, #0055b8 100%);
+            background: linear-gradient(180deg, #ffffff 0%, #ffe3f1 35%, #ff7bbd 65%, #2fc260 100%);
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 3px 6px rgba(0, 40, 100, 0.4)) drop-shadow(0 1px 0 #ffffff);
+            filter: drop-shadow(0 3px 6px rgba(180, 40, 110, 0.35)) drop-shadow(0 1px 0 #ffffff);
         }
 
         .search-container {
@@ -235,27 +235,27 @@
             font-family: var(--font-heading);
             font-weight: 700;
             font-size: 1.1rem;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(230, 245, 255, 0.6) 100%);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 235, 245, 0.7) 100%);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-            border: 2px solid rgba(255, 255, 255, 0.9);
-            color: #003366;
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            color: #4a1532;
             border-radius: 30px;
             outline: none;
             transition: all 0.25s ease;
-            box-shadow: inset 0 2px 5px rgba(0, 60, 130, 0.25), 0 8px 20px rgba(0, 100, 200, 0.2);
+            box-shadow: inset 0 2px 5px rgba(200, 80, 140, 0.2), 0 8px 20px rgba(80, 200, 130, 0.25);
             text-align: center;
         }
 
         .search-bar::placeholder {
-            color: rgba(0, 60, 120, 0.65);
+            color: rgba(160, 60, 110, 0.65);
             font-weight: 600;
         }
 
         .search-bar:focus {
-            background: linear-gradient(180deg, #ffffff 0%, #e6f7ff 100%);
-            border-color: #00d2ff;
-            box-shadow: inset 0 2px 4px rgba(0, 60, 130, 0.15), 0 0 25px rgba(0, 210, 255, 0.8);
+            background: linear-gradient(180deg, #ffffff 0%, #f0fff4 100%);
+            border-color: #5be38c;
+            box-shadow: inset 0 2px 4px rgba(40, 150, 80, 0.15), 0 0 25px rgba(91, 227, 140, 0.8);
             transform: scale(1.02);
         }
 
@@ -267,15 +267,15 @@
             max-width: 1100px;
         }
 
-        /* Skeuomorphic Glass Card */
+        /* Skeuomorphic Light Glass Card */
         .game-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(210, 240, 255, 0.25) 100%);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 225, 240, 0.45) 100%);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 2px solid rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.9);
             padding: 14px;
             text-decoration: none;
-            color: #003366;
+            color: #3b172a;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -283,15 +283,15 @@
             position: relative;
             overflow: hidden;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 10px 25px rgba(0, 70, 150, 0.25), inset 0 2px 2px rgba(255, 255, 255, 0.95);
+            box-shadow: 0 10px 25px rgba(180, 80, 130, 0.2), inset 0 2px 2px rgba(255, 255, 255, 0.95);
         }
 
-        /* 2000s Gel/Glass Top Sheen Reflector */
+        /* Gel/Glass Top Sheen Reflector */
         .game-card::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; height: 48%;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 100%);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 100%);
             border-radius: 20px 20px 0 0;
             pointer-events: none;
             z-index: 2;
@@ -299,9 +299,9 @@
 
         .game-card:hover {
             transform: translateY(-8px) scale(1.03);
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(180, 230, 255, 0.45) 100%);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(220, 252, 230, 0.65) 100%);
             border-color: #ffffff;
-            box-shadow: 0 18px 38px rgba(0, 140, 255, 0.4), 0 0 22px rgba(0, 210, 255, 0.6), inset 0 2px 4px #ffffff;
+            box-shadow: 0 18px 38px rgba(60, 190, 110, 0.35), 0 0 22px rgba(255, 140, 190, 0.6), inset 0 2px 4px #ffffff;
         }
 
         .img-wrapper {
@@ -310,15 +310,15 @@
             position: relative;
             overflow: hidden;
             border-radius: 14px;
-            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.3), 0 3px 8px rgba(0, 50, 100, 0.2);
-            border: 1.5px solid rgba(255, 255, 255, 0.8);
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.15), 0 3px 8px rgba(180, 80, 130, 0.15);
+            border: 1.5px solid rgba(255, 255, 255, 0.9);
         }
 
         .game-card img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            background-color: #cbeaff;
+            background-color: #ffdceb;
             transition: transform 0.4s ease;
         }
 
@@ -334,7 +334,7 @@
             left: -100%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%);
+            background: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%);
             transform: rotate(25deg);
             transition: all 0.6s ease;
             pointer-events: none;
@@ -345,7 +345,7 @@
             left: 50%;
         }
 
-        /* Early 2000s Typography: Lucida Grande / Tahoma with bevel shadow */
+        /* Typography */
         .game-title {
             margin-top: 14px;
             font-family: var(--font-body);
@@ -353,35 +353,33 @@
             font-size: 1.05rem;
             text-align: center;
             line-height: 1.3;
-            color: #002b55;
+            color: #4a1532;
             text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
             transition: color 0.2s ease;
         }
 
         .game-card:hover .game-title {
-            color: #0066d6;
+            color: #1b8740;
         }
         .library-count {
             position: relative; z-index: 3;
             display: flex; align-items: center; justify-content: center;
             flex-wrap: wrap; gap: 9px; margin: -18px 0 25px;
             padding: 11px 26px; border-radius: 30px;
-            color: #003b70; font-family: var(--font-heading);
+            color: #3b172a; font-family: var(--font-heading);
             font-size: 1.05rem; font-weight: 700;
-            background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(156,222,255,.65) 50%, rgba(48,167,239,.65));
+            background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,210,230,.7) 50%, rgba(91,227,140,.7));
             border: 2px solid rgba(255,255,255,.95);
-            box-shadow: 0 7px 20px rgba(0,75,150,.25), inset 0 2px 3px #fff;
+            box-shadow: 0 7px 20px rgba(180,70,130,.2), inset 0 2px 3px #fff;
             text-shadow: 0 1px 0 rgba(255,255,255,.8);
         }
         .library-count strong { font-size: 1.25em; }
-        .count-orb { color: #008ed6; }
+        .count-orb { color: #ff5da3; }
         .count-search { font-size: .88rem; font-weight: 600; opacity: .85; }
         .count-search[hidden], .no-results[hidden] { display: none; }
-        .no-results { position: relative; z-index: 3; padding: 25px; font-weight: 700; text-align: center; }
-        .library-privacy { position: relative; z-index: 3; margin: 32px 0 0; }
-        .library-privacy a { color: #003366; background: #edf8fff2; padding: 8px 14px; border-radius: 14px; }
-        .library-privacy { margin-top: 35px; }
-        .library-privacy a { color: #003366; }
+        .no-results { position: relative; z-index: 3; padding: 25px; font-weight: 700; text-align: center; color: #4a1532; }
+        .library-privacy { position: relative; z-index: 3; margin: 35px 0 0; }
+        .library-privacy a { color: #3b172a; background: #fff0f7f2; padding: 8px 14px; border-radius: 14px; }
         @media (max-width: 600px) {
             body { padding: 18px 12px 45px; }
             header { padding: 16px 24px; max-width: 100%; }
@@ -412,20 +410,20 @@
             font-family: var(--font-heading);
             font-weight: 700;
             font-size: 0.92rem;
-            color: #003055;
+            color: #2b5731;
             padding: 8px 16px 8px 12px;
-            background: linear-gradient(180deg, #ffffff 0%, #d4f2ff 45%, #7bd7ff 50%, #20b0ff 85%, #0088e0 100%);
+            background: linear-gradient(180deg, #ffffff 0%, #e2fbe8 45%, #8ae8a9 50%, #46d674 85%, #25a851 100%);
             border-radius: 20px;
             border: 1.5px solid #ffffff;
-            box-shadow: 0 4px 12px rgba(0, 70, 150, 0.35), inset 0 1px 1px #ffffff, inset 0 -2px 3px rgba(0, 50, 120, 0.4);
+            box-shadow: 0 4px 12px rgba(50, 150, 80, 0.35), inset 0 1px 1px #ffffff, inset 0 -2px 3px rgba(20, 100, 40, 0.3);
             text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
             transition: all 0.2s ease;
         }
 
         .theme-btn:hover {
             transform: translateY(-2px);
-            background: linear-gradient(180deg, #ffffff 0%, #e8f8ff 45%, #9ee3ff 50%, #4cc3ff 85%, #00a0f0 100%);
-            box-shadow: 0 6px 18px rgba(0, 170, 255, 0.6), inset 0 1px 2px #ffffff;
+            background: linear-gradient(180deg, #ffffff 0%, #f0fff4 45%, #abf3c3 50%, #63e38c 85%, #2fc260 100%);
+            box-shadow: 0 6px 18px rgba(70, 210, 120, 0.6), inset 0 1px 2px #ffffff;
         }
 
         .theme-btn .chevron { transition: transform 0.2s ease; }
@@ -437,8 +435,8 @@
             border-radius: 50%;
             flex: 0 0 auto;
             border: 1.5px solid #ffffff;
-            box-shadow: 0 0 0 1px rgba(0, 60, 120, 0.3), 0 0 9px rgba(0, 210, 255, 0.9);
-            background: linear-gradient(135deg, #9fe8ff 0%, #00a2ff 60%, #0058c8 100%);
+            box-shadow: 0 0 0 1px rgba(80, 180, 110, 0.4), 0 0 9px rgba(255, 140, 190, 0.9);
+            background: linear-gradient(135deg, #ffb3da 0%, #5be38c 100%);
         }
 
         .theme-dropdown {
@@ -452,11 +450,11 @@
             gap: 6px;
             padding: 10px;
             border-radius: 20px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(214, 242, 255, 0.95) 100%);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 230, 242, 0.95) 100%);
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
             border: 2px solid rgba(255, 255, 255, 0.95);
-            box-shadow: 0 18px 40px rgba(0, 60, 140, 0.35), inset 0 2px 2px #ffffff;
+            box-shadow: 0 18px 40px rgba(180, 70, 120, 0.25), inset 0 2px 2px #ffffff;
             opacity: 0;
             visibility: hidden;
             transform: translateY(-8px) scale(0.97);
@@ -479,7 +477,7 @@
             border-radius: 14px;
             border: 1.5px solid transparent;
             background: transparent;
-            color: #003055;
+            color: #3b172a;
             font-family: var(--font-heading);
             font-size: 0.9rem;
             font-weight: 700;
@@ -489,14 +487,14 @@
 
         .theme-option:hover {
             background: rgba(255, 255, 255, 0.85);
-            border-color: #8fd8ff;
+            border-color: #ffb3da;
             transform: translateX(2px);
         }
 
         .theme-option.active {
-            background: linear-gradient(180deg, #ffffff 0%, #bfe9ff 100%);
-            border-color: #3aa6ff;
-            box-shadow: 0 3px 10px rgba(0, 140, 255, 0.3), inset 0 1px 0 #ffffff;
+            background: linear-gradient(180deg, #ffffff 0%, #d4fce1 100%);
+            border-color: #5be38c;
+            box-shadow: 0 3px 10px rgba(80, 200, 120, 0.3), inset 0 1px 0 #ffffff;
         }
 
         .theme-option .dot {
@@ -505,7 +503,7 @@
             flex: 0 0 auto;
             border-radius: 50%;
             border: 1.5px solid #ffffff;
-            box-shadow: 0 0 0 1px rgba(0, 50, 120, 0.3), 0 0 7px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 0 0 1px rgba(120, 60, 90, 0.3), 0 0 7px rgba(0, 0, 0, 0.15);
         }
 
         .theme-option .meta {
@@ -523,13 +521,117 @@
 
         .theme-option .check {
             margin-left: auto;
-            color: #0088e0;
+            color: #2fc260;
             font-size: 0.95rem;
             opacity: 0;
             transition: opacity 0.18s ease;
         }
 
         .theme-option.active .check { opacity: 1; }
+
+        /* ============================= PINK AERO THEME ============================= */
+
+        html[data-theme="pink"] body {
+            background: linear-gradient(180deg, rgba(255, 190, 220, 0.85) 0%, rgba(210, 250, 225, 0.85) 100%),
+                        url("Bg_stream_%281%29.webp") center/cover no-repeat fixed;
+            color: #3b172a;
+        }
+
+        html[data-theme="pink"] .back-btn {
+            color: #3d1428;
+            background: linear-gradient(180deg, #ffffff 0%, #ffe3f1 45%, #ff9ecd 50%, #ff52a4 85%, #d9237c 100%);
+            border-color: #ffffff;
+            box-shadow: 0 4px 12px rgba(180, 50, 110, 0.35), inset 0 1px 1px #ffffff, inset 0 -2px 3px rgba(120, 20, 70, 0.3);
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        html[data-theme="pink"] .back-btn:hover {
+            background: linear-gradient(180deg, #ffffff 0%, #ffebf5 45%, #ffb3d7 50%, #ff6cb3 85%, #ea318b 100%);
+            box-shadow: 0 6px 18px rgba(255, 80, 160, 0.6), inset 0 1px 2px #ffffff;
+        }
+
+        html[data-theme="pink"] header {
+            background: rgba(255, 255, 255, 0.55);
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 10px 30px rgba(255, 100, 170, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.95);
+        }
+
+        html[data-theme="pink"] .aero-title {
+            background: linear-gradient(180deg, #ffffff 0%, #ffd6eb 35%, #ff5ba8 65%, #25a851 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 3px 6px rgba(180, 30, 100, 0.4)) drop-shadow(0 1px 0 #ffffff);
+        }
+
+        html[data-theme="pink"] .search-bar {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 220, 238, 0.8) 100%);
+            border-color: rgba(255, 255, 255, 0.95);
+            color: #3b172a;
+            box-shadow: inset 0 2px 5px rgba(220, 80, 150, 0.25), 0 8px 20px rgba(255, 120, 180, 0.25);
+        }
+
+        html[data-theme="pink"] .search-bar:focus {
+            background: linear-gradient(180deg, #ffffff 0%, #fff0f7 100%);
+            border-color: #ff52a4;
+            box-shadow: inset 0 2px 4px rgba(200, 50, 120, 0.15), 0 0 25px rgba(255, 100, 170, 0.85);
+        }
+
+        html[data-theme="pink"] .game-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 210, 232, 0.55) 100%);
+            border-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 10px 25px rgba(200, 70, 130, 0.25), inset 0 2px 2px rgba(255, 255, 255, 0.95);
+        }
+
+        html[data-theme="pink"] .game-card:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(220, 255, 230, 0.75) 100%);
+            border-color: #ffffff;
+            box-shadow: 0 18px 38px rgba(255, 90, 160, 0.4), 0 0 22px rgba(91, 227, 140, 0.6), inset 0 2px 4px #ffffff;
+        }
+
+        html[data-theme="pink"] .game-title { color: #4a1532; }
+        html[data-theme="pink"] .game-card:hover .game-title { color: #d9237c; }
+
+        html[data-theme="pink"] .library-count {
+            color: #3b172a;
+            background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,190,220,.8) 50%, rgba(255,110,175,.75));
+            border-color: rgba(255,255,255,.95);
+            box-shadow: 0 7px 20px rgba(200,60,120,.25), inset 0 2px 3px #fff;
+        }
+
+        html[data-theme="pink"] .count-orb { color: #2fc260; }
+
+        html[data-theme="pink"] .theme-btn {
+            color: #3d1428;
+            background: linear-gradient(180deg, #ffffff 0%, #ffe3f1 45%, #ff9ecd 50%, #ff52a4 85%, #d9237c 100%);
+            border-color: #ffffff;
+            box-shadow: 0 4px 12px rgba(180, 50, 110, 0.35), inset 0 1px 1px #ffffff, inset 0 -2px 3px rgba(120, 20, 70, 0.3);
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        html[data-theme="pink"] .theme-btn:hover {
+            background: linear-gradient(180deg, #ffffff 0%, #ffebf5 45%, #ffb3d7 50%, #ff6cb3 85%, #ea318b 100%);
+            box-shadow: 0 6px 18px rgba(255, 80, 160, 0.6), inset 0 1px 2px #ffffff;
+        }
+
+        html[data-theme="pink"] .theme-swatch {
+            background: linear-gradient(135deg, #ffb3da 0%, #ff3b9a 60%, #a8135d 100%);
+            box-shadow: 0 0 0 1px rgba(150, 30, 80, 0.3), 0 0 9px rgba(255, 90, 170, 0.9);
+        }
+
+        html[data-theme="pink"] .theme-dropdown {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 215, 235, 0.96) 100%);
+            border-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 18px 40px rgba(200, 60, 120, 0.35), inset 0 2px 2px #ffffff;
+        }
+
+        html[data-theme="pink"] .theme-option.active {
+            background: linear-gradient(180deg, #ffffff 0%, #ffd4ea 100%);
+            border-color: #ff52a4;
+            box-shadow: 0 3px 10px rgba(255, 80, 160, 0.3), inset 0 1px 0 #ffffff;
+        }
+
+        html[data-theme="pink"] .theme-option .check { color: #ea318b; }
 
         /* ============================= HALLOWEEN THEME ============================= */
 
@@ -567,7 +669,7 @@
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 3px 7px rgba(60, 0, 20, 0.7)) drop-shadow(0 0 18px rgba(255, 140, 30, 0.45));
+            filter: drop-shadow(0 3px 7px rgba(60, 0, 20, 0.7)) drop-shadow(0 0 18px rgba(255, 140, 40, 0.45));
         }
 
         html[data-theme="halloween"] .search-bar {
@@ -682,7 +784,6 @@
         /* ============================= DARK AERO THEME (Xbox 360) ============================= */
 
         html[data-theme="dark"] body {
-            /* Lighter tint so the wallpaper actually reads through the layers */
             background: linear-gradient(180deg, rgba(3, 12, 5, 0.62) 0%, rgba(5, 22, 10, 0.34) 45%, rgba(1, 8, 3, 0.68) 100%),
                         url("https://i.redd.it/tzkuzsy5oup81.jpg") center/cover no-repeat fixed;
             color: #d9ffd2;
@@ -934,8 +1035,13 @@
             </button>
             <div class="theme-dropdown" id="themeDropdown" role="menu" aria-label="Theme">
                 <button type="button" class="theme-option" role="menuitemradio" data-theme-option="frutiger" aria-checked="true">
-                    <span class="dot" style="background: linear-gradient(135deg, #9fe8ff 0%, #00a2ff 60%, #0058c8 100%);" aria-hidden="true"></span>
-                    <span class="meta">Frutiger Aero<small>Default aqua glass</small></span>
+                    <span class="dot" style="background: linear-gradient(135deg, #ffb3da 0%, #5be38c 100%);" aria-hidden="true"></span>
+                    <span class="meta">Frutiger Aero<small>Light Pink & Green</small></span>
+                    <span class="check" aria-hidden="true">✔</span>
+                </button>
+                <button type="button" class="theme-option" role="menuitemradio" data-theme-option="pink" aria-checked="false">
+                    <span class="dot" style="background: linear-gradient(135deg, #ffb3da 0%, #ff3b9a 60%, #a8135d 100%);" aria-hidden="true"></span>
+                    <span class="meta">Pink kinda<small>All Pink aesthetic for someone coool :0</small></span>
                     <span class="check" aria-hidden="true">✔</span>
                 </button>
                 <button type="button" class="theme-option" role="menuitemradio" data-theme-option="halloween" aria-checked="false">
@@ -1039,7 +1145,7 @@
 
         <a href="games/Omori.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="https://tse2.mm.bing.net/th/id/OIP.OjMPuBuseVh5HvBxPXO-VwHaDt?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="OMORI">
+                <img loading="lazy" decoding="async" src="https://tse2.mm.bing.net/th/id/OIP.OjMPuBuseHvBxPXO-VwHaDt?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="OMORI">
             </div>
             <div class="game-title">OMORI</div>
         </a>
@@ -1515,7 +1621,11 @@
         const THEMES = {
             frutiger: {
                 label: 'Frutiger Aero',
-                bubbles: { highlight: '255, 255, 255', mid: '0, 210, 255', edge: '0, 100, 220' }
+                bubbles: { highlight: '255, 235, 245', mid: '255, 120, 185', edge: '60, 210, 110' }
+            },
+            pink: {
+                label: 'Pink Aero',
+                bubbles: { highlight: '255, 235, 245', mid: '255, 90, 170', edge: '200, 30, 120' }
             },
             halloween: {
                 label: 'Halloween Aero',
@@ -1582,7 +1692,7 @@
 
         applyTheme(activeTheme, false);
 
-        // --- FLOATING CLEAR BLUE WATER BUBBLES ---
+        // --- FLOATING CLEAR WATER BUBBLES ---
         const canvas = document.getElementById('bubbleCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -1645,4 +1755,3 @@
     </script>
 </body>
 </html>
-
