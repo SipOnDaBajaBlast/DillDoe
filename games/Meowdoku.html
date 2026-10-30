@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meowdoku · DillDoe</title>
+<style>*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;color:#edf8ff;background:linear-gradient(150deg,#08213b,#236a8d)}header{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.85rem 1rem;background:#061a2bbb}a{color:#c9f4ff}main{max-width:1200px;margin:2rem auto;padding:0 1rem;text-align:center}h1{font-size:clamp(2rem,6vw,4rem);margin:.5rem 0;color:#d6fbff}p{line-height:1.5}button{cursor:pointer;border:0;border-radius:8px;background:#a5e8f4;color:#12384c;padding:.8rem 1.4rem;font-size:1rem;font-weight:bold}#stage{display:none;width:min(100%,420px,45vh);aspect-ratio:9/16;margin:1.5rem auto;background:#000}#stage iframe{width:100%;height:100%;border:0}#stage:fullscreen{width:100vw;height:100vh;aspect-ratio:auto;margin:0}#fullscreen[hidden]{display:none}#status{color:#d8efff}</style>
+</head><body>
+<header><a href="/games">← Game Library</a><strong>Meowdoku</strong><button id="fullscreen" type="button" hidden>Fullscreen</button></header>
+<main><section id="intro"><h1>Meowdoku</h1><p>Double-click or double-tap a cell to place a cat, and follow the puzzle tutorial. The first launch downloads about 220 MB of game files.</p><button id="play" type="button">Play game</button></section><div id="stage" aria-label="Meowdoku game"></div><p id="status" role="status"></p></main>
+<script>
+const stage=document.getElementById('stage'),status=document.getElementById('status');
+document.getElementById('fullscreen').onclick=()=>stage.requestFullscreen().catch(()=>{status.textContent='Fullscreen is unavailable in this browser.'});
+document.getElementById('play').onclick=()=>{const frame=document.createElement('iframe');frame.src='/ports/meowdoku/';frame.title='Meowdoku';frame.allow='cross-origin-isolated; fullscreen; autoplay; gamepad';frame.allowFullscreen=true;frame.onload=()=>{status.textContent='Game opened. If it is still loading, wait for the in-game progress bar.'};frame.onerror=()=>{status.textContent='The game could not load. Reload this page and try again.'};stage.append(frame);stage.style.display='block';document.getElementById('intro').hidden=true;document.getElementById('fullscreen').hidden=false;status.textContent='Opening the game…';frame.focus();};
+</script></body></html>
