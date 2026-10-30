@@ -22,6 +22,8 @@ The 192,348,226-byte Unity data download is stored in ten static pieces, each at
 - Generated guide and Play link validated; library search finds one Death Note card, with a loaded local thumbnail and 64 total games.
 - Actual browser runtime reached its menu and started a new game.
 - Clicked the desk, used the computer, opened the notebook, returned with Escape, opened pause, and saved back to the menu.
-- Full playthrough, all notebook text-entry behavior, and audible sound quality have not been verified.
+- Follow-up verification: the original corner drag opens the actual rules/writing spread on the live site, accepts typed text, and turns to the next rules page. The original BookPro drag hotspot occupies the bottom-right quarter of the full spread; dragging the middle of the cover does not trigger it. The wrapper and guide now explain this explicitly before Play.
+- All 65 library-card images (including the request card) now use local files; all loaded successfully in the live browser. Existing cover choices and themes were preserved.
+- Full playthrough, every notebook outcome, and audible sound quality have not been verified.
 
 The supplied runtime emitted a resolution fallback warning and a concurrent save-sync warning during startup. Neither prevented the tested interactions. No original gameplay binaries were modified.
