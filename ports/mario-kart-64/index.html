@@ -665,6 +665,10 @@
                 ['pointerup', 'pointercancel', 'pointerleave', 'lostpointercapture'].forEach(function (t) {
                     btn.addEventListener(t, release);
                 });
+                btn.addEventListener('click', function(e) {
+                    // Keyboard and assistive activation have no pointerdown/up pair.
+                    if(e.detail===0&&!held){press();setTimeout(release,120);}
+                });
                 btn.addEventListener('contextmenu', function (e) { e.preventDefault(); });
             });
 
