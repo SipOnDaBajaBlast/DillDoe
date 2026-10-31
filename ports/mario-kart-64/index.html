@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mario Kart 64 — WebAssembly</title>
+    <style>
+        :root {
+            --ink: #0b0d10;
+            --panel: #14181d;
+            --line: #262c34;
+            --paper: #e8ecf1;
+            --muted: #93a0ae;
+            --red: #e11d2e;
+            --yellow: #ffcf33;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+        }
+
+        body {
+            background:
+                radial-gradient(1200px 600px at 50% -10%, #1d232b 0%, transparent 60%),
+                var(--ink);
+            color: var(--paper);
+            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ---------- checkered flag strips ---------- */
+        .checker {
+            height: 14px;
+            flex: 0 0 auto;
+            background-image:
+                linear-gradient(45deg, #fff 25%, transparent 25%, transparent 75%, #fff 75%),
+                linear-gradient(45deg, #fff 25%, #000 25%, #000 75%, #fff 75%);
+            background-size: 14px 14px;
+            background-position: 0 0, 7px 7px;
+            background-color: #000;
+            opacity: .85;
+        }
+
+        /* ---------- launcher ---------- */
+        #launcher {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px 60px;
+        }
+
+        .card {
+            width: min(860px, 100%);
+            background: linear-gradient(180deg, var(--panel), #0f1216);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 34px 34px 28px;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, .55);
+        }
+
+        .kicker {
+            font: 600 12px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+            color: var(--yellow);
+            margin: 0 0 14px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(38px, 7vw, 74px);
+            line-height: .92;
+            letter-spacing: -.03em;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-style: italic;
+            text-shadow: 0 3px 0 #000;
+        }
+
+        h1 span {
+            display: block;
+            color: var(--red);
+            font-size: .52em;
+            letter-spacing: .3em;
+            font-style: normal;
+            margin-top: 6px;
+            text-shadow: 0 2px 0 #000;
+        }
+
+        .sub {
+            color: var(--muted);
+            margin: 18px 0 0;
+            font-size: 15px;
+            line-height: 1.6;
+            max-width: 58ch;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 26px;
+        }
+
+        button {
+            font: inherit;
+            cursor: pointer;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            transition: transform .08s ease, filter .15s ease;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .play {
+            display: inline-block;
+            background: linear-gradient(180deg, #ff3b45, var(--red));
+            color: #fff;
+            border-color: #ff6b72;
+            font-weight: 800;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            padding: 16px 34px;
+            font-size: 15px;
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 10px 24px rgba(225, 29, 46, .35);
+        }
+
+        .play.is-disabled {
+            filter: grayscale(1) brightness(.7);
+            cursor: not-allowed;
+            box-shadow: none;
+            pointer-events: none;
+        }
+
+        .play:not(.is-disabled):hover {
+            filter: brightness(1.08);
+        }
+
+        .ghost {
+            background: transparent;
+            color: var(--paper);
+            border-color: var(--line);
+            padding: 15px 20px;
+            font-size: 14px;
+        }
+
+        .ghost:hover {
+            border-color: #3a434f;
+            background: #1a1f25;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font: 13px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+            color: var(--muted);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--yellow);
+            box-shadow: 0 0 10px currentColor;
+            flex: 0 0 auto;
+        }
+
+        .dot.ok {
+            background: #35d07f;
+        }
+
+        .dot.bad {
+            background: var(--red);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 26px;
+            margin-top: 34px;
+            padding-top: 26px;
+            border-top: 1px solid var(--line);
+        }
+
+        @media (max-width: 700px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 24px 20px;
+            }
+        }
+
+        h2 {
+            font: 700 12px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin: 0 0 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 5px 0;
+            border-bottom: 1px dashed #1f252c;
+            vertical-align: top;
+        }
+
+        td:last-child {
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        kbd {
+            font: 600 12px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+            background: #1d242c;
+            border: 1px solid #2d3641;
+            border-bottom-width: 2px;
+            border-radius: 5px;
+            padding: 3px 6px;
+            color: var(--paper);
+        }
+
+        .notes {
+            font-size: 13.5px;
+            line-height: 1.65;
+            color: var(--muted);
+        }
+
+        .notes p {
+            margin: 0 0 10px;
+        }
+
+        .notes strong {
+            color: var(--paper);
+            font-weight: 600;
+        }
+
+        .notes a {
+            color: var(--yellow);
+        }
+
+        /* ---------- running state ---------- */
+        #screen {
+            display: none;
+            flex: 1 1 auto;
+            position: relative;
+            background: #000;
+        }
+
+        body.running #launcher {
+            display: none;
+        }
+
+        body.running #screen {
+            display: block;
+        }
+
+        #emu {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            display: block;
+        }
+
+        /* ---------- mouse / touch pad ---------- */
+        #pad {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 22px 22px;
+            gap: 18px;
+            pointer-events: none;
+            z-index: 6;
+        }
+
+        #pad.hidden {
+            display: none;
+        }
+
+        .stick {
+            pointer-events: auto;
+            position: relative;
+            width: 128px;
+            height: 128px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, .26);
+            background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, .13), rgba(0, 0, 0, .55));
+            touch-action: none;
+            user-select: none;
+            cursor: grab;
+        }
+
+        .stick:active {
+            cursor: grabbing;
+        }
+
+        .knob {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #ffffff, #c3ccd7);
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .6);
+            pointer-events: none;
+        }
+
+        .stick-label {
+            position: absolute;
+            left: 50%;
+            bottom: -18px;
+            transform: translateX(-50%);
+            font: 600 10px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+            letter-spacing: .18em;
+            color: rgba(255, 255, 255, .5);
+        }
+
+        .pad-buttons {
+            pointer-events: auto;
+            display: grid;
+            grid-template-columns: repeat(3, 62px);
+            gap: 8px;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .pbtn {
+            height: 54px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .22);
+            background: rgba(16, 20, 26, .74);
+            color: #eef2f7;
+            font: 800 15px/1 "Segoe UI", sans-serif;
+            letter-spacing: .04em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            touch-action: none;
+        }
+
+        .pbtn small {
+            font: 500 9px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, .5);
+        }
+
+        .pbtn.accel {
+            background: rgba(225, 29, 46, .84);
+            border-color: rgba(255, 122, 130, .75);
+        }
+
+        .pbtn.down {
+            filter: brightness(1.5);
+            transform: translateY(1px);
+        }
+
+        #hud {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            display: flex;
+            gap: 8px;
+            z-index: 5;
+            opacity: .28;
+            transition: opacity .2s ease;
+        }
+
+        #hud:hover {
+            opacity: 1;
+        }
+
+        #hud button {
+            background: rgba(12, 14, 18, .88);
+            color: var(--paper);
+            border: 1px solid #333c47;
+            padding: 7px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .06em;
+        }
+
+        footer {
+            flex: 0 0 auto;
+            text-align: center;
+            padding: 9px;
+            font: 11px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+            color: #5d6875;
+            background: #080a0c;
+            border-top: 1px solid #14181d;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="checker"></div>
+
+    <div id="launcher">
+        <div class="card">
+            <p class="kicker">Nintendo 64 · WebAssembly</p>
+            <h1>Mario Kart<span>64</span></h1>
+            <p class="sub">
+                The real game, running in your browser. A Nintendo 64 emulator core compiled to WebAssembly
+                loads Mario Kart 64 automatically when you press Play. The first launch downloads 12 MB of game data; later launches reuse browser storage when available.
+            </p>
+
+            <div class="row">
+                <a class="play" id="play" href="engine/index.html?autostart=1">Play Mario Kart 64</a>
+                <button class="ghost" id="remapHint" type="button" hidden>Remap controls</button>
+                <div class="status"><span class="dot" id="dot"></span><span id="status">Looking for ROM…</span></div>
+            </div>
+
+            <div class="grid">
+                <div>
+                    <h2>Keyboard</h2>
+                    <table>
+                        <tr><td>Steer</td><td><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></td></tr>
+                        <tr><td>Accelerate (A)</td><td><kbd>Space</kbd></td></tr>
+                        <tr><td>Brake / reverse (B)</td><td><kbd>X</kbd></td></tr>
+                        <tr><td>Item (Z)</td><td><kbd>Z</kbd></td></tr>
+                        <tr><td>Hop / drift (R)</td><td><kbd>C</kbd></td></tr>
+                        <tr><td>Look behind (L)</td><td><kbd>V</kbd></td></tr>
+                        <tr><td>Camera (C-buttons)</td><td><kbd>I</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd></td></tr>
+                        <tr><td>Pause / start</td><td><kbd>Enter</kbd></td></tr>
+                        <tr><td>Emulator menu</td><td><kbd>`</kbd></td></tr>
+                        <tr><td>Hide the on-screen pad</td><td><kbd>Pad</kbd> button</td></tr>
+                    </table>
+                </div>
+                <div class="notes">
+                    <h2>Notes</h2>
+                    <p><strong>Mouse &amp; touch:</strong> an on-screen pad sits over the game — drag the stick to
+                        steer, click the buttons for A/B/Z/R/L/Start. Toggle it with the <em>Pad</em> button
+                        (top right) to see the full picture.</p>
+                    <p><strong>Gamepad:</strong> plug in an Xbox or PlayStation controller and it maps itself —
+                        analog stick steers, A accelerates.</p>
+                    <p><strong>Save states &amp; SRAM</strong> live in your browser storage, so a cup you started
+                        today is still there tomorrow.</p>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen">
+        <div id="hud">
+            <button type="button" id="btnPad">Pad: on</button>
+            <button type="button" id="btnFull">Fullscreen</button>
+            <button type="button" id="btnExit">Exit</button>
+        </div>
+        <div id="pad">
+            <div class="stick" id="stick" role="application" aria-label="Analog stick, drag to steer">
+                <div class="knob" id="knob"></div>
+                <span class="stick-label">STEER</span>
+            </div>
+            <div class="pad-buttons">
+                <button type="button" class="pbtn accel" data-key="a">A<small>accel</small></button>
+                <button type="button" class="pbtn" data-key="b">B<small>brake</small></button>
+                <button type="button" class="pbtn" data-key="z">Z<small>item</small></button>
+                <button type="button" class="pbtn" data-key="r">R<small>hop</small></button>
+                <button type="button" class="pbtn" data-key="l">L<small>look</small></button>
+                <button type="button" class="pbtn" data-key="start">START<small>pause</small></button>
+            </div>
+        </div>
+        <iframe id="emu" title="Mario Kart 64 emulator" allow="autoplay; fullscreen; gamepad"></iframe>
+    </div>
+
+    <footer>Mario Kart 64 · Saves stay in this browser</footer>
+    <div class="checker"></div>
+
+    <script>
+        (function () {
+            var ROM = 'engine/roms/mk64.us.bin';
+            var playBtn = document.getElementById('play');
+            var statusEl = document.getElementById('status');
+            var dot = document.getElementById('dot');
+            var screen = document.getElementById('screen');
+            var frame = document.getElementById('emu');
+            var started = false;
+
+            // Start disabled: the ROM has to be confirmed present before we offer to boot.
+            // The anchor still carries a working href, so if this script ever fails the
+            // link simply navigates to the emulator page instead.
+            playBtn.classList.add('is-disabled');
+            playBtn.removeAttribute('href');
+
+            // ---- control scheme -------------------------------------------------
+            // The engine compares event.key literally, so these are the exact keys it
+            // matches. Seeded once per browser; an existing custom remap always wins.
+            var KEYMAP = {
+                Mapping_Up: 'ArrowUp',
+                Mapping_Down: 'ArrowDown',
+                Mapping_Left: 'ArrowLeft',
+                Mapping_Right: 'ArrowRight',
+                Mapping_Action_A: ' ',
+                Mapping_Action_B: 'x',
+                Mapping_Action_Z: 'z',
+                Mapping_Action_R: 'c',
+                Mapping_Action_L: 'v',
+                Mapping_Action_Start: 'Enter',
+                Mapping_Action_CUP: 'i',
+                Mapping_Action_CDOWN: 'k',
+                Mapping_Action_CLEFT: 'j',
+                Mapping_Action_CRIGHT: 'l',
+                Mapping_Menu: '`'
+            };
+
+            try {
+                if (!localStorage.getItem('n64wasm_mappings_v3')) {
+                    localStorage.setItem('n64wasm_mappings_v3', JSON.stringify(KEYMAP));
+                }
+            } catch (err) { /* storage blocked: engine falls back to its own defaults */ }
+
+            function setStatus(dotClass, text) {
+                dot.className = 'dot ' + dotClass;
+                statusEl.textContent = text;
+            }
+
+            function human(bytes) {
+                return (bytes / 1048576).toFixed(1) + ' MB';
+            }
+
+            // Confirm the ROM is actually sitting next to this page before offering to boot it.
+            fetch(ROM, { method: 'HEAD' })
+                .then(function (r) {
+                    if (!r.ok) { throw new Error('HTTP ' + r.status); }
+                    var len = parseInt(r.headers.get('Content-Length') || '0', 10);
+                    setStatus('ok', 'ROM ready · Mario Kart 64 (USA) · ' + (len ? human(len) : 'found'));
+                    playBtn.classList.remove('is-disabled');
+                    playBtn.setAttribute('href', 'engine/index.html?autostart=1');
+                })
+                .catch(function () {
+                    setStatus('bad', 'No ROM at ' + ROM + ' — drop a .z64 in engine/roms/');
+                });
+
+            function start() {
+                if (started) { return; }
+                started = true;
+                document.body.classList.add('running');
+                frame.src = 'engine/index.html?autostart=1';
+                frame.focus();
+                document.getElementById('remapHint').hidden = false;
+            }
+
+            playBtn.addEventListener('click', function (e) {
+                if (playBtn.classList.contains('is-disabled')) {
+                    e.preventDefault();
+                    return;
+                }
+                e.preventDefault();   // stay in the launcher; the game loads in the frame
+                start();
+            });
+
+            window.addEventListener('message', function (e) {
+                if (e.source === frame.contentWindow && e.origin === location.origin && e.data && e.data.type === 'mk64-ready') {
+                    frame.focus();
+                }
+            });
+
+            document.getElementById('btnExit').addEventListener('click', function () {
+                started = false;
+                document.body.classList.remove('running');
+                frame.src = 'about:blank';
+            });
+
+            document.getElementById('btnFull').addEventListener('click', function () {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else if (screen.requestFullscreen) {
+                    screen.requestFullscreen();
+                }
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !document.fullscreenElement && started) {
+                    document.getElementById('btnExit').click();
+                }
+            });
+
+            // ---- on-screen pad (mouse + touch) ----------------------------------
+            // Events are dispatched straight into the emulator document, which owns the
+            // key handlers, so the pad works without stealing focus from the game.
+            var pad = document.getElementById('pad');
+            var stick = document.getElementById('stick');
+            var knob = document.getElementById('knob');
+
+            function sendKey(key, isDown) {
+                if (!started || !frame.contentDocument || !key) { return; }
+                frame.contentDocument.dispatchEvent(new KeyboardEvent(isDown ? 'keydown' : 'keyup', {
+                    key: key,
+                    bubbles: true,
+                    cancelable: true
+                }));
+            }
+
+            var ACTIONS = {
+                a: KEYMAP.Mapping_Action_A,
+                b: KEYMAP.Mapping_Action_B,
+                z: KEYMAP.Mapping_Action_Z,
+                r: KEYMAP.Mapping_Action_R,
+                l: KEYMAP.Mapping_Action_L,
+                start: KEYMAP.Mapping_Action_Start
+            };
+
+            function refocus() {
+                // Keep physical keys flowing to the game after a mouse press.
+                try { frame.focus(); } catch (err) { }
+            }
+
+            Array.prototype.forEach.call(document.querySelectorAll('.pbtn'), function (btn) {
+                var key = ACTIONS[btn.dataset.key];
+                var held = false;
+
+                function press() {
+                    if (held) { return; }
+                    held = true;
+                    btn.classList.add('down');
+                    sendKey(key, true);
+                }
+
+                function release() {
+                    if (!held) { return; }
+                    held = false;
+                    btn.classList.remove('down');
+                    sendKey(key, false);
+                    refocus();
+                }
+
+                btn.addEventListener('pointerdown', function (e) {
+                    e.preventDefault();
+                    try { btn.setPointerCapture(e.pointerId); } catch (err) { }
+                    press();
+                });
+                ['pointerup', 'pointercancel', 'pointerleave', 'lostpointercapture'].forEach(function (t) {
+                    btn.addEventListener(t, release);
+                });
+                btn.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+            });
+
+            var STICK_KEYS = {
+                up: KEYMAP.Mapping_Up,
+                down: KEYMAP.Mapping_Down,
+                left: KEYMAP.Mapping_Left,
+                right: KEYMAP.Mapping_Right
+            };
+            var dir = { up: false, down: false, left: false, right: false };
+            var stickActive = false;
+
+            function setDir(name, on) {
+                if (dir[name] === on) { return; }
+                dir[name] = on;
+                sendKey(STICK_KEYS[name], on);
+            }
+
+            function centreKnob() {
+                knob.style.transform = 'translate(-50%, -50%)';
+            }
+
+            function releaseStick() {
+                stickActive = false;
+                centreKnob();
+                Object.keys(dir).forEach(function (d) { setDir(d, false); });
+                refocus();
+            }
+
+            function moveStick(e) {
+                var r = stick.getBoundingClientRect();
+                var cx = r.left + r.width / 2;
+                var cy = r.top + r.height / 2;
+                var radius = r.width / 2;
+                var dx = (e.clientX - cx) / radius;
+                var dy = (e.clientY - cy) / radius;
+                var mag = Math.sqrt(dx * dx + dy * dy);
+                var dead = 0.2;
+
+                knob.style.transform = 'translate(calc(-50% + ' + (dx * radius * 0.52) +
+                    'px), calc(-50% + ' + (dy * radius * 0.52) + 'px))';
+
+                setDir('left', dx < -dead);
+                setDir('right', dx > dead);
+                setDir('up', dy < -dead);
+                setDir('down', dy > dead);
+            }
+
+            stick.addEventListener('pointerdown', function (e) {
+                e.preventDefault();
+                stickActive = true;
+                try { stick.setPointerCapture(e.pointerId); } catch (err) { }
+                moveStick(e);
+            });
+            stick.addEventListener('pointermove', function (e) {
+                if (!stickActive) { return; }
+                e.preventDefault();
+                moveStick(e);
+            });
+            ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (t) {
+                stick.addEventListener(t, releaseStick);
+            });
+            stick.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+            document.getElementById('btnPad').addEventListener('click', function (e) {
+                var hidden = pad.classList.toggle('hidden');
+                e.currentTarget.textContent = hidden ? 'Pad: off' : 'Pad: on';
+                refocus();
+            });
+        })();
+    </script>
+</body>
+
+</html>
