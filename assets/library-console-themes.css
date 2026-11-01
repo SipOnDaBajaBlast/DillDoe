@@ -1,0 +1,75 @@
+/* Console themes keep the library's existing links and grid intact. */
+html[data-theme="dark"] .bg-meme-container,
+html[data-theme="dark"] #bubbleCanvas,
+html[data-theme="ps2"] .bg-meme-container,
+html[data-theme="ps2"] #bubbleCanvas { display: none; }
+html[data-theme="dark"] .game-card {
+  background: linear-gradient(145deg, #f4f5ef, #c8cec3);
+  border: 1px solid #e1eadb;
+  border-top: 7px solid #87c82c;
+  box-shadow: 0 7px 18px #0008;
+}
+html[data-theme="dark"] .game-title,
+html[data-theme="dark"] .game-card:hover .game-title { color: #22351a; text-shadow: none; }
+html[data-theme="dark"] .game-card:hover { background: #efffd9; border-color: #a7ed48; }
+html[data-theme="dark"] .img-wrapper::after { display: none; }
+html[data-theme="dark"] .search-bar::placeholder { color: #c1d5b8; }
+html[data-theme="ps2"] body {
+  color: #e5ecff;
+  background: linear-gradient(#02061266,#020612aa), url('/assets/ps2-boot-background.png') center / cover fixed;
+  font-family: Tahoma, Verdana, sans-serif;
+}
+html[data-theme="ps2"] header {
+  background: linear-gradient(110deg,#040917ee,#133a80dd);
+  border: 1px solid #779cd4;
+  border-radius: 0;
+  box-shadow: 6px 6px 0 #020616aa, 0 0 30px #1769b733;
+}
+html[data-theme="ps2"] .aero-title {
+  background: none; -webkit-text-fill-color: #eef5ff;
+  color: #eef5ff; filter: none; text-shadow: 0 0 16px #70a9ff88;
+  font-weight: 400; letter-spacing: .13em;
+}
+html[data-theme="ps2"] .back-btn,
+html[data-theme="ps2"] .theme-btn,
+html[data-theme="ps2"] .library-count,
+html[data-theme="ps2"] .library-privacy a {
+  background: linear-gradient(#263e6e,#0c142c);
+  border: 1px solid #8199bd; border-radius: 2px;
+  color: #f3f6ff; text-shadow: none; box-shadow: 3px 3px 0 #0006;
+}
+html[data-theme="ps2"] .search-bar {
+  background: #060b1be8; border: 1px solid #829bc6; border-radius: 0;
+  color: #fff; box-shadow: inset 0 2px 8px #000;
+}
+html[data-theme="ps2"] .search-bar::placeholder { color: #b6c6e2; }
+html[data-theme="ps2"] .game-card {
+  border-radius: 3px; border: 2px solid #273d6b;
+  background: linear-gradient(110deg,#101522,#050812);
+  padding-top: 28px; position: relative;
+  box-shadow: 5px 7px 0 #0008, inset 3px 0 0 #546382;
+}
+html[data-theme="ps2"] .game-card::before {
+  content: 'DILLDOE / GAME DISC'; position: absolute;
+  top: 0; left: 0; width: 100%; height: 24px; border-radius: 0;
+  display: flex; align-items: center; padding-left: 10px;
+  background: #03040a; color: #e8eefc; font-size: 9px; letter-spacing: .12em;
+}
+html[data-theme="ps2"] .game-card:hover,
+html[data-theme="ps2"] .game-card:focus-visible { border-color: #81acff; background: #132550; }
+html[data-theme="ps2"] .img-wrapper { border-radius: 0; border: 1px solid #7084a1; }
+html[data-theme="ps2"] .img-wrapper::after { display: none; }
+html[data-theme="ps2"] .game-title,
+html[data-theme="ps2"] .game-card:hover .game-title { color: #f0f4ff; text-shadow: none; font-weight: 400; }
+html[data-theme="ps2"] .theme-dropdown { background: #080f23fa; border-color: #849ac6; border-radius: 2px; }
+html[data-theme="ps2"] .theme-option { color: #e5ecff; border-radius: 0; }
+html[data-theme="ps2"] .theme-option:hover,
+html[data-theme="ps2"] .theme-option.active { background: #244a87; border-color: #86b7ff; }
+html[data-theme="ps2"] .theme-option .check,
+html[data-theme="ps2"] .count-orb { color: #a9caff; }
+html[data-theme="ps2"] .no-results { color: #fff; }
+html[data-theme="ps2"] :focus-visible { outline: 2px solid #b7d6ff; outline-offset: 4px; }
+@media(max-width:600px) {
+  html[data-theme="ps2"] body { background-attachment: scroll; }
+  html[data-theme="ps2"] .aero-title { letter-spacing: .04em; }
+}

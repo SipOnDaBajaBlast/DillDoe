@@ -11,7 +11,7 @@
         (function () {
             try {
                 var saved = localStorage.getItem('dilldoe-theme');
-                if (saved === 'frutiger' || saved === 'pink' || saved === 'halloween' || saved === 'dark') {
+                if (saved === 'frutiger' || saved === 'pink' || saved === 'ps2' || saved === 'dark') {
                     document.documentElement.setAttribute('data-theme', saved);
                 }
             } catch (error) { /* Storage may be blocked; the default theme still works. */ }
@@ -635,159 +635,11 @@
 
         html[data-theme="pink"] .theme-option .check { color: #ea318b; }
 
-        /* ============================= HALLOWEEN THEME ============================= */
-
-        html[data-theme="halloween"] body {
-            background: linear-gradient(180deg, rgba(24, 4, 40, 0.55) 0%, rgba(70, 16, 40, 0.30) 45%, rgba(10, 2, 18, 0.70) 100%),
-                        url("https://preview.redd.it/my-first-halloween-frutiger-aero-artwork-is-finally-here-v0-1rfa54f7ggyf1.jpeg?auto=webp&s=1acff76dceb7eddae58de1589cb99b227cad771c") center/cover no-repeat fixed;
-            color: #ffe9cd;
-        }
-
-        html[data-theme="halloween"] .back-btn {
-            color: #2b0a00;
-            background: linear-gradient(180deg, #fff4dd 0%, #ffd9a4 45%, #ffab52 50%, #ff8318 85%, #d95a00 100%);
-            border-color: rgba(255, 240, 220, 0.95);
-            box-shadow: 0 4px 14px rgba(120, 20, 90, 0.5), 0 0 18px rgba(255, 138, 30, 0.35), inset 0 1px 1px #fff8ea, inset 0 -2px 3px rgba(120, 40, 0, 0.45);
-            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
-        }
-
-        html[data-theme="halloween"] .back-btn:hover {
-            background: linear-gradient(180deg, #fffaf0 0%, #ffe7c2 45%, #ffb96e 50%, #ff9224 85%, #e86600 100%);
-            box-shadow: 0 6px 20px rgba(255, 130, 20, 0.55), 0 0 26px rgba(180, 60, 220, 0.45), inset 0 1px 2px #ffffff;
-        }
-
-        html[data-theme="halloween"] header {
-            background: linear-gradient(180deg, rgba(72, 20, 92, 0.55) 0%, rgba(46, 10, 62, 0.45) 100%);
-            border: 2px solid rgba(255, 158, 62, 0.55);
-            box-shadow: 0 10px 32px rgba(20, 0, 30, 0.55), 0 0 26px rgba(255, 140, 40, 0.22), inset 0 2px 4px rgba(255, 226, 190, 0.35);
-        }
-
-        html[data-theme="halloween"] header::before {
-            background: linear-gradient(180deg, rgba(255, 226, 190, 0.35) 0%, rgba(255, 226, 190, 0) 100%);
-        }
-
-        html[data-theme="halloween"] .aero-title {
-            background: linear-gradient(180deg, #fff6e4 0%, #ffdca6 35%, #ff9a2e 65%, #c2410c 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 3px 7px rgba(60, 0, 20, 0.7)) drop-shadow(0 0 18px rgba(255, 140, 40, 0.45));
-        }
-
-        html[data-theme="halloween"] .search-bar {
-            background: linear-gradient(180deg, rgba(58, 14, 76, 0.72) 0%, rgba(34, 6, 48, 0.62) 100%);
-            border-color: rgba(255, 176, 90, 0.65);
-            color: #ffe9cd;
-            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.45), 0 8px 22px rgba(20, 0, 30, 0.45);
-        }
-
-        html[data-theme="halloween"] .search-bar::placeholder { color: rgba(255, 214, 168, 0.75); }
-
-        html[data-theme="halloween"] .search-bar:focus {
-            background: linear-gradient(180deg, rgba(70, 18, 90, 0.92) 0%, rgba(40, 8, 56, 0.88) 100%);
-            border-color: #ff9a2e;
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4), 0 0 26px rgba(255, 140, 40, 0.75);
-        }
-
-        html[data-theme="halloween"] .game-card {
-            background: linear-gradient(135deg, rgba(76, 20, 92, 0.55) 0%, rgba(30, 6, 44, 0.45) 100%);
-            border-color: rgba(255, 168, 76, 0.5);
-            box-shadow: 0 10px 26px rgba(16, 0, 26, 0.55), inset 0 2px 2px rgba(255, 224, 186, 0.25);
-        }
-
-        html[data-theme="halloween"] .game-card::before {
-            background: linear-gradient(180deg, rgba(255, 226, 190, 0.25) 0%, rgba(255, 226, 190, 0) 100%);
-        }
-
-        html[data-theme="halloween"] .game-card:hover {
-            background: linear-gradient(135deg, rgba(104, 30, 120, 0.68) 0%, rgba(44, 10, 60, 0.62) 100%);
-            border-color: #ffb04d;
-            box-shadow: 0 18px 40px rgba(30, 0, 40, 0.6), 0 0 26px rgba(255, 140, 40, 0.55), inset 0 2px 4px rgba(255, 234, 200, 0.4);
-        }
-
-        html[data-theme="halloween"] .img-wrapper {
-            border-color: rgba(255, 176, 90, 0.6);
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5), 0 3px 10px rgba(20, 0, 30, 0.5);
-        }
-
-        html[data-theme="halloween"] .game-card img { background-color: #2a0a38; }
-
-        html[data-theme="halloween"] .game-title {
-            color: #ffe6c7;
-            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.65), 0 0 12px rgba(255, 140, 40, 0.35);
-        }
-
-        html[data-theme="halloween"] .game-card:hover .game-title { color: #ffb14d; }
-
-        html[data-theme="halloween"] .library-count {
-            color: #ffe9cd;
-            background: linear-gradient(180deg, rgba(255, 196, 122, 0.92) 0%, rgba(242, 132, 30, 0.9) 50%, rgba(180, 68, 0, 0.92) 100%);
-            border-color: rgba(255, 232, 200, 0.85);
-            box-shadow: 0 7px 22px rgba(30, 0, 30, 0.5), 0 0 20px rgba(255, 130, 20, 0.35), inset 0 2px 3px rgba(255, 255, 255, 0.5);
-            text-shadow: 0 1px 0 rgba(90, 30, 0, 0.55);
-        }
-
-        html[data-theme="halloween"] .count-orb { color: #ffe9a8; }
-        html[data-theme="halloween"] .no-results { color: #ffe9cd; }
-
-        html[data-theme="halloween"] .library-privacy a {
-            color: #ffe9cd;
-            background: rgba(40, 8, 54, 0.82);
-            border: 1px solid rgba(255, 168, 76, 0.45);
-        }
-
-        html[data-theme="halloween"] .theme-btn {
-            color: #2b0a00;
-            background: linear-gradient(180deg, #fff4dd 0%, #ffd9a4 45%, #ffab52 50%, #ff8318 85%, #d95a00 100%);
-            border-color: rgba(255, 240, 220, 0.95);
-            box-shadow: 0 4px 14px rgba(120, 20, 90, 0.5), 0 0 18px rgba(255, 138, 30, 0.35), inset 0 1px 1px #fff8ea, inset 0 -2px 3px rgba(120, 40, 0, 0.45);
-            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
-        }
-
-        html[data-theme="halloween"] .theme-btn:hover {
-            box-shadow: 0 6px 20px rgba(255, 130, 20, 0.55), inset 0 1px 2px #ffffff;
-        }
-
-        html[data-theme="halloween"] .theme-swatch {
-            background: linear-gradient(135deg, #ffcf8a 0%, #ff8a1e 55%, #7b2cbf 100%);
-            box-shadow: 0 0 0 1px rgba(60, 20, 0, 0.35), 0 0 10px rgba(255, 140, 40, 0.95);
-        }
-
-        html[data-theme="halloween"] .theme-dropdown {
-            background: linear-gradient(180deg, rgba(62, 16, 78, 0.97) 0%, rgba(30, 6, 44, 0.97) 100%);
-            border-color: rgba(255, 168, 76, 0.6);
-            box-shadow: 0 18px 44px rgba(0, 0, 0, 0.65), 0 0 24px rgba(255, 130, 20, 0.3), inset 0 2px 2px rgba(255, 224, 186, 0.25);
-        }
-
-        html[data-theme="halloween"] .theme-option { color: #ffe9cd; }
-        html[data-theme="halloween"] .theme-option small { opacity: 0.72; }
-
-        html[data-theme="halloween"] .theme-option:hover {
-            background: rgba(255, 158, 62, 0.18);
-            border-color: rgba(255, 168, 76, 0.6);
-        }
-
-        html[data-theme="halloween"] .theme-option.active {
-            background: linear-gradient(180deg, rgba(255, 178, 92, 0.35) 0%, rgba(160, 60, 10, 0.35) 100%);
-            border-color: #ffab52;
-            box-shadow: 0 3px 12px rgba(255, 120, 20, 0.35), inset 0 1px 0 rgba(255, 236, 210, 0.35);
-        }
-
-        html[data-theme="halloween"] .theme-option .check { color: #ffcf8a; }
-
-        html[data-theme="halloween"] .bg-meme-container { opacity: 0.55; }
-        html[data-theme="halloween"] .nyan-cat,
-        html[data-theme="halloween"] .doge-meme,
-        html[data-theme="halloween"] .troll-face,
-        html[data-theme="halloween"] .sad-bart {
-            filter: drop-shadow(0 0 16px rgba(255, 140, 40, 0.85)) sepia(0.35) saturate(1.4);
-        }
-
         /* ============================= DARK AERO THEME (Xbox 360) ============================= */
 
         html[data-theme="dark"] body {
             background: linear-gradient(180deg, rgba(3, 12, 5, 0.62) 0%, rgba(5, 22, 10, 0.34) 45%, rgba(1, 8, 3, 0.68) 100%),
-                        url("https://i.redd.it/tzkuzsy5oup81.jpg") center/cover no-repeat fixed;
+                        radial-gradient(ellipse at 18% 12%, #87b94a 0%, #334b25 28%, #101a12 65%) fixed;
             color: #d9ffd2;
         }
 
@@ -1005,6 +857,7 @@
             .xbox-sackboy { width: 110px; right: 0; bottom: 20%; }
         }
     </style>
+    <link rel="stylesheet" href="/assets/library-console-themes.css">
 </head>
 
 <body>
@@ -1046,14 +899,14 @@
                     <span class="meta">Pink and GREEN<small>for someone kewlll 0:</small></span>
                     <span class="check" aria-hidden="true">✔</span>
                 </button>
-                <button type="button" class="theme-option" role="menuitemradio" data-theme-option="halloween" aria-checked="false">
-                    <span class="dot" style="background: linear-gradient(135deg, #ffcf8a 0%, #ff8a1e 55%, #7b2cbf 100%);" aria-hidden="true"></span>
-                    <span class="meta">Halloween Aero(LIMITED TIME)<small>SPOOOKYYY themed</small></span>
+                <button type="button" class="theme-option" role="menuitemradio" data-theme-option="ps2" aria-checked="false">
+                    <span class="dot" style="background:linear-gradient(135deg,#bcdcff,#125dcc,#050916)" aria-hidden="true"></span>
+                    <span class="meta">Retro PS2<small>Midnight blue / memory card era</small></span>
                     <span class="check" aria-hidden="true">✔</span>
                 </button>
                 <button type="button" class="theme-option" role="menuitemradio" data-theme-option="dark" aria-checked="false">
                     <span class="dot" style="background: linear-gradient(135deg, #cdf79a 0%, #86e01a 55%, #16350a 100%);" aria-hidden="true"></span>
-                    <span class="meta">Dark Aero<small>Xbox 360 green</small></span>
+                    <span class="meta">Xbox 360<small>Green dashboard</small></span>
                     <span class="check" aria-hidden="true">✔</span>
                 </button>
             </div>
@@ -1655,12 +1508,12 @@
                 label: 'Pink & Green Aero',
                 bubbles: { highlight: '255, 235, 245', mid: '255, 120, 185', edge: '60, 210, 110' }
             },
-            halloween: {
-                label: 'Halloween Aero',
-                bubbles: { highlight: '255, 236, 200', mid: '255, 138, 30', edge: '110, 30, 140' }
+            ps2: {
+                label: 'Retro PS2',
+                bubbles: { highlight: '210, 230, 255', mid: '45, 100, 220', edge: '10, 30, 100' }
             },
             dark: {
-                label: 'Dark Aero',
+                label: 'Xbox 360',
                 bubbles: { highlight: '225, 255, 200', mid: '134, 224, 26', edge: '22, 74, 12' }
             }
         };
