@@ -4,7 +4,7 @@ export const SITE_ORIGIN='https://dilldoe-games.pages.dev';
 // Only fetch/XHR data moves hosts. HTML, JavaScript, images, audio, and game
 // documents keep their original origin, preserving saves and worker security.
 export const isSecondaryFile=file=>/\.(?:wgsl|json|xml|meta)$/i.test(file);
-export const isSecondaryGameFile=(game,file)=>isSecondaryFile(file)||(game==='omori'&&file.startsWith('audio/')&&file.endsWith('.m4a'))||(game==='gta5-webport-vercel'&&file.startsWith('data/')&&Object.hasOwn(gtaStatic.hashes,file.slice(5)));
+export const isSecondaryGameFile=(game,file)=>game==='worldfox'||isSecondaryFile(file)||(game==='omori'&&file.startsWith('audio/')&&file.endsWith('.m4a'))||(game==='gta5-webport-vercel'&&file.startsWith('data/')&&Object.hasOwn(gtaStatic.hashes,file.slice(5)));
 export const specialRoutes=[
  '/halo-mobile/*',
  '/ports/gta5-webport-vercel/data/*','/ports/gta5-webport-vercel/deployment-status.json',
