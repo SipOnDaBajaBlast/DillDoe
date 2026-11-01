@@ -1,3 +1,4 @@
+import {worldfoxHtml} from './worldfox-loader.mjs';
 import {bootstrap,rewriteRootPaths,installGameDownloadGuard} from './migration-paths.mjs';
 import {patchFeedPitHtml} from './feed-pit-loader.mjs';
 import {gtaRoutingScript} from './gta-static-routing.mjs';
@@ -5,6 +6,7 @@ import {patchDeathNoteHtml} from './death-note-loader.mjs';
 
 // Share exactly the same compatibility fixes between static builds and downloads.
 export function transformGameText(text,game,entry,path) {
+ if(game==='worldfox'&&path==='index.html')return worldfoxHtml();
  if(game==='gta5-webport-vercel'&&path.startsWith('data/'))return text;
  // Bump Halo's shell version when its mounted-map paths change, so its
  // service worker offers existing visitors the corrected files.

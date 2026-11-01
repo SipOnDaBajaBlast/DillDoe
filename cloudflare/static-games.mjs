@@ -56,7 +56,8 @@ async function rawSource(name,entry,files){
   const relative=(entry.directory||'')+file;
   const target=path.join(directory,relative);
   const host=entry.lfsFiles?.includes(file)?'media.githubusercontent.com/media':'raw.githubusercontent.com';
-  await download(`https://${host}/${entry.repo}/${entry.sha}/${relative.split('/').map(encodeURIComponent).join('/')}`,target,entry.files[file]);
+  const url=entry.sourceHost==='gitlab'?`https://gitlab.com/${entry.repo}/-/raw/${entry.sha}/${relative.split('/').map(encodeURIComponent).join('/')}`:`https://${host}/${entry.repo}/${entry.sha}/${relative.split('/').map(encodeURIComponent).join('/')}`;
+  await download(url,target,entry.files[file],entry.integrity?.[file]);
  });
  return file=>path.join(directory,(entry.directory||'')+file);
 }
