@@ -41,7 +41,7 @@ async function rawSource(name,entry,files){
  // with only a few useful small files are fetched individually instead.
  const allBytes=Object.values(entry.files).reduce((a,b)=>a+b,0);
  const wantedBytes=wanted.reduce((a,file)=>a+entry.files[file],0);
- if(wanted.length>80&&wantedBytes<2*1024**3&&wantedBytes/Math.max(1,allBytes)>.3){
+ if(!entry.noArchive&&wanted.length>80&&wantedBytes<2*1024**3&&wantedBytes/Math.max(1,allBytes)>.3){
   const complete=path.join(directory,'.complete');
   if(!await exists(complete)){
    const archive=path.join(cache,'archives',name+'-'+entry.sha+'.tar.gz');

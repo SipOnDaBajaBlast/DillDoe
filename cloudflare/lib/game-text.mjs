@@ -6,6 +6,11 @@ import {patchDeathNoteHtml} from './death-note-loader.mjs';
 
 // Share exactly the same compatibility fixes between static builds and downloads.
 export function transformGameText(text,game,entry,path) {
+ if(game==='hotline-miami'&&path==='html5game/HotlineMiami.js'){
+  const start=text.indexOf('function _AR4(){'),end=text.indexOf('function _PR4(){',start);
+  if(start<0||end<start||end-start>2000)throw new Error('Recheck Hotline Miami canvas focus after source changes');
+  text=text.slice(0,start)+'function _AR4(){window.focus();var c=document.getElementById(_MW2);if(c)c.focus();_Fq3=true}'+text.slice(end);
+ }
  if(game==='worldfox'&&path==='index.html')return worldfoxHtml();
  if(game==='gta5-webport-vercel'&&path.startsWith('data/'))return text;
  // Bump Halo's shell version when its mounted-map paths change, so its
@@ -24,6 +29,16 @@ export function transformGameText(text,game,entry,path) {
  }
  if(game==='feed-the-pit'&&path==='feedthepit.js')text=text.replace('`${loadPath}.wasm`','`${loadPath}.wasm?loader=3`');
  if(path.endsWith('.html')){
+  if(game==='class-of-09'&&path==='index.html'){
+   text=text.replace(new RegExp('https://cdn[.]jsdelivr[.]net/gh/genizy/web-port@[^/]+/class-of-09/','g'),'');
+   text=text.replace('fetch(fileParts[index]).then((response) => response.arrayBuffer())','fetch(fileParts[index]).then(response => { if(!response.ok) throw new Error("Game download failed (HTTP "+response.status+")"); return response.arrayBuffer(); })');
+   text=text.replace(/document\.body\.appendChild\(renpypre\);\s*document\.body\.appendChild\(renpy\);/,'renpypre.onload = () => document.body.appendChild(renpy);\n                document.body.appendChild(renpypre);');
+  }
+  if(game==='hotline-miami'&&path==='index.html'){
+   text=text.replace("@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');",'');
+   text=text.replace('<canvas id="canvas"','<canvas id="canvas" tabindex="0"');
+   text=text.replace('</head>','<style>body{animation:none!important;transform:none!important}canvas{max-width:100vw;max-height:100vh;width:auto!important;height:auto!important}</style></head>');
+  }
   if(game==='death-note'&&path==='index.html')text=patchDeathNoteHtml(text,entry);
   if(game==='kindergarten3'&&path==='index.html'){
    if(!text.includes('Promise.all([')||!text.includes('Kindergarten3Port.loader.js'))throw new Error('Kindergarten 3 loader changed; recheck split file loading');
