@@ -10,6 +10,7 @@ Reviewed upstream: Shindo957-Official/worldfox on GitLab, commit 4f4833720b036d3
 - Player CSP limits connections to the two DillDoe static origins, blocks workers, plugins and forms, and limits scripts to local scripts, launcher code and WebAssembly compilation. The embedding frame restricts popups, top navigation and downloads. No camera/microphone permissions are delegated.
 - Split WASM, game data and audio are reconstructed as streams in their original order, with total size validation. Every source part is below Cloudflare’s 25 MiB file limit. No new dynamic download routes are required.
 - Local browser test reached world generation and the tutorial; clicking advanced the tutorial. Fullscreen is supplied by the existing browser fullscreen API. A complete feature-by-feature playthrough and audible verification have not been performed.
-- Static-plan, fast-publish, isolation and path compatibility tests: 11 passed. Runtime emitted the original Unity persistent-data synchronization deprecation warning; it did not prevent startup.
+- Static-plan, fast-publish, isolation and path compatibility tests: 12 passed. Runtime emitted the original Unity persistent-data synchronization deprecation warning; it did not prevent startup.
 
 This report records checks, not a malware-free certification.
+

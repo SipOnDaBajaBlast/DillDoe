@@ -19,8 +19,17 @@ test('every game file is static or explicitly retains a function route',()=>{
  assert.ok(plan.routes.includes('/ports/gta5-webport-vercel/data/*'));
  assert.ok(plan.games.omori.secondaryFiles.includes('audio/bgm/002_White_Space.m4a') || plan.games.omori.secondaryFiles.some(file=>file.startsWith('audio/')&&file.endsWith('.m4a')));
  assert.ok(plan.games.omori.secondaryFiles.includes('asset-manifest.json'));
- for(const[name,game]of Object.entries(plan.games))assert.ok(!game.secondaryFiles.some(file=>/\.(html|js|mjs|png|webp|jpg|ogg|mp3|wasm)$/.test(file)&&!(name==='gta5-webport-vercel'&&file.startsWith('data/'))));
+ for(const[name,game]of Object.entries(plan.games))assert.ok(!game.secondaryFiles.some(file=>/\.(html|js|mjs|png|webp|jpg|ogg|mp3|wasm)$/.test(file)&&name!=='worldfox'&&!(name==='gta5-webport-vercel'&&file.startsWith('data/'))));
 });
+test('reviewed WorldBox runtime stays entirely on the separate game origin',()=>{
+ const game=staticPlan(catalog).games.worldfox;
+ assert.deepEqual(game.secondaryFiles,game.files);
+ assert.equal(game.large.length,0);
+ const wrapper=fs.readFileSync(new URL('../games/WorldBox.html',import.meta.url),'utf8');
+ assert.ok(wrapper.includes("frame.src='https://dilldoe-gamefiles.pages.dev/ports/worldfox/'"));
+ assert.ok(wrapper.includes("frame.sandbox='allow-scripts allow-same-origin allow-pointer-lock'"));
+});
+
 test('static and dynamic text retain game scoping and RenPy filesystem paths',()=>{
  const entry={files:{'index.html':100,'assets/game.js':100,'renpy.wasm':100}};
  const html=transformGameText('<html><head></head><script src="/assets/game.js"></script></html>','example',entry,'index.html');
