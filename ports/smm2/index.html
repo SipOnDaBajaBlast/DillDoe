@@ -82,12 +82,26 @@
   #compatrow label { cursor: pointer; }
   #compatrow.on { color: #cfcfd8; }
   #compattext { font-style: normal; color: #5f5f69; }
+  /* diagnosis for a device that cannot finish starting the game: where it stopped, when, and why */
+  #diag { display: none; max-width: 470px; margin: 0 0 4px; padding: 13px 15px; border-radius: 10px; border: 1px solid #2b3650;
+    background: #101521; color: #c8d3e6; font-size: 12px; line-height: 1.6; text-align: left; }
+  #diag.show { display: block; }
+  #diag h3 { margin: 0 0 8px; font-size: 13px; color: #e7eefc; }
+  #diag dl { margin: 0 0 6px; display: grid; grid-template-columns: 58px 1fr; gap: 3px 10px; }
+  #diag dt { color: #7f8ca3; }
+  #diag dd { margin: 0; color: #dbe4f4; }
+  #diag dd b { color: #fff; }
+  #diag ul { margin: 6px 0 10px; padding-left: 17px; color: #9fb0c9; }
+  #diag li { margin: 0 0 3px; }
+  #diag button { background: transparent; color: #8fd4ff; border: 1px solid #2b3650; border-radius: 6px; padding: 5px 11px; font-size: 12px; }
+  #diag button:hover { filter: brightness(1.15); }
 </style>
 </head>
 <body>
 <div id="setup">
   <div id="loadwrap">
     <div id="warn"></div>
+    <div id="diag"></div>
     <div id="bar" class="busy"><div id="barfill"></div></div>
     <button id="start" disabled>PLAY</button>
     <div id="importmsg"></div>
@@ -168,25 +182,30 @@
   } catch (e) {}
   // A dead renderer cannot report anything, so the stage the game reached and how big the console had grown are
   // written once a second and survive the crash: the next visit can then say where it stopped instead of guessing.
-  var PROG_KEY = 'smm2-progress', progPhase = '';
+  var PROG_KEY = 'smm2-progress', progPhase = '', progStart = 0, progPeak = 0, progPagePeak = 0;
   function progWrite() {
     var mm = window.__smm2Memory, m = performance.memory;
     try {
       localStorage.setItem(PROG_KEY, JSON.stringify({ phase: progPhase, mem: mm ? mm.buffer.byteLength : 0,
-        page: m ? m.usedJSHeapSize : 0, at: Date.now(), low: LOW,
-        compat: /[?&]env=WEB_NO_GPU/.test(location.search) }));
+        page: m ? m.usedJSHeapSize : 0, at: Date.now(), start: progStart,
+        elapsed: progStart ? Date.now() - progStart : 0, peak: progPeak, pagePeak: progPagePeak,
+        low: LOW, compat: /[?&]env=WEB_NO_GPU/.test(location.search) }));
     } catch (e) {}
   }
   function progMark(phase) { if (progPhase === phase) return; progPhase = phase; progWrite(); }
   setInterval(function () {
     if (!progPhase) return;
-    var mm = window.__smm2Memory;
-    if (mm && progPhase !== 'boot' && progPhase !== 'running') {
-      try { if (mm.buffer.byteLength > 134217728) progMark('boot'); } catch (e) {}
-    }
+    var mm = window.__smm2Memory, m = performance.memory;
+    try {
+      if (mm && mm.buffer.byteLength > progPeak) progPeak = mm.buffer.byteLength;
+      if (mm && progPhase !== 'boot' && progPhase !== 'running' && mm.buffer.byteLength > 134217728) progMark('boot');
+    } catch (e) {}
+    if (m && m.usedJSHeapSize > progPagePeak) progPagePeak = m.usedJSHeapSize;
     progWrite();
   }, 1000);
-  document.getElementById('start').addEventListener('click', function () { progMark('start'); }, true);
+  document.getElementById('start').addEventListener('click', function () {
+    progStart = Date.now(); progPeak = 0; progPagePeak = 0; progPhase = ''; progMark('start');
+  }, true);
   var AHEAD = LOW ? 0 : 2;                         // extra parts fetched alongside the one being read
   var CACHE = 'smm2-module-v1';                    // the module's parts, kept so a return visit is quick
   var orig = window.fetch.bind(window);
@@ -523,6 +542,61 @@
                        : 'Compatibility mode is being switched on for this attempt: the software renderer is slower but survives weak graphics drivers.'));
       }
     }
+    // the report a school Chromebook sees: where the start stopped, when, how much memory it had reached, why that
+    // happens on this device, and a button that copies the whole thing for a teacher or for me
+    window.addEventListener('load', function () {
+      var box = document.getElementById('diag');
+      if (!box || !prev || !prev.phase) return;
+      var stages = { start: ['just after PLAY', 'the page had only begun loading the game'],
+                     module: ['while loading the game module', 'the 184 MB game program was being downloaded and compiled'],
+                     boot: ['while starting the emulated console', 'the console was allocating its memory and booting'],
+                     data: ['while loading the game data', 'the 3.1 GB of game files were being copied into the browser'],
+                     running: ['just after it had started', 'the console had booted and the game was running'] };
+      var s = stages[prev.phase] || [prev.phase, 'an unknown stage'];
+      var mb = function (b) { return b ? Math.round(b / 1048576) + ' MB' : 'nothing yet'; };
+      var MEM64 = new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 5, 3, 1, 4, 1]);
+      var m64 = false; try { m64 = WebAssembly.validate(MEM64); } catch (e) {}
+      var gpu = !!navigator.gpu, gl2 = false;
+      try { gl2 = !!document.createElement('canvas').getContext('webgl2'); } catch (e) {}
+      var bad = [].map.call(document.querySelectorAll('#checks li.bad'), function (l) { return l.textContent; });
+      var dem = navigator.deviceMemory, cores = navigator.hardwareConcurrency;
+      var secs = Math.max(1, Math.round((prev.elapsed || 0) / 1000));
+      var how = prev.phase === 'module'
+        ? 'The game is one 184 MB WebAssembly program. Chrome must compile all of it into a single piece before one frame can be drawn, and that needs several hundred MB of scratch space on top of the console it builds right afterwards. This machine could not give the tab that much, so Chrome replaced the page with its own crash screen.'
+        : prev.phase === 'boot'
+        ? 'The emulated console starts at 128 MB and grows to two or three gigabytes as it boots. That is more than a 4 GB Chromebook can hand to a single tab, so Chrome killed it.'
+        : prev.phase === 'data'
+        ? 'Copying the 3.1 GB of game files into the browser is disk-bound, and the tab died during it: usually the storage quota, not RAM.'
+        : 'The tab ran out of memory while the game was starting.';
+      var facts = (dem ? dem + ' GB RAM reported' : 'RAM not reported') + ' · ' + (cores || '?') + ' cores · '
+        + (m64 ? '64-bit WebAssembly memory ok' : 'no 64-bit WebAssembly memory') + ' · ' + (gpu ? 'WebGPU ok' : 'no WebGPU') + ' · ' + (gl2 ? 'WebGL2 ok' : 'no WebGL2');
+      var report = ['Super Mario Maker 2 web port — this device cannot start it',
+        'Where: ' + s[0] + ' (' + s[1] + ')',
+        'When: ' + secs + ' s after PLAY, console at ' + mb(prev.mem) + ' (peak ' + mb(prev.peak) + '), page at ' + mb(prev.pagePeak || prev.page),
+        'Device: ' + facts + ', low-memory mode ' + (prev.low ? 'on' : 'off') + ', compatibility mode ' + (prev.compat ? 'on' : 'off'),
+        (bad.length ? 'Failed browser checks: ' + bad.join('; ') : 'Browser checks: all passed'),
+        'Why: ' + how].join('\n');
+      var esc = function (t) { return String(t).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
+      box.innerHTML = '<h3>Why this Chromebook can’t start the game</h3>'
+        + '<dl><dt>Where</dt><dd>' + esc(s[0]) + ' — ' + esc(s[1]) + '</dd>'
+        + '<dt>When</dt><dd>' + secs + ' s after PLAY, with the console at <b>' + mb(prev.mem) + '</b> and the page at ' + mb(prev.pagePeak || prev.page) + '</dd>'
+        + '<dt>How</dt><dd>' + esc(how) + '</dd>'
+        + '<dt>Device</dt><dd>' + esc(facts) + '</dd></dl>'
+        + '<ul><li>The game is a whole emulated console, not a web page: it needs a desktop or laptop with 8 GB of RAM.</li>'
+        + '<li>Closing every other tab and extension sometimes frees enough for it to reach the menu.</li>'
+        + '<li>Nothing is wrong with the site — the same page starts on a larger computer, and the game files already downloaded are kept.</li></ul>'
+        + '<button id="diagcopy" type="button">Copy this report</button>';
+      box.classList.add('show');
+      var warnEl = document.getElementById('warn');
+      if (warnEl && /last attempt stopped/.test(warnEl.textContent)) { warnEl.style.display = 'none'; warnEl.innerHTML = ''; }
+      window.__smm2Report = report;
+      document.getElementById('diagcopy').addEventListener('click', function () {
+        var btn = this;
+        var done = function (ok) { btn.textContent = ok ? 'Copied to the clipboard' : 'Copy failed — the text is above'; btn.style.color = ok ? '#4fd18b' : '#ffb86b'; };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(report).then(function () { done(true); }, function () { done(false); });
+        else done(false);
+      });
+    });
     // the attempt is recorded before the module starts, and confirmed only once the game has really been running
     document.getElementById('start').addEventListener('click', function () {
       store('smm2-running', null);

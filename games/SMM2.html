@@ -77,6 +77,18 @@
         title = 'The game crashed this browser last time';
         text = 'Chrome showed its own <b>“Aw, Snap!”</b> page, which means the tab ran out of memory while starting the emulated console — not that the page itself is broken. '
              + 'Closing other tabs and trying again can get further.';
+        // where it stopped, so the message says when and how as well as that it failed
+        try {
+          const p = JSON.parse(store.get('smm2-progress') || 'null');
+          const stage = p && ({ start: 'just after PLAY', module: 'while loading the game module',
+                                boot: 'while starting the emulated console', data: 'while loading the game data',
+                                running: 'just after it had started' })[p.phase];
+          if (stage) {
+            text += '<br><br><b>Where it stopped:</b> ' + stage + ', ' + Math.max(1, Math.round((p.elapsed || 0) / 1000)) + ' s after PLAY, with the emulated console at <b>'
+                  + (p.mem ? Math.round(p.mem / 1048576) + ' MB' : 'nothing yet') + '</b> of memory.';
+          }
+        } catch (e) {}
+        text += '<br><br>Open the game and its start screen repeats this in full, with a button that copies the report.';
       } else if (mem && mem <= 4) {
         title = 'This device probably can’t run the game';
         text = 'It reports about <b>' + mem + ' GB of RAM</b>. The game needs several gigabytes just for the emulated console, so Chrome will most likely show its <b>“Aw, Snap!”</b> crash page instead of an error.';
