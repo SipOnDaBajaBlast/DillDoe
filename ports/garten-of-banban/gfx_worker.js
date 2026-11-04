@@ -17,7 +17,7 @@ const record = body => { const seq = ++recSeq; recChain = recChain.then(() => fe
 
 self.onmessage = e => {
   if (failed) return;
-  const d = e.txta;
+  const d = e.data;
   if (d.init) { rec = !!(d.env && d.env.REXCOMP_GFXREC); start(d).catch(fatal); return; }
   if (d.link) { LINK = d.link; if (G) G['rxcLink'] = LINK; linkPoll(); return; }
   if (d.glcheck) { if (G) G._gfxw_glcheck(d.glcheck | 0); return; }        // debug: glGetError after every GL call of the next n frames ([gl] error lines)
