@@ -12,22 +12,26 @@
   #gameContainer canvas { display: block; }
 </style>
 <script>
-  // UnityLoader and the wasm/data files use .txt/.bin names because this host only ships known extensions.
-  // The 48 MB data file ships as three parts because this host caps files at 25 MiB. merge.js (in this folder)
-  // replays the parts as one response before UnityLoader asks for the data, so the loader never sees the split.
-  window.fileMergerConfig = {
-    // 3 x 16123399 bytes; the size is checked so an HTML error page can never be merged by mistake.
-    files: [{ name: 'bb1.data.unityweb', parts: 3, partExtension: '.bin', size: 48370197 }],
-    // Unity only decompresses URLs that end in .unityweb, and these two are LZ4-compressed Unity bundles
-    // that the host will not publish under that extension, so the shim serves the .bin bytes behind the old names.
+  // The host only publishes known file extensions, so the Unity bundles ship as .bin and the 48 MB data file
+  // ships as three .bin parts (25 MiB per file). poppy-loader.js fetches all of it up front and serves it under
+  // the names UnityLoader asks for; the .unityweb names matter because Unity decompresses those URLs itself.
+  window.poppyLoader = {
+    data: {
+      name: 'bb1.data.unityweb',
+      urls: [
+        'Build/bb1.data.unityweb.part1.bin',
+        'Build/bb1.data.unityweb.part2.bin',
+        'Build/bb1.data.unityweb.part3.bin'
+      ],
+      size: 48370197
+    },
     aliases: [
-      { name: 'bb1.wasm.code.unityweb', target: 'bb1.wasm.code.bin' },
-      { name: 'bb1.wasm.framework.unityweb', target: 'bb1.wasm.framework.bin' }
-    ],
-    basePath: 'Build/', debug: false
+      { name: 'bb1.wasm.code.unityweb', url: 'Build/bb1.wasm.code.bin' },
+      { name: 'bb1.wasm.framework.unityweb', url: 'Build/bb1.wasm.framework.bin' }
+    ]
   };
 </script>
-<script src="merge.js?v=2"></script>
+<script src="poppy-loader.js"></script>
 <script src="TemplateData/UnityProgress.js"></script>
 <script src="Build/UnityLoader.js"></script>
 </head>
