@@ -15,9 +15,19 @@
   // UnityLoader and the wasm/data files use .txt/.bin names because this host only ships known extensions.
   // The 48 MB data file ships as three parts because this host caps files at 25 MiB. merge.js (in this folder)
   // replays the parts as one response before UnityLoader asks for the data, so the loader never sees the split.
-  window.fileMergerConfig = { files: [{ name: 'bb1.data.unityweb', parts: 3, partExtension: '.bin' }], basePath: 'Build/', debug: false };
+  window.fileMergerConfig = {
+    // 3 x 16123399 bytes; the size is checked so an HTML error page can never be merged by mistake.
+    files: [{ name: 'bb1.data.unityweb', parts: 3, partExtension: '.bin', size: 48370197 }],
+    // Unity only decompresses URLs that end in .unityweb, and these two are LZ4-compressed Unity bundles
+    // that the host will not publish under that extension, so the shim serves the .bin bytes behind the old names.
+    aliases: [
+      { name: 'bb1.wasm.code.unityweb', target: 'bb1.wasm.code.bin' },
+      { name: 'bb1.wasm.framework.unityweb', target: 'bb1.wasm.framework.bin' }
+    ],
+    basePath: 'Build/', debug: false
+  };
 </script>
-<script src="merge.js"></script>
+<script src="merge.js?v=2"></script>
 <script src="TemplateData/UnityProgress.js"></script>
 <script src="Build/UnityLoader.js"></script>
 </head>
@@ -27,7 +37,7 @@
 </div>
 <script>
   window.addEventListener('load', function () {
-    UnityLoader.instantiate('gameContainer', 'Build/bb1.settings.txt', { onProgress: UnityProgress });
+    UnityLoader.instantiate('gameContainer', 'Build/bb1.config.txt', { onProgress: UnityProgress });
   });
 </script>
 </body>

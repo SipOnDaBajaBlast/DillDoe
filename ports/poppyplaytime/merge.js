@@ -3,6 +3,7 @@
 
   const defaultConfig = {
     files: [],
+    aliases: [],
     basePath: '',
     partExtension: '',
     debug: true
@@ -34,7 +35,7 @@
     return norm1.split('/').pop() === norm2.split('/').pop();
   }
 
-  async function mergeSplitFiles(filePath, numParts) {
+  async function mergeSplitFiles(filePath, numParts, expectedSize) {
     try {
       const parts = [];
       for (let i = 1; i <= numParts; i++) {
@@ -67,6 +68,10 @@
         offset += buffer.byteLength;
       }
 
+      if (expectedSize && totalSize !== expectedSize) {
+        throw new Error(`Merged size mismatch for ${filePath}: got ${totalSize} bytes, expected ${expectedSize}`);
+      }
+
       log(`✅ ${filePath} merged successfully: ${(totalSize / 1024 / 1024).toFixed(2)} MB`);
       return mergedArray.buffer;
     } catch (err) {
@@ -78,6 +83,11 @@
   function shouldInterceptFile(url) {
     const urlStr = normalizeUrl(url);
     if (urlStr.includes('.part')) return null;
+
+    for (const alias of config.aliases) {
+      const aliasPath = config.basePath ? `${config.basePath}${alias.name}` : alias.name;
+      if (urlsMatch(urlStr, alias.name) || urlsMatch(urlStr, aliasPath)) return alias.name;
+    }
 
     for (const file of config.files) {
       const fileName = file.name;
@@ -179,7 +189,24 @@
   };
 
   // --- START MERGING ---
+  // Aliases are single compressed files served under a name Unity already understands.
+  async function prefetchAlias(alias) {
+    const url = config.basePath ? `${config.basePath}${alias.target}` : alias.target;
+    try {
+      const response = await window.originalFetch(url);
+      if (!response.ok) throw new Error(`Failed to load ${url}: ${response.status}`);
+      const buffer = await response.arrayBuffer();
+      window.mergedFiles[alias.name] = buffer;
+      mergeStatus[alias.name] = 'ready';
+      log(`Alias ready: ${alias.name} -> ${url} (${(buffer.byteLength / 1024 / 1024).toFixed(2)} MB)`);
+    } catch (err) {
+      mergeStatus[alias.name] = 'failed';
+      error(`Alias failed for ${alias.name}:`, err);
+    }
+  }
+
   async function autoMergeFiles() {
+    if (config.aliases.length) await Promise.all(config.aliases.map(prefetchAlias));
     if (!config.files.length) return;
     
     try {
@@ -187,7 +214,7 @@
         const fullPath = config.basePath ? `${config.basePath}${file.name}` : file.name;
         mergeStatus[file.name] = 'merging';
         
-        return mergeSplitFiles(fullPath, file.parts)
+        return mergeSplitFiles(fullPath, file.parts, file.size)
           .then(buffer => {
             window.mergedFiles[file.name] = buffer;
             window.mergedFiles[fullPath] = buffer;
