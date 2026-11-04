@@ -75,17 +75,29 @@
 <div id="log"></div>
 <script>
 // The game data (3.1 GB) lives in a public parts repo because this host caps files at 25 MiB.
-// Everything the page does not ship itself is data: it is fetched from the parts repo instead.
-// Parts are pipelined a few at a time, and the same hook reports what is downloading and how long is left.
+// Everything the page does not ship itself is data and is fetched from the parts repo: single parts,
+// whole files stitched from their parts, and the file list. Parts are pipelined a few at a time.
+// The same hook reports what is downloading, how fast and how long is left.
 (function () {
   var REMOTE = 'https://raw.githubusercontent.com/SipOnDaBajaBlast/smm2-data/main/';
   var PRE = '/ports/smm2/';
   var LOCAL = ['', 'shell.js', 'mmk.js', 'mmk.wasm', 'coi-sw.js', 'audio_worklet.js', 'course_worker.js',
                'Super Mario Maker 2.js', 'LICENSE.txt', 'LICENSE-LASRecomp.txt', 'THIRD-PARTY.txt'];
+  var DATA = /^(gamedata\/|split\.json$|game\.json$|shaders\.json\.gz$)/;
   var AHEAD = 2;                                   // extra parts fetched alongside the one being read
+  var CACHE = 'smm2-module-v1';                    // the module's parts, kept so a return visit is quick
   var orig = window.fetch.bind(window);
   var split = null, total = 0, done = 0, label = '', lastText = '', lastPaint = 0;
   var samples = [], ahead = new Map();             // part url -> its bytes, dropped as soon as they are read
+  var cacheReady = ('caches' in window) ? caches.open(CACHE).catch(function () { return null; }) : Promise.resolve(null);
+
+  // the page is already cross-origin isolated by its response headers, so the build's worker shim for that
+  // (and the reload it forces) is not needed. it also used to stitch the module from local part urls,
+  // which this host cannot serve, so it is switched off and any earlier copy is removed.
+  if ('serviceWorker' in navigator) {
+    try { navigator.serviceWorker.register = function () { return Promise.reject(new Error('cross-origin isolation already provided by the response headers')); }; } catch (e) {}
+    try { navigator.serviceWorker.getRegistrations().then(function (rs) { rs.forEach(function (r) { r.unregister(); }); }).catch(function () {}); } catch (e) {}
+  }
 
   function byId(id) { return document.getElementById(id); }
   function size(b) {
@@ -138,12 +150,25 @@
   function partOf(rel) {                           // name.000 -> { base: name, idx: 0, count: 57 }
     var m = /^(.*)\.(\d{3})$/.exec(rel);
     if (!m || !split || !split[m[1]]) return null;
-    return { base: m[1], idx: +m[2], count: split[m[1]].parts, total: split[m[1]].size };
+    return { base: m[1], idx: +m[2], count: split[m[1]].parts, size: split[m[1]].size };
+  }
+  function isModule(rel) { return /\.wasm$/.test(rel) && split && split[rel]; }
+  function cachedPart(rel) {
+    if (!isModule(rel.slice(0, -4)) || !cacheReady) return Promise.resolve(null);
+    return cacheReady.then(function (c) { return c ? c.match(remoteUrl(rel)) : null; })
+      .then(function (r) { return r ? r.arrayBuffer() : null; }).catch(function () { return null; });
+  }
+  function rememberPart(rel, buf) {
+    if (!cacheReady || !/\.wasm\.\d{3}$/.test(rel)) return;
+    cacheReady.then(function (c) { return c ? c.put(remoteUrl(rel), new Response(buf)) : null; }).catch(function () {});
   }
   function fetchPart(rel) {
-    if (!ahead.has(rel)) ahead.set(rel, orig(remoteUrl(rel), { cache: 'no-cache' }).then(function (r) {
-      if (!r.ok) throw new Error(rel + ': HTTP ' + r.status);
-      return r.arrayBuffer();
+    if (!ahead.has(rel)) ahead.set(rel, cachedPart(rel).then(function (hit) {
+      if (hit) return hit;
+      return orig(remoteUrl(rel), { cache: 'no-cache' }).then(function (r) {
+        if (!r.ok) throw new Error(rel + ': HTTP ' + r.status);
+        return r.arrayBuffer().then(function (buf) { rememberPart(rel, buf); return buf; });
+      });
     }));
     return ahead.get(rel);
   }
@@ -184,6 +209,30 @@
     return res.then(function (r) { return counted(r, name, part); });
   }
 
+  // one whole file that only exists as parts: handed back as a single stream, in order
+  function joined(base, e) {
+    var idx = 0, cur = null, off = 0;
+    var body = new ReadableStream({
+      pull: function (ctrl) {
+        if (cur) {
+          if (off < cur.byteLength) {
+            var chunk = cur.subarray(off, Math.min(off + 262144, cur.byteLength));
+            off += chunk.byteLength; ctrl.enqueue(chunk); return;
+          }
+          cur = null; off = 0;
+        }
+        if (idx >= e.parts) { ctrl.close(); return; }
+        var name = base + '.' + String(idx).padStart(3, '0');
+        idx++;
+        return fetchPart(name).then(function (buf) {
+          cur = new Uint8Array(buf); off = 0;
+          if (idx < e.parts) aheadFrom({ base: base, idx: idx, count: e.parts });
+        });
+      }
+    });
+    return new Response(body, { headers: { 'Content-Length': String(e.size) } });
+  }
+
   window.fetch = function (input, init) {
     try {
       var u = (input instanceof Request) ? input.url : String(input);
@@ -191,18 +240,23 @@
       if (abs.origin === location.origin) {
         var p = abs.pathname.indexOf(PRE) === 0 ? abs.pathname.slice(PRE.length) : null;
         if (p !== null) {
-          var rel = decodeURI(p);
-          if (LOCAL.indexOf(rel) < 0) {
-            var info = partOf(rel);
-            if (info) {                              // one part of a file that comes in parts
-              label = info.base + ' — part ' + (info.idx + 1) + ' of ' + info.count;
-              if (!total) { total = 0; for (var key in split) total += split[key].size || 0; }
-              aheadFrom(info);
-            } else {
-              label = rel === 'split.json' ? '' : rel;   // small extras: name only, no bytes counted
-            }
+          var rel = decodeURI(p), info = partOf(rel);
+          if (info) {                              // one part of a file that comes in parts
+            label = info.base + ' — part ' + (info.idx + 1) + ' of ' + info.count;
+            if (!total) { total = 0; for (var key in split) total += split[key].size || 0; }
+            aheadFrom(info);
             paint();
             return dataFetch(rel, info, init);
+          }
+          if (isModule(rel)) {                     // the whole module, stitched from its parts
+            label = rel;
+            paint();
+            return Promise.resolve(counted(joined(rel, split[rel]), rel, true));
+          }
+          if (DATA.test(rel)) {                    // small lists and the shader pack
+            label = rel === 'split.json' ? '' : rel;
+            paint();
+            return dataFetch(rel, null, init);
           }
         }
       }
