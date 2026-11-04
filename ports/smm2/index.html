@@ -561,23 +561,30 @@
       var bad = [].map.call(document.querySelectorAll('#checks li.bad'), function (l) { return l.textContent; });
       var checkList = document.querySelectorAll('#checks li').length > 0;   // shell.js only writes these once it runs
       var dem = navigator.deviceMemory, cores = navigator.hardwareConcurrency;
+      var gpuText = '';                                  // filled in from the WebGPU adapter when it answers
       var secs = Math.max(1, Math.round((prev.elapsed || 0) / 1000));
       var how = prev.phase === 'module'
         ? 'The game is one 184 MB WebAssembly program. Chrome must compile all of it into a single piece before one frame can be drawn, and that needs several hundred MB of scratch space on top of the console it builds right afterwards. This machine could not give the tab that much, so Chrome replaced the page with its own crash screen.'
         : prev.phase === 'boot'
-        ? 'The emulated console starts at 128 MB and grows to two or three gigabytes as it boots. That is more than a 4 GB Chromebook can hand to a single tab, so Chrome killed it.'
+        ? (prev.mem && prev.mem < 1073741824
+            ? 'The tab died while the emulated console was still small — only ' + mb(prev.mem) + ' — on a machine that reports ' + (dem || 'an unknown amount of') + ' GB of RAM. That is far below what it can spare, so this is almost certainly not memory: the graphics driver is the prime suspect, because when the GPU process dies it takes the whole tab with it. Compatibility mode uses the software renderer and skips that driver entirely, so it is the thing to try.'
+            : 'The emulated console starts at 128 MB and grows to two or three gigabytes as it boots. It had reached ' + mb(prev.mem) + ' when the tab died, with ' + (dem || 'an unknown amount of') + ' GB reported on this machine — that is the tab running out of room.')
+        : prev.phase === 'start'
+        ? 'The tab died before the game program was even asked for, which is a browser or memory failure rather than the game itself.'
         : prev.phase === 'data'
         ? 'Copying the 3.1 GB of game files into the browser is disk-bound, and the tab died during it: usually the storage quota, not RAM.'
         : 'The tab ran out of memory while the game was starting.';
       var facts = (dem ? dem + ' GB RAM reported' : 'RAM not reported') + ' · ' + (cores || '?') + ' cores · '
         + (m64 ? '64-bit WebAssembly memory ok' : 'no 64-bit WebAssembly memory') + ' · ' + (gpu ? 'WebGPU ok' : 'no WebGPU') + ' · ' + (gl2 ? 'WebGL2 ok' : 'no WebGL2');
-      var report = ['Super Mario Maker 2 web port — this device cannot start it',
-        'Where: ' + s[0] + ' (' + s[1] + ')',
-        'When: ' + secs + ' s after PLAY, console at ' + mb(prev.mem) + ' (peak ' + mb(prev.peak) + '), page at ' + mb(prev.pagePeak || prev.page),
-        'Device: ' + facts + ', low-memory mode ' + (prev.low ? 'on' : 'off') + ', compatibility mode ' + (prev.compat ? 'on' : 'off'),
-        (bad.length ? 'Failed browser checks: ' + bad.join('; ')
-                    : (checkList ? 'Browser checks: all passed' : 'Browser checks: not reported')),
-        'Why: ' + how].join('\n');
+      var report = function () {
+        return ['Super Mario Maker 2 web port — this device cannot start it',
+          'Where: ' + s[0] + ' (' + s[1] + ')',
+          'When: ' + secs + ' s after PLAY, console at ' + mb(prev.mem) + ' (peak ' + mb(prev.peak) + '), page at ' + mb(prev.pagePeak || prev.page),
+          'Device: ' + facts + (gpuText ? ' · ' + gpuText : '') + ', low-memory mode ' + (prev.low ? 'on' : 'off') + ', compatibility mode ' + (prev.compat ? 'on' : 'off'),
+          (bad.length ? 'Failed browser checks: ' + bad.join('; ')
+                      : (checkList ? 'Browser checks: all passed' : 'Browser checks: not reported')),
+          'Why: ' + how].join('\n');
+      };
       var esc = function (t) { return String(t).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
       box.innerHTML = '<h3>Why this Chromebook can’t start the game</h3>'
         + '<dl><dt>Where</dt><dd>' + esc(s[0]) + ' — ' + esc(s[1]) + '</dd>'
@@ -589,13 +596,25 @@
         + '<li>Nothing is wrong with the site — the same page starts on a larger computer, and the game files already downloaded are kept.</li></ul>'
         + '<button id="diagcopy" type="button">Copy this report</button>';
       box.classList.add('show');
+      // the adapter's own name and features go in as soon as it answers: a driver without subgroup support is a
+      // classic reason for a tab to die seconds in, and it is the one thing compatibility mode works around
+      if (navigator.gpu && navigator.gpu.requestAdapter) navigator.gpu.requestAdapter().then(function (a) {
+        if (!a) return;
+        var info = a.info || {};
+        var name = [info.vendor, info.architecture, info.device].filter(Boolean).join(' ') || a.name || 'unknown adapter';
+        var feats = a.features ? Array.from(a.features) : [];
+        gpuText = name + ' · ' + feats.length + ' features' + (feats.indexOf('subgroups') < 0 ? ', no subgroups' : ', subgroups ok');
+        var dd = document.getElementById('diagdev');
+        if (dd) dd.textContent = facts + ' · ' + gpuText;
+        window.__smm2Report = report();
+      }).catch(function () {});
       var warnEl = document.getElementById('warn');
       if (warnEl && /last attempt stopped/.test(warnEl.textContent)) { warnEl.style.display = 'none'; warnEl.innerHTML = ''; }
-      window.__smm2Report = report;
+      window.__smm2Report = report();
       document.getElementById('diagcopy').addEventListener('click', function () {
         var btn = this;
         var done = function (ok) { btn.textContent = ok ? 'Copied to the clipboard' : 'Copy failed — the text is above'; btn.style.color = ok ? '#4fd18b' : '#ffb86b'; };
-        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(report).then(function () { done(true); }, function () { done(false); });
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(report()).then(function () { done(true); }, function () { done(false); });
         else done(false);
       });
     });
