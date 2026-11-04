@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<base href="https://cdn.jsdelivr.net/gh/web-ports/garten-of-banban@bf64e313b6d3a5dc2ca5b752f7140f27b6cd1a05/">
+<base href="/ports/garten-of-banban/">
 <style>
   :root { color-scheme: dark; --bg: #000; --panel: rgba(12, 14, 18, 0.86); --ink: #fff; --dim: #8b95a3; --accent: #fff; }
   * { box-sizing: border-box; }
@@ -70,7 +70,7 @@
 <script>
 // where the game data (manifest.json + game/) is served from: '' = next to this page, or a CDN base such as
 // 'https://cdn.jsdelivr.net/gh/<user>/<repo>@<tag>/' (build.py pack writes the chunked tree)
-const GAME_BASE = '';
+const GAME_BASE = 'https://raw.githubusercontent.com/web-ports/garten-of-banban/bf64e313b6d3a5dc2ca5b752f7140f27b6cd1a05/';
 const BASE_DEPTH_FIX = [
   '9be4bc7f38cddc89', 'c50e90db15d00113', '14cecf7f47a3f4af',
   '2a8002f9ce4c293e', 'b2f7d886496edd36'
