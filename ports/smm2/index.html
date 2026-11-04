@@ -75,14 +75,17 @@
 <div id="log"></div>
 <script>
 // The game data (3.1 GB) lives in a public parts repo because this host caps files at 25 MiB.
-// Every data request the loader makes stays relative, so it is redirected here to the parts host.
-// The same hook reports which part is downloading, the speed and the time left.
+// Everything the page does not ship itself is data: it is fetched from the parts repo instead.
+// Parts are pipelined a few at a time, and the same hook reports what is downloading and how long is left.
 (function () {
   var REMOTE = 'https://raw.githubusercontent.com/SipOnDaBajaBlast/smm2-data/main/';
-  var OWN = ['split.json', 'game.json', 'shaders.json.gz', 'gamedata/'];
+  var PRE = '/ports/smm2/';
+  var LOCAL = ['', 'shell.js', 'mmk.js', 'mmk.wasm', 'coi-sw.js', 'audio_worklet.js', 'course_worker.js',
+               'Super Mario Maker 2.js', 'LICENSE.txt', 'LICENSE-LASRecomp.txt', 'THIRD-PARTY.txt'];
+  var AHEAD = 2;                                   // extra parts fetched alongside the one being read
   var orig = window.fetch.bind(window);
-  var split = null, total = 0, done = 0, label = '', shown = false, lastPaint = 0, lastText = '';
-  var samples = [];
+  var split = null, total = 0, done = 0, label = '', lastText = '', lastPaint = 0;
+  var samples = [], ahead = new Map();             // part url -> its bytes, dropped as soon as they are read
 
   function byId(id) { return document.getElementById(id); }
   function size(b) {
@@ -97,7 +100,7 @@
     if (m < 60) return 'about ' + m + ' min left';
     return 'about ' + Math.floor(m / 60) + ' h ' + (m % 60) + ' min left';
   }
-  function speed() {                        // bytes per second over the last few seconds
+  function speed() {                               // bytes per second over the last few seconds
     if (samples.length < 2) return 0;
     var a = samples[0], b = samples[samples.length - 1], dt = (b.t - a.t) / 1000;
     return dt > 0.4 ? (b.n - a.n) / dt : 0;
@@ -114,7 +117,7 @@
     lastText = text;
     byId('dlwhat').textContent = label;
     byId('dlstat').textContent = stat.join(' · ');
-    box.style.display = 'block'; shown = true;
+    box.style.display = 'block';
   }
   function sample() {
     var now = Date.now();
@@ -122,13 +125,34 @@
     while (samples.length > 2 && now - samples[0].t > 8000) samples.shift();
     if (now - lastPaint > 200) { lastPaint = now; paint(); }
   }
+  function remoteUrl(rel) { return new URL(REMOTE + rel).href; }
+
   // split.json says which files come in parts and how big each one is: that is the overall total
-  orig(REMOTE + 'split.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (m) {
+  orig(remoteUrl('split.json'), { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (m) {
     if (!m) return;
     split = m; total = 0;
     for (var key in m) total += m[key].size || 0;
     paint();
   }).catch(function () {});
+
+  function partOf(rel) {                           // name.000 -> { base: name, idx: 0, count: 57 }
+    var m = /^(.*)\.(\d{3})$/.exec(rel);
+    if (!m || !split || !split[m[1]]) return null;
+    return { base: m[1], idx: +m[2], count: split[m[1]].parts, total: split[m[1]].size };
+  }
+  function fetchPart(rel) {
+    if (!ahead.has(rel)) ahead.set(rel, orig(remoteUrl(rel), { cache: 'no-cache' }).then(function (r) {
+      if (!r.ok) throw new Error(rel + ': HTTP ' + r.status);
+      return r.arrayBuffer();
+    }));
+    return ahead.get(rel);
+  }
+  function aheadFrom(info) {
+    for (var k = 1; k <= AHEAD; k++) {
+      var j = info.idx + k;
+      if (j < info.count) fetchPart(info.base + '.' + String(j).padStart(3, '0'));
+    }
+  }
 
   // wraps a response body so the bytes are counted as the loader reads them
   function counted(res, name, count) {
@@ -147,26 +171,39 @@
     return new Response(stream, { status: res.status, statusText: res.statusText, headers: res.headers });
   }
 
+  function dataFetch(rel, info, init) {
+    var name = label, part = !!info;
+    var ready = info ? ahead.get(rel) : null;
+    if (ready) ahead.delete(rel);
+    var res = ready
+      ? ready.then(function (buf) { return new Response(buf, { headers: { 'Content-Length': String(buf.byteLength) } }); })
+      : orig(remoteUrl(rel), init || {}).then(function (r) {
+          if (!r.ok) throw new Error(rel + ': HTTP ' + r.status);
+          return r;
+        });
+    return res.then(function (r) { return counted(r, name, part); });
+  }
+
   window.fetch = function (input, init) {
     try {
       var u = (input instanceof Request) ? input.url : String(input);
       var abs = new URL(u, location.href);
       if (abs.origin === location.origin) {
-        var pre = '/ports/smm2/', p = abs.pathname.indexOf(pre) === 0 ? abs.pathname.slice(pre.length) : null;
-        if (p && OWN.some(function (n) { return p === n || p.indexOf(n) === 0; })) {
-          var rel = decodeURI(p), hit = /^(.*)\.(\d{3})$/.exec(rel);
-          var part = !!hit, name = label;
-          if (hit) {                            // one part of a file that comes in parts
-            var base = hit[1], idx = +hit[2] + 1, n = (split && split[base]) ? split[base].parts : 0;
-            name = base + ' — part ' + idx + (n ? ' of ' + n : '');
-            label = name;
-            if (!total && split) { total = 0; for (var key in split) total += split[key].size || 0; }
-          } else {
-            label = rel === 'split.json' ? '' : rel;   // small extras: show the name, count no bytes
-            name = label;
+        var p = abs.pathname.indexOf(PRE) === 0 ? abs.pathname.slice(PRE.length) : null;
+        if (p !== null) {
+          var rel = decodeURI(p);
+          if (LOCAL.indexOf(rel) < 0) {
+            var info = partOf(rel);
+            if (info) {                              // one part of a file that comes in parts
+              label = info.base + ' — part ' + (info.idx + 1) + ' of ' + info.count;
+              if (!total) { total = 0; for (var key in split) total += split[key].size || 0; }
+              aheadFrom(info);
+            } else {
+              label = rel === 'split.json' ? '' : rel;   // small extras: name only, no bytes counted
+            }
+            paint();
+            return dataFetch(rel, info, init);
           }
-          paint();
-          return orig(new URL(REMOTE + rel).href, init || {}).then(function (r) { return counted(r, name, part); });
         }
       }
     } catch (e) {}
