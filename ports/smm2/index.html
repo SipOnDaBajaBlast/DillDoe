@@ -527,9 +527,11 @@
                      running: 'after it had started' };
       var stage = stages[prev.phase] || prev.phase;
       var mb = function (b) { return b ? (b / 1048576).toFixed(0) + ' MB' : 'not yet allocated'; };
-      if (!compatOn && !read('smm2-escalated')) {
-        // one automatic retry on the runtime's software path: weak Chromebook GPUs often die on subgroup ops
-        store('smm2-escalated', '1');
+      // one automatic retry on the runtime's software path, once per tab: sticky flags used to leave a device that
+      // crashed before with no way back in, because the flag outlived the browser session
+      var triedCompat = false; try { triedCompat = sessionStorage.getItem('smm2-tried-compat') === '1'; } catch (e) {}
+      if (!compatOn && !prev.compat && !triedCompat) {
+        try { sessionStorage.setItem('smm2-tried-compat', '1'); } catch (e) {}
         var q = new URLSearchParams(location.search);
         var keepEnv = q.getAll('env').filter(function (v) { return !/^WEB_(NO_GPU|NO_SUBGROUPS)/.test(v); });
         q.delete('env');
@@ -574,6 +576,9 @@
         : prev.phase === 'data'
         ? 'Copying the 3.1 GB of game files into the browser is disk-bound, and the tab died during it: usually the storage quota, not RAM.'
         : 'The tab ran out of memory while the game was starting.';
+      how += compatOn
+        ? ' Compatibility mode is on, so if it dies again the driver is not the whole story — the console itself is the wall on this machine.'
+        : ' Compatibility mode is switched on for the next attempt: press PLAY again.';
       var facts = (dem ? dem + ' GB RAM reported' : 'RAM not reported') + ' · ' + (cores || '?') + ' cores · '
         + (m64 ? '64-bit WebAssembly memory ok' : 'no 64-bit WebAssembly memory') + ' · ' + (gpu ? 'WebGPU ok' : 'no WebGPU') + ' · ' + (gl2 ? 'WebGL2 ok' : 'no WebGL2');
       var report = function () {
