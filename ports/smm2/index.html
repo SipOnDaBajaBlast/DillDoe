@@ -74,6 +74,14 @@
   #lowrow.on { color: #cfcfd8; }
   #lowtext { font-style: normal; color: #5f5f69; }
   #mem { color: #55555e; font: 11px ui-monospace, Consolas, monospace; }
+  /* live readout while playing: the emulated console's memory next to the page's own */
+  #memline { display: none; position: fixed; left: 8px; bottom: 8px; color: #6f6f79; font: 11px ui-monospace, Consolas, monospace;
+    background: rgba(0,0,0,.45); padding: 2px 6px; border-radius: 5px; z-index: 5; pointer-events: none; }
+  #compatrow { display: flex; align-items: center; gap: 8px; color: #7b7b85; font-size: 12px; user-select: none; }
+  #compatrow input { width: 14px; height: 14px; accent-color: #fff; margin: 0; }
+  #compatrow label { cursor: pointer; }
+  #compatrow.on { color: #cfcfd8; }
+  #compattext { font-style: normal; color: #5f5f69; }
 </style>
 </head>
 <body>
@@ -86,6 +94,7 @@
     <div id="status"></div>
     <div id="dl"><div id="dlwhat"></div><div id="dlstat"></div></div>
     <div id="lowrow"><input type="checkbox" id="lowmem"><label for="lowmem">Low-memory mode</label><em id="lowtext"></em></div>
+    <div id="compatrow"><input type="checkbox" id="compat"><label for="compat">Compatibility mode</label><em id="compattext"></em></div>
     <div id="mem"></div>
     <button id="pick">Import game files from a folder…</button>
   </div>
@@ -101,6 +110,7 @@
 <div id="touch"><div id="t-stick"></div><div id="t-base"><div id="t-knob"></div></div></div>
 <div id="hud"><button class="ghost" id="showkeys">Keys</button><button class="ghost" id="fs">Fullscreen</button><button class="ghost" id="showfps">FPS</button><button class="ghost" id="showlog">Log</button></div>
 <div id="keyshint"></div>
+<div id="memline"></div>
 <div id="keys"><div id="keyscard">
   <h2>Controls</h2>
   <p>The keyboard plays as a controller. <kbd>F1</kbd> opens this card; <kbd>Esc</kbd> or a click outside closes it.</p>
@@ -148,6 +158,14 @@
     localStorage.setItem('smm2-web-settings', JSON.stringify(lowSaved));
   } catch (e) {} }
   try { window.__SMM2_LOW = LOW; } catch (e) {}
+  // keep a handle on the emulated console's memory so its growth can be seen: it starts at 128 MiB and grows as the
+  // game boots, and watching it climb is how an out-of-memory crash becomes visible before the tab dies
+  try {
+    var RealMemory = WebAssembly.Memory;
+    var TrackedMemory = function (opts) { var m = new RealMemory(opts); try { window.__smm2Memory = m; } catch (e) {} return m; };
+    TrackedMemory.prototype = RealMemory.prototype;
+    WebAssembly.Memory = TrackedMemory;
+  } catch (e) {}
   var AHEAD = LOW ? 0 : 2;                         // extra parts fetched alongside the one being read
   var CACHE = 'smm2-module-v1';                    // the module's parts, kept so a return visit is quick
   var orig = window.fetch.bind(window);
@@ -408,13 +426,33 @@
       try { localStorage.setItem('smm2-lowmem', box.checked ? '1' : '0'); } catch (e) {}
       location.reload();
     });
+    // compatibility mode: the runtime's own escape hatch for weak or broken GPU drivers (?env=WEB_NO_GPU=1)
+    (function () {
+      var box = document.getElementById('compat'), text = document.getElementById('compattext');
+      var on = /[?&]env=WEB_NO_GPU/.test(location.search);
+      box.checked = on;
+      document.getElementById('compatrow').classList.toggle('on', on);
+      text.textContent = on ? 'on · software renderer, no GPU subgroup ops (slower)' : 'off · hardware GPU';
+      box.addEventListener('change', function () {
+        var q = new URLSearchParams(location.search);
+        var keep = q.getAll('env').filter(function (v) { return !/^WEB_(NO_GPU|NO_SUBGROUPS)/.test(v); });
+        q.delete('env');
+        keep.forEach(function (v) { q.append('env', v); });
+        if (box.checked) { q.append('env', 'WEB_NO_GPU=1'); q.append('env', 'WEB_NO_SUBGROUPS=1'); }
+        location.search = q.toString();
+      });
+    })();
+    var lineEl = document.getElementById('memline'), gameEl = document.getElementById('game');
     function tick() {
-      var m = performance.memory, bits = [];
-      if (m) bits.push('page memory ' + (m.usedJSHeapSize / 1048576).toFixed(0) + ' MB of ' + (m.jsHeapSizeLimit / 1048576).toFixed(0) + ' MB');
-      if (low) bits.push('low-memory mode');
-      memEl.textContent = bits.join(' · ');
+      var bits = [], m = performance.memory, mm = window.__smm2Memory;
+      if (m) bits.push('page ' + (m.usedJSHeapSize / 1048576).toFixed(0) + ' MB');
+      if (mm) { try { bits.push('console ' + (mm.buffer.byteLength / 1048576).toFixed(0) + ' MB'); } catch (e) {} }
+      var text = bits.join(' · ') + (low ? ' · low-memory mode' : '');
+      memEl.textContent = text;
+      lineEl.textContent = bits.length ? text : '';
+      lineEl.style.display = (gameEl.style.display === 'none' || !bits.length) ? 'none' : 'block';
     }
-    tick(); setInterval(tick, 2000);
+    tick(); setInterval(tick, 1500);
   })();
 
   // weak devices: the game allocates gigabytes of emulated console memory, and on a small machine Chrome's
