@@ -49,6 +49,20 @@
          overflow: auto; padding: 8px 10px; white-space: pre-wrap; border-top: 1px solid var(--line); z-index: 6; }
   #shaderbox { position: fixed; right: 8px; bottom: 8px; display: none; background: rgba(0,0,0,.55); color: #fff; font: 600 12px system-ui, sans-serif; padding: 3px 8px; border-radius: 5px; z-index: 3; pointer-events: none; }
   a { color: var(--accent); }
+  /* controls card + the one-line key strip while playing */
+  #keys { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(6,6,8,.86); z-index: 8; padding: 20px; overflow: auto; }
+  #keys.show { display: flex; }
+  #keyscard { background: #151519; border: 1px solid #2e2e34; border-radius: 14px; padding: 18px 22px 16px; max-width: 580px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.6); margin: auto; }
+  #keyscard h2 { margin: 0 0 4px; font-size: 17px; }
+  #keyscard p { margin: 0 0 12px; color: #8a8a92; font-size: 12px; }
+  #keyscard table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  #keyscard td { padding: 6px 0; border-top: 1px solid #232329; vertical-align: top; }
+  #keyscard td:first-child { white-space: nowrap; padding-right: 16px; color: #cfcfd8; width: 1%; }
+  #keyscard td:last-child { color: #94949f; }
+  kbd { display: inline-block; background: #22222a; border: 1px solid #34343e; border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; margin: 1px 0;
+    font: 600 12px ui-monospace, Consolas, monospace; color: #dcdce4; }
+  #keyshint { display: none; position: fixed; left: 0; right: 0; bottom: 10px; text-align: center; color: #7b7b85; font: 11px ui-monospace, Consolas, monospace;
+    z-index: 5; pointer-events: none; text-shadow: 0 1px 3px #000; }
 </style>
 </head>
 <body>
@@ -71,7 +85,27 @@
 <div id="fpsbox"></div>
 <div id="shaderbox"></div>
 <div id="touch"><div id="t-stick"></div><div id="t-base"><div id="t-knob"></div></div></div>
-<div id="hud"><button class="ghost" id="fs">Fullscreen</button><button class="ghost" id="showfps">FPS</button><button class="ghost" id="showlog">Log</button></div>
+<div id="hud"><button class="ghost" id="showkeys">Keys</button><button class="ghost" id="fs">Fullscreen</button><button class="ghost" id="showfps">FPS</button><button class="ghost" id="showlog">Log</button></div>
+<div id="keyshint"></div>
+<div id="keys"><div id="keyscard">
+  <h2>Controls</h2>
+  <p>The keyboard plays as a controller. <kbd>F1</kbd> opens this card; <kbd>Esc</kbd> or a click outside closes it.</p>
+  <table>
+    <tr><td><kbd>&uarr;</kbd> <kbd>&darr;</kbd> <kbd>&larr;</kbd> <kbd>&rarr;</kbd> or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></td><td>Move, menus</td></tr>
+    <tr><td><kbd>K</kbd> or <kbd>Space</kbd></td><td>B &mdash; the bottom face button: jump in play, place in the editor</td></tr>
+    <tr><td><kbd>L</kbd></td><td>A &mdash; right face button: confirm, run / hold</td></tr>
+    <tr><td><kbd>J</kbd></td><td>Y &mdash; left face button</td></tr>
+    <tr><td><kbd>I</kbd></td><td>X &mdash; top face button</td></tr>
+    <tr><td><kbd>Enter</kbd></td><td>+ (start, pause)</td></tr>
+    <tr><td><kbd>Backspace</kbd></td><td>&minus; (menu)</td></tr>
+    <tr><td><kbd>Q</kbd> / <kbd>E</kbd></td><td>L / R shoulders</td></tr>
+    <tr><td>Mouse</td><td>Clicking the picture is a touch on the console's screen (Course Maker); the wheel scrolls</td></tr>
+    <tr><td><kbd>F11</kbd></td><td>Fullscreen (also the button top-right)</td></tr>
+    <tr><td><kbd>Shift</kbd>+<kbd>F9</kbd></td><td>Log panel (same as the Log button)</td></tr>
+    <tr><td>Gamepad</td><td>A real controller still works; it takes the slots after the keyboard</td></tr>
+  </table>
+  <p style="margin:14px 0 0"><button class="ghost" id="keysclose">Close</button></p>
+</div></div>
 <div id="log"></div>
 <script>
 // The game data (3.1 GB) lives in a public parts repo because this host caps files at 25 MiB.
@@ -263,6 +297,58 @@
     } catch (e) {}
     return orig(input, init);
   };
+})();
+</script>
+<script>
+// Keyboard as a controller: the game polls navigator.getGamepads() every frame, so a keyboard-shaped pad is
+// handed to it in the first slot (real controllers keep the slots after it). Also the controls card and key strip.
+(function () {
+  var BTN = { up: 12, down: 13, left: 14, right: 15, b: 0, a: 1, x: 2, y: 3, l: 4, r: 5, minus: 8, plus: 9 };
+  var KEYMAP = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down',
+                 ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right',
+                 KeyK: 'b', Space: 'b', KeyL: 'a', KeyJ: 'y', KeyI: 'x',
+                 KeyQ: 'l', KeyE: 'r', Enter: 'plus', NumpadEnter: 'plus', Backspace: 'minus' };
+  var held = {};
+  function isDown(name) { for (var c in held) if (held[c] === name) return true; return false; }
+  function pad() {
+    var b = [], i;
+    for (i = 0; i < 17; i++) b.push({ pressed: false, touched: false, value: 0 });
+    for (var c in held) {
+      var idx = BTN[held[c]];
+      if (idx !== undefined) { b[idx].pressed = true; b[idx].touched = true; b[idx].value = 1; }
+    }
+    return { id: 'Keyboard (this page)', index: 0, connected: true, mapping: 'standard', timestamp: performance.now(),
+      axes: [(isDown('right') ? 1 : 0) - (isDown('left') ? 1 : 0), (isDown('down') ? 1 : 0) - (isDown('up') ? 1 : 0), 0, 0],
+      buttons: b, hapticActuators: [], vibrationActuator: null };
+  }
+  var real = navigator.getGamepads ? navigator.getGamepads.bind(navigator) : null;
+  navigator.getGamepads = function () {
+    var out = [pad()];
+    if (real) { var l = real() || []; for (var i = 0; i < l.length; i++) if (l[i] && l[i].connected) out.push(l[i]); }
+    return out;
+  };
+
+  var panel = document.getElementById('keys'), hint = document.getElementById('keyshint'), game = document.getElementById('game');
+  function showKeys(on) { panel.classList.toggle('show', !!on); }
+  document.getElementById('showkeys').onclick = function () { showKeys(!panel.classList.contains('show')); };
+  document.getElementById('keysclose').onclick = function () { showKeys(false); };
+  panel.addEventListener('click', function (e) { if (e.target === panel) showKeys(false); });
+  hint.textContent = 'Arrows / WASD move \u00b7 K B \u00b7 L A \u00b7 J Y \u00b7 I X \u00b7 Enter + \u00b7 F1 for all controls';
+  document.getElementById('start').addEventListener('click', function () {
+    hint.style.display = 'block';
+    try { if (!sessionStorage.getItem('smm2-keys-card')) { sessionStorage.setItem('smm2-keys-card', '1'); showKeys(true); } } catch (e) {}
+  }, true);
+
+  window.addEventListener('keydown', function (e) {
+    if (e.code === 'F1') { e.preventDefault(); showKeys(!panel.classList.contains('show')); return; }
+    if (e.code === 'Escape' && panel.classList.contains('show')) { e.preventDefault(); showKeys(false); return; }
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var name = KEYMAP[e.code]; if (!name) return;
+    held[e.code] = name;
+    if (game.style.display !== 'none') e.preventDefault();
+  }, true);
+  window.addEventListener('keyup', function (e) { delete held[e.code]; }, true);
+  window.addEventListener('blur', function () { held = {}; });
 })();
 </script>
 <script src="shell.js"></script>
