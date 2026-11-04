@@ -66,7 +66,7 @@ async function start(d) {
   if (!d.noprelink) {
     const seen = new Set(), list = [];
     const take = arr => { for (const e of arr || []) if (typeof e === 'string' && !seen.has(e)) { seen.add(e); list.push(e); } };
-    try { const r = await fetch('programs.json'); if (r.ok) take(await r.json()); } catch (e) {}
+    try { const r = await fetch('programs.dat'); if (r.ok) take(await r.json()); } catch (e) {}
     take(d.learned);
     if (list.length) { pairs = new Map(); const add = (k, v) => { let a = pairs.get(k); if (!a) pairs.set(k, a = []); a.push(v); };
       for (const e of list) { const [v, p] = e.split(':'); if (!v || !p) continue; add('v' + v, p); if (p !== '-') add('p' + p, v); } }
