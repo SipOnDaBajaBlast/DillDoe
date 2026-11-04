@@ -17,6 +17,10 @@
   #bar.busy #barfill { width: 30%; animation: slide 1.1s ease-in-out infinite; }
   @keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
   #importmsg, #status { color: #8a8a92; font-size: 13px; text-align: center; white-space: pre-wrap; min-height: 1.45em; }
+  /* what is downloading right now, how fast, how much longer */
+  #dl { display: none; width: 100%; color: #6f6f79; font: 12px/1.5 ui-monospace, Consolas, monospace; text-align: center; }
+  #dlwhat { color: #a9a9b4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #dlstat { color: #6a6a74; }
   #start { display: none; background: #fff; color: #000; border: 0; border-radius: 999px; padding: 14px 54px; font: 700 18px system-ui, sans-serif; letter-spacing: .04em; cursor: pointer;
     animation: fadein .4s ease-out; }
   #start:hover { background: #e6e6e6; } #start:focus { outline: none; } #start:disabled { opacity: .4; cursor: default; }
@@ -54,6 +58,7 @@
     <button id="start" disabled>PLAY</button>
     <div id="importmsg"></div>
     <div id="status"></div>
+    <div id="dl"><div id="dlwhat"></div><div id="dlstat"></div></div>
     <button id="pick">Import game files from a folder…</button>
   </div>
   <div id="credit">SMM2 Recomp (<a href="LICENSE.txt">GPL-3.0</a>), built on LAS Recomp (<a href="LICENSE-LASRecomp.txt">MIT</a>) — <a href="THIRD-PARTY.txt">third-party notices</a>. Not affiliated with Nintendo.</div>
@@ -71,18 +76,98 @@
 <script>
 // The game data (3.1 GB) lives in a public parts repo because this host caps files at 25 MiB.
 // Every data request the loader makes stays relative, so it is redirected here to the parts host.
+// The same hook reports which part is downloading, the speed and the time left.
 (function () {
   var REMOTE = 'https://raw.githubusercontent.com/SipOnDaBajaBlast/smm2-data/main/';
   var OWN = ['split.json', 'game.json', 'shaders.json.gz', 'gamedata/'];
   var orig = window.fetch.bind(window);
+  var split = null, total = 0, done = 0, label = '', shown = false, lastPaint = 0, lastText = '';
+  var samples = [];
+
+  function byId(id) { return document.getElementById(id); }
+  function size(b) {
+    if (b >= 1073741824) return (b / 1073741824).toFixed(2) + ' GB';
+    if (b >= 1048576) return (b / 1048576).toFixed(1) + ' MB';
+    return Math.round(b / 1024) + ' KB';
+  }
+  function left(s) {
+    if (!isFinite(s) || s <= 0) return '';
+    if (s < 60) return 'under a minute left';
+    var m = Math.round(s / 60);
+    if (m < 60) return 'about ' + m + ' min left';
+    return 'about ' + Math.floor(m / 60) + ' h ' + (m % 60) + ' min left';
+  }
+  function speed() {                        // bytes per second over the last few seconds
+    if (samples.length < 2) return 0;
+    var a = samples[0], b = samples[samples.length - 1], dt = (b.t - a.t) / 1000;
+    return dt > 0.4 ? (b.n - a.n) / dt : 0;
+  }
+  function paint() {
+    var box = byId('dl'); if (!box) return;
+    if (total && done >= total) label = 'game data downloaded';
+    var stat = [];
+    if (total) stat.push(size(done) + ' of ' + size(total) + ' · ' + Math.floor(done / total * 100) + '%');
+    var r = speed();
+    if (r > 1024) { stat.push((r / 1048576).toFixed(1) + ' MB/s'); if (total > done) stat.push(left((total - done) / r)); }
+    var text = label + '\u0000' + stat.join(' · ');
+    if (text === lastText) return;
+    lastText = text;
+    byId('dlwhat').textContent = label;
+    byId('dlstat').textContent = stat.join(' · ');
+    box.style.display = 'block'; shown = true;
+  }
+  function sample() {
+    var now = Date.now();
+    samples.push({ t: now, n: done });
+    while (samples.length > 2 && now - samples[0].t > 8000) samples.shift();
+    if (now - lastPaint > 200) { lastPaint = now; paint(); }
+  }
+  // split.json says which files come in parts and how big each one is: that is the overall total
+  orig(REMOTE + 'split.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (m) {
+    if (!m) return;
+    split = m; total = 0;
+    for (var key in m) total += m[key].size || 0;
+    paint();
+  }).catch(function () {});
+
+  // wraps a response body so the bytes are counted as the loader reads them
+  function counted(res, name, count) {
+    if (!res || !res.body) return res;
+    var rd = res.body.getReader();
+    var stream = new ReadableStream({
+      pull: function (ctrl) {
+        return rd.read().then(function (x) {
+          if (x.done) { ctrl.close(); return; }
+          if (count) { done += x.value.byteLength; sample(); }
+          ctrl.enqueue(x.value);
+        });
+      },
+      cancel: function (why) { try { rd.cancel(why); } catch (e) {} }
+    });
+    return new Response(stream, { status: res.status, statusText: res.statusText, headers: res.headers });
+  }
+
   window.fetch = function (input, init) {
     try {
       var u = (input instanceof Request) ? input.url : String(input);
       var abs = new URL(u, location.href);
       if (abs.origin === location.origin) {
         var pre = '/ports/smm2/', p = abs.pathname.indexOf(pre) === 0 ? abs.pathname.slice(pre.length) : null;
-        if (p && OWN.some(function (n) { return p === n || p.indexOf(n) === 0; }))
-          return orig(new URL(REMOTE + decodeURI(p)).href, init || {});
+        if (p && OWN.some(function (n) { return p === n || p.indexOf(n) === 0; })) {
+          var rel = decodeURI(p), hit = /^(.*)\.(\d{3})$/.exec(rel);
+          var part = !!hit, name = label;
+          if (hit) {                            // one part of a file that comes in parts
+            var base = hit[1], idx = +hit[2] + 1, n = (split && split[base]) ? split[base].parts : 0;
+            name = base + ' — part ' + idx + (n ? ' of ' + n : '');
+            label = name;
+            if (!total && split) { total = 0; for (var key in split) total += split[key].size || 0; }
+          } else {
+            label = rel === 'split.json' ? '' : rel;   // small extras: show the name, count no bytes
+            name = label;
+          }
+          paint();
+          return orig(new URL(REMOTE + rel).href, init || {}).then(function (r) { return counted(r, name, part); });
+        }
       }
     } catch (e) {}
     return orig(input, init);
