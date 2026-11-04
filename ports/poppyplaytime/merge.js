@@ -4,6 +4,7 @@
   const defaultConfig = {
     files: [],
     basePath: '',
+    partExtension: '',
     debug: true
   };
 
@@ -37,7 +38,7 @@
     try {
       const parts = [];
       for (let i = 1; i <= numParts; i++) {
-        parts.push(`${filePath}.part${i}`);
+        parts.push(`${filePath}.part${i}${config.partExtension || ''}`);
       }
 
       log(`Merging ${filePath} from ${numParts} parts...`);

@@ -12,9 +12,10 @@
   #gameContainer canvas { display: block; }
 </style>
 <script>
+  // UnityLoader and the wasm/data files use .txt/.bin names because this host only ships known extensions.
   // The 48 MB data file ships as three parts because this host caps files at 25 MiB. merge.js (in this folder)
   // replays the parts as one response before UnityLoader asks for the data, so the loader never sees the split.
-  window.fileMergerConfig = { files: [{ name: 'bb1.data.unityweb', parts: 3 }], basePath: 'Build/', debug: false };
+  window.fileMergerConfig = { files: [{ name: 'bb1.data.unityweb', parts: 3, partExtension: '.bin' }], basePath: 'Build/', debug: false };
 </script>
 <script src="merge.js"></script>
 <script src="TemplateData/UnityProgress.js"></script>
@@ -26,7 +27,7 @@
 </div>
 <script>
   window.addEventListener('load', function () {
-    UnityLoader.instantiate('gameContainer', 'Build/bb1.json', { onProgress: UnityProgress });
+    UnityLoader.instantiate('gameContainer', 'Build/bb1.settings.txt', { onProgress: UnityProgress });
   });
 </script>
 </body>
