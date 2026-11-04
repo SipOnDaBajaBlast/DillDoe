@@ -63,11 +63,16 @@
     font: 600 12px ui-monospace, Consolas, monospace; color: #dcdce4; }
   #keyshint { display: none; position: fixed; left: 0; right: 0; bottom: 10px; text-align: center; color: #7b7b85; font: 11px ui-monospace, Consolas, monospace;
     z-index: 5; pointer-events: none; text-shadow: 0 1px 3px #000; }
+  /* device / crash notice: amber, small, above the bar */
+  #warn { display: none; max-width: 460px; margin: 0 0 4px; padding: 10px 12px; border-radius: 10px; border: 1px solid #6b5320; background: #241d0d; color: #e8d6a6;
+    font-size: 12px; line-height: 1.5; }
+  #warn b { color: #ffe9b0; }
 </style>
 </head>
 <body>
 <div id="setup">
   <div id="loadwrap">
+    <div id="warn"></div>
     <div id="bar" class="busy"><div id="barfill"></div></div>
     <button id="start" disabled>PLAY</button>
     <div id="importmsg"></div>
@@ -349,6 +354,35 @@
   }, true);
   window.addEventListener('keyup', function (e) { delete held[e.code]; }, true);
   window.addEventListener('blur', function () { held = {}; });
+
+  // weak devices: the game allocates gigabytes of emulated console memory, and on a small machine Chrome's
+  // renderer dies with its own "Aw, Snap!" page instead of raising an error here. So warn before the wait,
+  // and if a launch never reported back, say what that crash page meant.
+  (function () {
+    var warn = document.getElementById('warn');
+    function show(html) { warn.innerHTML = html; warn.style.display = 'block'; }
+    function store(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+    function read(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+    var launched = +read('smm2-launch') || 0, ran = read('smm2-running'), mem = navigator.deviceMemory, cores = navigator.hardwareConcurrency;
+    if (launched && !ran) {
+      store('smm2-launch', null);
+      show('<b>This tab crashed the last time the game started.</b> “Aw, Snap!” is Chrome running out of memory, not the page throwing an error — '
+         + 'the game loads a whole emulated console and needs a desktop-class machine. Closing other tabs and pressing PLAY again sometimes gets further; '
+         + 'a laptop or desktop with 8 GB of RAM and working WebGL2 is the reliable option.');
+    } else if (mem && mem <= 4) {
+      show('<b>This device reports about ' + mem + ' GB of RAM.</b> The game needs several gigabytes for the emulated console, so Chrome may '
+         + 'crash the tab with “Aw, Snap!” instead of showing an error. It is meant for a desktop or laptop with 8 GB or more.');
+    } else if (cores && cores <= 2) {
+      show('<b>This device reports ' + cores + ' CPU cores.</b> The emulated console will be far too slow to play, and Chrome may run out of ' +
+         'memory and show “Aw, Snap!”. A desktop or laptop is the reliable option.');
+    }
+    // the attempt is recorded before the module starts, and confirmed only once the game has really been running
+    document.getElementById('start').addEventListener('click', function () {
+      store('smm2-running', null);
+      store('smm2-launch', String(Date.now()));
+      setTimeout(function () { store('smm2-launch', null); store('smm2-running', '1'); }, 20000);
+    }, true);
+  })();
 })();
 </script>
 <script src="shell.js"></script>

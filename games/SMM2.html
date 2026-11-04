@@ -22,6 +22,17 @@
     main p { margin: 0; padding: 8px 16px; font-size: 12px; color: #9aa8c2; background: #0b0e16; }
     main p a { color: #8fd4ff; }
     #stage:fullscreen { background: #000; }
+    /* device notice, shown instead of the game on machines that will not manage it */
+    #notice { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; padding: 24px; background: #06070c; z-index: 2; }
+    #notice.show { display: flex; }
+    #noticecard { max-width: 560px; border: 1px solid #1d2536; background: #0b0e16; border-radius: 12px; padding: 20px 22px; }
+    #noticecard h2 { margin: 0 0 8px; font-size: 17px; }
+    #noticecard p { margin: 0 0 12px; padding: 0; background: none; font-size: 13px; line-height: 1.6; color: #9aa8c2; }
+    #noticecard b { color: #e7eefc; }
+    #noticecard .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    #noticecard button { padding: 9px 16px; font: inherit; font-size: 13px; border-radius: 7px; border: 1px solid #2b3650; background: transparent; color: #8fd4ff; cursor: pointer; }
+    #noticecard button.primary { border: 0; color: #06070c; background: linear-gradient(180deg, #8ee3ff 0%, #65bfff 100%); }
+    #noticecard button:hover { filter: brightness(1.1); }
   </style>
 </head>
 <body>
@@ -32,20 +43,71 @@
   </header>
   <main>
     <div id="stage">
-      <iframe src="/ports/smm2/" title="Super Mario Maker 2" allow="cross-origin-isolated; fullscreen; autoplay; gamepad" allowfullscreen></iframe>
+      <iframe id="game" title="Super Mario Maker 2" allow="cross-origin-isolated; fullscreen; autoplay; gamepad" allowfullscreen></iframe>
+      <div id="notice">
+        <div id="noticecard">
+          <h2 id="noticetitle">This device probably can't run the game</h2>
+          <p id="noticetext"></p>
+          <p>The game is a full emulated console: it wants several gigabytes of memory, a real GPU with WebGL2/WebGPU, and about 3.1&nbsp;GB of free storage.</p>
+          <div class="row">
+            <button class="primary" id="anyway" type="button">Try it anyway</button>
+            <button id="back" type="button">Back to games</button>
+          </div>
+        </div>
+      </div>
     </div>
-    <p>Web port of Super Mario Maker 2 (SMM2 Recomp). Needs Chrome or Edge 133+ for 64-bit WebAssembly memory and WebGPU, and about 3.1&nbsp;GB of free disk: the first start copies the whole game into the browser's private storage, so keep the tab open until the PLAY button appears. Story mode, the editor and local play work; online levels and course upload don't, because they need a socket proxy a static site can't run. Mouse and keyboard or a gamepad.</p>
+    <p>Web port of Super Mario Maker 2 (SMM2 Recomp). Needs Chrome or Edge 133+ for 64-bit WebAssembly memory and WebGPU, and about 3.1&nbsp;GB of free disk: the first start copies the whole game into the browser's private storage, so keep the tab open until the PLAY button appears. Story mode, the editor and local play work; online levels and course upload don't, because they need a socket proxy a static site can't run. Keyboard (arrows/WASD plus J/K/L/I, F1 for the full list) or a gamepad. On a low-end Chromebook or a 4&nbsp;GB machine the browser usually runs out of memory and shows its own “Aw, Snap!” page instead — it is meant for a desktop or laptop.</p>
   </main>
   <script>
     const stage = document.getElementById('stage');
-    const frame = stage.querySelector('iframe');
+    const frame = document.getElementById('game');
+    const notice = document.getElementById('notice');
+    const store = {
+      get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+      del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+    };
+
+    (function () {
+      const mem = navigator.deviceMemory;              // approximate GB, Chrome caps it at 8
+      const cores = navigator.hardwareConcurrency;
+      const crashed = store.get('smm2-launch') && !store.get('smm2-running');
+      store.del('smm2-launch');
+      let title = '', text = '';
+      if (crashed) {
+        title = 'The game crashed this browser last time';
+        text = 'Chrome showed its own <b>“Aw, Snap!”</b> page, which means the tab ran out of memory while starting the emulated console — not that the page itself is broken. '
+             + 'Closing other tabs and trying again can get further.';
+      } else if (mem && mem <= 4) {
+        title = 'This device probably can’t run the game';
+        text = 'It reports about <b>' + mem + ' GB of RAM</b>. The game needs several gigabytes just for the emulated console, so Chrome will most likely show its <b>“Aw, Snap!”</b> crash page instead of an error.';
+      } else if (cores && cores <= 2) {
+        title = 'This device probably can’t run the game';
+        text = 'It reports <b>' + cores + ' CPU cores</b>, which is far too slow for the emulated console, and the tab may run out of memory and show <b>“Aw, Snap!”</b>.';
+      }
+      if (title) {
+        document.getElementById('noticetitle').textContent = title;
+        document.getElementById('noticetext').innerHTML = text;
+        notice.classList.add('show');
+      } else {
+        load();
+      }
+    })();
+
+    function load() {
+      notice.classList.remove('show');
+      if (!frame.src) frame.src = '/ports/smm2/';
+      resize();
+    }
+    document.getElementById('anyway').addEventListener('click', load);
+    document.getElementById('back').addEventListener('click', () => { location.href = '/games'; });
     document.getElementById('fullscreen').addEventListener('click', () => stage.requestFullscreen());
-    const resize = () => {
+
+    function resize() {
       const scale = Math.min(stage.clientWidth / 1280, stage.clientHeight / 720);
       frame.style.transform = `scale(${scale})`;
       frame.style.left = `${(stage.clientWidth - 1280 * scale) / 2}px`;
       frame.style.top = `${(stage.clientHeight - 720 * scale) / 2}px`;
-    };
+    }
     resize();
     new ResizeObserver(resize).observe(stage);
   </script>
