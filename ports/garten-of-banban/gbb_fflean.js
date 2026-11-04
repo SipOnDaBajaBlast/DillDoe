@@ -4135,7 +4135,7 @@ var _emscripten_set_main_loop_timing = (mode, value) => {
         /** @param {Event} event */ var MainLoop_setImmediate_messageHandler = event => {
           // When called in current thread or Worker, the main loop ID is structured slightly different to accommodate for --proxy-to-worker runtime listening to Worker events,
           // so check for both cases.
-          if (event.data === emscriptenMainLoopMessageId || event.data.target === emscriptenMainLoopMessageId) {
+          if (event.txta === emscriptenMainLoopMessageId || event.txta.target === emscriptenMainLoopMessageId) {
             event.stopPropagation();
             setImmediates.shift()();
           }
@@ -9266,7 +9266,7 @@ var RXC = {
         };
         for (const key of keys) {
           const ov = RXC.overlay.get(key);
-          if (ov) st.put(ov.data.slice(0, ov.size).buffer, key); else st.delete(key);
+          if (ov) st.put(ov.txta.slice(0, ov.size).buffer, key); else st.delete(key);
         }
       } catch (e) {
         console.warn("[web] persist failed", keys, e);
@@ -9287,7 +9287,7 @@ var RXC = {
   seedIni(list) {
     for (const s of list || []) {
       const key = RXC.norm(s.file), ov = RXC.overlay.get(key);
-      const lines = ov ? (new TextDecoder).decode(ov.data.subarray(0, ov.size)).split(/\r?\n/) : [];
+      const lines = ov ? (new TextDecoder).decode(ov.txta.subarray(0, ov.size)).split(/\r?\n/) : [];
       let at = lines.findIndex(l => l.trim().toLowerCase() === "[" + s.section.toLowerCase() + "]");
       if (at < 0) {
         if (lines.length && lines[lines.length - 1] !== "") lines.push("");
@@ -9324,12 +9324,12 @@ var RXC = {
     RXC.seedIni(Module["iniSeed"]);
     RXC.base = Module["gameBase"] || "";
     if (RXC.base && !RXC.base.endsWith("/")) RXC.base += "/";
-    // manifest.dat: {path: size} for Range requests (tools/serve_web.py), or {chunk, files} from `build.py pack`: every
+    // manifest.txt: {path: size} for Range requests (tools/serve_web.py), or {chunk, files} from `build.py pack`: every
     // file split into game/<path>.<n> chunks of `chunk` bytes, for plain static servers and CDNs (no Range support)
     let m = null;
     for (let attempt = 0; !m; attempt++) {
       try {
-        const r = await fetch(RXC.base + "manifest.dat", {
+        const r = await fetch(RXC.base + "manifest.txt", {
           cache: "no-cache"
         });
         if (!r.ok) throw new Error("HTTP " + r.status);
@@ -9357,7 +9357,7 @@ var RXC = {
     // debugging: read a file the game wrote, e.g. __rxcReadFile('C:/Users/Player/AppData/Local/HelloNeighbor/Saved/Logs/HelloNeighbor.log')
     globalThis.__rxcReadFile = path => {
       const ov = RXC.overlay.get(RXC.norm(path));
-      return ov ? (new TextDecoder).decode(ov.data.subarray(0, ov.size)) : null;
+      return ov ? (new TextDecoder).decode(ov.txta.subarray(0, ov.size)) : null;
     };
     await RXC.loadPrograms();
     // small; needed before the first shaders are created
@@ -9586,7 +9586,7 @@ var RXC = {
   async loadPrograms() {
     if (Module["prelinkShaders"] === false || new URLSearchParams(location.search).has("noprelink")) return;
     try {
-      const r = await fetch("programs.dat");
+      const r = await fetch("programs.txt");
       if (!r.ok) return;
       const list = await r.json();
       RXC.pairs = new Map;
@@ -9628,7 +9628,7 @@ var RXC = {
   },
   async loadSeed() {
     try {
-      const r = await fetch("seed.dat", {
+      const r = await fetch("seed.txt", {
         cache: "no-cache"
       });
       if (!r.ok) return;
@@ -9666,7 +9666,7 @@ var RXC = {
   async loadPreload() {
     if (new URLSearchParams(location.search).has("nopreload")) return;
     try {
-      const r = await fetch("preload.dat");
+      const r = await fetch("preload.txt");
       if (!r.ok) return;
       RXC.pre = await r.json();
       RXC.preIdx = new Map(RXC.pre.map((k, i) => [ k, i ]));
@@ -9795,7 +9795,7 @@ var _rxc_js_file_open = function(pathp, write, create, truncate) {
     const inGame = rel !== null && rel in RXC.manifest && !RXC.hidden.has(key);
     if (!ov && !inGame && !create) return -1;
     if (truncate && ov) {
-      ov.data = new Uint8Array(0);
+      ov.txta = new Uint8Array(0);
       ov.size = 0;
     }
     const dirty = !!truncate || (!ov && !!create);
@@ -9816,8 +9816,8 @@ var _rxc_js_file_open = function(pathp, write, create, truncate) {
         size: 0
       };
       if (inGame && !truncate) return (async () => {
-        ov.data = (await RXC.readRange(rel, 0, RXC.manifest[rel])).slice();
-        ov.size = ov.data.length;
+        ov.txta = (await RXC.readRange(rel, 0, RXC.manifest[rel])).slice();
+        ov.size = ov.txta.length;
         RXC.overlay.set(key, ov);
         return finish();
       })();
@@ -9841,7 +9841,7 @@ function _rxc_js_file_read(fd, bufp, off, n) {
   if (f.ov) {
     const end = Math.min(f.ov.size, off + n);
     if (off >= end) return RXC.px(0);
-    HEAPU8.set(f.ov.data.subarray(off, end), bufp >>> 0);
+    HEAPU8.set(f.ov.txta.subarray(off, end), bufp >>> 0);
     return RXC.px(end - off);
   }
   return RXC.px(RXC.readRangeInto(f.rel, off, n, bufp));
@@ -9860,7 +9860,7 @@ function _rxc_js_file_read_nb(fd, bufp, off, n, donep, resultp) {
   if (f.ov) {
     const end = Math.min(f.ov.size, off + n);
     if (off >= end) return 0;
-    HEAPU8.set(f.ov.data.subarray(off, end), bufp >>> 0);
+    HEAPU8.set(f.ov.txta.subarray(off, end), bufp >>> 0);
     return end - off;
   }
   const d = RXC.readRangeInto(f.rel, off, n, bufp);
@@ -9917,11 +9917,11 @@ _rxc_js_file_stat.isAsync = true;
 function _rxc_js_file_truncate(fd, size) {
   const f = RXC.files[fd];
   if (!f || !f.ov || !Number.isSafeInteger(size) || size < 0) return 0;
-  if (size > f.ov.data.length) {
+  if (size > f.ov.txta.length) {
     const data = new Uint8Array(size);
-    data.set(f.ov.data.subarray(0, f.ov.size));
-    f.ov.data = data;
-  } else if (size > f.ov.size) f.ov.data.fill(0, f.ov.size, size);
+    data.set(f.ov.txta.subarray(0, f.ov.size));
+    f.ov.txta = data;
+  } else if (size > f.ov.size) f.ov.txta.fill(0, f.ov.size, size);
   f.ov.size = size;
   f.dirty = true;
   f.version++;
@@ -9955,12 +9955,12 @@ function _rxc_js_file_write(fd, bufp, off, n) {
     RXC.overlay.set(f.key, f.ov);
   }
   const need = off + n;
-  if (need > f.ov.data.length) {
-    const nd = new Uint8Array(Math.max(need, f.ov.data.length * 2, 4096));
-    nd.set(f.ov.data);
-    f.ov.data = nd;
+  if (need > f.ov.txta.length) {
+    const nd = new Uint8Array(Math.max(need, f.ov.txta.length * 2, 4096));
+    nd.set(f.ov.txta);
+    f.ov.txta = nd;
   }
-  f.ov.data.set(HEAPU8.subarray(bufp >>> 0, bufp + n >>> 0), off);
+  f.ov.txta.set(HEAPU8.subarray(bufp >>> 0, bufp + n >>> 0), off);
   if (need > f.ov.size) f.ov.size = need;
   if (f.key.endsWith("console.log")) {
     const g = RXC.gcl || (RXC.gcl = {
@@ -10059,7 +10059,7 @@ var RXCG = {
     if (d.log !== undefined) RXC.log(d.log);
     if (d.wstat) globalThis.__rxcWorker = d.wstat;
     if (d.rb !== undefined) {
-      if (d.data.length) HEAPU8.set(d.data, d.addr >>> 0 >>> 0);
+      if (d.txta.length) HEAPU8.set(d.txta, d.addr >>> 0 >>> 0);
       if (d.rb > RXCG.rbDone) {
         RXCG.rbSet.add(d.rb);
         while (RXCG.rbSet.delete(RXCG.rbDone + 1)) RXCG.rbDone++;
@@ -10236,13 +10236,13 @@ var RXCMF = {
     if (RXCMF.worker !== null) return RXCMF.worker;
     RXCMF.worker = false;
     if (typeof VideoFrame === "undefined" || typeof Worker === "undefined") return false;
-    const code = `const ctxs = new Map();\n        function rgba(vf, w, h) { const k = w + 'x' + h; let c = ctxs.get(k); if (!c) { c = new OffscreenCanvas(w, h).getContext('2d', { willReadFrequently: true, alpha: false }); ctxs.set(k, c); } c.drawImage(vf, 0, 0, w, h); return c.getImageData(0, 0, w, h).data; }\n        function yuv(px, w, h, nv12) {\n          const cw = (w + 1) >> 1, ch = (h + 1) >> 1, o = new Uint8Array(w * h + 2 * cw * ch), ob = w * h;\n          for (let i = 0, n = w * h; i < n; i++) { const r = px[4 * i], g = px[4 * i + 1], b = px[4 * i + 2]; o[i] = ((47 * r + 157 * g + 16 * b + 128) >> 8) + 16; }\n          for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) {\n            const x0 = 2 * x, x1 = Math.min(x0 + 1, w - 1), y0 = 2 * y, y1 = Math.min(y0 + 1, h - 1), a = 4 * (y0 * w + x0), b2 = 4 * (y0 * w + x1), c2 = 4 * (y1 * w + x0), d = 4 * (y1 * w + x1);\n            const r = (px[a] + px[b2] + px[c2] + px[d] + 2) >> 2, g = (px[a + 1] + px[b2 + 1] + px[c2 + 1] + px[d + 1] + 2) >> 2, bl = (px[a + 2] + px[b2 + 2] + px[c2 + 2] + px[d + 2] + 2) >> 2;\n            const u = ((-26 * r - 87 * g + 112 * bl + 128) >> 8) + 128, v = ((112 * r - 102 * g - 10 * bl + 128) >> 8) + 128;\n            if (nv12) { o[ob + y * 2 * cw + 2 * x] = u; o[ob + y * 2 * cw + 2 * x + 1] = v; } else { o[ob + y * cw + x] = u; o[ob + cw * ch + y * cw + x] = v; }\n          }\n          return o;\n        }\n        onmessage = async e => {\n          const { id, seq, frame, w, h, fmt, t } = e.data; let out = null, err = null;\n          try {\n            const src = frame.format, vr = frame.visibleRect;\n            if (fmt !== 0 && (src === 'I420' || src === 'NV12' || src === 'I420A') && vr && vr.width === w && vr.height === h) {\n              const tmp = new Uint8Array(frame.allocationSize({ rect: vr })), lay = await frame.copyTo(tmp, { rect: vr });\n              const cw = (w + 1) >> 1, ch = (h + 1) >> 1, ob = w * h; out = new Uint8Array(ob + 2 * cw * ch);\n              for (let y = 0; y < h; y++) out.set(tmp.subarray(lay[0].offset + y * lay[0].stride, lay[0].offset + y * lay[0].stride + w), y * w);\n              if (src === 'NV12') {\n                for (let y = 0; y < ch; y++) { const row = tmp.subarray(lay[1].offset + y * lay[1].stride, lay[1].offset + y * lay[1].stride + 2 * cw);\n                  if (fmt === 1) out.set(row, ob + y * 2 * cw); else for (let x = 0; x < cw; x++) { out[ob + y * cw + x] = row[2 * x]; out[ob + cw * ch + y * cw + x] = row[2 * x + 1]; } }\n              } else {\n                for (let y = 0; y < ch; y++) { const u = tmp.subarray(lay[1].offset + y * lay[1].stride, lay[1].offset + y * lay[1].stride + cw), v = tmp.subarray(lay[2].offset + y * lay[2].stride, lay[2].offset + y * lay[2].stride + cw);\n                  if (fmt === 2) { out.set(u, ob + y * cw); out.set(v, ob + cw * ch + y * cw); } else for (let x = 0; x < cw; x++) { out[ob + y * 2 * cw + 2 * x] = u[x]; out[ob + y * 2 * cw + 2 * x + 1] = v[x]; } }\n              }\n            } else { const px = rgba(frame, w, h); out = fmt === 0 ? new Uint8Array(px.buffer) : yuv(px, w, h, fmt === 1); }\n          } catch (x) { err = String(x && x.message || x); }\n          frame.close();\n          if (out) postMessage({ id, seq, buf: out.buffer, w, h, fmt, t }, [out.buffer]); else postMessage({ id, seq, err });\n        };`;
+    const code = `const ctxs = new Map();\n        function rgba(vf, w, h) { const k = w + 'x' + h; let c = ctxs.get(k); if (!c) { c = new OffscreenCanvas(w, h).getContext('2d', { willReadFrequently: true, alpha: false }); ctxs.set(k, c); } c.drawImage(vf, 0, 0, w, h); return c.getImageData(0, 0, w, h).txta; }\n        function yuv(px, w, h, nv12) {\n          const cw = (w + 1) >> 1, ch = (h + 1) >> 1, o = new Uint8Array(w * h + 2 * cw * ch), ob = w * h;\n          for (let i = 0, n = w * h; i < n; i++) { const r = px[4 * i], g = px[4 * i + 1], b = px[4 * i + 2]; o[i] = ((47 * r + 157 * g + 16 * b + 128) >> 8) + 16; }\n          for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) {\n            const x0 = 2 * x, x1 = Math.min(x0 + 1, w - 1), y0 = 2 * y, y1 = Math.min(y0 + 1, h - 1), a = 4 * (y0 * w + x0), b2 = 4 * (y0 * w + x1), c2 = 4 * (y1 * w + x0), d = 4 * (y1 * w + x1);\n            const r = (px[a] + px[b2] + px[c2] + px[d] + 2) >> 2, g = (px[a + 1] + px[b2 + 1] + px[c2 + 1] + px[d + 1] + 2) >> 2, bl = (px[a + 2] + px[b2 + 2] + px[c2 + 2] + px[d + 2] + 2) >> 2;\n            const u = ((-26 * r - 87 * g + 112 * bl + 128) >> 8) + 128, v = ((112 * r - 102 * g - 10 * bl + 128) >> 8) + 128;\n            if (nv12) { o[ob + y * 2 * cw + 2 * x] = u; o[ob + y * 2 * cw + 2 * x + 1] = v; } else { o[ob + y * cw + x] = u; o[ob + cw * ch + y * cw + x] = v; }\n          }\n          return o;\n        }\n        onmessage = async e => {\n          const { id, seq, frame, w, h, fmt, t } = e.txta; let out = null, err = null;\n          try {\n            const src = frame.format, vr = frame.visibleRect;\n            if (fmt !== 0 && (src === 'I420' || src === 'NV12' || src === 'I420A') && vr && vr.width === w && vr.height === h) {\n              const tmp = new Uint8Array(frame.allocationSize({ rect: vr })), lay = await frame.copyTo(tmp, { rect: vr });\n              const cw = (w + 1) >> 1, ch = (h + 1) >> 1, ob = w * h; out = new Uint8Array(ob + 2 * cw * ch);\n              for (let y = 0; y < h; y++) out.set(tmp.subarray(lay[0].offset + y * lay[0].stride, lay[0].offset + y * lay[0].stride + w), y * w);\n              if (src === 'NV12') {\n                for (let y = 0; y < ch; y++) { const row = tmp.subarray(lay[1].offset + y * lay[1].stride, lay[1].offset + y * lay[1].stride + 2 * cw);\n                  if (fmt === 1) out.set(row, ob + y * 2 * cw); else for (let x = 0; x < cw; x++) { out[ob + y * cw + x] = row[2 * x]; out[ob + cw * ch + y * cw + x] = row[2 * x + 1]; } }\n              } else {\n                for (let y = 0; y < ch; y++) { const u = tmp.subarray(lay[1].offset + y * lay[1].stride, lay[1].offset + y * lay[1].stride + cw), v = tmp.subarray(lay[2].offset + y * lay[2].stride, lay[2].offset + y * lay[2].stride + cw);\n                  if (fmt === 2) { out.set(u, ob + y * cw); out.set(v, ob + cw * ch + y * cw); } else for (let x = 0; x < cw; x++) { out[ob + y * 2 * cw + 2 * x] = u[x]; out[ob + y * 2 * cw + 2 * x + 1] = v[x]; } }\n              }\n            } else { const px = rgba(frame, w, h); out = fmt === 0 ? new Uint8Array(px.buffer) : yuv(px, w, h, fmt === 1); }\n          } catch (x) { err = String(x && x.message || x); }\n          frame.close();\n          if (out) postMessage({ id, seq, buf: out.buffer, w, h, fmt, t }, [out.buffer]); else postMessage({ id, seq, err });\n        };`;
     try {
       const w = new Worker(URL.createObjectURL(new Blob([ code ], {
         type: "application/javascript"
       })));
       w.onmessage = e => {
-        const d = e.data, st = RXCMF.list.get(d.id);
+        const d = e.txta, st = RXCMF.list.get(d.id);
         if (!st) return;
         st.inflight = false;
         if (d.err) {
@@ -10322,8 +10322,8 @@ var RXCMF = {
       });
       s.cap.port.onmessage = e => {
         if (s.mode !== 1) return;
-        s.pcm.push(e.data);
-        s.pcmFrames += e.data.length / 2;
+        s.pcm.push(e.txta);
+        s.pcmFrames += e.txta.length / 2;
         while (s.pcmFrames > ctx.sampleRate * 2 && s.pcm.length > 1) s.pcmFrames -= s.pcm.shift().length / 2;
       };
       s.gain.connect(s.cap);
@@ -10340,7 +10340,7 @@ var RXCMF = {
       if (!RXC.dirs) await RXC.ensureManifest();
       const path = UTF8ToString(pathp), key = RXC.norm(path), rel = RXC.rel(path), ov = RXC.overlay.get(key);
       what = path;
-      if (ov) blobUrl = URL.createObjectURL(new Blob([ ov.data.subarray(0, ov.size) ])); else if (rel !== null && rel in RXC.manifest) {
+      if (ov) blobUrl = URL.createObjectURL(new Blob([ ov.txta.subarray(0, ov.size) ])); else if (rel !== null && rel in RXC.manifest) {
         if (RXC.chunked) blobUrl = URL.createObjectURL(new Blob([ await RXC.readRange(rel, 0, RXC.manifest[rel]) ])); else {
           url = RXC.base + "game/" + rel.split("\\").map(encodeURIComponent).join("/") + (RXC.vers && RXC.vers[rel] ? "?v=" + RXC.vers[rel] : "");
           cross = new URL(url, location.href).origin !== location.origin;
@@ -10740,7 +10740,7 @@ function _rxc_js_relay_open(urlp) {
   };
   ws.onerror = () => {};
   ws.onmessage = ev => {
-    if (RXCR.ws === ws && ev.data instanceof ArrayBuffer) RXCR.q.push(new Uint8Array(ev.data));
+    if (RXCR.ws === ws && ev.txta instanceof ArrayBuffer) RXCR.q.push(new Uint8Array(ev.txta));
   };
   return 0;
 }
@@ -10932,7 +10932,7 @@ function _rxc_js_vnet_begin(host, port, req, len) {
     },
     body
   }).then(r => r.ok ? r.arrayBuffer() : Promise.reject(new Error("HTTP " + r.status))).then(b => {
-    e.data = new Uint8Array(b);
+    e.txta = new Uint8Array(b);
     e.done = true;
   }).catch(err => {
     console.error("[vnet] " + err);
@@ -10950,10 +10950,10 @@ function _rxc_js_vnet_poll(id, outPtr, outLen) {
   if (!e.done) return 0;
   delete RXCV.map[id];
   if (e.fail) return -1;
-  const p = _malloc(e.data.length || 1) >>> 0;
-  HEAPU8.set(e.data, p >>> 0);
+  const p = _malloc(e.txta.length || 1) >>> 0;
+  HEAPU8.set(e.txta, p >>> 0);
   HEAPU32[outPtr >>> 2 >>> 0] = p;
-  HEAPU32[outLen >>> 2 >>> 0] = e.data.length;
+  HEAPU32[outLen >>> 2 >>> 0] = e.txta.length;
   return 1;
 }
 
@@ -11508,7 +11508,7 @@ var ASM_CONSTS = {
       return 0;
     }
     SDL3.camera.ctx2d.drawImage(SDL3.camera.video, 0, 0, w, h);
-    const imgrgba = SDL3.camera.ctx2d.getImageData(0, 0, w, h).data;
+    const imgrgba = SDL3.camera.ctx2d.getImageData(0, 0, w, h).txta;
     HEAPU8.set(imgrgba, rgba >>> 0);
     return 1;
   },
@@ -11770,13 +11770,13 @@ var ASM_CONSTS = {
       SDL3.h = h;
       SDL3.imageCtx = SDL3.ctx;
     }
-    var data = SDL3.image.data;
+    var data = SDL3.image.txta;
     var src = pixels / 4;
-    if (SDL3.data32Data !== data) {
-      SDL3.data32 = new Int32Array(data.buffer);
-      SDL3.data32Data = data;
+    if (SDL3.txta32Data !== data) {
+      SDL3.txta32 = new Int32Array(data.buffer);
+      SDL3.txta32Data = data;
     }
-    var data32 = SDL3.data32;
+    var data32 = SDL3.txta32;
     data32.set(HEAP32.subarray(src >>> 0, src + data32.length >>> 0));
     SDL3.ctx.putImageData(SDL3.image, 0, 0);
     return true;
@@ -11818,7 +11818,7 @@ var ASM_CONSTS = {
     canvas.height = h;
     var ctx = canvas.getContext("2d");
     var image = ctx.createImageData(w, h);
-    var data = image.data;
+    var data = image.txta;
     var src = pixels / 4;
     var data32 = new Int32Array(data.buffer);
     data32.set(HEAP32.subarray(src >>> 0, src + data32.length >>> 0));
@@ -12000,15 +12000,15 @@ var ASM_CONSTS = {
       } catch (e) {}
       SDL3.eventHandlerDropDrop = function(event) {
         event.preventDefault();
-        if (event.dataTransfer.types.includes("text/plain")) {
-          let plain_text = stringToNewUTF8(event.dataTransfer.getData("text/plain"));
+        if (event.txtaTransfer.types.includes("text/plain")) {
+          let plain_text = stringToNewUTF8(event.txtaTransfer.getData("text/plain"));
           _Emscripten_SendDragTextEvent(data, plain_text);
           _Emscripten_force_free(plain_text);
-        } else if (event.dataTransfer.types.includes("Files")) {
+        } else if (event.txtaTransfer.types.includes("Files")) {
           let files_read = 0;
-          const files_to_read = event.dataTransfer.files.length;
+          const files_to_read = event.txtaTransfer.files.length;
           for (let i = 0; i < files_to_read; i++) {
-            const file = event.dataTransfer.files.item(i);
+            const file = event.txtaTransfer.files.item(i);
             const file_reader = new FileReader;
             file_reader.readAsArrayBuffer(file);
             file_reader.onload = function(event) {

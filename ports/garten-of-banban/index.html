@@ -68,7 +68,7 @@
 </div></div>
 <script src="split-loader.js"></script>
 <script>
-// where the game data (manifest.dat + game/) is served from: '' = next to this page, or a CDN base such as
+// where the game data (manifest.txt + game/) is served from: '' = next to this page, or a CDN base such as
 // 'https://cdn.jsdelivr.net/gh/<user>/<repo>@<tag>/' (build.py pack writes the chunked tree)
 const GAME_BASE = 'https://raw.githubusercontent.com/web-ports/garten-of-banban/bf64e313b6d3a5dc2ca5b752f7140f27b6cd1a05/';
 const BASE_DEPTH_FIX = [
@@ -206,8 +206,8 @@ const PORT_ENV = {
     constructor() { super(); this.q = []; this.off = 0; this.queued = 0; this.play = false; this.began = false; this.gain = 1; this.l = 0; this.r = 0; this.k = 0;
       this.target = sampleRate * 0.08;
       this.st = { starve: 0, gaps: 0, drop: 0, qmin: 1e9, qmax: 0 };
-      this.port.onmessage = e => { if (e.data && e.data.reset) { this.q = []; this.off = this.queued = 0; this.play = this.began = false; this.target = sampleRate * 0.08; this.gain = 0; this.l = this.r = 0; return; }
-        this.q.push(e.data); this.queued += e.data.length / 2;
+      this.port.onmessage = e => { if (e.txta && e.txta.reset) { this.q = []; this.off = this.queued = 0; this.play = this.began = false; this.target = sampleRate * 0.08; this.gain = 0; this.l = this.r = 0; return; }
+        this.q.push(e.txta); this.queued += e.txta.length / 2;
         if (this.queued > sampleRate * 0.35) { while (this.q.length > 1) { const f = this.q[0].length / 2 - this.off; if (this.queued - f < Math.max(sampleRate * 0.15, this.target)) break; this.q.shift(); this.queued -= f; this.st.drop += f; this.off = 0; } this.gain = 0; } }; }
     process(inputs, outputs) { const out = outputs[0], L = out[0], R = out[1] || out[0], n = L.length; let i = 0;
       if (!this.play && this.queued >= this.target) { this.play = true; this.began = true; this.gain = 0; }
@@ -244,7 +244,7 @@ const PORT_ENV = {
         return { state: ctx.state, rms: Math.sqrt(sum / Math.max(1, n)), peak, audibleFraction: loud / Math.max(1, polls), destinationChannels: ctx.destination.channelCount };
       };
       // underrun totals since the last read (tools/mc2bench.py reads and resets them)
-      node.port.onmessage = e => { const a = e.data.a, t = globalThis.__rxcAudio || (globalThis.__rxcAudio = { starve: 0, gaps: 0, drop: 0, qmin: 1e9, qmax: 0 });
+      node.port.onmessage = e => { const a = e.txta.a, t = globalThis.__rxcAudio || (globalThis.__rxcAudio = { starve: 0, gaps: 0, drop: 0, qmin: 1e9, qmax: 0 });
         t.starve += a.starve; t.gaps += a.gaps; t.drop += a.drop; t.qmin = Math.min(t.qmin, a.qmin); t.qmax = Math.max(t.qmax, a.qmax); t.targetMs = a.targetMs; };
     } catch (e) { console.warn('[audio] unavailable:', e); }
   }
@@ -269,7 +269,7 @@ const PORT_ENV = {
   };
   window.rxcDump = (tex, w, h, fl, name) => window.rexcomp.gfxWorker.postMessage({ readtex: [tex, w, h, fl ? 1 : 0, name || ('tex' + tex)] });
   function rxcImage(im) {
-    const c = new OffscreenCanvas(im.w, im.h); c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(im.data.buffer), im.w, im.h), 0, 0);
+    const c = new OffscreenCanvas(im.w, im.h); c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(im.txta.buffer), im.w, im.h), 0, 0);
     c.convertToBlob({ type: 'image/png' }).then(b => fetch('/upload/' + im.name + '.png', { method: 'POST', body: b })).then(() => console.log('[dump] uploaded ' + im.name));
   }
 
@@ -284,8 +284,8 @@ const PORT_ENV = {
   const bar = $('bar').firstElementChild;
   let splitLoader;
   async function downloadAssets() {
-    const response = await fetch('split-assets.dat', {cache: 'no-cache'});
-    if (!response.ok) throw new Error(`Could not load split-assets.dat (HTTP ${response.status})`);
+    const response = await fetch('split-assets.txt', {cache: 'no-cache'});
+    if (!response.ok) throw new Error(`Could not load split-assets.txt (HTTP ${response.status})`);
     const allAssets = await response.json();
     const dataBase = new URL((q.get('base') || GAME_BASE || './').replace(/\/?$/, '/'), document.baseURI).href;
     const assets = allAssets.filter(asset => !asset.url.endsWith('.wasm') ||
@@ -341,7 +341,7 @@ const PORT_ENV = {
         const off = canvas.transferControlToOffscreen(), w = new Worker('gfx_worker.js'), env = { REXCOMP_PSOVERRIDE: PORT_ENV.REXCOMP_PSOVERRIDE };
         for (const [k, v] of q) if (k.startsWith('REXCOMP_') && !['REXCOMP_INPUT', 'REXCOMP_EXIT_AT', 'REXCOMP_SHOT'].includes(k)) env[k] = v;
         M.__gfxEarly = [];
-        w.onmessage = e => { if (e.data.img) return rxcImage(e.data.img); M.__gfxmsg ? M.__gfxmsg(e.data) : M.__gfxEarly.push(e.data); };
+        w.onmessage = e => { if (e.txta.img) return rxcImage(e.txta.img); M.__gfxmsg ? M.__gfxmsg(e.txta) : M.__gfxEarly.push(e.txta); };
         w.onerror = e => { console.error('[gfx worker] ' + (e.message || e)); status('The graphics worker failed to start: ' + (e.message || e)); };
         const noprelink = M.prelinkShaders === false || q.has('noprelink');
         w.postMessage({ init: true, canvas: off, env, noprelink, learned: noprelink ? [] : loadLearned() }, [off]);

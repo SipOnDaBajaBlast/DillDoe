@@ -17,7 +17,7 @@ const record = body => { const seq = ++recSeq; recChain = recChain.then(() => fe
 
 self.onmessage = e => {
   if (failed) return;
-  const d = e.data;
+  const d = e.txta;
   if (d.init) { rec = !!(d.env && d.env.REXCOMP_GFXREC); start(d).catch(fatal); return; }
   if (d.link) { LINK = d.link; if (G) G['rxcLink'] = LINK; linkPoll(); return; }
   if (d.glcheck) { if (G) G._gfxw_glcheck(d.glcheck | 0); return; }        // debug: glGetError after every GL call of the next n frames ([gl] error lines)
@@ -66,7 +66,7 @@ async function start(d) {
   if (!d.noprelink) {
     const seen = new Set(), list = [];
     const take = arr => { for (const e of arr || []) if (typeof e === 'string' && !seen.has(e)) { seen.add(e); list.push(e); } };
-    try { const r = await fetch('programs.dat'); if (r.ok) take(await r.json()); } catch (e) {}
+    try { const r = await fetch('programs.txt'); if (r.ok) take(await r.json()); } catch (e) {}
     take(d.learned);
     if (list.length) { pairs = new Map(); const add = (k, v) => { let a = pairs.get(k); if (!a) pairs.set(k, a = []); a.push(v); };
       for (const e of list) { const [v, p] = e.split(':'); if (!v || !p) continue; add('v' + v, p); if (p !== '-') add('p' + p, v); } }
