@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Super Mario Maker 2</title>
+  <meta name="description" content="Play the Super Mario Maker 2 web port in your browser.">
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: #06070c; color: #e7eefc; font-family: 'Lucida Grande', Tahoma, 'Segoe UI', Verdana, sans-serif; }
+    body { display: flex; flex-direction: column; }
+    header { display: flex; align-items: center; gap: 16px; padding: 10px 16px; background: rgba(15, 18, 28, 0.95); border-bottom: 1px solid #1d2536; }
+    header a { color: #8fd4ff; text-decoration: none; font-size: 14px; }
+    header a:hover { text-decoration: underline; }
+    header strong { font-size: 15px; letter-spacing: 0.04em; }
+    header button { margin-left: auto; padding: 7px 14px; font: inherit; font-size: 13px; color: #06070c; background: linear-gradient(180deg, #8ee3ff 0%, #65bfff 100%); border: 0; border-radius: 6px; cursor: pointer; }
+    header button:hover { filter: brightness(1.08); }
+    main { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    #stage { position: relative; flex: 1; overflow: hidden; background: #000; }
+    #stage iframe { position: absolute; width: 1280px; height: 720px; border: 0; transform-origin: 0 0; background: #000; }
+    main p { margin: 0; padding: 8px 16px; font-size: 12px; color: #9aa8c2; background: #0b0e16; }
+    main p a { color: #8fd4ff; }
+    #stage:fullscreen { background: #000; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/games">&larr; Game Library</a>
+    <strong>Super Mario Maker 2</strong>
+    <button id="fullscreen" type="button">Fullscreen</button>
+  </header>
+  <main>
+    <div id="stage">
+      <iframe src="/ports/smm2/" title="Super Mario Maker 2" allow="cross-origin-isolated; fullscreen; autoplay; gamepad" allowfullscreen></iframe>
+    </div>
+    <p>Web port of Super Mario Maker 2 (SMM2 Recomp). Needs Chrome or Edge 133+ for 64-bit WebAssembly memory and WebGPU, and about 3.1&nbsp;GB of free disk: the first start copies the whole game into the browser's private storage, so keep the tab open until the PLAY button appears. Story mode, the editor and local play work; online levels and course upload don't, because they need a socket proxy a static site can't run. Mouse and keyboard or a gamepad.</p>
+  </main>
+  <script>
+    const stage = document.getElementById('stage');
+    const frame = stage.querySelector('iframe');
+    document.getElementById('fullscreen').addEventListener('click', () => stage.requestFullscreen());
+    const resize = () => {
+      const scale = Math.min(stage.clientWidth / 1280, stage.clientHeight / 720);
+      frame.style.transform = `scale(${scale})`;
+      frame.style.left = `${(stage.clientWidth - 1280 * scale) / 2}px`;
+      frame.style.top = `${(stage.clientHeight - 720 * scale) / 2}px`;
+    };
+    resize();
+    new ResizeObserver(resize).observe(stage);
+  </script>
+</body>
+</html>
