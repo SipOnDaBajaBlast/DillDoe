@@ -166,6 +166,27 @@
     TrackedMemory.prototype = RealMemory.prototype;
     WebAssembly.Memory = TrackedMemory;
   } catch (e) {}
+  // A dead renderer cannot report anything, so the stage the game reached and how big the console had grown are
+  // written once a second and survive the crash: the next visit can then say where it stopped instead of guessing.
+  var PROG_KEY = 'smm2-progress', progPhase = '';
+  function progWrite() {
+    var mm = window.__smm2Memory, m = performance.memory;
+    try {
+      localStorage.setItem(PROG_KEY, JSON.stringify({ phase: progPhase, mem: mm ? mm.buffer.byteLength : 0,
+        page: m ? m.usedJSHeapSize : 0, at: Date.now(), low: LOW,
+        compat: /[?&]env=WEB_NO_GPU/.test(location.search) }));
+    } catch (e) {}
+  }
+  function progMark(phase) { if (progPhase === phase) return; progPhase = phase; progWrite(); }
+  setInterval(function () {
+    if (!progPhase) return;
+    var mm = window.__smm2Memory;
+    if (mm && progPhase !== 'boot' && progPhase !== 'running') {
+      try { if (mm.buffer.byteLength > 134217728) progMark('boot'); } catch (e) {}
+    }
+    progWrite();
+  }, 1000);
+  document.getElementById('start').addEventListener('click', function () { progMark('start'); }, true);
   var AHEAD = LOW ? 0 : 2;                         // extra parts fetched alongside the one being read
   var CACHE = 'smm2-module-v1';                    // the module's parts, kept so a return visit is quick
   var orig = window.fetch.bind(window);
@@ -342,6 +363,7 @@
           var rel = decodeURI(p), info = partOf(rel);
           if (info) {                              // one part of a file that comes in parts
             label = info.base + ' — part ' + (info.idx + 1) + ' of ' + info.count;
+            if (/^gamedata\//.test(info.base)) progMark('data');
             if (!total) { total = 0; for (var key in split) total += split[key].size || 0; }
             aheadFrom(info);
             paint();
@@ -349,6 +371,7 @@
           }
           if (isModule(rel)) {                     // the whole module, stitched from its parts
             label = rel;
+            progMark('module');
             paint();
             return Promise.resolve(counted(joined(rel, split[rel]), rel, true));
           }
@@ -476,11 +499,41 @@
       show('<b>This device reports ' + cores + ' CPU cores.</b> The emulated console will be far too slow to play, and Chrome may run out of ' +
          'memory and show “Aw, Snap!”. A desktop or laptop is the reliable option.');
     }
+    // the previous attempt's last words: the stage it had reached and the console's size at the time
+    var prev = null; try { prev = JSON.parse(read('smm2-progress') || 'null'); } catch (e) {}
+    var compatOn = /[?&]env=WEB_NO_GPU/.test(location.search);
+    if (prev && prev.phase && !ran && Date.now() - (prev.at || 0) < 6 * 3600e3) {
+      var stages = { start: 'just after PLAY', module: 'while loading the game module',
+                     boot: 'while starting the emulated console', data: 'while loading the game data',
+                     running: 'after it had started' };
+      var stage = stages[prev.phase] || prev.phase;
+      var mb = function (b) { return b ? (b / 1048576).toFixed(0) + ' MB' : 'not yet allocated'; };
+      if (!compatOn && !read('smm2-escalated')) {
+        // one automatic retry on the runtime's software path: weak Chromebook GPUs often die on subgroup ops
+        store('smm2-escalated', '1');
+        var q = new URLSearchParams(location.search);
+        var keepEnv = q.getAll('env').filter(function (v) { return !/^WEB_(NO_GPU|NO_SUBGROUPS)/.test(v); });
+        q.delete('env');
+        keepEnv.forEach(function (v) { q.append('env', v); });
+        q.append('env', 'WEB_NO_GPU=1'); q.append('env', 'WEB_NO_SUBGROUPS=1');
+        location.replace(location.pathname + '?' + q.toString());
+      } else {
+        show('<b>The last attempt stopped ' + stage + '.</b> The emulated console was at <b>' + mb(prev.mem) + '</b> and the page at ' + mb(prev.page) + '. '
+           + (compatOn ? 'Compatibility mode was already on, so that was the machine running out of room rather than a graphics-driver fault — a 4 GB Chromebook cannot hold the emulated console, and closing other tabs is the only lever left.'
+                       : 'Compatibility mode is being switched on for this attempt: the software renderer is slower but survives weak graphics drivers.'));
+      }
+    }
     // the attempt is recorded before the module starts, and confirmed only once the game has really been running
     document.getElementById('start').addEventListener('click', function () {
       store('smm2-running', null);
       store('smm2-launch', String(Date.now()));
-      setTimeout(function () { store('smm2-launch', null); store('smm2-running', '1'); }, 20000);
+      setTimeout(function () {
+        store('smm2-launch', null); store('smm2-running', '1'); store('smm2-escalated', null);
+        try {
+          var p = JSON.parse(read('smm2-progress') || 'null');
+          if (p) { p.phase = 'running'; localStorage.setItem('smm2-progress', JSON.stringify(p)); }
+        } catch (e) {}
+      }, 20000);
     }, true);
   })();
 })();
