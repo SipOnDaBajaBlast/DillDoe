@@ -596,7 +596,8 @@
         + '<dt>When</dt><dd>' + secs + ' s after PLAY, with the console at <b>' + mb(prev.mem) + '</b> and the page at ' + mb(prev.pagePeak || prev.page) + '</dd>'
         + '<dt>How</dt><dd>' + esc(how) + '</dd>'
         + '<dt>Device</dt><dd id="diagdev">' + esc(facts) + '</dd>'
-        + '<dt>Tried</dt><dd>low-memory mode ' + (prev.low ? 'on' : 'off') + ', compatibility mode ' + (prev.compat ? 'on' : 'off') + '</dd></dl>'
+        + '<dt>That try</dt><dd>low-memory mode ' + (prev.low ? 'on' : 'off') + ', compatibility mode ' + (prev.compat ? 'on' : 'off')
+        + (compatOn && !prev.compat ? ' · this one has compatibility mode on' : '') + '</dd></dl>'
         + '<ul><li>The game is a whole emulated console, not a web page: it needs a desktop or laptop with 8 GB of RAM.</li>'
         + '<li>Closing every other tab and extension sometimes frees enough for it to reach the menu.</li>'
         + '<li>Nothing is wrong with the site — the same page starts on a larger computer, and the game files already downloaded are kept.</li></ul>'
