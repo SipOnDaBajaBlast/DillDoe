@@ -570,14 +570,14 @@
         : prev.phase === 'boot'
         ? (prev.mem && prev.mem < 1073741824
             ? 'The tab died while the emulated console was still small — only ' + mb(prev.mem) + ' — on a machine that reports ' + (dem || 'an unknown amount of') + ' GB of RAM. That is far below what it can spare, so this is almost certainly not memory: the graphics driver is the prime suspect, because when the GPU process dies it takes the whole tab with it. Compatibility mode uses the software renderer and skips that driver entirely, so it is the thing to try.'
-            : 'The emulated console starts at 128 MB and grows to two or three gigabytes as it boots. It had reached ' + mb(prev.mem) + ' when the tab died, with ' + (dem || 'an unknown amount of') + ' GB reported on this machine — that is the tab running out of room.')
+            : 'The emulated console starts at 128 MB and grows to the four gigabytes it emulates, so the tab needs roughly that much free on top of everything else Chrome and the system are using. It had reached ' + mb(prev.mem) + ' when the tab died, with ' + (dem || 'an unknown amount of') + ' GB reported on this machine — that is the tab running out of room, and no page-side setting can shrink the console.')
         : prev.phase === 'start'
         ? 'The tab died before the game program was even asked for, which is a browser or memory failure rather than the game itself.'
         : prev.phase === 'data'
         ? 'Copying the 3.1 GB of game files into the browser is disk-bound, and the tab died during it: usually the storage quota, not RAM.'
         : 'The tab ran out of memory while the game was starting.';
-      how += compatOn
-        ? ' Compatibility mode is on, so if it dies again the driver is not the whole story — the console itself is the wall on this machine.'
+      how += (compatOn || prev.compat)
+        ? ' That attempt already used the software renderer, so the graphics driver is not the cause: the console’s own memory is the wall on this machine, and a computer with more RAM is the only way past it.'
         : ' Compatibility mode is switched on for the next attempt: press PLAY again.';
       var facts = (dem ? dem + ' GB RAM reported' : 'RAM not reported') + ' · ' + (cores || '?') + ' cores · '
         + (m64 ? '64-bit WebAssembly memory ok' : 'no 64-bit WebAssembly memory') + ' · ' + (gpu ? 'WebGPU ok' : 'no WebGPU') + ' · ' + (gl2 ? 'WebGL2 ok' : 'no WebGL2');
