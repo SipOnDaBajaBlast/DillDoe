@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<base href="/ports/garten-of-banban/">
+<base href="https://raw.githubusercontent.com/web-ports/garten-of-banban/bf64e313b6d3a5dc2ca5b752f7140f27b6cd1a05/">
 <style>
   :root { color-scheme: dark; --bg: #000; --panel: rgba(12, 14, 18, 0.86); --ink: #fff; --dim: #8b95a3; --accent: #fff; }
   * { box-sizing: border-box; }
@@ -66,11 +66,11 @@
   <div id="status"></div>
   <div id="bar"><div></div></div>
 </div></div>
-<script src="split-loader.js"></script>
+<script src="/ports/garten-of-banban/split-loader.js"></script>
 <script>
-// where the game data (manifest.txt + game/) is served from: '' = next to this page, or a CDN base such as
+// where the game data (manifest.json + game/) is served from: '' = next to this page, or a CDN base such as
 // 'https://cdn.jsdelivr.net/gh/<user>/<repo>@<tag>/' (build.py pack writes the chunked tree)
-const GAME_BASE = 'https://raw.githubusercontent.com/web-ports/garten-of-banban/bf64e313b6d3a5dc2ca5b752f7140f27b6cd1a05/';
+const GAME_BASE = '';
 const BASE_DEPTH_FIX = [
   '9be4bc7f38cddc89', 'c50e90db15d00113', '14cecf7f47a3f4af',
   '2a8002f9ce4c293e', 'b2f7d886496edd36'
@@ -284,8 +284,8 @@ const PORT_ENV = {
   const bar = $('bar').firstElementChild;
   let splitLoader;
   async function downloadAssets() {
-    const response = await fetch('split-assets.txt', {cache: 'no-cache'});
-    if (!response.ok) throw new Error(`Could not load split-assets.txt (HTTP ${response.status})`);
+    const response = await fetch('split-assets.json', {cache: 'no-cache'});
+    if (!response.ok) throw new Error(`Could not load split-assets.json (HTTP ${response.status})`);
     const allAssets = await response.json();
     const dataBase = new URL((q.get('base') || GAME_BASE || './').replace(/\/?$/, '/'), document.baseURI).href;
     const assets = allAssets.filter(asset => !asset.url.endsWith('.wasm') ||
@@ -298,7 +298,7 @@ const PORT_ENV = {
   }
   const loadEngine = threaded => new Promise((resolve, reject) => {
     const script = document.createElement('script');
-    script.src = threaded ? 'gbb_mt.js' : firefox ? 'gbb_fflean.js' : 'gbb.js';
+    script.src = threaded ? '/ports/garten-of-banban/gbb_mt.js' : firefox ? '/ports/garten-of-banban/gbb_fflean.js' : '/ports/garten-of-banban/gbb.js';
     script.onload = resolve; script.onerror = () => reject(new Error('Could not load the game engine.'));
     document.head.appendChild(script);
   });
@@ -338,7 +338,7 @@ const PORT_ENV = {
     // records commands (rt/web/gfx_remote.c). ?gfxworker=0 keeps WebGL on the engine thread.
     if (useWorker) {
       try {
-        const off = canvas.transferControlToOffscreen(), w = new Worker('gfx_worker.js'), env = { REXCOMP_PSOVERRIDE: PORT_ENV.REXCOMP_PSOVERRIDE };
+        const off = canvas.transferControlToOffscreen(), w = new Worker('/ports/garten-of-banban/gfx_worker.js'), env = { REXCOMP_PSOVERRIDE: PORT_ENV.REXCOMP_PSOVERRIDE };
         for (const [k, v] of q) if (k.startsWith('REXCOMP_') && !['REXCOMP_INPUT', 'REXCOMP_EXIT_AT', 'REXCOMP_SHOT'].includes(k)) env[k] = v;
         M.__gfxEarly = [];
         w.onmessage = e => { if (e.data.img) return rxcImage(e.data.img); M.__gfxmsg ? M.__gfxmsg(e.data) : M.__gfxEarly.push(e.data); };

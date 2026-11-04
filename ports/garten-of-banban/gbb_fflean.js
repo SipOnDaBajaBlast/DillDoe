@@ -9324,12 +9324,12 @@ var RXC = {
     RXC.seedIni(Module["iniSeed"]);
     RXC.base = Module["gameBase"] || "";
     if (RXC.base && !RXC.base.endsWith("/")) RXC.base += "/";
-    // manifest.txt: {path: size} for Range requests (tools/serve_web.py), or {chunk, files} from `build.py pack`: every
+    // manifest.json: {path: size} for Range requests (tools/serve_web.py), or {chunk, files} from `build.py pack`: every
     // file split into game/<path>.<n> chunks of `chunk` bytes, for plain static servers and CDNs (no Range support)
     let m = null;
     for (let attempt = 0; !m; attempt++) {
       try {
-        const r = await fetch(RXC.base + "manifest.txt", {
+        const r = await fetch(RXC.base + "manifest.json", {
           cache: "no-cache"
         });
         if (!r.ok) throw new Error("HTTP " + r.status);
@@ -9586,7 +9586,7 @@ var RXC = {
   async loadPrograms() {
     if (Module["prelinkShaders"] === false || new URLSearchParams(location.search).has("noprelink")) return;
     try {
-      const r = await fetch("programs.txt");
+      const r = await fetch("programs.json");
       if (!r.ok) return;
       const list = await r.json();
       RXC.pairs = new Map;
@@ -9628,7 +9628,7 @@ var RXC = {
   },
   async loadSeed() {
     try {
-      const r = await fetch("seed.txt", {
+      const r = await fetch("seed.json", {
         cache: "no-cache"
       });
       if (!r.ok) return;
@@ -9666,7 +9666,7 @@ var RXC = {
   async loadPreload() {
     if (new URLSearchParams(location.search).has("nopreload")) return;
     try {
-      const r = await fetch("preload.txt");
+      const r = await fetch("preload.json");
       if (!r.ok) return;
       RXC.pre = await r.json();
       RXC.preIdx = new Map(RXC.pre.map((k, i) => [ k, i ]));
