@@ -78,6 +78,9 @@
   // the module (.wasm, the big one) into the browser's cache now, so the play button starts right away
   async function prefetchModule(from) {
     const url = game.script.replace(/\.js$/, '.wasm');
+    // low-memory mode (set by the host page): let the runtime stream the module straight into the compiler
+    // instead of keeping a 184 MB copy of it in the page
+    if (window.__SMM2_LOW) { bar(1); return; }
     if (Object.keys(await splitMap()).length && !(navigator.serviceWorker && navigator.serviceWorker.controller)) { wasmBuf = await (async () => {
       const r = await sfetch(url), total = +r.headers.get('content-length') || 0, out = new Uint8Array(total), rd = r.body.getReader(); let got = 0;
       for (;;) { const c = await rd.read(); if (c.done) break; out.set(c.value, got); got += c.value.length;

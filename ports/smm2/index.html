@@ -67,6 +67,13 @@
   #warn { display: none; max-width: 460px; margin: 0 0 4px; padding: 10px 12px; border-radius: 10px; border: 1px solid #6b5320; background: #241d0d; color: #e8d6a6;
     font-size: 12px; line-height: 1.5; }
   #warn b { color: #ffe9b0; }
+  /* low-memory mode row + live page memory */
+  #lowrow { display: flex; align-items: center; gap: 8px; color: #7b7b85; font-size: 12px; user-select: none; }
+  #lowrow input { width: 14px; height: 14px; accent-color: #fff; margin: 0; }
+  #lowrow label { cursor: pointer; }
+  #lowrow.on { color: #cfcfd8; }
+  #lowtext { font-style: normal; color: #5f5f69; }
+  #mem { color: #55555e; font: 11px ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
@@ -78,6 +85,8 @@
     <div id="importmsg"></div>
     <div id="status"></div>
     <div id="dl"><div id="dlwhat"></div><div id="dlstat"></div></div>
+    <div id="lowrow"><input type="checkbox" id="lowmem"><label for="lowmem">Low-memory mode</label><em id="lowtext"></em></div>
+    <div id="mem"></div>
     <button id="pick">Import game files from a folder…</button>
   </div>
   <div id="credit">SMM2 Recomp (<a href="LICENSE.txt">GPL-3.0</a>), built on LAS Recomp (<a href="LICENSE-LASRecomp.txt">MIT</a>) — <a href="THIRD-PARTY.txt">third-party notices</a>. Not affiliated with Nintendo.</div>
@@ -123,7 +132,23 @@
   var LOCAL = ['', 'shell.js', 'mmk.js', 'mmk.wasm', 'coi-sw.js', 'audio_worklet.js', 'course_worker.js',
                'Super Mario Maker 2.js', 'LICENSE.txt', 'LICENSE-LASRecomp.txt', 'THIRD-PARTY.txt'];
   var DATA = /^(gamedata\/|split\.json$|game\.json$|shaders\.json\.gz$)/;
-  var AHEAD = 2;                                   // extra parts fetched alongside the one being read
+  // Low-memory mode: the runtime's own low-spec switches (30 fps, no shadows, low-power GPU, no shader prewarm)
+  // are already driven by the saved web settings, which the game reads as soon as this page loads — so they
+  // are written before shell.js runs. The data is then streamed instead of buffered, which drops the parts
+  // held in memory and the module cache copy. Auto-on for small devices; ?lowmem=1 forces it.
+  var LOW_FLAG = 'smm2-lowmem';
+  var LOW_SETTINGS = { gpu: 'low', shadows: 0, framelimit: 30, filter: 'sharp', prewarm: 0, docked: 0 };
+  var lowQuery = new URLSearchParams(location.search);
+  var lowStored = null; try { lowStored = localStorage.getItem(LOW_FLAG); } catch (e) {}
+  var lowDevice = (navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+  var LOW = lowQuery.get('lowmem') === '1' || lowStored === '1' || (lowStored !== '0' && !!lowDevice);
+  if (LOW) { try {
+    var lowSaved = {}; try { lowSaved = JSON.parse(localStorage.getItem('smm2-web-settings') || '{}') || {}; } catch (e) {}
+    for (var lowKey in LOW_SETTINGS) lowSaved[lowKey] = LOW_SETTINGS[lowKey];
+    localStorage.setItem('smm2-web-settings', JSON.stringify(lowSaved));
+  } catch (e) {} }
+  try { window.__SMM2_LOW = LOW; } catch (e) {}
+  var AHEAD = LOW ? 0 : 2;                         // extra parts fetched alongside the one being read
   var CACHE = 'smm2-module-v1';                    // the module's parts, kept so a return visit is quick
   var orig = window.fetch.bind(window);
   var split = null, total = 0, done = 0, label = '', lastText = '', lastPaint = 0;
@@ -193,12 +218,12 @@
   }
   function isModule(rel) { return /\.wasm$/.test(rel) && split && split[rel]; }
   function cachedPart(rel) {
-    if (!isModule(rel.slice(0, -4)) || !cacheReady) return Promise.resolve(null);
+    if (LOW || !isModule(rel.slice(0, -4)) || !cacheReady) return Promise.resolve(null);
     return cacheReady.then(function (c) { return c ? c.match(remoteUrl(rel)) : null; })
       .then(function (r) { return r ? r.arrayBuffer() : null; }).catch(function () { return null; });
   }
   function rememberPart(rel, buf) {
-    if (!cacheReady || !/\.wasm\.\d{3}$/.test(rel)) return;
+    if (LOW || !cacheReady || !/\.wasm\.\d{3}$/.test(rel)) return;
     cacheReady.then(function (c) { return c ? c.put(remoteUrl(rel), new Response(buf)) : null; }).catch(function () {});
   }
   function fetchPart(rel) {
@@ -248,28 +273,45 @@
     return res.then(function (r) { return counted(r, name, part); });
   }
 
-  // one whole file that only exists as parts: handed back as a single stream, in order
+  // one whole file that only exists as parts: handed back as a single stream, in order. low-memory mode pipes
+  // each part straight through instead of holding a whole part's bytes, so peak memory stays at one chunk.
   function joined(base, e) {
-    var idx = 0, cur = null, off = 0;
+    var idx = 0, cur = null, off = 0, reader = null;
     var body = new ReadableStream({
       pull: function (ctrl) {
-        if (cur) {
-          if (off < cur.byteLength) {
-            var chunk = cur.subarray(off, Math.min(off + 262144, cur.byteLength));
-            off += chunk.byteLength; ctrl.enqueue(chunk); return;
+        return (async function () {
+          for (;;) {
+            if (cur) {
+              if (off < cur.byteLength) {
+                var chunk = cur.subarray(off, Math.min(off + 262144, cur.byteLength));
+                off += chunk.byteLength; ctrl.enqueue(chunk); return;
+              }
+              cur = null; off = 0;
+            }
+            if (reader) {
+              var x = await reader.read();
+              if (x.done) { reader = null; continue; }
+              ctrl.enqueue(x.value); return;
+            }
+            if (idx >= e.parts) { ctrl.close(); return; }
+            var name = base + '.' + String(idx).padStart(3, '0');
+            idx++;
+            if (LOW) {
+              var r = await orig(remoteUrl(name), { cache: 'no-cache' });
+              if (!r.ok || !r.body) throw new Error(name + ': HTTP ' + r.status);
+              reader = r.body.getReader();
+            } else {
+              cur = new Uint8Array(await fetchPart(name)); off = 0;
+              if (idx < e.parts) aheadFrom({ base: base, idx: idx, count: e.parts });
+            }
           }
-          cur = null; off = 0;
-        }
-        if (idx >= e.parts) { ctrl.close(); return; }
-        var name = base + '.' + String(idx).padStart(3, '0');
-        idx++;
-        return fetchPart(name).then(function (buf) {
-          cur = new Uint8Array(buf); off = 0;
-          if (idx < e.parts) aheadFrom({ base: base, idx: idx, count: e.parts });
-        });
+        })();
       }
     });
-    return new Response(body, { headers: { 'Content-Length': String(e.size) } });
+    var heads = { 'Content-Length': String(e.size) };
+    // the wasm type lets the runtime compile while it streams instead of buffering the whole module
+    if (/\.wasm$/.test(base)) heads['Content-Type'] = 'application/wasm';
+    return new Response(body, { headers: heads });
   }
 
   window.fetch = function (input, init) {
@@ -354,6 +396,26 @@
   }, true);
   window.addEventListener('keyup', function (e) { delete held[e.code]; }, true);
   window.addEventListener('blur', function () { held = {}; });
+
+  // low-memory mode switch: writes the flag and reloads, because the game reads its web settings once, at load
+  (function () {
+    var low = window.__SMM2_LOW === true;
+    var box = document.getElementById('lowmem'), text = document.getElementById('lowtext'), memEl = document.getElementById('mem');
+    box.checked = low;
+    document.getElementById('lowrow').classList.toggle('on', low);
+    text.textContent = low ? 'on · 30 fps, no shadows, low-power GPU, data streamed' : 'off · full quality';
+    box.addEventListener('change', function () {
+      try { localStorage.setItem('smm2-lowmem', box.checked ? '1' : '0'); } catch (e) {}
+      location.reload();
+    });
+    function tick() {
+      var m = performance.memory, bits = [];
+      if (m) bits.push('page memory ' + (m.usedJSHeapSize / 1048576).toFixed(0) + ' MB of ' + (m.jsHeapSizeLimit / 1048576).toFixed(0) + ' MB');
+      if (low) bits.push('low-memory mode');
+      memEl.textContent = bits.join(' · ');
+    }
+    tick(); setInterval(tick, 2000);
+  })();
 
   // weak devices: the game allocates gigabytes of emulated console memory, and on a small machine Chrome's
   // renderer dies with its own "Aw, Snap!" page instead of raising an error here. So warn before the wait,
