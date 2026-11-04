@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Poppy Playtime</title>
+<link rel="icon" href="TemplateData/favicon.ico">
+<link rel="stylesheet" href="TemplateData/style.css">
+<style>
+  html, body { margin: 0; height: 100%; background: #231F20; overflow: hidden; }
+  #gameContainer { width: 100vw !important; height: 100vh !important; }
+  #gameContainer canvas { display: block; }
+</style>
+<script>
+  // The 48 MB data file ships as three parts because this host caps files at 25 MiB. merge.js (in this folder)
+  // replays the parts as one response before UnityLoader asks for the data, so the loader never sees the split.
+  window.fileMergerConfig = { files: [{ name: 'bb1.data.unityweb', parts: 3 }], basePath: 'Build/', debug: false };
+</script>
+<script src="merge.js"></script>
+<script src="TemplateData/UnityProgress.js"></script>
+<script src="Build/UnityLoader.js"></script>
+</head>
+<body>
+<div class="webgl-content">
+  <div id="gameContainer" style="width: 960px; height: 600px"></div>
+</div>
+<script>
+  window.addEventListener('load', function () {
+    UnityLoader.instantiate('gameContainer', 'Build/bb1.json', { onProgress: UnityProgress });
+  });
+</script>
+</body>
+</html>

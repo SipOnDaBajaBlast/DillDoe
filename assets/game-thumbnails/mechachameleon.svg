@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 616 353" role="img" aria-label="Mecha Chameleon">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f2a1c"/>
+      <stop offset="0.55" stop-color="#16463a"/>
+      <stop offset="1" stop-color="#06101a"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8ff7c6"/>
+      <stop offset="0.5" stop-color="#37c98e"/>
+      <stop offset="1" stop-color="#147a58"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.7" cy="0.25" r="0.75">
+      <stop offset="0" stop-color="#7bffd0" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#7bffd0" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="616" height="353" fill="url(#bg)"/>
+  <rect width="616" height="353" fill="url(#glow)"/>
+  <g stroke="#0a1a14" stroke-width="3">
+    <path d="M188 214c0-46 34-78 76-78h96c15 0 26 6 36 18l44 50c9 10 14 22 14 36v33c0 16-12 27-28 27H206c-11 0-18-8-18-18z" fill="url(#metal)"/>
+    <circle cx="356" cy="182" r="34" fill="#0f2a1c"/>
+    <circle cx="356" cy="182" r="22" fill="#a8ffdc"/>
+    <circle cx="356" cy="182" r="10" fill="#062018"/>
+    <path d="M466 156c22-16 44-18 62-4 14 12 16 30 6 44-8 12-22 18-38 18h-42z" fill="#2fbd8c"/>
+    <path d="M206 286l-16 42M252 286l-12 42M318 286l8 42M372 286l18 42" fill="none"/>
+    <circle cx="300" cy="242" r="7" fill="#062018"/>
+    <circle cx="336" cy="242" r="7" fill="#062018"/>
+    <path d="M286 268h64" fill="none" stroke="#062018" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <g font-family="Trebuchet MS, Segoe UI, sans-serif" fill="#d9ffe9">
+    <text x="34" y="70" font-size="40" font-weight="bold" letter-spacing="2">MECHA</text>
+    <text x="34" y="106" font-size="27" letter-spacing="7" fill="#7ff0b6">CHAMELEON</text>
+    <text x="34" y="316" font-size="16" fill="#7fa892">Unreal Engine 5.6 · WebGPU port</text>
+  </g>
+</svg>
