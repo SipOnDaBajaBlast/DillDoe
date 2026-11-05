@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I LOVE NYAN CAT <3</title>
+    <link rel="canonical" href="https://dilldoe-games.pages.dev/">
+    <title>I LOVE NYAN CAT &lt;3</title>
+    <link rel="stylesheet" href="assets/home-layout.css">
+    <script src="assets/home-window.js" defer></script>
     
     <!-- Early 2000s Frutiger Aero / Web 2.0 Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -77,19 +80,40 @@
         .bg-cat {
             position: absolute;
             z-index: 3;
-            pointer-events: none;
+            pointer-events: auto;
             user-select: none;
+            cursor: pointer !important;
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+
+        .bg-cat:hover {
+            filter: drop-shadow(0px 0px 15px rgba(255, 255, 255, 0.9)) brightness(1.1);
         }
 
         /* Dancing Kitten - Bottom Left */
-        .bg-cat-kitten {
+        .pet-kitten {
+            position: fixed;
             bottom: 15px;
             left: 25px;
-            width: 250px;
-            max-width: 30vw;
-            opacity: 0.95;
-            filter: drop-shadow(0px 10px 20px rgba(0, 60, 120, 0.4));
+            z-index: 4;
+            width: min(180px, 15vh, 30vw);
+            aspect-ratio: 2 / 3;
+            padding: 0;
+            border: 0;
+            background: none;
+            filter: drop-shadow(0 10px 20px rgba(0, 60, 120, .4));
+            transform-origin: 50% 100%;
+            cursor: pointer !important;
         }
+        .pet-kitten img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; user-select: none; }
+        .pet-kitten .jump-pose { opacity: 0; }
+        .pet-kitten:hover { filter: drop-shadow(0 10px 20px rgba(0, 60, 120, .4)) brightness(1.08); }
+        .pet-kitten.is-jumping { animation: kitten-hop .8s ease-in-out; }
+        .pet-kitten.is-jumping .rest-pose { opacity: 0; }
+        .pet-kitten.is-jumping .jump-pose { opacity: 1; }
+        .pet-kitten:focus-visible { outline: 3px solid white; outline-offset: 4px; border-radius: 12px; }
+        @keyframes kitten-hop { 0%,100% { transform: translateY(0); } 43% { transform: translateY(-65px) rotate(-5deg); } 70% { transform: translateY(-20px) rotate(3deg); } }
+        @media (prefers-reduced-motion: reduce) { .pet-kitten.is-jumping { animation: none; } }
 
         /* Nyan Cat - Top Right */
         .bg-cat-nyan {
@@ -371,75 +395,91 @@
             display: flex;
             justify-content: space-between;
         }
+
     </style>
 </head>
 <body>
 
-    <!-- WATER OVERLAY -->
-    <div class="water-overlay"></div>
+    <div class="homepage-background" aria-hidden="true">
+        <!-- WATER OVERLAY -->
+        <div class="water-overlay"></div>
 
-    <!-- GRASS BOTTOM BORDER -->
-    <div class="grass-bottom"></div>
+        <!-- GRASS BOTTOM BORDER -->
+        <div class="grass-bottom"></div>
 
-    <!-- RISING BUBBLES -->
-    <div class="bubble" style="width: 42px; height: 42px; left: 8%; animation-duration: 9s;"></div>
-    <div class="bubble" style="width: 26px; height: 26px; left: 22%; animation-duration: 7s; animation-delay: 2s;"></div>
-    <div class="bubble" style="width: 52px; height: 52px; left: 52%; animation-duration: 11s; animation-delay: 1s;"></div>
-    <div class="bubble" style="width: 32px; height: 32px; left: 74%; animation-duration: 8s; animation-delay: 3s;"></div>
-    <div class="bubble" style="width: 46px; height: 46px; left: 90%; animation-duration: 10s; animation-delay: 0.5s;"></div>
+        <!-- RISING BUBBLES -->
+        <div class="bubble" style="width: 42px; height: 42px; left: 8%; animation-duration: 9s;"></div>
+        <div class="bubble" style="width: 26px; height: 26px; left: 22%; animation-duration: 7s; animation-delay: 2s;"></div>
+        <div class="bubble" style="width: 52px; height: 52px; left: 52%; animation-duration: 11s; animation-delay: 1s;"></div>
+        <div class="bubble" style="width: 32px; height: 32px; left: 74%; animation-duration: 8s; animation-delay: 3s;"></div>
+        <div class="bubble" style="width: 46px; height: 46px; left: 90%; animation-duration: 10s; animation-delay: 0.5s;"></div>
 
-    <!-- BACKGROUND CAT IMAGES -->
-    <img src="https://png.pngtree.com/png-vector/20240917/ourmid/pngtree-funny-kitten-cat-standing-or-dancing-isolated-png-image_13844217.png" alt="Dancing Kitten" class="bg-cat bg-cat-kitten">
-    <img src="https://wallpapers.com/images/featured/nyan-cat-png-az8jeatasi3z7yda.png" alt="Nyan Cat" class="bg-cat bg-cat-nyan">
-
-    <!-- LOADING SCREEN -->
-    <div id="loader-wrapper">
-        <div class="loader-box">
-            <div class="loader-text">DILL DOH</div>
-        </div>
+        <!-- BACKGROUND CAT IMAGES -->
+        <img src="https://wallpapers.com/images/featured/nyan-cat-png-az8jeatasi3z7yda.png" alt="Nyan Cat" class="bg-cat bg-cat-nyan">
     </div>
 
-    <!-- AERO GLASS WINDOW CONTAINER -->
-    <div class="aero-window" id="aeroWindow">
-        <!-- Title Bar (Draggable Handle) -->
-        <div class="window-titlebar" id="windowTitlebar">
-            <div class="window-title-text">
-                🌐 DillDoh_Unblocked_v2.0.exe
-            </div>
-            <div class="window-controls">
-                <div class="win-btn win-min"></div>
-                <div class="win-btn win-max"></div>
-                <div class="win-btn win-close"></div>
+    <button class="pet-kitten" type="button" aria-label="Pet the kitten" title="Pet the kitten">
+        <img class="rest-pose" src="assets/home-kitten-rest.webp" alt="" width="1024" height="1536" decoding="async">
+        <img class="jump-pose" src="assets/home-kitten-jump.webp" alt="" width="1024" height="1536" decoding="async">
+    </button>
+
+    <div class="homepage-layout">
+        <!-- LOADING SCREEN -->
+        <div id="loader-wrapper">
+            <div class="loader-box">
+                <div class="loader-text">DILL DOE</div>
             </div>
         </div>
 
-        <!-- Inner Content -->
-        <div class="window-content">
-            <!-- HEADER -->
-            <header>
-                <h1 class="metal-title">DILL DOH | UNBLOCKED GAMES</h1>
-                <p class="subtitle">(very funny name please laugh)</p>
-            </header>
-
-            <!-- MAIN ACTION -->
-            <main>
-                <div class="button-container">
-                    <a href="games.html" class="start-btn" onclick="navigateToPage(event, this.href)">Games</a>
-                    <a href="Tools.html" class="start-btn tools-btn" onclick="navigateToPage(event, this.href)">Fun Stuff!!!😊</a>
+        <!-- AERO GLASS WINDOW CONTAINER -->
+        <div class="aero-window" id="aeroWindow">
+            <!-- Title Bar -->
+            <div class="window-titlebar" id="windowTitlebar" tabindex="0" aria-label="Move main window: drag the title bar or use arrow keys; Home resets its position">
+                <div class="window-title-text">
+                    🌐 DillDoe_Unblocked_v2.0.exe
                 </div>
-            </main>
-        </div>
+                <div class="window-controls">
+                    <div class="win-btn win-min"></div>
+                    <div class="win-btn win-max"></div>
+                    <div class="win-btn win-close"></div>
+                </div>
+            </div>
 
-        <!-- Status Bar -->
-        <div class="window-statusbar">
-            <span>Status: error</span>
-            <span>version 67</span>
+            <!-- Inner Content -->
+            <div class="window-content">
+                <!-- HEADER -->
+                <header>
+                    <h1 class="metal-title">DILL DOE | UNBLOCKED GAMES</h1>
+                    <p class="subtitle">(very funny name please laugh)</p>
+                </header>
+
+                <!-- MAIN ACTION -->
+                <main>
+                    <div class="button-container">
+                        <a href="games.html" class="start-btn" onclick="navigateToPage(event, this.href)">Games</a>
+                        <a href="Tools.html" class="start-btn tools-btn" onclick="navigateToPage(event, this.href)">Fun Stuff!!!😊</a>
+                    </div>
+                </main>
+            </div>
+
+            <!-- Status Bar -->
+            <div class="window-statusbar">
+                <span>Status: error</span>
+                <span>version 67</span>
+            </div>
         </div>
     </div>
+    <a class="homepage-privacy" href="privacy.html">Privacy</a>
+
+    <!-- PET CAT AUDIO -->
+    <audio id="sound1" src="cleveland-brown---cleveland---ahhhhh!-made-with-Voicemod.mp3" preload="auto"></audio>
+    <audio id="sound2" src="oh-that's-nasty-cleveland-brown-made-with-Voicemod.mp3" preload="auto"></audio>
+    <audio id="sound3" src="cleveland-brown-no-no-no-no-no!-made-with-Voicemod.mp3" preload="auto"></audio>
+    <audio id="sound4" src="my-name-is-cleveland-brown-made-with-Voicemod.mp3" preload="auto"></audio>
 
     <script>
         // Loader Transition
-        window.addEventListener('load', () => {
+        window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 document.body.classList.add('loaded');
             }, 800);
@@ -454,69 +494,35 @@
                 window.location.href = destinationUrl;
             }, 400);
         }
-
-        // --- WINDOW DRAGGING FUNCTIONALITY ---
-        const windowElem = document.getElementById('aeroWindow');
-        const titlebarElem = document.getElementById('windowTitlebar');
-
-        let isDragging = false;
-        let offsetX = 0;
-        let offsetY = 0;
-
-        function startDrag(e) {
-            // Prevent drag if clicking on window controls
-            if (e.target.classList.contains('win-btn')) return;
-
-            isDragging = true;
-            windowElem.classList.add('is-dragging');
-
-            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-
-            const rect = windowElem.getBoundingClientRect();
-            offsetX = clientX - rect.left;
-            offsetY = clientY - rect.top;
+    </script>
+    <script>
+        if (!localStorage.getItem('dilldoePopup3Shown')) {
+            alert('Fixed movies and added 4 new games ');
+            localStorage.setItem('dilldoePopup3Shown', 'true');
         }
+    </script>
 
-        function onDrag(e) {
-            if (!isDragging) return;
+    <script>
+        const petKitten = document.querySelector('.pet-kitten');
+        const petSounds = [
+            document.getElementById('sound1'),
+            document.getElementById('sound2'),
+            document.getElementById('sound3'),
+            document.getElementById('sound4')
+        ];
+        let kittenTimer;
 
-            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        petKitten.addEventListener('click', () => {
+            petKitten.classList.remove('is-jumping');
+            void petKitten.offsetWidth;
+            petKitten.classList.add('is-jumping');
+            clearTimeout(kittenTimer);
+            kittenTimer = setTimeout(() => petKitten.classList.remove('is-jumping'), 800);
 
-            let newX = clientX - offsetX;
-            let newY = clientY - offsetY;
-
-            // Clamping window within screen boundaries
-            const minX = 10;
-            const minY = 10;
-            const maxX = window.innerWidth - windowElem.offsetWidth - 10;
-            const maxY = window.innerHeight - windowElem.offsetHeight - 10;
-
-            newX = Math.max(minX, Math.min(newX, maxX));
-            newY = Math.max(minY, Math.min(newY, maxY));
-
-            windowElem.style.left = `${newX}px`;
-            windowElem.style.top = `${newY}px`;
-            windowElem.style.transform = 'none'; // remove centered transform once dragged
-        }
-
-        function stopDrag() {
-            if (isDragging) {
-                isDragging = false;
-                windowElem.classList.remove('is-dragging');
-            }
-        }
-
-        // Mouse Events
-        titlebarElem.addEventListener('mousedown', startDrag);
-        window.addEventListener('mousemove', onDrag);
-        window.addEventListener('mouseup', stopDrag);
-
-        // Touch Events
-        titlebarElem.addEventListener('touchstart', startDrag);
-        window.addEventListener('touchmove', onDrag);
-        window.addEventListener('touchend', stopDrag);
+            const sound = petSounds[Math.floor(Math.random() * petSounds.length)];
+            sound.currentTime = 0;
+            sound.play().catch(error => console.warn('Pet sound unavailable:', error));
+        });
     </script>
 </body>
 </html>

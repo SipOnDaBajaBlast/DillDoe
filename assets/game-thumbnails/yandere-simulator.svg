@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Yandere Simulator">
-  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#170e19"/><stop offset="1" stop-color="#71344d"/></linearGradient></defs>
-  <rect width="640" height="360" fill="url(#bg)"/>
-  <circle cx="475" cy="162" r="114" fill="#f3a3c2" opacity=".13"/>
-  <path d="M372 324q4-125 76-145-29-28-25-75 4-52 57-52 56 0 61 52 4 47-25 75 72 20 76 145" fill="#110c13"/>
-  <path d="M432 110q48-67 97 0" fill="none" stroke="#f2a4c3" stroke-width="11" opacity=".55"/>
-  <text x="34" y="147" fill="#fff" font-family="Arial,sans-serif" font-size="58" font-weight="700">Yandere</text>
-  <text x="35" y="204" fill="#ff9dc3" font-family="Arial,sans-serif" font-size="46" font-weight="700">Simulator</text>
-</svg>
