@@ -12,6 +12,16 @@
   #gameContainer canvas { display: block; }
 </style>
 <script>
+  // Loads before this fix cached HTML error pages in Unity's IndexedDB cache, and Unity replays whatever it
+  // finds there for those URLs. Drop the cache once per loader version so visitors get the real bundles.
+  try {
+    if (localStorage.getItem('poppy-cache-version') !== '4') {
+      indexedDB.deleteDatabase('UnityCache');
+      localStorage.setItem('poppy-cache-version', '4');
+    }
+  } catch (error) {}
+</script>
+<script>
   // The host only publishes known file extensions, so the Unity bundles ship as .bin and the 48 MB data file
   // ships as three .bin parts (25 MiB per file). poppy-loader.js fetches all of it up front and serves it under
   // the names UnityLoader asks for; the .unityweb names matter because Unity decompresses those URLs itself.
