@@ -10,14 +10,22 @@
   html, body { margin: 0; height: 100%; background: #231F20; overflow: hidden; }
   #gameContainer { width: 100vw !important; height: 100vh !important; }
   #gameContainer canvas { display: block; }
+  .poppy-download { position: fixed; inset: 0; display: grid; place-items: center; background: #231F20; color: #f3e9ec; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Arial, sans-serif; z-index: 10; transition: opacity .25s ease; }
+  .poppy-download.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  .poppy-download-card { width: min(430px, 82vw); }
+  .poppy-download-phase { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: #c39aa4; }
+  .poppy-download-bar { height: 8px; margin: 14px 0 12px; border-radius: 999px; background: #ffffff1f; overflow: hidden; }
+  .poppy-download-bar span { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #e0536b, #f2a06b); transition: width .25s ease; }
+  .poppy-download-detail { font-variant-numeric: tabular-nums; color: #e9d3d8; }
+  .poppy-download-eta { margin-top: 4px; font-size: 13px; color: #a98c93; }
 </style>
 <script>
   // Loads before this fix cached HTML error pages in Unity's IndexedDB cache, and Unity replays whatever it
   // finds there for those URLs. Drop the cache once per loader version so visitors get the real bundles.
   try {
-    if (localStorage.getItem('poppy-cache-version') !== '5') {
+    if (localStorage.getItem('poppy-cache-version') !== '6') {
       indexedDB.deleteDatabase('UnityCache');
-      localStorage.setItem('poppy-cache-version', '5');
+      localStorage.setItem('poppy-cache-version', '6');
     }
   } catch (error) {}
 </script>
@@ -25,6 +33,7 @@
   // The host only publishes known file extensions, so the Unity bundles ship as .bin and the 48 MB data file
   // ships as three .bin parts (25 MiB per file). poppy-loader.js fetches all of it up front and serves it under
   // the names UnityLoader asks for; the .unityweb names matter because Unity decompresses those URLs itself.
+  // The sizes let the loader show a percentage and a time estimate before the first byte arrives.
   window.poppyLoader = {
     data: {
       name: 'bb1.data.unityweb',
@@ -36,8 +45,8 @@
       size: 48370197
     },
     aliases: [
-      { name: 'bb1.wasm.code.unityweb', url: 'Build/bb1.wasm.code.bin' },
-      { name: 'bb1.wasm.framework.unityweb', url: 'Build/bb1.wasm.framework.bin' }
+      { name: 'bb1.wasm.code.unityweb', url: 'Build/bb1.wasm.code.bin', size: 4315911 },
+      { name: 'bb1.wasm.framework.unityweb', url: 'Build/bb1.wasm.framework.bin', size: 72123 }
     ]
   };
 </script>
@@ -49,6 +58,72 @@
 <div class="webgl-content">
   <div id="gameContainer" style="width: 960px; height: 600px"></div>
 </div>
+<div class="poppy-download" id="poppy-download">
+  <div class="poppy-download-card">
+    <div class="poppy-download-phase" id="poppy-phase">Downloading game files</div>
+    <div class="poppy-download-bar"><span id="poppy-bar"></span></div>
+    <div class="poppy-download-detail" id="poppy-detail">Starting download…</div>
+    <div class="poppy-download-eta" id="poppy-eta">Estimating time remaining…</div>
+  </div>
+</div>
+<script>
+  (function () {
+    var box = document.getElementById('poppy-download');
+    var phaseEl = document.getElementById('poppy-phase');
+    var barEl = document.getElementById('poppy-bar');
+    var detailEl = document.getElementById('poppy-detail');
+    var etaEl = document.getElementById('poppy-eta');
+    var startingSince = 0;
+
+    function megabytes(bytes) {
+      return ((bytes || 0) / 1048576).toFixed(1);
+    }
+
+    function timeLeft(seconds) {
+      if (seconds === null || seconds === undefined || !isFinite(seconds)) return 'Estimating time remaining…';
+      if (seconds < 1.5) return 'Almost ready…';
+      if (seconds < 60) return 'About ' + Math.round(seconds) + ' s until the game is playable';
+      return 'About ' + Math.round(seconds / 60) + ' min until the game is playable';
+    }
+
+    function hide() {
+      box.classList.add('hidden');
+    }
+
+    function render(stats) {
+      if (!stats) return;
+      var percent = Math.max(0, Math.min(100, stats.percent || 0));
+      barEl.style.width = percent.toFixed(1) + '%';
+      if (stats.failed) {
+        phaseEl.textContent = 'Download failed';
+        detailEl.textContent = stats.failed;
+        etaEl.textContent = 'Reload the page to try again.';
+        return;
+      }
+      if (stats.phase === 'starting') {
+        if (!startingSince) startingSince = Date.now();
+        phaseEl.textContent = 'Starting the game';
+        detailEl.textContent = megabytes(stats.total) + ' MB downloaded';
+        etaEl.textContent = 'The engine is warming up…';
+        return;
+      }
+      phaseEl.textContent = 'Downloading game files';
+      detailEl.textContent = megabytes(stats.loaded) + ' MB of ' + megabytes(stats.total) + ' MB (' + Math.round(percent) + '%)' +
+        (stats.speed > 0 ? ' · ' + megabytes(stats.speed) + ' MB/s' : '');
+      etaEl.textContent = timeLeft(stats.eta);
+    }
+
+    window.addEventListener('poppy-progress', function (event) { render(event.detail); });
+    window.poppyHideDownload = hide;
+    render(window.poppyLoading);
+
+    // UnityProgress hides the overlay once it reports a finished load; this is the fallback for builds that
+    // never report 100% but do start rendering.
+    setInterval(function () {
+      if (startingSince && Date.now() - startingSince > 20000) hide();
+    }, 2000);
+  }());
+</script>
 <script>
   window.addEventListener('load', function () {
     UnityLoader.instantiate('gameContainer', 'Build/bb1.config.txt', { onProgress: UnityProgress });
