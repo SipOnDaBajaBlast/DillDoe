@@ -15,9 +15,9 @@
   // Loads before this fix cached HTML error pages in Unity's IndexedDB cache, and Unity replays whatever it
   // finds there for those URLs. Drop the cache once per loader version so visitors get the real bundles.
   try {
-    if (localStorage.getItem('poppy-cache-version') !== '4') {
+    if (localStorage.getItem('poppy-cache-version') !== '5') {
       indexedDB.deleteDatabase('UnityCache');
-      localStorage.setItem('poppy-cache-version', '4');
+      localStorage.setItem('poppy-cache-version', '5');
     }
   } catch (error) {}
 </script>
