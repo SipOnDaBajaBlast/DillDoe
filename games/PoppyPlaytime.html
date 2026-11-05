@@ -11,6 +11,7 @@ const timeLeft = seconds => seconds == null || !isFinite(seconds) ? 'estimating 
   : `about ${Math.round(seconds / 60)} min left`;
 let player = null;
 let ticker = null;
+let startingSince = 0;
 
 // The game page downloads the bundles itself, so read its progress to keep this page's status honest
 // instead of claiming the game is loading with no idea how far along it is.
@@ -24,7 +25,13 @@ function watchProgress() {
       statusEl.textContent = `Game files could not load: ${stats.failed}`;
       clearInterval(ticker);
     } else if (stats.phase === 'starting') {
-      statusEl.textContent = `Downloaded ${megabytes(stats.total)} MB — starting the game…`;
+      if (!startingSince) startingSince = Date.now();
+      if (Date.now() - startingSince > 12000) {
+        statusEl.textContent = `Ready — ${megabytes(stats.total)} MB loaded.`;
+        clearInterval(ticker);
+      } else {
+        statusEl.textContent = `Downloaded ${megabytes(stats.total)} MB — starting the game…`;
+      }
     } else if (stats.loaded > 0) {
       statusEl.textContent = `Downloading ${megabytes(stats.loaded)} MB of ${megabytes(stats.total)} MB (${Math.round(stats.percent || 0)}%)`
         + `${stats.speed > 0 ? ` · ${megabytes(stats.speed)} MB/s` : ''} — ${timeLeft(stats.eta)}`;
