@@ -37,7 +37,7 @@ part of the emulator.
 The vendored build declared a WebAssembly memory maximum of 8,192 pages
 (512 MiB). The core copies the whole disc image into that memory, so no retail
 disc could fit and every attempt aborted with an out-of-memory trap.
-[`gecko/patch-memory-limit.py`](gecko/patch-memory-limit.py) rewrites that single
+[`gecko/patch-memory-limit.py.txt`](gecko/patch-memory-limit.py.txt) rewrites that single
 memory-section field to 65,536 pages (4 GiB); nothing else in the module is
 changed. With it applied, a 1.03 GiB Wind Waker RVZ boots and measures about
 10 fps (~18% of full speed), and the Swiss homebrew boot disc about 14 fps
