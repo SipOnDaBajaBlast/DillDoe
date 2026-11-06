@@ -1,27 +1,28 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Wind Waker · browser prototype · DillDoe</title><meta name="description" content="Boot your own GameCube Wind Waker disc image in the browser. No game data is hosted or uploaded — the disc is read locally.">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GameCube homebrew · browser demo · DillDoe</title><meta name="description" content="A real GameCube core running small homebrew in the browser, with the memory limit that stops retail discs spelled out.">
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
-body{background:radial-gradient(circle at 50% 18%,#0d3348,#061019 70%);color:#e9f6ff;font:16px/1.5 "Trebuchet MS",Verdana,sans-serif}
+body{background:radial-gradient(circle at 50% 18%,#12283d,#060f18 70%);color:#e9f2fb;font:16px/1.5 "Trebuchet MS",Verdana,sans-serif}
 body.playing{overflow:hidden;background:#000}
 body.playing canvas{position:fixed;inset:0;width:100%!important;height:100%!important;display:block;background:#000}
 body.playing .veil{display:none}
 .veil{position:fixed;inset:0;overflow:auto;display:grid;place-items:center;padding:1.25rem}
-.card{width:100%;max-width:44rem;background:#071621e6;border:1px solid #ffffff2b;border-radius:1.1rem;padding:1.6rem 1.6rem 1.3rem;box-shadow:0 24px 60px #00000070}
+.card{width:100%;max-width:46rem;background:#071421e6;border:1px solid #ffffff2b;border-radius:1.1rem;padding:1.6rem 1.6rem 1.3rem;box-shadow:0 24px 60px #00000070}
 .back{color:#9fd7ff;font-size:.86rem;text-decoration:none}
 .back:hover{text-decoration:underline}
-h1{margin:.4rem 0 .1rem;font-size:clamp(1.9rem,5.5vw,2.8rem);letter-spacing:.1em;text-transform:uppercase;color:#ffe6ae}
-.lede{margin:.2rem 0 1rem;color:#c6e6f8}
-.facts{margin:0 0 1.2rem;padding:0;list-style:none;display:grid;gap:.45rem;font-size:.9rem}
-.facts li{padding-left:1.1rem;position:relative;color:#cfe4f0}
-.facts li:before{content:"";position:absolute;left:0;top:.55em;width:.42em;height:.42em;border-radius:50%;background:#ffcf6b}
+h1{margin:.4rem 0 .1rem;font-size:clamp(1.7rem,5vw,2.5rem);letter-spacing:.08em;text-transform:uppercase;color:#bfe6ff}
+.lede{margin:.2rem 0 1rem;color:#c3dced}
+.notice{margin:0 0 1.1rem;padding:.7rem .9rem;border-left:3px solid #ffcf6b;background:#0d2130;border-radius:.4rem;font-size:.88rem;color:#ffe4b3}
+.facts{margin:0 0 1.2rem;padding:0;list-style:none;display:grid;gap:.45rem;font-size:.88rem}
+.facts li{padding-left:1.1rem;position:relative;color:#c9dfee}
+.facts li:before{content:"";position:absolute;left:0;top:.55em;width:.42em;height:.42em;border-radius:50%;background:#6fc7ff}
 .facts b{color:#fff}
 .pick{position:relative;display:block;text-align:center;cursor:pointer;border:1px dashed #7fd0ff66;border-radius:.7rem;padding:.85rem;color:#bfe9ff;background:#0b243380}
 .pick:hover{border-color:#7fd0ffcc;background:#0f2d3f}
 .pick input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
-#chosen{margin:.5rem 0 .9rem;font-size:.85rem;color:#93b4c7;font-variant-numeric:tabular-nums}
-button{cursor:pointer;border:0;border-radius:.65rem;padding:.85rem 1.5rem;font:inherit;font-weight:700;color:#06202c;background:linear-gradient(#ffeeb5,#ffc65a);box-shadow:0 8px 22px #00000055}
+#chosen{margin:.5rem 0 .9rem;font-size:.85rem;color:#8fa9ba;font-variant-numeric:tabular-nums}
+button{cursor:pointer;border:0;border-radius:.65rem;padding:.85rem 1.5rem;font:inherit;font-weight:700;color:#06202c;background:linear-gradient(#e6f4ff,#9fd0f0);box-shadow:0 8px 22px #00000055}
 button:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
 #note{margin:.8rem 0 0;font-size:.85rem;color:#ffd79a;min-height:1.2em}
 details{margin-top:1rem;font-size:.85rem;color:#c6dbe8}
@@ -36,17 +37,19 @@ details td{padding:.15rem .8rem .15rem 0;border-top:1px solid #ffffff1a}
 </style></head><body>
 <div class="veil" id="veil"><div class="card">
 <a class="back" href="/games">&larr; Game Library</a>
-<h1>The Wind Waker</h1>
-<p class="lede">A browser prototype: a GameCube core runs <em>your own</em> disc image locally. Nothing is uploaded and no game data is served from this site.</p>
+<h1>GameCube homebrew</h1>
+<p class="lede">A real GameCube core (gecko) compiled to WebAssembly, running small homebrew in this tab. Nothing is uploaded and no game data is served from this site.</p>
+<p class="notice"><b>Retail discs do not work here, and it is not a bug I can fix in the page:</b> this wasm build declares a maximum of 512&nbsp;MiB of memory, the core copies the whole image in, and every retail GameCube disc is about 1.1–1.4&nbsp;GB. The boot aborts with an out-of-memory trap before the game starts. Wind Waker was measured on exactly that wall.</p>
 <ul class="facts">
-<li><b>Your disc:</b> USA release, GZLE01 revision 0, as <code>.iso</code>, <code>.gcm</code> or <code>.rvz</code></li>
-<li><b>Your browser:</b> one with WebGPU — Chrome or Edge 113+, or Safari 26+</li>
-<li><b>Expectations:</b> the web core is an interpreter, so the game runs below full speed, and the web build has no audio yet</li>
-<li><b>Privacy:</b> the file is read in this tab, mounted in memory, and never leaves your machine</li>
+<li><b>What runs:</b> homebrew <code>.dol</code> files and very small disc images — Swiss r2073 is the reference payload</li>
+<li><b>Speed:</b> the web core interprets, so expect well below native — the Swiss boot disc measures about 14&nbsp;fps / 23% on a desktop</li>
+<li><b>Browser:</b> WebGPU required — Chrome or Edge 113+, or Safari 26+</li>
+<li><b>Audio:</b> none; the web build has no sound output yet</li>
+<li><b>Privacy:</b> the file is read in this tab and never leaves your machine</li>
 </ul>
-<label class="pick"><input type="file" id="file" accept=".iso,.gcm,.rvz,.zip"><span>Choose your disc image</span></label>
+<label class="pick"><input type="file" id="file" accept=".dol,.iso,.rvz"><span>Choose a homebrew DOL or small disc image</span></label>
 <p id="chosen">No file selected.</p>
-<button id="go" type="button" disabled>Boot game</button>
+<button id="go" type="button" disabled>Boot it</button>
 <p id="note" role="status"></p>
 <details><summary>Controls</summary><table>
 <tr><td>Main stick</td><td>Arrow keys</td></tr>
@@ -56,11 +59,11 @@ details td{padding:.15rem .8rem .15rem 0;border-top:1px solid #ffffff1a}
 <tr><td>D-pad</td><td>I J K L</td></tr>
 <tr><td>Start</td><td>Enter</td></tr>
 </table></details>
-<p class="legal">Emulator core: gecko (GNU GPL-3.0), pinned upstream commit <code>39e8220</code> plus the CubeDeck disc-boot patch — see <a href="/ports/windwaker/notice.html">this notice</a> for the full corresponding-source record. This page hosts no game code, assets or disc images, and is not affiliated with or endorsed by Nintendo. Use it only with a disc you own.</p>
+<p class="legal">Emulator core: gecko (GNU GPL-3.0), pinned upstream commit <code>39e8220</code> plus the CubeDeck disc-boot patch — see <a href="/ports/gamecube-homebrew/notice.html">this notice</a> for the full corresponding-source record. This page hosts no game code, assets or disc images, and is not affiliated with or endorsed by Nintendo.</p>
 </div></div>
 <div id="hud" hidden><span id="fps">0 fps</span><span id="speed">0% speed</span><span id="saves">no save yet</span></div>
 <script type="module">
-const CORE_URL = '/ports/windwaker/gecko/web.js';
+const CORE_URL = '/ports/gamecube-homebrew/gecko/web.js';
 const veil = document.getElementById('veil');
 const note = document.getElementById('note');
 const fileInput = document.getElementById('file');
@@ -72,7 +75,7 @@ const speedEl = document.getElementById('speed');
 const savesEl = document.getElementById('saves');
 
 let core = null;
-let pending = null;        // {bytes, name}
+let pending = null;        // {bytes, name, file}
 let cardVersion = -1;
 let saveTimer = 0;
 let booted = false;
@@ -80,7 +83,7 @@ let booted = false;
 const say = text => { note.textContent = text; };
 
 /* ---- save persistence: gecko exposes a 2 MiB slot-A card; keep a copy in IndexedDB ---- */
-const DB_NAME = 'windwaker-saves';
+const DB_NAME = 'gamecube-homebrew-saves';
 const STORE = 'memcard';
 function db() {
   return new Promise((resolve, reject) => {
@@ -136,7 +139,7 @@ fileInput.addEventListener('change', event => selectFile(event.target.files[0]))
 
 async function readPending() {
   if (pending.bytes) return pending.bytes;
-  say('Reading the disc image…');
+  say('Reading the file…');
   const bytes = new Uint8Array(await pending.file.arrayBuffer());
   pending.bytes = bytes;
   pending.file = null;
@@ -164,23 +167,25 @@ function watchPerformance() {
 
 async function boot(bytes, name) {
   // winit can only build one event loop per document: a second start panics with
-  // RecreationAttempt, so one page load boots exactly one disc.
+  // RecreationAttempt, so one page load boots exactly one image.
   if (booted) return;
   booted = true;
   const api = await loadCore();
   const card = await loadCard();
-  say('Starting the core…');
+  saveCard; // referenced only for clarity
   veil.style.display = 'none';
   document.body.classList.add('playing');
   hud.hidden = false;
   if (!card) savesEl.textContent = 'no save yet';
+  say('');
   try {
     api.start_emulator(bytes, name.toLowerCase(), undefined, card || undefined);
   } catch (error) {
     hud.hidden = true;
     document.body.classList.remove('playing');
     veil.style.display = 'grid';
-    say(`The core could not start: ${error && error.message ? error.message : error}`);
+    booted = false;
+    say(`The core could not start that image (${error && error.message ? error.message : error}). Small homebrew DOLs work; retail discs exceed the core's 512 MiB memory.`);
     return;
   }
   watchPerformance();
@@ -197,19 +202,19 @@ go.addEventListener('click', async () => {
   }
 });
 
-/* A disc hosted anywhere CORS-enabled can be booted straight away with ?disc=…,
-   which is also how this page is smoke-tested. It never points at a ROM site. */
+/* A homebrew DOL hosted anywhere CORS-enabled can be booted with ?disc=…,
+   which is also how this page is smoke-tested. */
 const remote = new URLSearchParams(location.search).get('disc');
 if (remote) {
   (async () => {
     try {
-      say('Fetching the disc image…');
+      say('Fetching the image…');
       const response = await fetch(remote);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const bytes = new Uint8Array(await response.arrayBuffer());
-      await boot(bytes, remote.split('/').pop() || 'disc.iso');
+      await boot(bytes, remote.split('/').pop() || 'disc.dol');
     } catch (error) {
-      say(`That disc could not be fetched: ${error.message || error}`);
+      say(`That image could not be fetched: ${error.message || error}`);
     }
   })();
 } else if (!navigator.gpu) {

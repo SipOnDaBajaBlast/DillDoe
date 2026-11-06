@@ -1,8 +1,8 @@
-# Wind Waker browser prototype — emulator core notice
+# GameCube homebrew browser demo — emulator core notice
 
 This directory contains **no game data**. No Nintendo code, assets, disc images or
-keys are stored or served here. Visitors must supply their own legally obtained
-disc image; it is read locally in the browser and never uploaded.
+keys are stored or served here. Any image a visitor loads is read locally in the
+browser and never uploaded.
 
 ## Emulator core
 
@@ -29,11 +29,18 @@ in Rust, licensed **GNU GPL, version 3.0 or later**.
 in this directory: apply it to the pinned upstream commit to reproduce
 `web.js` / `web_bg.wasm` exactly.
 
-The page itself (`/games/WindWaker.html`) is this site's own code and is not part
-of the emulator.
+The page itself (`/games/GameCubeHomebrew.html`) is this site's own code and is not
+part of the emulator.
+
+## Known limit
+
+This build's WebAssembly memory section declares a maximum of 8,192 pages
+(512 MiB). The core copies the whole image into that memory, so only small
+homebrew fits; retail discs (~1.1–1.4 GB) abort with an out-of-memory trap. A
+rebuild with a larger ceiling would be required to change that.
 
 ## Homebrew test payload
 
-The prototype was validated with **Swiss r2073**, an open-source GPL GameCube
+The demo was validated with **Swiss r2073**, an open-source GPL GameCube
 homebrew boot disc (`swiss_r2073.dol`, bundled in the upstream CubeDeck demo).
 It was used only as a local test payload and is **not** committed here.

@@ -1,19 +1,19 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wind Waker prototype — core notice</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GameCube homebrew demo — core notice</title>
 <style>
-body{margin:0;padding:2rem 1.25rem;background:#061019;color:#dbeaf3;font:16px/1.6 "Trebuchet MS",Verdana,sans-serif}
+body{margin:0;padding:2rem 1.25rem;background:#060f18;color:#dbeaf3;font:16px/1.6 "Trebuchet MS",Verdana,sans-serif}
 main{max-width:46rem;margin:0 auto}
 a{color:#9fd7ff}
-h1{font-size:1.5rem;letter-spacing:.06em;color:#ffe6ae}
+h1{font-size:1.45rem;letter-spacing:.06em;color:#bfe6ff}
 h2{font-size:1.05rem;margin-top:1.8rem;color:#bfe9ff}
 code{background:#0d2434;padding:.1rem .3rem;border-radius:.25rem;font-size:.88em}
 ul{padding-left:1.2rem}
 li{margin:.25rem 0}
 .note{border-left:3px solid #ffcf6b;padding:.6rem .9rem;background:#0b1f2b;border-radius:.4rem}
 </style></head><body><main>
-<p><a href="/games/WindWaker.html">&larr; back to the prototype</a></p>
-<h1>Wind Waker browser prototype — emulator core notice</h1>
-<p class="note">This directory contains <b>no game data</b>. No Nintendo code, assets, disc images or keys are stored or served here. Visitors supply their own legally obtained disc image; it is read locally in the browser and never uploaded.</p>
+<p><a href="/games/GameCubeHomebrew.html">&larr; back to the demo</a></p>
+<h1>GameCube homebrew demo — emulator core notice</h1>
+<p class="note">This directory contains <b>no game data</b>. No Nintendo code, assets, disc images or keys are stored or served here. Any image a visitor loads is read locally in the browser and never uploaded.</p>
 
 <h2>Emulator core</h2>
 <p><code>gecko/web.js</code>, <code>gecko/web_bg.wasm</code> and <code>gecko/web.d.ts</code> are a patched
@@ -23,7 +23,7 @@ licensed <b>GNU GPL, version 3.0 or later</b>.</p>
 <ul>
   <li>Upstream project: <a href="https://github.com/ioncodes/gecko">github.com/ioncodes/gecko</a></li>
   <li>Pinned upstream commit: <code>39e82205a0da154f23fd36b95e64a8029d468618</code></li>
-  <li>Local patch: <a href="/ports/windwaker/gecko/gecko-web-disc.patch.txt">gecko-web-disc.patch.txt</a> — the patch series from
+  <li>Local patch: <a href="/ports/gamecube-homebrew/gecko/gecko-web-disc.patch.txt">gecko-web-disc.patch.txt</a> — the patch series from
     <a href="https://github.com/yerry262/gamecube-web">yerry262/gamecube-web</a>
     (<code>emulator/gecko-web-disc.patch</code>), which adds disc-image boot in the web crate
     (ISO / RVZ / zipped ISO via <code>image::load_dvd</code>, booted through the IPL HLE apploader path;
@@ -35,12 +35,17 @@ licensed <b>GNU GPL, version 3.0 or later</b>.</p>
 </ul>
 <p><code>gecko-web-disc.patch.txt</code> is the complete corresponding source delta for the binary in this
 directory: apply it to the pinned upstream commit to reproduce <code>web.js</code> / <code>web_bg.wasm</code>.</p>
-<p>The page itself (<code>/games/WindWaker.html</code>) is this site's own code and is not part of the emulator.</p>
+<p>The page itself (<code>/games/GameCubeHomebrew.html</code>) is this site's own code and is not part of the emulator.</p>
+
+<h2>Known limit</h2>
+<p>This build's WebAssembly memory section declares a maximum of 8,192 pages (512&nbsp;MiB). Because the core
+copies the whole image into that memory, only small homebrew fits; retail discs (~1.1–1.4&nbsp;GB) abort with an
+out-of-memory trap. A rebuild with a larger ceiling would be required to change that.</p>
 
 <h2>Homebrew test payload</h2>
-<p>The prototype was validated with <b>Swiss r2073</b>, an open-source GPL GameCube homebrew boot disc
+<p>The demo was validated with <b>Swiss r2073</b>, an open-source GPL GameCube homebrew boot disc
 (<code>swiss_r2073.dol</code>, bundled in the upstream CubeDeck demo). It was used only as a local test
 payload and is not hosted here.</p>
 
-<p><a href="/games/WindWaker.html">&larr; back to the prototype</a></p>
+<p><a href="/games/GameCubeHomebrew.html">&larr; back to the demo</a></p>
 </main></body></html>
