@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wind Waker prototype — core notice</title>
+<style>
+body{margin:0;padding:2rem 1.25rem;background:#061019;color:#dbeaf3;font:16px/1.6 "Trebuchet MS",Verdana,sans-serif}
+main{max-width:46rem;margin:0 auto}
+a{color:#9fd7ff}
+h1{font-size:1.5rem;letter-spacing:.06em;color:#ffe6ae}
+h2{font-size:1.05rem;margin-top:1.8rem;color:#bfe9ff}
+code{background:#0d2434;padding:.1rem .3rem;border-radius:.25rem;font-size:.88em}
+ul{padding-left:1.2rem}
+li{margin:.25rem 0}
+.note{border-left:3px solid #ffcf6b;padding:.6rem .9rem;background:#0b1f2b;border-radius:.4rem}
+</style></head><body><main>
+<p><a href="/games/WindWaker.html">&larr; back to the prototype</a></p>
+<h1>Wind Waker browser prototype — emulator core notice</h1>
+<p class="note">This directory contains <b>no game data</b>. No Nintendo code, assets, disc images or keys are stored or served here. Visitors supply their own legally obtained disc image; it is read locally in the browser and never uploaded.</p>
+
+<h2>Emulator core</h2>
+<p><code>gecko/web.js</code>, <code>gecko/web_bg.wasm</code> and <code>gecko/web.d.ts</code> are a patched
+<a href="https://github.com/rustwasm/wasm-pack">wasm-pack</a> build of
+<a href="https://github.com/ioncodes/gecko">gecko</a>, a GameCube/Wii emulator written in Rust,
+licensed <b>GNU GPL, version 3.0 or later</b>.</p>
+<ul>
+  <li>Upstream project: <a href="https://github.com/ioncodes/gecko">github.com/ioncodes/gecko</a></li>
+  <li>Pinned upstream commit: <code>39e82205a0da154f23fd36b95e64a8029d468618</code></li>
+  <li>Local patch: <a href="/ports/windwaker/gecko/gecko-web-disc.patch">gecko-web-disc.patch</a> — the patch series from
+    <a href="https://github.com/yerry262/gamecube-web">yerry262/gamecube-web</a>
+    (<code>emulator/gecko-web-disc.patch</code>), which adds disc-image boot in the web crate
+    (ISO / RVZ / zipped ISO via <code>image::load_dvd</code>, booted through the IPL HLE apploader path;
+    Wii discs are rejected), a 2 MiB slot-A memory card with an in-memory backing store plus
+    <code>get_memcard()</code> / <code>memcard_version()</code> so the page can persist saves,
+    <code>set_pad_state(...)</code> for page-level touch and Gamepad input, <code>get_perf()</code> exposing
+    smoothed <code>[fps, percent-of-native-speed]</code> to the page, and the removal of the in-core egui
+    perf overlay.</li>
+</ul>
+<p><code>gecko-web-disc.patch</code> is the complete corresponding source delta for the binary in this
+directory: apply it to the pinned upstream commit to reproduce <code>web.js</code> / <code>web_bg.wasm</code>.</p>
+<p>The page itself (<code>/games/WindWaker.html</code>) is this site's own code and is not part of the emulator.</p>
+
+<h2>Homebrew test payload</h2>
+<p>The prototype was validated with <b>Swiss r2073</b>, an open-source GPL GameCube homebrew boot disc
+(<code>swiss_r2073.dol</code>, bundled in the upstream CubeDeck demo). It was used only as a local test
+payload and is not hosted here.</p>
+
+<p><a href="/games/WindWaker.html">&larr; back to the prototype</a></p>
+</main></body></html>
