@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Wind Waker · browser prototype · DillDoe</title><meta name="description" content="Boot your own GameCube Wind Waker disc image in the browser. No game data is hosted or uploaded — the disc is read locally.">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:radial-gradient(circle at 50% 18%,#0d3348,#061019 70%);color:#e9f6ff;font:16px/1.5 "Trebuchet MS",Verdana,sans-serif}
+body.playing{overflow:hidden;background:#000}
+body.playing canvas{position:fixed;inset:0;width:100%!important;height:100%!important;display:block;background:#000}
+body.playing .veil{display:none}
+.veil{position:fixed;inset:0;overflow:auto;display:grid;place-items:center;padding:1.25rem}
+.card{width:100%;max-width:44rem;background:#071621e6;border:1px solid #ffffff2b;border-radius:1.1rem;padding:1.6rem 1.6rem 1.3rem;box-shadow:0 24px 60px #00000070}
+.back{color:#9fd7ff;font-size:.86rem;text-decoration:none}
+.back:hover{text-decoration:underline}
+h1{margin:.4rem 0 .1rem;font-size:clamp(1.9rem,5.5vw,2.8rem);letter-spacing:.1em;text-transform:uppercase;color:#ffe6ae}
+.lede{margin:.2rem 0 1rem;color:#c6e6f8}
+.facts{margin:0 0 1.2rem;padding:0;list-style:none;display:grid;gap:.45rem;font-size:.9rem}
+.facts li{padding-left:1.1rem;position:relative;color:#cfe4f0}
+.facts li:before{content:"";position:absolute;left:0;top:.55em;width:.42em;height:.42em;border-radius:50%;background:#ffcf6b}
+.facts b{color:#fff}
+.pick{position:relative;display:block;text-align:center;cursor:pointer;border:1px dashed #7fd0ff66;border-radius:.7rem;padding:.85rem;color:#bfe9ff;background:#0b243380}
+.pick:hover{border-color:#7fd0ffcc;background:#0f2d3f}
+.pick input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
+#chosen{margin:.5rem 0 .9rem;font-size:.85rem;color:#93b4c7;font-variant-numeric:tabular-nums}
+button{cursor:pointer;border:0;border-radius:.65rem;padding:.85rem 1.5rem;font:inherit;font-weight:700;color:#06202c;background:linear-gradient(#ffeeb5,#ffc65a);box-shadow:0 8px 22px #00000055}
+button:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+#note{margin:.8rem 0 0;font-size:.85rem;color:#ffd79a;min-height:1.2em}
+details{margin-top:1rem;font-size:.85rem;color:#c6dbe8}
+summary{cursor:pointer;color:#9fd7ff}
+details table{border-collapse:collapse;margin-top:.5rem}
+details td{padding:.15rem .8rem .15rem 0;border-top:1px solid #ffffff1a}
+.legal{margin:1.1rem 0 0;font-size:.72rem;line-height:1.5;color:#7f9aab}
+.legal a{color:#9fd7ff}
+#hud{position:fixed;top:.7rem;right:.7rem;display:flex;gap:.5rem;align-items:center;pointer-events:none;z-index:4}
+#hud span{background:#03121bcc;border:1px solid #ffffff2e;border-radius:.5rem;padding:.25rem .55rem;font-size:.78rem;font-variant-numeric:tabular-nums;color:#d7ecf8}
+#hud[hidden]{display:none}
+</style></head><body>
+<div class="veil" id="veil"><div class="card">
+<a class="back" href="/games">&larr; Game Library</a>
+<h1>The Wind Waker</h1>
+<p class="lede">A browser prototype: a GameCube core runs <em>your own</em> disc image locally. Nothing is uploaded and no game data is served from this site.</p>
+<ul class="facts">
+<li><b>Your disc:</b> USA release, GZLE01 revision 0, as <code>.iso</code>, <code>.gcm</code> or <code>.rvz</code></li>
+<li><b>Your browser:</b> one with WebGPU — Chrome or Edge 113+, or Safari 26+</li>
+<li><b>Expectations:</b> the web core is an interpreter, so the game runs below full speed, and the web build has no audio yet</li>
+<li><b>Privacy:</b> the file is read in this tab, mounted in memory, and never leaves your machine</li>
+</ul>
+<label class="pick"><input type="file" id="file" accept=".iso,.gcm,.rvz,.zip"><span>Choose your disc image</span></label>
+<p id="chosen">No file selected.</p>
+<button id="go" type="button" disabled>Boot game</button>
+<p id="note" role="status"></p>
+<details><summary>Controls</summary><table>
+<tr><td>Main stick</td><td>Arrow keys</td></tr>
+<tr><td>C-stick</td><td>T F G H</td></tr>
+<tr><td>A / B / X / Y</td><td>X / Z / C / V</td></tr>
+<tr><td>L / R / Z</td><td>A / S / D</td></tr>
+<tr><td>D-pad</td><td>I J K L</td></tr>
+<tr><td>Start</td><td>Enter</td></tr>
+</table></details>
+<p class="legal">Emulator core: gecko (GNU GPL-3.0), pinned upstream commit <code>39e8220</code> plus the CubeDeck disc-boot patch — see <a href="/ports/windwaker/NOTICE.md">NOTICE.md</a> for the full corresponding-source record. This page hosts no game code, assets or disc images, and is not affiliated with or endorsed by Nintendo. Use it only with a disc you own.</p>
+</div></div>
+<div id="hud" hidden><span id="fps">0 fps</span><span id="speed">0% speed</span><span id="saves">no save yet</span></div>
+<script type="module">
+const CORE_URL = '/ports/windwaker/gecko/web.js';
+const veil = document.getElementById('veil');
+const note = document.getElementById('note');
+const fileInput = document.getElementById('file');
+const go = document.getElementById('go');
+const chosen = document.getElementById('chosen');
+const hud = document.getElementById('hud');
+const fpsEl = document.getElementById('fps');
+const speedEl = document.getElementById('speed');
+const savesEl = document.getElementById('saves');
+
+let core = null;
+let pending = null;        // {bytes, name}
+let cardVersion = -1;
+let saveTimer = 0;
+
+const say = text => { note.textContent = text; };
+
+/* ---- save persistence: gecko exposes a 2 MiB slot-A card; keep a copy in IndexedDB ---- */
+const DB_NAME = 'windwaker-saves';
+const STORE = 'memcard';
+function db() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = () => request.result.createObjectStore(STORE);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+async function loadCard() {
+  try {
+    const store = await db();
+    return await new Promise(resolve => {
+      const get = store.transaction(STORE, 'readonly').objectStore(STORE).get('slotA');
+      get.onsuccess = () => resolve(get.result ? new Uint8Array(get.result) : null);
+      get.onerror = () => resolve(null);
+    });
+  } catch (error) { return null; }
+}
+async function saveCard(bytes) {
+  try {
+    const store = await db();
+    const copy = bytes.slice();
+    await new Promise(resolve => {
+      const tx = store.transaction(STORE, 'readwrite');
+      tx.objectStore(STORE).put(copy.buffer, 'slotA');
+      tx.oncomplete = resolve;
+      tx.onerror = resolve;
+    });
+    savesEl.textContent = 'save stored';
+  } catch (error) { /* private mode etc. — saves simply stay in memory */ }
+}
+
+/* ---- the core itself ---- */
+async function loadCore() {
+  if (core) return core;
+  say('Loading the emulator core (9.4 MB)…');
+  const module = await import(CORE_URL);
+  await module.default();
+  core = module;
+  return core;
+}
+
+function selectFile(file) {
+  if (!file) return;
+  pending = { bytes: null, name: file.name, file };
+  chosen.textContent = `${file.name} · ${(file.size / 1048576).toFixed(1)} MB`;
+  go.disabled = false;
+  say('');
+}
+
+fileInput.addEventListener('change', event => selectFile(event.target.files[0]));
+
+async function readPending() {
+  if (pending.bytes) return pending.bytes;
+  say('Reading the disc image…');
+  const bytes = new Uint8Array(await pending.file.arrayBuffer());
+  pending.bytes = bytes;
+  pending.file = null;
+  return bytes;
+}
+
+function watchPerformance() {
+  if (!core) return;
+  const [fps, percent] = core.get_perf();
+  if (fps > 0) {
+    fpsEl.textContent = `${fps.toFixed(0)} fps`;
+    speedEl.textContent = `${percent.toFixed(0)}% speed`;
+  }
+  const version = core.memcard_version();
+  if (version !== cardVersion) {
+    cardVersion = version;
+    const card = core.get_memcard();
+    if (card && card.length) {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => saveCard(card), 1500);
+    }
+  }
+  setTimeout(watchPerformance, 1000);
+}
+
+async function boot(bytes, name) {
+  const api = await loadCore();
+  const card = await loadCard();
+  say('Starting the core…');
+  veil.style.display = 'none';
+  document.body.classList.add('playing');
+  hud.hidden = false;
+  if (!card) savesEl.textContent = 'no save yet';
+  try {
+    api.start_emulator(bytes, name.toLowerCase(), undefined, card || undefined);
+  } catch (error) {
+    hud.hidden = true;
+    document.body.classList.remove('playing');
+    veil.style.display = 'grid';
+    say(`The core could not start: ${error && error.message ? error.message : error}`);
+    return;
+  }
+  watchPerformance();
+}
+
+go.addEventListener('click', async () => {
+  if (!pending) return;
+  go.disabled = true;
+  try {
+    await boot(await readPending(), pending.name);
+  } catch (error) {
+    go.disabled = false;
+    say(`Could not read that file: ${error.message || error}`);
+  }
+});
+
+/* A disc hosted anywhere CORS-enabled can be booted straight away with ?disc=…,
+   which is also how this page is smoke-tested. It never points at a ROM site. */
+const remote = new URLSearchParams(location.search).get('disc');
+if (remote) {
+  (async () => {
+    try {
+      say('Fetching the disc image…');
+      const response = await fetch(remote);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      await boot(bytes, remote.split('/').pop() || 'disc.iso');
+    } catch (error) {
+      say(`That disc could not be fetched: ${error.message || error}`);
+    }
+  })();
+} else if (!navigator.gpu) {
+  say('This browser has no WebGPU, so the GameCube core cannot draw. Try Chrome or Edge 113+.');
+}
+</script></body></html>
