@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GameCube homebrew · browser demo · DillDoe</title><meta name="description" content="A real GameCube core running small homebrew in the browser, with the memory limit that stops retail discs spelled out.">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GameCube in the browser · DillDoe</title><meta name="description" content="A real GameCube core running your own disc image in the browser, with the measured speed and limits spelled out.">
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
@@ -37,17 +37,18 @@ details td{padding:.15rem .8rem .15rem 0;border-top:1px solid #ffffff1a}
 </style></head><body>
 <div class="veil" id="veil"><div class="card">
 <a class="back" href="/games">&larr; Game Library</a>
-<h1>GameCube homebrew</h1>
-<p class="lede">A real GameCube core (gecko) compiled to WebAssembly, running small homebrew in this tab. Nothing is uploaded and no game data is served from this site.</p>
-<p class="notice"><b>Retail discs do not work here, and it is not a bug I can fix in the page:</b> this wasm build declares a maximum of 512&nbsp;MiB of memory, the core copies the whole image in, and every retail GameCube disc is about 1.1–1.4&nbsp;GB. The boot aborts with an out-of-memory trap before the game starts. Wind Waker was measured on exactly that wall.</p>
+<h1>GameCube in the browser</h1>
+<p class="lede">A real GameCube core (gecko) compiled to WebAssembly, running your own disc image in this tab. Nothing is uploaded and no game data is served from this site.</p>
+<p class="notice"><b>It runs the real thing, slowly.</b> The stock build of this core capped its memory at 512&nbsp;MiB, which no retail disc can fit inside. This copy was rebuilt with a 4&nbsp;GiB ceiling, and a 1.03&nbsp;GiB Wind Waker <code>.rvz</code> now boots and runs at about 10&nbsp;fps — roughly 18% of full speed — with no audio. Compressed <code>.rvz</code> images are what make it fit; a raw 1.4&nbsp;GiB ISO is tight.</p>
 <ul class="facts">
-<li><b>What runs:</b> homebrew <code>.dol</code> files and very small disc images — Swiss r2073 is the reference payload</li>
-<li><b>Speed:</b> the web core interprets, so expect well below native — the Swiss boot disc measures about 14&nbsp;fps / 23% on a desktop</li>
+<li><b>What runs:</b> homebrew <code>.dol</code> files and compressed <code>.rvz</code> disc images — Wind Waker's 1.03&nbsp;GiB RVZ is the reference payload</li>
+<li><b>Speed:</b> the web core interprets, so expect well below native — Wind Waker measures about 10&nbsp;fps / 18%, the Swiss homebrew boot disc about 14&nbsp;fps / 23%</li>
 <li><b>Browser:</b> WebGPU required — Chrome or Edge 113+, or Safari 26+</li>
 <li><b>Audio:</b> none; the web build has no sound output yet</li>
+<li><b>Memory:</b> the 4&nbsp;GiB ceiling still has to hold the whole image, so prefer <code>.rvz</code> over <code>.iso</code></li>
 <li><b>Privacy:</b> the file is read in this tab and never leaves your machine</li>
 </ul>
-<label class="pick"><input type="file" id="file" accept=".dol,.iso,.rvz"><span>Choose a homebrew DOL or small disc image</span></label>
+<label class="pick"><input type="file" id="file" accept=".rvz,.iso,.gcm,.dol"><span>Choose your disc image (.rvz recommended) or a homebrew DOL</span></label>
 <p id="chosen">No file selected.</p>
 <button id="go" type="button" disabled>Boot it</button>
 <p id="note" role="status"></p>
@@ -59,7 +60,7 @@ details td{padding:.15rem .8rem .15rem 0;border-top:1px solid #ffffff1a}
 <tr><td>D-pad</td><td>I J K L</td></tr>
 <tr><td>Start</td><td>Enter</td></tr>
 </table></details>
-<p class="legal">Emulator core: gecko (GNU GPL-3.0), pinned upstream commit <code>39e8220</code> plus the CubeDeck disc-boot patch — see <a href="/ports/gamecube-homebrew/notice.html">this notice</a> for the full corresponding-source record. This page hosts no game code, assets or disc images, and is not affiliated with or endorsed by Nintendo.</p>
+<p class="legal">Emulator core: gecko (GNU GPL-3.0), pinned upstream commit <code>39e8220</code> plus the CubeDeck disc-boot patch and a local memory-ceiling patch — see <a href="/ports/gamecube-homebrew/notice.html">this notice</a> for the full corresponding-source record. This page hosts no game code, assets or disc images, and is not affiliated with or endorsed by Nintendo.</p>
 </div></div>
 <div id="hud" hidden><span id="fps">0 fps</span><span id="speed">0% speed</span><span id="saves">no save yet</span></div>
 <script type="module">
@@ -185,7 +186,7 @@ async function boot(bytes, name) {
     document.body.classList.remove('playing');
     veil.style.display = 'grid';
     booted = false;
-    say(`The core could not start that image (${error && error.message ? error.message : error}). Small homebrew DOLs work; retail discs exceed the core's 512 MiB memory.`);
+    say(`The core could not start that image (${error && error.message ? error.message : error}). If it is a retail disc, try a compressed .rvz — the core has to hold the whole image in 4 GiB of memory, and smaller homebrew DOLs are the lightest test.`);
     return;
   }
   watchPerformance();
