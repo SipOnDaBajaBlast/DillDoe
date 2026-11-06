@@ -39,6 +39,12 @@ export function transformGameText(text,game,entry,path) {
    text=text.replace('<canvas id="canvas"','<canvas id="canvas" tabindex="0"');
    text=text.replace('</head>','<style>body{animation:none!important;transform:none!important}canvas{max-width:100vw;max-height:100vh;width:auto!important;height:auto!important}</style></head>');
   }
+  // Dealer's Life fetches its Unity chunks from a jsDelivr copy of its source
+  // repository. Serve them from this game's own origin instead.
+  if(game==='dealers-life'&&path==='index.html'){
+   text=text.replace('var ASSET_BASE = "https://fastly.jsdelivr.net/gh/Reeyuki/dealers-life-webport@main/1";','var ASSET_BASE = "/ports/dealers-life";');
+   if(/jsdelivr/i.test(text))throw new Error('Dealer’s Life loader changed; recheck its asset base URL');
+  }
   if(game==='death-note'&&path==='index.html')text=patchDeathNoteHtml(text,entry);
   if(game==='kindergarten3'&&path==='index.html'){
    if(!text.includes('Promise.all([')||!text.includes('Kindergarten3Port.loader.js'))throw new Error('Kindergarten 3 loader changed; recheck split file loading');
