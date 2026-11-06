@@ -23,7 +23,7 @@ licensed <b>GNU GPL, version 3.0 or later</b>.</p>
 <ul>
   <li>Upstream project: <a href="https://github.com/ioncodes/gecko">github.com/ioncodes/gecko</a></li>
   <li>Pinned upstream commit: <code>39e82205a0da154f23fd36b95e64a8029d468618</code></li>
-  <li>Local patch: <a href="/ports/windwaker/gecko/gecko-web-disc.patch">gecko-web-disc.patch</a> — the patch series from
+  <li>Local patch: <a href="/ports/windwaker/gecko/gecko-web-disc.patch.txt">gecko-web-disc.patch.txt</a> — the patch series from
     <a href="https://github.com/yerry262/gamecube-web">yerry262/gamecube-web</a>
     (<code>emulator/gecko-web-disc.patch</code>), which adds disc-image boot in the web crate
     (ISO / RVZ / zipped ISO via <code>image::load_dvd</code>, booted through the IPL HLE apploader path;
@@ -33,7 +33,7 @@ licensed <b>GNU GPL, version 3.0 or later</b>.</p>
     smoothed <code>[fps, percent-of-native-speed]</code> to the page, and the removal of the in-core egui
     perf overlay.</li>
 </ul>
-<p><code>gecko-web-disc.patch</code> is the complete corresponding source delta for the binary in this
+<p><code>gecko-web-disc.patch.txt</code> is the complete corresponding source delta for the binary in this
 directory: apply it to the pinned upstream commit to reproduce <code>web.js</code> / <code>web_bg.wasm</code>.</p>
 <p>The page itself (<code>/games/WindWaker.html</code>) is this site's own code and is not part of the emulator.</p>
 

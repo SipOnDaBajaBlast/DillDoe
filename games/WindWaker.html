@@ -75,6 +75,7 @@ let core = null;
 let pending = null;        // {bytes, name}
 let cardVersion = -1;
 let saveTimer = 0;
+let booted = false;
 
 const say = text => { note.textContent = text; };
 
@@ -162,6 +163,10 @@ function watchPerformance() {
 }
 
 async function boot(bytes, name) {
+  // winit can only build one event loop per document: a second start panics with
+  // RecreationAttempt, so one page load boots exactly one disc.
+  if (booted) return;
+  booted = true;
   const api = await loadCore();
   const card = await loadCard();
   say('Starting the core…');

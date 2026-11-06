@@ -13,7 +13,7 @@ in Rust, licensed **GNU GPL, version 3.0 or later**.
 
 - Upstream project: https://github.com/ioncodes/gecko
 - Pinned upstream commit: `39e82205a0da154f23fd36b95e64a8029d468618`
-- Local patch: [`gecko-web-disc.patch`](gecko-web-disc.patch) — the patch series
+- Local patch: [`gecko-web-disc.patch.txt`](gecko/gecko-web-disc.patch.txt) — the patch series
   from [yerry262/gamecube-web](https://github.com/yerry262/gamecube-web)
   (`emulator/gecko-web-disc.patch`), which adds:
 
@@ -25,7 +25,7 @@ in Rust, licensed **GNU GPL, version 3.0 or later**.
   - `get_perf()`, exposing smoothed `[fps, percent-of-native-speed]` to the page,
   - removal of the in-core egui perf overlay (the host page draws its own HUD).
 
-`gecko-web-disc.patch` is the complete corresponding source delta for the binary
+`gecko-web-disc.patch.txt` is the complete corresponding source delta for the binary
 in this directory: apply it to the pinned upstream commit to reproduce
 `web.js` / `web_bg.wasm` exactly.
 
