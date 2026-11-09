@@ -117,7 +117,7 @@ async function ensurePlayer(request, env) {
   }
 
   const player = await env.PLAYER_DB.prepare(
-    'SELECT username, previous_username, name_version, banned_at, last_seen_at FROM players WHERE player_id = ?'
+    'SELECT username, name_version, banned_at, last_seen_at FROM players WHERE player_id = ?'
   ).bind(id).first();
   if (player && Date.now() - player.last_seen_at > 60 * 1000) {
     await env.PLAYER_DB.prepare('UPDATE players SET last_seen_at = ? WHERE player_id = ?')
@@ -208,12 +208,12 @@ async function adminApi(request, env, url) {
       env.PLAYER_DB.prepare(`
         SELECT player_id, username, name_version, created_at, last_seen_at, banned_at
         FROM players
-        WHERE name_version >= ? AND INSTR(LOWER(username), ?) > 0
+        WHERE name_version >= ? AND username IS NOT NULL AND username <> '' AND INSTR(LOWER(username), ?) > 0
         ORDER BY username COLLATE NOCASE LIMIT ? OFFSET ?
       `).bind(NAME_VERSION, search, limit, offset).all(),
       env.PLAYER_DB.prepare(`
         SELECT COUNT(*) AS count FROM players
-        WHERE name_version >= ? AND INSTR(LOWER(username), ?) > 0
+        WHERE name_version >= ? AND username IS NOT NULL AND username <> '' AND INSTR(LOWER(username), ?) > 0
       `).bind(NAME_VERSION, search).first(),
     ]);
     return json({ players: rows.results, total: total.count, limit, offset, nameVersion: NAME_VERSION });
