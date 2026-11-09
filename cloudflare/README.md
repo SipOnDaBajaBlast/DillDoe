@@ -18,9 +18,9 @@ The workflow uses the encrypted repository secret `CLOUDFLARE_API_TOKEN` with Cl
 
 ## Player names and moderation
 
-The site asks each browser to choose a unique player name. Players are told to use their real name or a nickname that other people will recognize; names that look like random typing (`asdasd`, `qwerty`, `zxcvbn`, repeated patterns) are rejected. Names are 2–24 characters of letters, numbers, spaces, dots, apostrophes, dashes, or underscores and need at least two letters. The name is stored with a random, HttpOnly browser ID in Cloudflare D1. Browsers do not expose a person's computer-account or other service username; clearing this site's cookies or changing browsers creates a new browser profile.
+The site asks each browser to choose a unique player name. Players are told to use their real name or a nickname that other people will recognize; names that look like random typing (`asdasd`, `qwerty`, `zxcvbn`, repeated patterns) are rejected. Names are 2–24 letters and spaces; numbers and symbols are not allowed. The name is stored with a random, HttpOnly browser ID in Cloudflare D1. Browsers do not expose a person's computer-account or other service username; clearing this site's cookies or changing browsers creates a new browser profile.
 
-The database also keeps the previous name and a `name_version` flag. After a rules change, every player is asked to enter a name again the next time they visit, including players who already picked one under the new rules. Their old name stays visible to moderators in the admin page and remains searchable there. The Worker adds the columns, creates the small `player_meta` table, and resets all rows automatically the first time it reaches the database; bumping `NAME_VERSION` in `lib/player-registry.mjs` triggers another reset for everyone. `migrations/0002_player_name_reset.sql` performs the same reset by hand.
+The database also keeps the previous name and a `name_version` flag. After a rules change, every player is asked to enter a name again the next time they visit, including players who already picked one under the new rules. Their old name stays visible to moderators in the admin page and remains searchable there. The Worker adds the columns, creates the small `player_meta` table, and resets all rows automatically the first time it reaches the database; bumping `NAME_VERSION` in `lib/player-registry.mjs` triggers another reset for everyone. The reset files in `migrations/` perform the same reset by hand.
 
 Before publishing the player registry, create its database and apply the schema from this directory:
 
@@ -33,6 +33,7 @@ To apply the player name reset to an existing database by hand, run:
 
 ```sh
 npx wrangler d1 execute dilldoe-players --remote --file migrations/0002_player_name_reset.sql
+npx wrangler d1 execute dilldoe-players --remote --file migrations/0003_player_name_reset.sql
 ```
 
 In Cloudflare, open **Workers & Pages → dilldoe-games → Settings → Bindings**. Add a production D1 binding named `PLAYER_DB` and select `dilldoe-players`. Under **Settings → Variables and Secrets**, add `PLAYER_ADMIN_PASSWORD` as a secret with a strong, unique password. Save and redeploy so the Worker receives the binding and secret. Do not put the password in GitHub, HTML, or JavaScript.

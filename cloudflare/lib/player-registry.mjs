@@ -6,7 +6,7 @@ const SESSION_LIFETIME = 12 * 60 * 60;
 const LOGIN_WINDOW = 15 * 60;
 const MAX_LOGIN_ATTEMPTS = 5;
 // Bump this to ask every player for a name again. Existing rows below it are reset.
-const NAME_VERSION = 2;
+const NAME_VERSION = 3;
 
 function json(body, status = 200, headers = {}) {
   return Response.json(body, {

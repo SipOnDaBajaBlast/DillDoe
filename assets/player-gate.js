@@ -39,12 +39,12 @@
   gate.innerHTML = `
     <section class="dd-player-card" role="dialog" aria-modal="true" aria-labelledby="dd-player-title">
       <h1 id="dd-player-title">Choose your player name</h1>
-      <p class="dd-player-intro">Other players and games see this name, so use your real name or a nickname people will recognize — like “Alex”, “Apple”, or “Kya”. Names that look like random typing, such as “asdasd”, are not accepted.</p>
+      <p class="dd-player-intro">Other players and games see this name, so use your real name or a nickname people will recognize — like “Alex”, “Apple”, or “Kya”. Use letters and spaces only; random typing such as “asdasd” is not accepted.</p>
       <p class="dd-player-note" hidden></p>
       <form>
         <label for="dd-player-name">Real name or nickname</label>
-        <input id="dd-player-name" name="username" minlength="2" maxlength="24" autocomplete="nickname" autocapitalize="words" spellcheck="false" required>
-        <p class="dd-player-hint">2–24 characters: letters, numbers, spaces, dots, apostrophes, dashes, or underscores.</p>
+        <input id="dd-player-name" name="username" minlength="2" maxlength="24" pattern="[\p{L} ]{2,24}" autocomplete="nickname" autocapitalize="words" spellcheck="false" required>
+        <p class="dd-player-hint">2–24 letters and spaces. Numbers and symbols are not allowed.</p>
         <button type="submit">Save my name</button>
         <p class="dd-player-error" role="status" aria-live="polite"></p>
       </form>
