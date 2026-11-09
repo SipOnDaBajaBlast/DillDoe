@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 616 353" role="img" aria-labelledby="title">
-  <title id="title">Mario Kart Wii</title>
-  <defs><linearGradient id="bg" x2="0" y2="1"><stop stop-color="#53c9ff"/><stop offset="1" stop-color="#147bce"/></linearGradient></defs>
-  <rect width="616" height="353" fill="url(#bg)"/><path d="M0 245Q150 180 310 250t306-2v105H0" fill="#278c42"/>
-  <path d="M80 286h455" stroke="#fff" stroke-width="6" stroke-dasharray="24 20" opacity=".8"/>
-  <g transform="translate(150 112) rotate(-8)"><ellipse cx="152" cy="150" rx="131" ry="25" fill="#12314a" opacity=".35"/><path d="M44 107h215l31 44-54 35H74l-54-35z" fill="#fbd34f" stroke="#142436" stroke-width="9"/><circle cx="85" cy="181" r="30" fill="#1e2935"/><circle cx="238" cy="181" r="30" fill="#1e2935"/><circle cx="85" cy="181" r="12" fill="#d4e3ed"/><circle cx="238" cy="181" r="12" fill="#d4e3ed"/><path d="M89 102q8-54 56-54t57 54" fill="#ef4c58" stroke="#142436" stroke-width="8"/><circle cx="145" cy="82" r="30" fill="#ffd4ab" stroke="#142436" stroke-width="6"/><path d="M117 72q26-36 55 0" fill="#4f63d8"/></g>
-  <text x="308" y="48" text-anchor="middle" font-family="Arial,sans-serif" font-size="26" font-weight="800" fill="#10243a">MARIO KART WII</text>
-</svg>
