@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 616 353" role="img" aria-labelledby="title">
+  <title id="title">Hollow Knight</title>
+  <defs><radialGradient id="bg"><stop stop-color="#283447"/><stop offset="1" stop-color="#090d15"/></radialGradient></defs>
+  <rect width="616" height="353" fill="url(#bg)"/><circle cx="308" cy="137" r="79" fill="#e7edf2"/>
+  <path d="M244 94 201 58q-6 57 22 87M372 94l43-36q6 57-22 87" fill="#e7edf2"/>
+  <ellipse cx="280" cy="142" rx="10" ry="18" fill="#17202c"/><ellipse cx="336" cy="142" rx="10" ry="18" fill="#17202c"/>
+  <text x="308" y="277" text-anchor="middle" font-family="Georgia,serif" font-size="38" letter-spacing="4" fill="#f4f7fa">HOLLOW KNIGHT</text>
+</svg>
