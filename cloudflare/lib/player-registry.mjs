@@ -119,7 +119,7 @@ async function ensurePlayer(request, env) {
   const player = await env.PLAYER_DB.prepare(
     'SELECT username, previous_username, name_version, banned_at, last_seen_at FROM players WHERE player_id = ?'
   ).bind(id).first();
-  if (player && Date.now() - player.last_seen_at > 5 * 60 * 1000) {
+  if (player && Date.now() - player.last_seen_at > 60 * 1000) {
     await env.PLAYER_DB.prepare('UPDATE players SET last_seen_at = ? WHERE player_id = ?')
       .bind(Date.now(), id).run();
   }
