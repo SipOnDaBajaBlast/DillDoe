@@ -206,15 +206,15 @@ async function adminApi(request, env, url) {
     const search = query.toLowerCase();
     const [rows, total] = await Promise.all([
       env.PLAYER_DB.prepare(`
-        SELECT player_id, username, previous_username, name_version, created_at, last_seen_at, banned_at
+        SELECT player_id, username, name_version, created_at, last_seen_at, banned_at
         FROM players
-        WHERE INSTR(LOWER(username), ?) > 0 OR INSTR(LOWER(COALESCE(previous_username, '')), ?) > 0
+        WHERE name_version >= ? AND INSTR(LOWER(username), ?) > 0
         ORDER BY username COLLATE NOCASE LIMIT ? OFFSET ?
-      `).bind(search, search, limit, offset).all(),
+      `).bind(NAME_VERSION, search, limit, offset).all(),
       env.PLAYER_DB.prepare(`
         SELECT COUNT(*) AS count FROM players
-        WHERE INSTR(LOWER(username), ?) > 0 OR INSTR(LOWER(COALESCE(previous_username, '')), ?) > 0
-      `).bind(search, search).first(),
+        WHERE name_version >= ? AND INSTR(LOWER(username), ?) > 0
+      `).bind(NAME_VERSION, search).first(),
     ]);
     return json({ players: rows.results, total: total.count, limit, offset, nameVersion: NAME_VERSION });
   }
@@ -246,11 +246,7 @@ export async function playerRegistry(request, env) {
     if (!player) return json({ registered: false }, 200, headers);
     if (player.banned_at) return json({ registered: true, banned: true }, 200, headers);
     if (Number(player.name_version) < NAME_VERSION) {
-      return json({
-        registered: false,
-        reset: true,
-        previousUsername: player.previous_username || player.username,
-      }, 200, headers);
+      return json({ registered: false, reset: true }, 200, headers);
     }
     return json({ registered: true, username: player.username }, 200, headers);
   }

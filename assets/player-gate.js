@@ -164,11 +164,6 @@
         title.textContent = 'Pick your player name again';
         note.hidden = false;
         note.textContent = 'We updated the player name rules, so please enter your real name or a nickname.';
-        if (player.previousUsername) {
-          const previous = document.createElement('strong');
-          previous.textContent = player.previousUsername;
-          note.append(' Your previous name was ', previous, '.');
-        }
       }
       gate.hidden = false;
       input.disabled = false;

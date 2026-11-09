@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 616 353" role="img" aria-labelledby="title">
+  <title id="title">Deltarune</title>
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="42%" r="55%">
+      <stop offset="0%" stop-color="#3a0b14"/>
+      <stop offset="100%" stop-color="#07070c"/>
+    </radialGradient>
+    <linearGradient id="heart" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff4a5e"/>
+      <stop offset="100%" stop-color="#c2102c"/>
+    </linearGradient>
+  </defs>
+  <rect width="616" height="353" fill="#07070c"/>
+  <circle cx="308" cy="140" r="110" fill="url(#glow)" stroke="#2a2030" stroke-width="2"/>
+  <path d="M308 216 C 260 182 236 160 236 136 C 236 112 256 98 278 104 C 290 107 302 116 308 128 C 314 116 326 107 338 104 C 360 98 380 112 380 136 C 380 160 356 182 308 216 Z" fill="url(#heart)" stroke="#ffd9de" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M284 128 L296 128 L296 150 L284 150 Z" fill="#fff" opacity=".9"/>
+  <text x="308" y="300" text-anchor="middle" font-family="Georgia,serif" font-size="46" font-weight="700" letter-spacing="4" fill="#f5f3ff">DELTARUNE</text>
+</svg>
