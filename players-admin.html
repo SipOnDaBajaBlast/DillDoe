@@ -30,7 +30,9 @@
     th, td { padding: 10px 8px; border-bottom: 1px solid #e1e8ee; text-align: left; white-space: nowrap; }
     th { color: #536b7f; font-size: .84rem; }
     .state-banned { color: #a51f1f; font-weight: 650; }
+    .state-pending { color: #9a6400; font-weight: 650; }
     .state-active { color: #15794a; }
+    .note { margin: 12px 0 0; color: #536b7f; font-size: .9rem; }
     @media (max-width: 560px) {
       body { padding: 12px; }
       header, .panel { padding: 16px; }
@@ -61,9 +63,10 @@
         </label>
         <button id="refresh" type="button">Refresh</button>
       </div>
+      <p class="note">Players marked “Needs new name” chose a name before the stricter rules. They will be asked for their real name or a nickname the next time they open the site.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Player</th><th>Joined</th><th>Last active</th><th>Status</th><th>Action</th></tr></thead>
+          <thead><tr><th>Player</th><th>Previous name</th><th>Joined</th><th>Last active</th><th>Status</th><th>Action</th></tr></thead>
           <tbody id="players"></tbody>
         </table>
       </div>
@@ -82,6 +85,7 @@
     let playerTotal = 0;
     let searchTimer;
     let listRequest = 0;
+    let requiredNameVersion = 1;
 
     async function api(url, options = {}) {
       const response = await fetch(url, {
@@ -125,24 +129,28 @@
       try {
         const result = await api(`/api/admin/players?${query}`);
         if (requestId !== listRequest) return;
+        requiredNameVersion = Number(result.nameVersion) || 1;
         for (const player of result.players) {
           const row = document.createElement('tr');
           const name = document.createElement('td');
           name.textContent = player.username;
+          const previous = document.createElement('td');
+          previous.textContent = player.previous_username || '—';
           const joined = document.createElement('td');
           joined.textContent = date(player.created_at);
           const active = document.createElement('td');
           active.textContent = date(player.last_seen_at);
           const state = document.createElement('td');
-          state.textContent = player.banned_at ? 'Banned' : 'Active';
-          state.className = player.banned_at ? 'state-banned' : 'state-active';
+          const needsName = Number(player.name_version) < requiredNameVersion;
+          state.textContent = player.banned_at ? 'Banned' : needsName ? 'Needs new name' : 'Active';
+          state.className = player.banned_at ? 'state-banned' : needsName ? 'state-pending' : 'state-active';
           const actionCell = document.createElement('td');
           const action = document.createElement('button');
           action.textContent = player.banned_at ? 'Unban' : 'Ban';
           if (!player.banned_at) action.className = 'danger';
           action.addEventListener('click', () => setBanned(player, !player.banned_at, action));
           actionCell.append(action);
-          row.append(name, joined, active, state, actionCell);
+          row.append(name, previous, joined, active, state, actionCell);
           playerRows.append(row);
         }
         playerOffset += result.players.length;

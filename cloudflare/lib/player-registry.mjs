@@ -1,8 +1,12 @@
+import { checkPlayerName } from './player-name.mjs';
+
 const PLAYER_COOKIE = '__Host-dd_player';
 const ADMIN_COOKIE = '__Host-dd_player_admin';
 const SESSION_LIFETIME = 12 * 60 * 60;
 const LOGIN_WINDOW = 15 * 60;
 const MAX_LOGIN_ATTEMPTS = 5;
+// Bump this to ask every player for a name again. Existing rows below it are reset.
+const NAME_VERSION = 2;
 
 function json(body, status = 200, headers = {}) {
   return Response.json(body, {
@@ -61,6 +65,49 @@ function sameOrigin(request) {
   }
 }
 
+let schemaReady = null;
+
+async function addColumn(env, definition) {
+  try {
+    await env.PLAYER_DB.prepare(`ALTER TABLE players ADD COLUMN ${definition}`).run();
+  } catch (error) {
+    if (!String(error?.message).toLowerCase().includes('duplicate column')) throw error;
+  }
+}
+
+async function migratePlayerSchema(env) {
+  const table = await env.PLAYER_DB.prepare('PRAGMA table_info(players)').all();
+  const columns = new Set((table.results || []).map(column => column.name));
+  if (!columns.size) return;
+  if (!columns.has('name_version')) await addColumn(env, 'name_version INTEGER NOT NULL DEFAULT 0');
+  if (!columns.has('previous_username')) await addColumn(env, 'previous_username TEXT');
+  await env.PLAYER_DB.prepare(
+    'CREATE TABLE IF NOT EXISTS player_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)'
+  ).run();
+  const applied = await env.PLAYER_DB.prepare(
+    "SELECT value FROM player_meta WHERE key = 'name_version'"
+  ).first();
+  if (Number(applied?.value) === NAME_VERSION) return;
+  // Everyone enters a name again after a rules change, even if they already picked one.
+  await env.PLAYER_DB.prepare(
+    'UPDATE players SET previous_username = COALESCE(previous_username, username), name_version = 0'
+  ).run();
+  await env.PLAYER_DB.prepare(`
+    INSERT INTO player_meta (key, value) VALUES ('name_version', ?)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value
+  `).bind(String(NAME_VERSION)).run();
+}
+
+async function ensurePlayerSchema(env) {
+  if (!schemaReady) {
+    schemaReady = migratePlayerSchema(env).catch(error => {
+      schemaReady = null;
+      throw error;
+    });
+  }
+  return schemaReady;
+}
+
 async function ensurePlayer(request, env) {
   let id = cookieValue(request, PLAYER_COOKIE);
   const headers = {};
@@ -70,7 +117,7 @@ async function ensurePlayer(request, env) {
   }
 
   const player = await env.PLAYER_DB.prepare(
-    'SELECT username, banned_at, last_seen_at FROM players WHERE player_id = ?'
+    'SELECT username, previous_username, name_version, banned_at, last_seen_at FROM players WHERE player_id = ?'
   ).bind(id).first();
   if (player && Date.now() - player.last_seen_at > 5 * 60 * 1000) {
     await env.PLAYER_DB.prepare('UPDATE players SET last_seen_at = ? WHERE player_id = ?')
@@ -159,14 +206,17 @@ async function adminApi(request, env, url) {
     const search = query.toLowerCase();
     const [rows, total] = await Promise.all([
       env.PLAYER_DB.prepare(`
-        SELECT player_id, username, created_at, last_seen_at, banned_at
-        FROM players WHERE INSTR(LOWER(username), ?) > 0
+        SELECT player_id, username, previous_username, name_version, created_at, last_seen_at, banned_at
+        FROM players
+        WHERE INSTR(LOWER(username), ?) > 0 OR INSTR(LOWER(COALESCE(previous_username, '')), ?) > 0
         ORDER BY username COLLATE NOCASE LIMIT ? OFFSET ?
-      `).bind(search, limit, offset).all(),
-      env.PLAYER_DB.prepare('SELECT COUNT(*) AS count FROM players WHERE INSTR(LOWER(username), ?) > 0')
-        .bind(search).first(),
+      `).bind(search, search, limit, offset).all(),
+      env.PLAYER_DB.prepare(`
+        SELECT COUNT(*) AS count FROM players
+        WHERE INSTR(LOWER(username), ?) > 0 OR INSTR(LOWER(COALESCE(previous_username, '')), ?) > 0
+      `).bind(search, search).first(),
     ]);
-    return json({ players: rows.results, total: total.count, limit, offset });
+    return json({ players: rows.results, total: total.count, limit, offset, nameVersion: NAME_VERSION });
   }
   if (url.pathname === '/api/admin/ban' && request.method === 'POST') {
     if (!sameOrigin(request)) return json({ error: 'Request rejected.' }, 403);
@@ -185,6 +235,7 @@ async function adminApi(request, env, url) {
 
 export async function playerRegistry(request, env) {
   if (!env.PLAYER_DB) return json({ error: 'Player accounts are not configured yet.' }, 503);
+  await ensurePlayerSchema(env);
   const url = new URL(request.url);
   if (url.pathname.startsWith('/api/admin/')) return adminApi(request, env, url);
   if (url.pathname !== '/api/player/status' && url.pathname !== '/api/player/register') {
@@ -194,31 +245,47 @@ export async function playerRegistry(request, env) {
     const { player, headers } = await ensurePlayer(request, env);
     if (!player) return json({ registered: false }, 200, headers);
     if (player.banned_at) return json({ registered: true, banned: true }, 200, headers);
+    if (Number(player.name_version) < NAME_VERSION) {
+      return json({
+        registered: false,
+        reset: true,
+        previousUsername: player.previous_username || player.username,
+      }, 200, headers);
+    }
     return json({ registered: true, username: player.username }, 200, headers);
   }
   if (request.method === 'POST' && url.pathname === '/api/player/register') {
     if (!sameOrigin(request)) return json({ error: 'Request rejected.' }, 403);
     const body = await bodyJson(request);
-    const username = typeof body?.username === 'string' ? body.username.normalize('NFKC').trim() : '';
-    if (!/^[A-Za-z0-9_.-]{3,20}$/.test(username)) {
-      return json({ error: 'Use 3–20 letters, numbers, dots, dashes, or underscores.' }, 400);
-    }
+    const checked = checkPlayerName(typeof body?.username === 'string' ? body.username : '');
+    if (!checked.ok) return json({ error: checked.error }, 400);
     const { id, player, headers } = await ensurePlayer(request, env);
     if (player?.banned_at) return json({ error: 'This player is banned.' }, 403, headers);
-    if (player) return json({ registered: true, username: player.username }, 200, headers);
+    if (player && Number(player.name_version) >= NAME_VERSION) {
+      return json({ registered: true, username: player.username }, 200, headers);
+    }
     const now = Date.now();
     try {
-      await env.PLAYER_DB.prepare(`
-        INSERT INTO players (player_id, username, created_at, last_seen_at)
-        VALUES (?, ?, ?, ?)
-      `).bind(id, username, now, now).run();
+      if (player) {
+        await env.PLAYER_DB.prepare(`
+          UPDATE players
+          SET previous_username = CASE WHEN username = ? THEN NULL ELSE username END,
+              username = ?, name_version = ?, last_seen_at = ?
+          WHERE player_id = ?
+        `).bind(checked.name, checked.name, NAME_VERSION, now, id).run();
+      } else {
+        await env.PLAYER_DB.prepare(`
+          INSERT INTO players (player_id, username, created_at, last_seen_at, name_version)
+          VALUES (?, ?, ?, ?, ?)
+        `).bind(id, checked.name, now, now, NAME_VERSION).run();
+      }
     } catch (error) {
       if (String(error?.message).includes('UNIQUE constraint failed')) {
-        return json({ error: 'That username is already taken. Choose another.' }, 409, headers);
+        return json({ error: 'That name is already taken. Choose another.' }, 409, headers);
       }
       throw error;
     }
-    return json({ registered: true, username }, 201, headers);
+    return json({ registered: true, username: checked.name }, player ? 200 : 201, headers);
   }
   return json({ error: 'Method not allowed.' }, 405, { Allow: 'GET, POST' });
 }
