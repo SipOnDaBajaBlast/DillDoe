@@ -6,6 +6,7 @@ export const SITE_ORIGIN='https://dilldoe-games.pages.dev';
 export const isSecondaryFile=file=>/\.(?:wgsl|json|xml|meta)$/i.test(file);
 export const isSecondaryGameFile=(game,file)=>game==='worldfox'||isSecondaryFile(file)||(game==='omori'&&file.startsWith('audio/')&&file.endsWith('.m4a'))||(game==='gta5-webport-vercel'&&file.startsWith('data/')&&Object.hasOwn(gtaStatic.hashes,file.slice(5)));
 export const specialRoutes=[
+ '/api/*',
  '/halo-mobile/*',
  '/ports/gta5-webport-vercel/data/*','/ports/gta5-webport-vercel/deployment-status.json',
  '/ports/master-quest-browser/api/*','/ports/persona3-browser/api/*','/ports/ghost-sparta-browser/api/*',

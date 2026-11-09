@@ -7,6 +7,7 @@ import {createReleaseStore,parseByteRange} from './release-store.mjs';
 import {bootstrap,cleanPath,contentType,isolatedHeaders} from './migration-paths.mjs';
 import {splitStream} from './split-stream.mjs';
 import {transformGameText} from './game-text.mjs';
+import {playerRegistry} from './player-registry.mjs';
 
 const readPacked=createReleaseStore('https://github.com/MagiczLunchly/gta5-webport-vercel/releases/download/dilldoe-game-assets-v1/',packed.packs);
 const gta=createDataServer(gtaIndex);
@@ -112,6 +113,10 @@ async function gameAsset(request,url,game,path) {
 
 export async function migrationRouter(request,env){
  const url=new URL(request.url);
+ if(url.pathname.startsWith('/api/player/')||url.pathname.startsWith('/api/admin/')){
+  try{return await playerRegistry(request,env);}
+  catch(error){console.error('Player registry request failed',error instanceof Error?error.message:String(error));return Response.json({error:'Player service temporarily unavailable.'},{status:503,headers:{'Cache-Control':'no-store'}});}
+ }
  if(url.pathname==='/ports/persona4/disc.iso'){
   if(!['GET','HEAD'].includes(request.method))return response('Method not allowed',405,{'Allow':'GET, HEAD'});
   const partial=request.headers.has('Range');

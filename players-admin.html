@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Player management · DillDoe</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; color: #14253a; background: #edf5fb; font: 16px/1.5 system-ui, sans-serif; }
+    main { width: min(100%, 920px); margin: 0 auto; }
+    header, .panel { padding: 22px; border: 1px solid #d4e0ea; border-radius: 14px; background: white; box-shadow: 0 8px 28px #17324a0d; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+    h1, h2, p { margin-top: 0; }
+    h1 { margin-bottom: 0; font-size: 1.35rem; }
+    label { display: block; margin-bottom: 6px; font-weight: 650; }
+    input, button { min-height: 42px; border: 1px solid #afbfcd; border-radius: 8px; font: inherit; }
+    input { width: 100%; padding: 8px 11px; }
+    button { padding: 7px 14px; color: #132b40; background: #f3f7fa; cursor: pointer; }
+    button.primary { border-color: #15794a; color: white; background: #15794a; }
+    button.danger { border-color: #c43939; color: #a51f1f; background: #fff8f8; }
+    button:disabled { opacity: .6; cursor: wait; }
+    #login-form { max-width: 420px; }
+    #toolbar { display: flex; align-items: end; gap: 12px; }
+    #toolbar label { flex: 1; }
+    #status { min-height: 1.5em; margin: 12px 0 0; color: #536b7f; }
+    #status.error { color: #a51f1f; }
+    .table-wrap { margin-top: 18px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px 8px; border-bottom: 1px solid #e1e8ee; text-align: left; white-space: nowrap; }
+    th { color: #536b7f; font-size: .84rem; }
+    .state-banned { color: #a51f1f; font-weight: 650; }
+    .state-active { color: #15794a; }
+    @media (max-width: 560px) {
+      body { padding: 12px; }
+      header, .panel { padding: 16px; }
+      #toolbar { align-items: stretch; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Player management</h1>
+      <button id="logout" type="button" hidden>Sign out</button>
+    </header>
+    <p id="status" role="status" aria-live="polite"></p>
+
+    <section id="login-panel" class="panel">
+      <form id="login-form">
+        <label for="password">Admin password</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+        <button class="primary" type="submit">Sign in</button>
+      </form>
+    </section>
+
+    <section id="players-panel" class="panel" hidden>
+      <div id="toolbar">
+        <label for="search">Search usernames
+          <input id="search" type="search" autocomplete="off" placeholder="Type a player name">
+        </label>
+        <button id="refresh" type="button">Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Player</th><th>Joined</th><th>Last active</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="players"></tbody>
+        </table>
+      </div>
+      <button id="load-more" type="button" hidden>Load more players</button>
+    </section>
+  </main>
+
+  <script>
+    const loginPanel = document.getElementById('login-panel');
+    const playersPanel = document.getElementById('players-panel');
+    const status = document.getElementById('status');
+    const playerRows = document.getElementById('players');
+    const logout = document.getElementById('logout');
+    const loadMore = document.getElementById('load-more');
+    let playerOffset = 0;
+    let playerTotal = 0;
+    let searchTimer;
+    let listRequest = 0;
+
+    async function api(url, options = {}) {
+      const response = await fetch(url, {
+        credentials: 'same-origin',
+        cache: 'no-store',
+        ...options,
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw Object.assign(new Error(result.error || 'Request failed.'), { status: response.status });
+      return result;
+    }
+
+    function showLogin() {
+      loginPanel.hidden = false;
+      playersPanel.hidden = true;
+      logout.hidden = true;
+      status.textContent = '';
+    }
+
+    function showPlayers() {
+      loginPanel.hidden = true;
+      playersPanel.hidden = false;
+      logout.hidden = false;
+      loadPlayers();
+    }
+
+    function date(value) {
+      return value ? new Date(value).toLocaleString() : '—';
+    }
+
+    async function loadPlayers(append = false) {
+      const requestId = ++listRequest;
+      if (!append) {
+        playerOffset = 0;
+        playerRows.replaceChildren();
+      }
+      status.classList.remove('error');
+      status.textContent = 'Loading players…';
+      loadMore.disabled = true;
+      const query = new URLSearchParams({ q: document.getElementById('search').value, offset: playerOffset });
+      try {
+        const result = await api(`/api/admin/players?${query}`);
+        if (requestId !== listRequest) return;
+        for (const player of result.players) {
+          const row = document.createElement('tr');
+          const name = document.createElement('td');
+          name.textContent = player.username;
+          const joined = document.createElement('td');
+          joined.textContent = date(player.created_at);
+          const active = document.createElement('td');
+          active.textContent = date(player.last_seen_at);
+          const state = document.createElement('td');
+          state.textContent = player.banned_at ? 'Banned' : 'Active';
+          state.className = player.banned_at ? 'state-banned' : 'state-active';
+          const actionCell = document.createElement('td');
+          const action = document.createElement('button');
+          action.textContent = player.banned_at ? 'Unban' : 'Ban';
+          if (!player.banned_at) action.className = 'danger';
+          action.addEventListener('click', () => setBanned(player, !player.banned_at, action));
+          actionCell.append(action);
+          row.append(name, joined, active, state, actionCell);
+          playerRows.append(row);
+        }
+        playerOffset += result.players.length;
+        playerTotal = result.total;
+        status.textContent = `Showing ${playerOffset} of ${playerTotal} player${playerTotal === 1 ? '' : 's'}.`;
+        loadMore.hidden = playerOffset >= playerTotal;
+      } catch (error) {
+        if (requestId !== listRequest) return;
+        if (error.status === 401) return showLogin();
+        status.classList.add('error');
+        status.textContent = error.message;
+      } finally {
+        if (requestId === listRequest) loadMore.disabled = false;
+      }
+    }
+
+    async function setBanned(player, banned, button) {
+      button.disabled = true;
+      try {
+        await api('/api/admin/ban', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ playerId: player.player_id, banned }),
+        });
+        await loadPlayers();
+      } catch (error) {
+        if (error.status === 401) return showLogin();
+        status.classList.add('error');
+        status.textContent = error.message;
+        button.disabled = false;
+      }
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const submit = event.currentTarget.querySelector('button');
+      submit.disabled = true;
+      try {
+        await api('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: document.getElementById('password').value }),
+        });
+        document.getElementById('password').value = '';
+        status.textContent = '';
+        showPlayers();
+      } catch (error) {
+        status.classList.add('error');
+        status.textContent = error.message;
+      } finally {
+        submit.disabled = false;
+      }
+    });
+
+    document.getElementById('search').addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(loadPlayers, 200);
+    });
+    loadMore.addEventListener('click', () => loadPlayers(true));
+    document.getElementById('refresh').addEventListener('click', loadPlayers);
+    logout.addEventListener('click', async () => {
+      try { await api('/api/admin/logout', { method: 'POST' }); } catch { /* Session may have expired. */ }
+      showLogin();
+    });
+    loadPlayers();
+  </script>
+</body>
+</html>

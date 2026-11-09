@@ -16,6 +16,21 @@ The compact `__migration/static-build.json` inventory records the static game ha
 
 The workflow uses the encrypted repository secret `CLOUDFLARE_API_TOKEN` with Cloudflare Pages publishing permission. Keep this credential out of source files. The account ID is configured in the workflow. Cloudflare's existing production branch label is `main`; the editable GitHub branch remains `App`.
 
+## Player names and moderation
+
+The site asks each browser to choose a unique 3–20 character player name. It stores that name with a random, HttpOnly browser ID in Cloudflare D1. Browsers do not expose a person's computer-account or other service username; clearing this site's cookies or changing browsers creates a new browser profile.
+
+Before publishing the player registry, create its database and apply the schema from this directory:
+
+```sh
+npx wrangler d1 create dilldoe-players
+npx wrangler d1 execute dilldoe-players --remote --file migrations/0001_player_registry.sql
+```
+
+In Cloudflare, open **Workers & Pages → dilldoe-games → Settings → Bindings**. Add a production D1 binding named `PLAYER_DB` and select `dilldoe-players`. Under **Settings → Variables and Secrets**, add `PLAYER_ADMIN_PASSWORD` as a secret with a strong, unique password. Save and redeploy so the Worker receives the binding and secret. Do not put the password in GitHub, HTML, or JavaScript.
+
+After the binding is active, visit `/players-admin.html`, sign in with that password, search player names, then use **Ban** or **Unban**. Admin sessions expire after 12 hours; repeated failed sign-ins are temporarily rate-limited. The registry stores the chosen name, browser ID, join/last-active times, and ban state. A player can create another browser profile by clearing cookies or switching browsers, so this is site moderation rather than verified real-world identity.
+
 For local builds, run `npm ci` and `npm run build` inside this directory. The output is `dist`. For a manual deployment, run `npm run deploy` after authenticating with Cloudflare.
 
 Suitable game files up to Pages' 25 MiB per-file limit are downloaded and size-checked at build time, then published as static assets. Large WebAssembly runtimes are also served statically when gzip brings their encoded size below that limit; their decoded bytes and URLs stay the same. HTML, JavaScript, images, audio, and playable documents stay on the original site origin so existing browser saves and workers keep working. Fetchable shader/JSON/XML/metadata files use the static-only `dilldoe-gamefiles.pages.dev` project with CORS. This splits the existing files between two free Pages projects without running a second Worker. The build validates both 20,000-file limits before publishing.

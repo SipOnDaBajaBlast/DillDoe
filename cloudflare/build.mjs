@@ -9,6 +9,11 @@ import {staticFingerprint,validateBaseline} from './lib/static-build-state.mjs';
 import {needsGameIsolation} from './lib/isolation-page.mjs';
 const project=process.cwd(),output=path.join(project,'dist');
 if(path.resolve(output)!==path.resolve(project,'dist')||path.dirname(output)!==project)throw new Error('Unsafe build directory');
+function addPlayerGate(html){
+ if(html.includes('/assets/player-gate.js'))return html;
+ const script='<script src="/assets/player-gate.js" defer></script>';
+ return /<\/body\s*>/i.test(html)?html.replace(/<\/body\s*>/i,script+'</body>'):html+script;
+}
 await fs.rm(output,{recursive:true,force:true});
 await fs.mkdir(output,{recursive:true});
 await fs.cp(path.join(project,'public'),output,{recursive:true});
@@ -30,6 +35,7 @@ if(await fs.stat(path.join(repository,'games.html')).catch(()=>null)){
   if(file.endsWith('.html')){
    let text=rewrite(await fs.readFile(path.join(repository,file),'utf8'));
    if(file.startsWith('games/'))text=text.replace(/<head\b[^>]*>/i,head=>head+'<script src="/assets/game-download-guard.js?v=1"></script>');
+   if(file!=='players-admin.html')text=addPlayerGate(text);
    if(needsGameIsolation(file,text)){
     if(!catalog.mainIsolation.includes(file))catalog.mainIsolation.push(file);
     text=text.replace(/<iframe\b([^>]*)>/gi,(whole,attrs)=>/\ballow=/.test(attrs)?whole:'<iframe'+attrs+' allow="cross-origin-isolated; fullscreen; autoplay; gamepad" allowfullscreen>');
