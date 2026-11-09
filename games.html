@@ -635,227 +635,274 @@
 
         html[data-theme="pink"] .theme-option .check { color: #ea318b; }
 
-        /* ============================= DARK AERO THEME (Xbox 360) ============================= */
+                /* ============================= XBOX 360 THEME (pitch black / electric green) ============================= */
+
+        html[data-theme="dark"] {
+            scrollbar-color: #7cff1a #050805;
+        }
 
         html[data-theme="dark"] body {
-            background: linear-gradient(180deg, rgba(3, 12, 5, 0.62) 0%, rgba(5, 22, 10, 0.34) 45%, rgba(1, 8, 3, 0.68) 100%),
-                        radial-gradient(ellipse at 18% 12%, #87b94a 0%, #334b25 28%, #101a12 65%) fixed;
-            color: #d9ffd2;
+            background:
+                radial-gradient(120% 92% at 8% -4%, rgba(124, 255, 26, 0.32) 0%, rgba(58, 168, 0, 0.16) 24%, rgba(0, 0, 0, 0) 56%),
+                radial-gradient(70% 52% at 102% -6%, rgba(124, 255, 26, 0.13) 0%, rgba(0, 0, 0, 0) 62%),
+                radial-gradient(85% 70% at 94% 104%, rgba(57, 255, 20, 0.15) 0%, rgba(0, 0, 0, 0) 60%),
+                linear-gradient(180deg, #000000 0%, #020402 44%, #000000 100%);
+            background-color: #000000;
+            background-attachment: fixed;
+            color: #e6ffd6;
         }
 
-        html[data-theme="dark"] .back-btn {
-            color: #e6ffdb;
-            background: linear-gradient(180deg, #3c4a38 0%, #26301f 45%, #1a231a 50%, #101710 85%, #060a06 100%);
-            border-color: rgba(146, 208, 80, 0.55);
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65), 0 0 16px rgba(126, 200, 40, 0.25), inset 0 1px 1px rgba(220, 255, 200, 0.35), inset 0 -2px 3px rgba(0, 0, 0, 0.7);
-            text-shadow: 0 0 10px rgba(150, 230, 70, 0.55);
-        }
-
-        html[data-theme="dark"] .back-btn:hover {
-            background: linear-gradient(180deg, #55684d 0%, #35442c 45%, #24311f 50%, #16211a 85%, #0a120a 100%);
-            border-color: #9be04a;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), 0 0 24px rgba(140, 220, 60, 0.55), inset 0 1px 2px rgba(230, 255, 210, 0.45);
+        /* Sweeping energy blades, like the dashboard light burst */
+        html[data-theme="dark"] body::before {
+            content: '';
+            position: fixed;
+            inset: -12%;
+            z-index: -1;
+            pointer-events: none;
+            background: repeating-conic-gradient(from 196deg at 6% -8%,
+                rgba(124, 255, 26, 0) 0deg 4.3deg,
+                rgba(124, 255, 26, 0.11) 4.7deg 5.3deg,
+                rgba(124, 255, 26, 0) 5.7deg 8.6deg,
+                rgba(210, 255, 160, 0.07) 9deg 9.4deg,
+                rgba(124, 255, 26, 0) 9.8deg 13deg);
+            -webkit-mask-image: radial-gradient(78% 78% at 9% 0%, #000 0%, rgba(0, 0, 0, 0.4) 46%, transparent 80%);
+            mask-image: radial-gradient(78% 78% at 9% 0%, #000 0%, rgba(0, 0, 0, 0.4) 46%, transparent 80%);
+            mix-blend-mode: screen;
+            opacity: 0.9;
         }
 
         html[data-theme="dark"] header {
-            background: linear-gradient(180deg, rgba(22, 34, 22, 0.78) 0%, rgba(6, 14, 8, 0.72) 100%);
-            border: 2px solid rgba(140, 210, 70, 0.45);
-            box-shadow: 0 10px 34px rgba(0, 0, 0, 0.7), 0 0 28px rgba(120, 200, 40, 0.22), inset 0 2px 4px rgba(200, 255, 170, 0.18);
+            position: relative;
+            overflow: hidden;
+            border-radius: 3px;
+            border: 1px solid rgba(124, 255, 26, 0.5);
+            background: linear-gradient(180deg, rgba(19, 32, 10, 0.96) 0%, rgba(4, 9, 2, 0.98) 46%, #000000 100%);
+            box-shadow:
+                0 0 0 1px #000000,
+                0 0 28px rgba(124, 255, 26, 0.24),
+                0 18px 40px rgba(0, 0, 0, 0.9),
+                inset 0 1px 0 rgba(200, 255, 150, 0.22);
         }
 
         html[data-theme="dark"] header::before {
-            background: linear-gradient(180deg, rgba(200, 255, 170, 0.16) 0%, rgba(200, 255, 170, 0) 100%);
+            height: 100%;
+            border-radius: 2px;
+            background:
+                linear-gradient(180deg, rgba(190, 255, 130, 0.16) 0%, rgba(124, 255, 26, 0.04) 40%, rgba(0, 0, 0, 0) 64%),
+                repeating-linear-gradient(0deg, rgba(160, 255, 90, 0.05) 0 1px, transparent 1px 3px);
         }
 
-        html[data-theme="dark"] .aero-title {
-            background: linear-gradient(180deg, #f2fff0 0%, #cdf79a 35%, #86e01a 65%, #3f8f00 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 18px rgba(140, 220, 60, 0.5));
-        }
-
-        html[data-theme="dark"] .search-bar {
-            background: linear-gradient(180deg, rgba(14, 24, 14, 0.9) 0%, rgba(4, 10, 4, 0.85) 100%);
-            border-color: rgba(140, 210, 70, 0.45);
-            color: #d9ffd2;
-            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8), 0 8px 22px rgba(0, 0, 0, 0.55);
-        }
-
-        html[data-theme="dark"] .search-bar::placeholder { color: rgba(190, 240, 160, 0.55); }
-
-        html[data-theme="dark"] .search-bar:focus {
-            background: linear-gradient(180deg, rgba(20, 34, 18, 0.96) 0%, rgba(6, 14, 6, 0.94) 100%);
-            border-color: #9be04a;
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.75), 0 0 26px rgba(140, 220, 60, 0.65);
-            color: #eaffdf;
-        }
-
-        html[data-theme="dark"] .game-card {
-            background: linear-gradient(135deg, rgba(24, 38, 24, 0.78) 0%, rgba(6, 14, 8, 0.7) 100%);
-            border-color: rgba(140, 210, 70, 0.42);
-            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7), inset 0 2px 2px rgba(200, 255, 170, 0.14);
-            color: #d9ffd2;
-        }
-
-        html[data-theme="dark"] .game-card::before {
-            background: linear-gradient(180deg, rgba(200, 255, 170, 0.12) 0%, rgba(200, 255, 170, 0) 100%);
-        }
-
-        html[data-theme="dark"] .game-card:hover {
-            background: linear-gradient(135deg, rgba(34, 54, 30, 0.85) 0%, rgba(10, 22, 10, 0.8) 100%);
-            border-color: #9be04a;
-            box-shadow: 0 18px 42px rgba(0, 0, 0, 0.75), 0 0 26px rgba(140, 220, 60, 0.5), inset 0 2px 4px rgba(210, 255, 180, 0.2);
-        }
-
-        html[data-theme="dark"] .img-wrapper {
-            border-color: rgba(140, 210, 70, 0.4);
-            box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.85), 0 3px 10px rgba(0, 0, 0, 0.7);
-        }
-
-        html[data-theme="dark"] .game-card img { background-color: #0a140a; }
-
-        html[data-theme="dark"] .img-wrapper::after {
-            background: linear-gradient(135deg, rgba(190, 255, 170, 0) 0%, rgba(200, 255, 170, 0.35) 50%, rgba(190, 255, 170, 0) 100%);
-        }
-
-        html[data-theme="dark"] .game-title {
-            color: #cdf3bd;
-            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.9), 0 0 12px rgba(130, 220, 60, 0.35);
-        }
-
-        html[data-theme="dark"] .game-card:hover .game-title { color: #a8ef5c; }
-
-        html[data-theme="dark"] .library-count {
-            color: #eaffdf;
-            background: linear-gradient(180deg, rgba(58, 92, 34, 0.95) 0%, rgba(32, 56, 18, 0.95) 50%, rgba(12, 26, 8, 0.95) 100%);
-            border-color: rgba(150, 220, 80, 0.55);
-            box-shadow: 0 7px 24px rgba(0, 0, 0, 0.7), 0 0 22px rgba(120, 200, 40, 0.3), inset 0 2px 3px rgba(210, 255, 180, 0.2);
-            text-shadow: 0 0 10px rgba(150, 230, 70, 0.5);
-        }
-
-        html[data-theme="dark"] .count-orb { color: #9be04a; }
-        html[data-theme="dark"] .no-results { color: #d9ffd2; }
-
-        html[data-theme="dark"] .library-privacy a {
-            color: #cdf3bd;
-            background: rgba(8, 16, 8, 0.88);
-            border: 1px solid rgba(140, 210, 70, 0.4);
-        }
-
-        html[data-theme="dark"] .theme-btn {
-            color: #e6ffdb;
-            background: linear-gradient(180deg, #3c4a38 0%, #26301f 45%, #1a231a 50%, #101710 85%, #060a06 100%);
-            border-color: rgba(146, 208, 80, 0.55);
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65), 0 0 16px rgba(126, 200, 40, 0.25), inset 0 1px 1px rgba(220, 255, 200, 0.35), inset 0 -2px 3px rgba(0, 0, 0, 0.7);
-            text-shadow: 0 0 10px rgba(150, 230, 70, 0.55);
-        }
-
-        html[data-theme="dark"] .theme-btn:hover {
-            border-color: #9be04a;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), 0 0 24px rgba(140, 220, 60, 0.55), inset 0 1px 2px rgba(230, 255, 210, 0.45);
-        }
-
-        html[data-theme="dark"] .theme-swatch {
-            background: linear-gradient(135deg, #cdf79a 0%, #86e01a 55%, #16350a 100%);
-            box-shadow: 0 0 0 1px rgba(0, 20, 0, 0.6), 0 0 10px rgba(140, 220, 60, 0.95);
-        }
-
-        html[data-theme="dark"] .theme-dropdown {
-            background: linear-gradient(180deg, rgba(18, 30, 18, 0.98) 0%, rgba(4, 12, 6, 0.98) 100%);
-            border-color: rgba(140, 210, 70, 0.5);
-            box-shadow: 0 18px 44px rgba(0, 0, 0, 0.8), 0 0 26px rgba(120, 200, 40, 0.28), inset 0 2px 2px rgba(200, 255, 170, 0.14);
-        }
-
-        html[data-theme="dark"] .theme-option { color: #d9ffd2; }
-        html[data-theme="dark"] .theme-option small { opacity: 0.68; }
-
-        html[data-theme="dark"] .theme-option:hover {
-            background: rgba(140, 210, 70, 0.16);
-            border-color: rgba(140, 210, 70, 0.55);
-        }
-
-        html[data-theme="dark"] .theme-option.active {
-            background: linear-gradient(180deg, rgba(120, 190, 60, 0.3) 0%, rgba(20, 40, 10, 0.4) 100%);
-            border-color: #9be04a;
-            box-shadow: 0 3px 12px rgba(100, 180, 30, 0.3), inset 0 1px 0 rgba(220, 255, 190, 0.25);
-        }
-
-        html[data-theme="dark"] .theme-option .check { color: #9be04a; }
-
-        /* Dark Aero drops the nyan cat and troll face and uses its own backdrop characters */
-        html[data-theme="dark"] .nyan-cat,
-        html[data-theme="dark"] .troll-face { display: none; }
-
-        html[data-theme="dark"] .doge-meme,
-        html[data-theme="dark"] .sad-bart {
-            opacity: 0.3;
-            filter: drop-shadow(0 0 16px rgba(140, 220, 60, 0.65)) saturate(0.75) brightness(0.85);
-        }
-
-        /* Xbox-era backdrop characters (Dark Aero only) */
-        .xbox-hero,
-        .xbox-sackboy {
+        html[data-theme="dark"] header::after {
+            content: 'XBOX 360';
             position: absolute;
-            display: none;
-            height: auto;
+            right: 64px;
+            top: 17px;
+            transform: none;
+            font-family: var(--font-heading);
+            font-size: 0.62rem;
+            font-weight: 800;
+            letter-spacing: 0.34em;
+            color: #b6ff5c;
+            text-shadow: 0 0 14px rgba(124, 255, 26, 0.9), 0 0 3px rgba(0, 0, 0, 0.9);
+            opacity: 0.78;
             pointer-events: none;
         }
 
-        .xbox-hero { left: 1%; bottom: 18%; width: 320px; }
-        .xbox-sackboy { right: 1%; bottom: 16%; width: 200px; }
-
-        html[data-theme="dark"] .xbox-hero,
-        html[data-theme="dark"] .xbox-sackboy { display: block; }
-
-        html[data-theme="dark"] .xbox-hero {
-            opacity: 0.92;
-            filter: drop-shadow(0 0 20px rgba(140, 220, 60, 0.6)) contrast(1.05);
-            animation: floatHero 7s ease-in-out infinite alternate;
+        html[data-theme="dark"] .aero-title {
+            background: linear-gradient(180deg, #ffffff 0%, #eaffd0 16%, #b6ff5c 42%, #63d600 64%, #1f6b00 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.12em;
+            filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.95)) drop-shadow(0 0 24px rgba(124, 255, 26, 0.55));
         }
 
-        html[data-theme="dark"] .xbox-sackboy {
-            opacity: 0.88;
-            filter: drop-shadow(0 0 18px rgba(140, 220, 60, 0.55)) contrast(1.05);
-            animation: floatSackboy 6s ease-in-out infinite alternate;
-        }
-
-        @keyframes floatHero {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-16px); }
-        }
-
-        @keyframes floatSackboy {
-            0% { transform: translateY(0) rotate(-2deg); }
-            100% { transform: translateY(14px) rotate(2deg); }
-        }
-
-        /* Dark Aero gets sharper, more angular surfaces */
-        html[data-theme="dark"] header { border-radius: 8px; }
-        html[data-theme="dark"] header::before { border-radius: 6px 6px 0 0; }
-        html[data-theme="dark"] .search-bar { border-radius: 5px; }
         html[data-theme="dark"] .back-btn,
-        html[data-theme="dark"] .theme-btn { border-radius: 6px; }
-        html[data-theme="dark"] .game-card { border-radius: 8px; }
-        html[data-theme="dark"] .game-card::before { border-radius: 6px 6px 0 0; }
-        html[data-theme="dark"] .img-wrapper { border-radius: 3px; }
-        html[data-theme="dark"] .library-count { border-radius: 6px; }
-        html[data-theme="dark"] .theme-dropdown { border-radius: 8px; }
-        html[data-theme="dark"] .theme-option { border-radius: 3px; }
-        html[data-theme="dark"] .library-privacy a { border-radius: 4px; }
+        html[data-theme="dark"] .theme-btn,
+        html[data-theme="dark"] .library-privacy a {
+            color: #e9ffd8;
+            background: linear-gradient(180deg, #1b2c10 0%, #0c1607 48%, #030703 100%);
+            border: 1px solid rgba(124, 255, 26, 0.45);
+            border-radius: 3px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(200, 255, 150, 0.2);
+            text-shadow: 0 0 10px rgba(124, 255, 26, 0.35);
+        }
+
+        html[data-theme="dark"] .back-btn:hover,
+        html[data-theme="dark"] .theme-btn:hover,
+        html[data-theme="dark"] .library-privacy a:hover {
+            background: linear-gradient(180deg, #2a4516 0%, #13230b 48%, #050a04 100%);
+            border-color: #a6ff3d;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.85), 0 0 26px rgba(124, 255, 26, 0.5), inset 0 1px 0 rgba(220, 255, 180, 0.35);
+        }
+
+        html[data-theme="dark"] .search-bar {
+            background: linear-gradient(180deg, rgba(10, 18, 6, 0.95) 0%, rgba(0, 0, 0, 0.96) 100%);
+            border: 1px solid rgba(124, 255, 26, 0.42);
+            border-radius: 3px;
+            color: #eaffdb;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.95), 0 0 18px rgba(124, 255, 26, 0.1);
+            text-shadow: 0 0 10px rgba(124, 255, 26, 0.25);
+        }
+
+        html[data-theme="dark"] .search-bar::placeholder { color: rgba(170, 255, 110, 0.5); }
+
+        html[data-theme="dark"] .search-bar:focus {
+            background: linear-gradient(180deg, rgba(14, 26, 8, 0.98) 0%, #000000 100%);
+            border-color: #9dff3d;
+            box-shadow: inset 0 2px 6px #000000, 0 0 28px rgba(124, 255, 26, 0.55);
+            transform: scale(1.015);
+        }
+
+        html[data-theme="dark"] .library-count {
+            color: #dfffcd;
+            background: linear-gradient(180deg, rgba(20, 34, 10, 0.96) 0%, rgba(4, 9, 3, 0.97) 55%, #000000 100%);
+            border: 1px solid rgba(124, 255, 26, 0.42);
+            border-radius: 3px;
+            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.8), 0 0 20px rgba(124, 255, 26, 0.16), inset 0 1px 0 rgba(200, 255, 150, 0.18);
+            text-shadow: none;
+        }
+
+        html[data-theme="dark"] .count-orb { color: #a6ff3d; text-shadow: 0 0 12px rgba(124, 255, 26, 0.9); }
+        html[data-theme="dark"] .no-results { color: #dfffcd; }
+
+        /* Game blades: black panels that flood with dashboard green on hover */
+        html[data-theme="dark"] .game-card {
+            background: linear-gradient(155deg, rgba(24, 44, 12, 0.92) 0%, rgba(6, 12, 3, 0.96) 45%, #000000 100%);
+            border: 1px solid rgba(124, 255, 26, 0.3);
+            border-radius: 4px;
+            color: #e9ffd8;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(180, 255, 120, 0.12);
+        }
+
+        html[data-theme="dark"] .game-card::before {
+            height: 52%;
+            border-radius: 3px 3px 0 0;
+            background: linear-gradient(180deg, rgba(190, 255, 130, 0.16) 0%, rgba(124, 255, 26, 0.04) 55%, rgba(124, 255, 26, 0) 100%);
+        }
+
+        html[data-theme="dark"] .game-card::after {
+            content: '';
+            position: absolute;
+            top: -60%;
+            left: -130%;
+            width: 220%;
+            height: 220%;
+            background: linear-gradient(102deg, rgba(160, 255, 90, 0) 44%, rgba(160, 255, 90, 0.12) 50%, rgba(160, 255, 90, 0) 56%);
+            transform: rotate(8deg);
+            transition: left 0.55s ease, top 0.55s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        html[data-theme="dark"] .game-card:hover::after {
+            left: -10%;
+            top: -40%;
+        }
+
+        html[data-theme="dark"] .game-card:hover,
+        html[data-theme="dark"] .game-card:focus-visible {
+            background: linear-gradient(155deg, #b6ff5c 0%, #7cff1a 34%, #3fae00 72%, #14530a 100%);
+            border-color: #e6ffbf;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.9), 0 0 34px rgba(124, 255, 26, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+        }
+
+        html[data-theme="dark"] .img-wrapper {
+            border: 1px solid rgba(124, 255, 26, 0.35);
+            border-radius: 2px;
+            box-shadow: inset 0 0 10px #000000, 0 2px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        html[data-theme="dark"] .game-card img { background-color: #050a04; }
+
+        html[data-theme="dark"] .img-wrapper::after {
+            background: linear-gradient(135deg, rgba(124, 255, 26, 0) 0%, rgba(190, 255, 130, 0.35) 50%, rgba(124, 255, 26, 0) 100%);
+        }
+
+        html[data-theme="dark"] .game-title {
+            color: #e4ffd2;
+            font-family: 'Segoe UI', Tahoma, var(--font-body);
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            text-shadow: 0 1px 0 #000000, 0 0 14px rgba(124, 255, 26, 0.25);
+        }
+
+        html[data-theme="dark"] .game-card:hover .game-title {
+            color: #050f04;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+        }
+
+        html[data-theme="dark"] .theme-swatch {
+            border-color: rgba(190, 255, 150, 0.6);
+            box-shadow: 0 0 0 1px #000000, 0 0 10px rgba(124, 255, 26, 0.95);
+        }
+
+        html[data-theme="dark"] .theme-dropdown {
+            background: linear-gradient(180deg, rgba(10, 18, 6, 0.985) 0%, rgba(0, 0, 0, 0.99) 100%);
+            border: 1px solid rgba(124, 255, 26, 0.45);
+            border-radius: 4px;
+            box-shadow: 0 20px 46px rgba(0, 0, 0, 0.9), 0 0 26px rgba(124, 255, 26, 0.22);
+        }
+
+        html[data-theme="dark"] .theme-option { color: #e4ffd2; border-radius: 2px; }
+        html[data-theme="dark"] .theme-option small { opacity: 0.68; }
+
+        html[data-theme="dark"] .theme-option:hover {
+            background: rgba(124, 255, 26, 0.12);
+            border-color: rgba(124, 255, 26, 0.5);
+        }
+
+        html[data-theme="dark"] .theme-option.active {
+            background: linear-gradient(180deg, #8cff1a 0%, #4dbb00 100%);
+            border-color: #d9ffb0;
+            color: #051003;
+            box-shadow: 0 0 18px rgba(124, 255, 26, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        html[data-theme="dark"] .theme-option .check { color: #a6ff3d; }
+        html[data-theme="dark"] .theme-option.active .check { color: #061004; }
+
+        html[data-theme="dark"] :focus-visible { outline: 2px solid #a6ff3d; outline-offset: 3px; }
+
+        /* Xbox 360 logo orb in the header */
+        .xbox-orb {
+            position: absolute;
+            top: 11px;
+            right: 16px;
+            width: 38px;
+            height: 38px;
+            display: none;
+            pointer-events: none;
+            opacity: 0.95;
+            filter: drop-shadow(0 0 14px rgba(124, 255, 26, 0.75));
+            animation: xboxOrbPulse 5.5s ease-in-out infinite alternate;
+        }
+
+        html[data-theme="dark"] .xbox-orb { display: block; }
+        .xbox-orb svg { width: 100%; height: 100%; display: block; }
+
+        @keyframes xboxOrbPulse {
+            0% { filter: drop-shadow(0 0 10px rgba(124, 255, 26, 0.55)); }
+            100% { filter: drop-shadow(0 0 20px rgba(160, 255, 60, 0.95)); }
+        }
 
         @media (prefers-reduced-motion: reduce) {
-            html[data-theme="dark"] .xbox-hero,
-            html[data-theme="dark"] .xbox-sackboy { animation: none; }
+            html[data-theme="dark"] .xbox-orb { animation: none; }
+            html[data-theme="dark"] .game-card::after { transition: none; }
+        }
+
+        @media (max-width: 900px) {
+            html[data-theme="dark"] header::after { display: none; }
+        }
+
+        @media (max-width: 760px) {
+            .xbox-orb { width: 30px; height: 30px; top: 9px; right: 12px; }
         }
 
         @media (max-width: 600px) {
-            .theme-btn { font-size: 0.82rem; padding: 7px 12px 7px 10px; }
-            .theme-dropdown { min-width: 215px; }
-            .theme-option { font-size: 0.85rem; padding: 8px 10px; }
-            .xbox-hero { width: 170px; left: 0; bottom: 22%; }
-            .xbox-sackboy { width: 110px; right: 0; bottom: 20%; }
+            html[data-theme="dark"] .xbox-orb { display: none; }
         }
+
     </style>
     <link rel="stylesheet" href="/assets/library-console-themes.css">
 </head>
@@ -870,8 +917,6 @@
         <img class="doge-meme" src="https://pngimg.com/uploads/doge_meme/doge_meme_PNG112723.png" alt="Doge">
         <img class="troll-face" src="https://www.pngkey.com/png/full/22-226917_memes-unhappy-troll-sticker-sad-trollface.png" alt="Sad Trollface">
         <img class="sad-bart" src="https://www.nicepng.com/png/full/136-1362322_sad-simpsons-and-bart-image-bart-simpson-sad.png" alt="Sad Bart Simpson">
-        <img class="xbox-hero" src="https://static.wikia.nocookie.net/neoencyclopedia/images/e/e9/Master_Chief_in_Halo_3.png/revision/latest/scale-to-width-down/250?cb=20110821054739" alt="Master Chief">
-        <img class="xbox-sackboy" src="https://static.wikia.nocookie.net/littlebigplanet/images/a/ad/Sackboy.png/revision/latest?cb=20220915190250" alt="Sackboy">
     </div>
 
     <!-- NAVIGATION BAR -->
@@ -905,8 +950,8 @@
                     <span class="check" aria-hidden="true">✔</span>
                 </button>
                 <button type="button" class="theme-option" role="menuitemradio" data-theme-option="dark" aria-checked="false">
-                    <span class="dot" style="background: linear-gradient(135deg, #cdf79a 0%, #86e01a 55%, #16350a 100%);" aria-hidden="true"></span>
-                    <span class="meta">Xbox 360<small>Green dashboard</small></span>
+                    <span class="dot" style="background: linear-gradient(135deg, #f2ffe0 0%, #a6ff3d 38%, #2f8b00 72%, #000000 100%);" aria-hidden="true"></span>
+                    <span class="meta">Xbox 360<small>Pitch black / electric green</small></span>
                     <span class="check" aria-hidden="true">✔</span>
                 </button>
             </div>
@@ -914,6 +959,35 @@
     </div>
 
     <header>
+        <div class="xbox-orb" aria-hidden="true">
+            <svg viewBox="0 0 220 220" focusable="false" role="presentation">
+            <defs>
+                <radialGradient id="xboxOrbHalo" cx="50%" cy="50%" r="50%">
+                    <stop offset="52%" stop-color="#7cff1a" stop-opacity="0.28"/>
+                    <stop offset="100%" stop-color="#7cff1a" stop-opacity="0"/>
+                </radialGradient>
+                <radialGradient id="xboxOrbSphere" cx="38%" cy="30%" r="82%">
+                    <stop offset="0%" stop-color="#1a3110"/>
+                    <stop offset="62%" stop-color="#070d05"/>
+                    <stop offset="100%" stop-color="#000000"/>
+                </radialGradient>
+                <linearGradient id="xboxOrbX" x1="20%" y1="8%" x2="80%" y2="94%">
+                    <stop offset="0%" stop-color="#eaffd0"/>
+                    <stop offset="34%" stop-color="#a6ff3d"/>
+                    <stop offset="74%" stop-color="#57c700"/>
+                    <stop offset="100%" stop-color="#1f5c00"/>
+                </linearGradient>
+            </defs>
+            <circle cx="110" cy="110" r="108" fill="url(#xboxOrbHalo)"/>
+            <circle cx="110" cy="110" r="92" fill="url(#xboxOrbSphere)" stroke="#7cff1a" stroke-opacity="0.35" stroke-width="1.2"/>
+            <g fill="url(#xboxOrbX)" stroke="#061003" stroke-width="1.5" stroke-linejoin="round">
+                <path d="M32 34c42 4 66 28 73 66-39-4-61-30-73-66z"/>
+                <path d="M188 34c-42 4-66 28-73 66 39-4 61-30 73-66z"/>
+                <path d="M32 186c42-4 66-28 73-66-39 4-61 30-73 66z"/>
+                <path d="M188 186c-42-4-66-28-73-66 39 4 61 30 73 66z"/>
+            </g>
+        </svg>
+        </div>
         <h1 class="aero-title">GAME LIBRARY</h1>
     </header>
 
@@ -1199,6 +1273,38 @@
                 <img loading="lazy" decoding="async" src="/assets/game-thumbnails/hotline-miami.jpg" alt="Hotline Miami">
             </div>
             <div class="game-title">Hotline Miami</div>
+        </a>
+
+        <!-- DEALER'S LIFE -->
+        <a href="games/DealersLife.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="/assets/game-thumbnails/dealers-life.webp" alt="Dealer's Life Thumbnail">
+            </div>
+            <div class="game-title">Dealer's Life</div>
+        </a>
+
+        <!-- WEBFISHING -->
+        <a href="games/Webfishing.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="/assets/game-thumbnails/webfishing.webp" alt="WEBFISHING Thumbnail">
+            </div>
+            <div class="game-title">WEBFISHING</div>
+        </a>
+
+        <!-- WITCH'S HEART -->
+        <a href="games/WitchsHeart.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="/assets/game-thumbnails/witchs-heart.webp" alt="Witch's Heart Thumbnail">
+            </div>
+            <div class="game-title">Witch's Heart</div>
+        </a>
+
+        <!-- FNAF: INTO THE PIT -->
+        <a href="games/FnafIntoThePit.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="/assets/game-thumbnails/fnaf-into-the-pit.webp" alt="FNAF: Into the Pit Thumbnail">
+            </div>
+            <div class="game-title">FNAF: Into the Pit</div>
         </a>
         <a href="games/Deltarune.html" class="game-card">
             <div class="img-wrapper">
@@ -1549,7 +1655,7 @@
             },
             dark: {
                 label: 'Xbox 360',
-                bubbles: { highlight: '225, 255, 200', mid: '134, 224, 26', edge: '22, 74, 12' }
+                bubbles: { highlight: '235, 255, 210', mid: '124, 255, 26', edge: '10, 48, 0' }
             }
         };
         const DEFAULT_THEME = 'frutiger';

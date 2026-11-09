@@ -3,17 +3,6 @@ html[data-theme="dark"] .bg-meme-container,
 html[data-theme="dark"] #bubbleCanvas,
 html[data-theme="ps2"] .bg-meme-container,
 html[data-theme="ps2"] #bubbleCanvas { display: none; }
-html[data-theme="dark"] .game-card {
-  background: linear-gradient(145deg, #f4f5ef, #c8cec3);
-  border: 1px solid #e1eadb;
-  border-top: 7px solid #87c82c;
-  box-shadow: 0 7px 18px #0008;
-}
-html[data-theme="dark"] .game-title,
-html[data-theme="dark"] .game-card:hover .game-title { color: #22351a; text-shadow: none; }
-html[data-theme="dark"] .game-card:hover { background: #efffd9; border-color: #a7ed48; }
-html[data-theme="dark"] .img-wrapper::after { display: none; }
-html[data-theme="dark"] .search-bar::placeholder { color: #c1d5b8; }
 html[data-theme="ps2"] body {
   color: #e5ecff;
   background: linear-gradient(#02061266,#020612aa), url('/assets/ps2-boot-background.png') center / cover fixed;
