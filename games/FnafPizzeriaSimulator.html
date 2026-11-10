@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#050505">
+  <title>FNAF: Pizzeria Simulator · DillDoe</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #050505; }
+    #stage { position: fixed; inset: 0; background: #050505; }
+    iframe { width: 100%; height: 100%; border: 0; display: block; }
+    #options { position: fixed; z-index: 5; top: 10px; right: 10px; display: flex; gap: 8px; }
+    #options a, #options button { border: 1px solid #ffffff66; border-radius: 8px; padding: 8px 12px; color: white; background: #101010dd; font: 14px system-ui,sans-serif; text-decoration: none; cursor: pointer; }
+    #stage:fullscreen iframe { width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <main id="stage" aria-label="FNAF: Pizzeria Simulator game">
+    <iframe src="https://irv77.github.io/hd_fnaf/ps/" title="FNAF: Pizzeria Simulator" allow="fullscreen; autoplay; gamepad" allowfullscreen></iframe>
+  </main>
+  <nav id="options" aria-label="Game options">
+    <a href="/games">Game library</a>
+    <a href="https://irv77.github.io/hd_fnaf/ps/" target="_blank" rel="noopener">Open game separately</a>
+    <button id="fullscreen" type="button">Fullscreen</button>
+  </nav>
+  <script>document.getElementById('fullscreen').addEventListener('click',()=>document.getElementById('stage').requestFullscreen?.());</script>
+</body>
+</html>

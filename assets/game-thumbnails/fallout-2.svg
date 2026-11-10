@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs><linearGradient id="bg" x2="0" y2="1"><stop stop-color="#18271a"/><stop offset="1" stop-color="#050906"/></linearGradient></defs>
+  <rect width="640" height="360" fill="url(#bg)"/>
+  <path d="M0 245 95 205 165 240 250 175 337 230 420 188 520 235 640 190V360H0Z" fill="#111b13"/>
+  <circle cx="320" cy="143" r="83" fill="none" stroke="#78ca65" stroke-width="12"/>
+  <path d="M320 61v164M238 143h164M262 85l116 116M378 85 262 201" stroke="#78ca65" stroke-width="10"/>
+  <text x="320" y="300" fill="#baff9e" text-anchor="middle" font-family="monospace" font-size="49" font-weight="700">FALLOUT 2</text>
+</svg>
