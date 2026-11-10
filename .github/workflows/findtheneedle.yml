@@ -1,0 +1,128 @@
+name: Update Find The Needle
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [App]
+    paths:
+      - '.github/workflows/findtheneedle.yml'
+      - 'findtheneedle-pin.txt'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: findtheneedle-production
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: cloudflare/package-lock.json
+      - name: Read pinned revision
+        id: pin
+        run: echo "sha=$(tr -d '[:space:]' < findtheneedle-pin.txt)" >> "$GITHUB_OUTPUT"
+      - name: Download Find The Needle
+        run: |
+          curl -fsSL --retry 3 --retry-all-errors -o /tmp/findtheneedle.tar.gz "https://codeload.github.com/Nawsif/FindTheNeedle/tar.gz/${{ steps.pin.outputs.sha }}"
+          mkdir -p dist-findtheneedle
+          tar -xzf /tmp/findtheneedle.tar.gz -C dist-findtheneedle --strip-components=1
+      - name: Prepare static site
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const root = 'dist-findtheneedle';
+          const indexPath = path.join(root, 'index.html');
+          const html = fs.readFileSync(indexPath, 'utf8');
+          if (/cdn\.jsdelivr\.net|raw\.githubusercontent\.com/i.test(html)) {
+            throw new Error('Find The Needle page still references an external asset host');
+          }
+          const split = JSON.parse(fs.readFileSync(path.join(root, 'asset-parts.json'), 'utf8'));
+          for (const [asset, info] of Object.entries(split)) {
+            let total = 0;
+            for (const part of info.parts) {
+              const file = path.join(root, part.file);
+              const size = fs.statSync(file).size;
+              if (size !== part.size) throw new Error(`Incomplete ${part.file}: expected ${part.size}, got ${size}`);
+              total += size;
+            }
+            if (total !== info.size) throw new Error(`Incomplete ${asset}: expected ${info.size}, got ${total}`);
+          }
+          const offline = path.join(root, 'index.offline.html');
+          if (!fs.existsSync(offline)) {
+            fs.writeFileSync(offline, '<!doctype html><meta charset="utf-8"><title>Find The Needle is offline</title><body style="background:#111;color:#fff;font:16px system-ui,sans-serif;padding:2rem"><h1>Find The Needle</h1><p>Connect to the internet and reload to continue.</p>');
+          }
+          fs.writeFileSync(path.join(root, '_headers'), [
+            '/*',
+            '  Cross-Origin-Opener-Policy: same-origin',
+            '  Cross-Origin-Embedder-Policy: require-corp',
+            '  Cross-Origin-Resource-Policy: cross-origin',
+            '  X-Content-Type-Options: nosniff',
+            '  Permissions-Policy: fullscreen=(self), gamepad=(self)',
+            '',
+            '/*.wasm',
+            '  Content-Type: application/wasm',
+            '',
+            '/*.part*',
+            '  Cache-Control: public, max-age=31536000, immutable',
+            '  Content-Type: application/octet-stream',
+            '',
+            '/index.html',
+            '  Cache-Control: no-cache',
+            '',
+            '/index.offline.html',
+            '  Cache-Control: no-cache',
+            '',
+            '/index.js',
+            '  Cache-Control: no-cache',
+            '',
+            '/split-assets.js',
+            '  Cache-Control: no-cache',
+            '',
+            '/web-browser-controls.js',
+            '  Cache-Control: no-cache',
+            '',
+            '/index.service.worker.js',
+            '  Cache-Control: no-cache',
+            ''
+          ].join('\n'));
+          NODE
+      - name: Install deploy tooling
+        working-directory: cloudflare
+        run: npm ci
+      - name: Ensure Pages project exists
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          const account = '7d0845823ccbb7316078275c24c2658c';
+          const base = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects`;
+          const headers = {Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`, 'Content-Type': 'application/json'};
+          const name = 'dilldoe-findtheneedle';
+          const current = await fetch(`${base}/${name}`, {headers, signal: AbortSignal.timeout(30000)});
+          const existing = await current.json();
+          if (current.ok && existing.success) console.log(`${name} is available.`);
+          else if (current.status === 404 || existing.errors?.some(error => error.code === 8000007)) {
+            const created = await fetch(base, {method: 'POST', headers, body: JSON.stringify({name, production_branch: 'main'}), signal: AbortSignal.timeout(30000)});
+            const result = await created.json();
+            if (!created.ok || !result.success) throw new Error('Cloudflare project creation failed: ' + JSON.stringify(result.errors));
+            console.log(`Created ${name}.pages.dev.`);
+          } else throw new Error('Cloudflare project check failed: ' + JSON.stringify(existing.errors));
+          NODE
+      - name: Publish Find The Needle
+        working-directory: cloudflare
+        run: npx wrangler pages deploy ../dist-findtheneedle --project-name dilldoe-findtheneedle --branch main --commit-hash "$GITHUB_SHA"
+        env:
+          CLOUDFLARE_ACCOUNT_ID: 7d0845823ccbb7316078275c24c2658c
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          WRANGLER_SEND_METRICS: 'false'
