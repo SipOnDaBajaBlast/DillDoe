@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 616 353" role="img" aria-label="Hollow Knight: Silksong">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="78%">
+      <stop offset="0" stop-color="#4a1327"/>
+      <stop offset=".58" stop-color="#190a15"/>
+      <stop offset="1" stop-color="#050509"/>
+    </radialGradient>
+    <linearGradient id="cloak" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e02f4f"/>
+      <stop offset="1" stop-color="#741026"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#f3d9d9" stop-opacity=".25"/>
+      <stop offset="1" stop-color="#f3d9d9" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="616" height="353" fill="url(#bg)"/>
+  <ellipse cx="308" cy="186" rx="190" ry="150" fill="url(#halo)"/>
+  <path d="M308 44c-10 0-17 8-17 8l-35 23 21 19 12-10 19-16 19 16 12 10 21-19-35-23s-7-8-17-8z" fill="#f5efe3"/>
+  <path d="M308 70c-18 0-31 16-31 36 0 15 8 26 17 33l14 11 14-11c9-7 17-18 17-33 0-20-13-36-31-36z" fill="#ebe3d5"/>
+  <path d="M264 146l44 28 44-28 31 22c14 10 22 26 22 44v22H211v-22c0-18 8-34 22-44z" fill="url(#cloak)"/>
+  <path d="M308 181v53M288 202l20 20 20-20" fill="none" stroke="#f4e6d0" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="294" cy="108" r="6" fill="#170a10"/>
+  <circle cx="322" cy="108" r="6" fill="#170a10"/>
+  <path d="M299 126h18" stroke="#170a10" stroke-width="4" stroke-linecap="round"/>
+  <path d="M246 164c18-9 37-13 62-13s44 4 62 13" fill="none" stroke="#f4e6d0" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+  <text x="308" y="308" text-anchor="middle" fill="#eee4d8" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="700" letter-spacing="8">SILKSONG</text>
+  <text x="308" y="332" text-anchor="middle" fill="#b9a8a5" font-family="Arial, sans-serif" font-size="12" letter-spacing="5">HOLLOW KNIGHT</text>
+</svg>

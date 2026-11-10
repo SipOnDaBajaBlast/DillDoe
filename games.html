@@ -692,22 +692,6 @@
                 repeating-linear-gradient(0deg, rgba(160, 255, 90, 0.05) 0 1px, transparent 1px 3px);
         }
 
-        html[data-theme="dark"] header::after {
-            content: 'XBOX 360';
-            position: absolute;
-            right: 64px;
-            top: 17px;
-            transform: none;
-            font-family: var(--font-heading);
-            font-size: 0.62rem;
-            font-weight: 800;
-            letter-spacing: 0.34em;
-            color: #b6ff5c;
-            text-shadow: 0 0 14px rgba(124, 255, 26, 0.9), 0 0 3px rgba(0, 0, 0, 0.9);
-            opacity: 0.78;
-            pointer-events: none;
-        }
-
         html[data-theme="dark"] .aero-title {
             background: linear-gradient(180deg, #ffffff 0%, #eaffd0 16%, #b6ff5c 42%, #63d600 64%, #1f6b00 100%);
             background-clip: text;
@@ -864,43 +848,28 @@
 
         html[data-theme="dark"] :focus-visible { outline: 2px solid #a6ff3d; outline-offset: 3px; }
 
-        /* Xbox 360 logo orb in the header */
-        .xbox-orb {
-            position: absolute;
-            top: 11px;
-            right: 16px;
-            width: 38px;
-            height: 38px;
+        /* Xbox 360 wallpaper: the classic sphere fills the background */
+        .xbox-watermark {
             display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.62;
             pointer-events: none;
-            opacity: 0.95;
-            filter: drop-shadow(0 0 14px rgba(124, 255, 26, 0.75));
-            animation: xboxOrbPulse 5.5s ease-in-out infinite alternate;
+            filter: saturate(1.1) brightness(1.08) drop-shadow(0 0 40px rgba(124, 255, 26, 0.35));
         }
 
-        html[data-theme="dark"] .xbox-orb { display: block; }
-        .xbox-orb svg { width: 100%; height: 100%; display: block; }
-
-        @keyframes xboxOrbPulse {
-            0% { filter: drop-shadow(0 0 10px rgba(124, 255, 26, 0.55)); }
-            100% { filter: drop-shadow(0 0 20px rgba(160, 255, 60, 0.95)); }
-        }
+        html[data-theme="dark"] .xbox-watermark { display: block; }
 
         @media (prefers-reduced-motion: reduce) {
-            html[data-theme="dark"] .xbox-orb { animation: none; }
             html[data-theme="dark"] .game-card::after { transition: none; }
         }
 
-        @media (max-width: 900px) {
-            html[data-theme="dark"] header::after { display: none; }
-        }
-
-        @media (max-width: 760px) {
-            .xbox-orb { width: 30px; height: 30px; top: 9px; right: 12px; }
-        }
-
         @media (max-width: 600px) {
-            html[data-theme="dark"] .xbox-orb { display: none; }
+            .xbox-watermark { opacity: 0.5; }
         }
 
     </style>
@@ -918,6 +887,8 @@
         <img class="troll-face" src="https://www.pngkey.com/png/full/22-226917_memes-unhappy-troll-sticker-sad-trollface.png" alt="Sad Trollface">
         <img class="sad-bart" src="https://www.nicepng.com/png/full/136-1362322_sad-simpsons-and-bart-image-bart-simpson-sad.png" alt="Sad Bart Simpson">
     </div>
+
+    <img class="xbox-watermark" id="xboxWatermark" data-src="/assets/xbox-360-logo.gif" alt="" aria-hidden="true" decoding="async" width="429" height="428">
 
     <!-- NAVIGATION BAR -->
     <div class="top-nav">
@@ -958,37 +929,7 @@
         </div>
     </div>
 
-    <header>
-        <div class="xbox-orb" aria-hidden="true">
-            <svg viewBox="0 0 220 220" focusable="false" role="presentation">
-            <defs>
-                <radialGradient id="xboxOrbHalo" cx="50%" cy="50%" r="50%">
-                    <stop offset="52%" stop-color="#7cff1a" stop-opacity="0.28"/>
-                    <stop offset="100%" stop-color="#7cff1a" stop-opacity="0"/>
-                </radialGradient>
-                <radialGradient id="xboxOrbSphere" cx="38%" cy="30%" r="82%">
-                    <stop offset="0%" stop-color="#1a3110"/>
-                    <stop offset="62%" stop-color="#070d05"/>
-                    <stop offset="100%" stop-color="#000000"/>
-                </radialGradient>
-                <linearGradient id="xboxOrbX" x1="20%" y1="8%" x2="80%" y2="94%">
-                    <stop offset="0%" stop-color="#eaffd0"/>
-                    <stop offset="34%" stop-color="#a6ff3d"/>
-                    <stop offset="74%" stop-color="#57c700"/>
-                    <stop offset="100%" stop-color="#1f5c00"/>
-                </linearGradient>
-            </defs>
-            <circle cx="110" cy="110" r="108" fill="url(#xboxOrbHalo)"/>
-            <circle cx="110" cy="110" r="92" fill="url(#xboxOrbSphere)" stroke="#7cff1a" stroke-opacity="0.35" stroke-width="1.2"/>
-            <g fill="url(#xboxOrbX)" stroke="#061003" stroke-width="1.5" stroke-linejoin="round">
-                <path d="M32 34c42 4 66 28 73 66-39-4-61-30-73-66z"/>
-                <path d="M188 34c-42 4-66 28-73 66 39-4 61-30 73-66z"/>
-                <path d="M32 186c42-4 66-28 73-66-39 4-61 30-73 66z"/>
-                <path d="M188 186c-42-4-66-28-73-66 39 4 61 30 73 66z"/>
-            </g>
-        </svg>
-        </div>
-        <h1 class="aero-title">GAME LIBRARY</h1>
+    <header>        <h1 class="aero-title">GAME LIBRARY</h1>
     </header>
 
     <!-- SEARCH BAR -->
@@ -1120,12 +1061,6 @@
             <div class="game-title">Team Fortress 2</div>
         </a>
 
-        <a href="games/Skate3.html" class="game-card">
-            <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="/assets/game-thumbnails/skate3.jpg" alt="Skate 3">
-            </div>
-            <div class="game-title">Skate 3</div>
-        </a>
         <!-- 4. NATURAL DISASTER -->
         <a href="games/NaturalD.html" class="game-card">
             <div class="img-wrapper">
@@ -1217,7 +1152,7 @@
 
         <a href="games/MechaChameleon.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="/assets/game-thumbnails/mechachameleon.svg" alt="Mecha Chameleon Thumbnail" width="616" height="353">
+                <img loading="lazy" decoding="async" src="https://assets.nintendo.com/image/upload/q_auto/f_auto/store/software/switch2/70010000135520/f3c3a1be1cf1c4a1364293da2040abb264ee4713fd546fb8b3c7f9755a57e1c6" alt="Mecha Chameleon Thumbnail" width="616" height="353">
             </div>
             <div class="game-title">Mecha Chameleon</div>
         </a>
@@ -1305,7 +1240,7 @@
             </div>
             <div class="game-title">FNAF: Into the Pit</div>
         </a>
-        <a href="games/Undertale.html" class="game-card">
+<a href="games/Undertale.html" class="game-card">
             <div class="img-wrapper">
                 <img loading="lazy" decoding="async" src="/assets/game-thumbnails/undertale.svg" alt="Undertale">
             </div>
@@ -1313,9 +1248,21 @@
         </a>
         <a href="games/HollowKnight.html" class="game-card">
             <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="/assets/game-thumbnails/hollow-knight.svg" alt="Hollow Knight">
+                <img loading="lazy" decoding="async" src="https://tse1.mm.bing.net/th/id/OIP.EA4zM4_3W4PjpJu29Vw9FAHaJ4?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Hollow Knight: Silksong">
             </div>
-            <div class="game-title">Hollow Knight</div>
+            <div class="game-title">Hollow Knight: Silksong</div>
+        </a>
+        <a href="games/PvZ.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://cdn2.unrealengine.com/plants-vs-zombies-replanted-gameplay-3840x2160-d76c4a82f299.png" alt="Plants vs. Zombies">
+            </div>
+            <div class="game-title">Plants vs. Zombies</div>
+        </a>
+        <a href="games/FindTheNeedle.html" class="game-card">
+            <div class="img-wrapper">
+                <img loading="lazy" decoding="async" src="https://gamescade.com/uploads/products/d2/find-the-needle-6aee5319e70fd-thumbnail.jpg" alt="Find The Needle">
+            </div>
+            <div class="game-title">Find The Needle</div>
         </a>
         <a href="games/Horseygame.html" class="game-card">
             <div class="img-wrapper">
@@ -1690,6 +1637,10 @@
             if (!THEMES[name]) name = DEFAULT_THEME;
             activeTheme = name;
             document.documentElement.setAttribute('data-theme', name);
+            const watermark = document.getElementById('xboxWatermark');
+            if (name === 'dark' && watermark && !watermark.getAttribute('src')) {
+                watermark.src = watermark.dataset.src;
+            }
             themeLabel.textContent = THEMES[name].label;
             themeOptions.forEach(option => {
                 const active = option.dataset.themeOption === name;
@@ -1700,6 +1651,7 @@
             if (dot) themeSwatch.style.background = dot.style.background;
             if (remember) {
                 try { localStorage.setItem(THEME_KEY, name); } catch (error) { /* Storage is optional. */ }
+                document.dispatchEvent(new CustomEvent('dilldoe-theme-change', { detail: { theme: name } }));
             }
         }
 

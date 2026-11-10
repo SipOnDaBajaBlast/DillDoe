@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 616 353" role="img" aria-label="Plants vs. Zombies">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a9ddf8"/>
+      <stop offset="1" stop-color="#eef8d8"/>
+    </linearGradient>
+    <linearGradient id="lawn" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#72b148"/>
+      <stop offset="1" stop-color="#2c641d"/>
+    </linearGradient>
+    <linearGradient id="zombie" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a9b7a2"/>
+      <stop offset="1" stop-color="#5f7563"/>
+    </linearGradient>
+  </defs>
+  <rect width="616" height="353" fill="url(#sky)"/>
+  <rect y="205" width="616" height="148" fill="url(#lawn)"/>
+  <path d="M0 205h616v10H0z" fill="#4b852d" opacity=".55"/>
+  <path d="M0 246h616M0 292h616" stroke="#8ac95a" stroke-width="16" opacity=".18"/>
+  <circle cx="506" cy="66" r="37" fill="#ffd84a"/>
+  <g stroke="#ffd84a" stroke-width="7" stroke-linecap="round">
+    <path d="M506 12v13M506 107v13M452 66h13M547 66h13M468 28l9 9M535 95l9 9M544 28l-9 9M477 95l-9 9"/>
+  </g>
+  <path d="M150 285c-2-30 9-56 31-72l-4-35" fill="none" stroke="#2f6b25" stroke-width="14" stroke-linecap="round"/>
+  <path d="M177 181l-43-17c-11-4-11-19 0-23l43-14c12-4 22 5 22 16v22c0 11-10 19-22 16z" fill="#5eae37"/>
+  <circle cx="190" cy="152" r="35" fill="#73c247"/>
+  <circle cx="220" cy="136" r="18" fill="#73c247"/>
+  <circle cx="226" cy="136" r="9" fill="#1e4217"/>
+  <circle cx="177" cy="143" r="5" fill="#1e4217"/>
+  <path d="M163 178c-13-4-18-15-14-27 5-12 19-15 30-7" fill="#4b8f2a"/>
+  <g fill="url(#zombie)">
+    <circle cx="455" cy="158" r="31"/>
+    <path d="M424 180h62l15 105h-92z"/>
+    <path d="M433 184l-30 54 12 7 34-46M477 184l30 54-12 7-34-46"/>
+  </g>
+  <path d="M445 118c-14-13-9-35 9-42 11-4 22 0 28 9" fill="none" stroke="#6f8a71" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="447" cy="153" r="6" fill="#1b2a1c"/>
+  <circle cx="468" cy="153" r="6" fill="#1b2a1c"/>
+  <path d="M444 174c8 5 17 5 25 0" fill="none" stroke="#1b2a1c" stroke-width="4" stroke-linecap="round"/>
+  <path d="M282 305c18-14 42-18 62-10M348 316c14-10 32-12 46-6" stroke="#d7f0ab" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+  <text x="308" y="334" text-anchor="middle" fill="#fff8d0" font-family="Arial Black, Arial, sans-serif" font-size="30" letter-spacing="2" stroke="#254d1d" stroke-width="5" paint-order="stroke">PLANTS vs. ZOMBIES</text>
+</svg>

@@ -1,0 +1,99 @@
+name: Update PvZ
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [App]
+    paths:
+      - '.github/workflows/pvz.yml'
+      - 'pvz-pin.txt'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pvz-production
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: cloudflare/package-lock.json
+      - name: Read pinned revision
+        id: pin
+        run: echo "sha=$(tr -d '[:space:]' < pvz-pin.txt)" >> "$GITHUB_OUTPUT"
+      - name: Download PvZ
+        run: |
+          curl -fsSL --retry 3 -o /tmp/pvz.tar.gz "https://codeload.github.com/web-ports/pvz/tar.gz/${{ steps.pin.outputs.sha }}"
+          mkdir -p dist-pvz
+          tar -xzf /tmp/pvz.tar.gz -C dist-pvz --strip-components=1
+      - name: Prepare static site
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const root = 'dist-pvz';
+          const index = path.join(root, 'index.html');
+          let html = fs.readFileSync(index, 'utf8');
+          // The upstream page resolves every asset through a jsDelivr base. Keep them local.
+          html = html.replace(/<base\b[^>]*>/gi, '');
+          if (html.includes('cdn.jsdelivr.net')) throw new Error('PvZ page still references the CDN');
+          fs.writeFileSync(index, html);
+          fs.writeFileSync(path.join(root, '_headers'), [
+            '/*',
+            '  Cross-Origin-Resource-Policy: cross-origin',
+            '  X-Content-Type-Options: nosniff',
+            '  Permissions-Policy: fullscreen=(self), gamepad=(self)',
+            '',
+            '/*.wasm',
+            '  Content-Type: application/wasm',
+            '',
+            '/*.pak.part*',
+            '  Cache-Control: public, max-age=31536000, immutable',
+            '',
+            '/pvz.js',
+            '  Cache-Control: public, max-age=31536000, immutable',
+            '',
+            '/index.html',
+            '  Cache-Control: no-cache',
+            ''
+          ].join('\n'));
+          NODE
+      - name: Install deploy tooling
+        working-directory: cloudflare
+        run: npm ci
+      - name: Ensure Pages project exists
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          const account = '7d0845823ccbb7316078275c24c2658c';
+          const base = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects`;
+          const headers = {Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`, 'Content-Type': 'application/json'};
+          const name = 'dilldoe-pvz';
+          const current = await fetch(`${base}/${name}`, {headers, signal: AbortSignal.timeout(30000)});
+          const existing = await current.json();
+          if (current.ok && existing.success) console.log(`${name} is available.`);
+          else if (current.status === 404 || existing.errors?.some(error => error.code === 8000007)) {
+            const created = await fetch(base, {method: 'POST', headers, body: JSON.stringify({name, production_branch: 'main'}), signal: AbortSignal.timeout(30000)});
+            const result = await created.json();
+            if (!created.ok || !result.success) throw new Error('Cloudflare project creation failed: ' + JSON.stringify(result.errors));
+            console.log(`Created ${name}.pages.dev.`);
+          } else throw new Error('Cloudflare project check failed: ' + JSON.stringify(existing.errors));
+          NODE
+      - name: Publish PvZ
+        working-directory: cloudflare
+        run: npx wrangler pages deploy ../dist-pvz --project-name dilldoe-pvz --branch main --commit-hash "$GITHUB_SHA"
+        env:
+          CLOUDFLARE_ACCOUNT_ID: 7d0845823ccbb7316078275c24c2658c
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          WRANGLER_SEND_METRICS: 'false'
