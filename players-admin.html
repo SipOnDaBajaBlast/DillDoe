@@ -63,10 +63,10 @@
         </label>
         <button id="refresh" type="button">Refresh</button>
       </div>
-      <p class="note">Players appear here after they choose a name. Players who are waiting for the name prompt stay hidden until they save one.</p>
+      <p class="note">Players appear here after they choose a name. Players who are waiting for the name prompt stay hidden until they save one. Theme is the last library theme they selected.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Player</th><th>Joined</th><th>Last active</th><th>Status</th><th>Action</th></tr></thead>
+          <thead><tr><th>Player</th><th>Theme</th><th>Joined</th><th>Last active</th><th>Status</th><th>Action</th></tr></thead>
           <tbody id="players"></tbody>
         </table>
       </div>
@@ -85,6 +85,12 @@
     let playerTotal = 0;
     let searchTimer;
     let listRequest = 0;
+    const THEME_NAMES = Object.freeze({
+      frutiger: 'Frutiger Aero',
+      pink: 'Pink & Green',
+      ps2: 'Retro PS2',
+      dark: 'Xbox 360',
+    });
 
     async function api(url, options = {}) {
       const response = await fetch(url, {
@@ -132,6 +138,8 @@
           const row = document.createElement('tr');
           const name = document.createElement('td');
           name.textContent = player.username;
+          const theme = document.createElement('td');
+          theme.textContent = THEME_NAMES[player.theme] || '—';
           const joined = document.createElement('td');
           joined.textContent = date(player.created_at);
           const active = document.createElement('td');
@@ -145,7 +153,7 @@
           if (!player.banned_at) action.className = 'danger';
           action.addEventListener('click', () => setBanned(player, !player.banned_at, action));
           actionCell.append(action);
-          row.append(name, joined, active, state, actionCell);
+          row.append(name, theme, joined, active, state, actionCell);
           playerRows.append(row);
         }
         playerOffset += result.players.length;

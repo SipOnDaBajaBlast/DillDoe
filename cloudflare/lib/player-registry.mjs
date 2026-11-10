@@ -7,6 +7,7 @@ const LOGIN_WINDOW = 15 * 60;
 const MAX_LOGIN_ATTEMPTS = 5;
 // Bump this to ask every player for a name again. Existing rows below it are reset.
 const NAME_VERSION = 3;
+const PLAYER_THEMES = new Set(['frutiger', 'pink', 'ps2', 'dark']);
 
 function json(body, status = 200, headers = {}) {
   return Response.json(body, {
@@ -81,6 +82,7 @@ async function migratePlayerSchema(env) {
   if (!columns.size) return;
   if (!columns.has('name_version')) await addColumn(env, 'name_version INTEGER NOT NULL DEFAULT 0');
   if (!columns.has('previous_username')) await addColumn(env, 'previous_username TEXT');
+  if (!columns.has('theme')) await addColumn(env, 'theme TEXT');
   await env.PLAYER_DB.prepare(
     'CREATE TABLE IF NOT EXISTS player_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)'
   ).run();
@@ -206,7 +208,7 @@ async function adminApi(request, env, url) {
     const search = query.toLowerCase();
     const [rows, total] = await Promise.all([
       env.PLAYER_DB.prepare(`
-        SELECT player_id, username, name_version, created_at, last_seen_at, banned_at
+        SELECT player_id, username, name_version, theme, created_at, last_seen_at, banned_at
         FROM players
         WHERE name_version >= ? AND username IS NOT NULL AND username <> '' AND INSTR(LOWER(username), ?) > 0
         ORDER BY username COLLATE NOCASE LIMIT ? OFFSET ?
@@ -238,6 +240,18 @@ export async function playerRegistry(request, env) {
   await ensurePlayerSchema(env);
   const url = new URL(request.url);
   if (url.pathname.startsWith('/api/admin/')) return adminApi(request, env, url);
+  if (url.pathname === '/api/player/theme') {
+    if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405, { Allow: 'POST' });
+    if (!sameOrigin(request)) return json({ error: 'Request rejected.' }, 403);
+    const body = await bodyJson(request);
+    if (!PLAYER_THEMES.has(body?.theme)) return json({ error: 'Choose a valid theme.' }, 400);
+    const { id, player, headers } = await ensurePlayer(request, env);
+    if (!player) return json({ error: 'Choose a player name first.' }, 409, headers);
+    if (player.banned_at) return json({ error: 'This player is banned.' }, 403, headers);
+    await env.PLAYER_DB.prepare('UPDATE players SET theme = ? WHERE player_id = ?')
+      .bind(body.theme, id).run();
+    return json({ ok: true, theme: body.theme }, 200, headers);
+  }
   if (url.pathname !== '/api/player/status' && url.pathname !== '/api/player/register') {
     return json({ error: 'Not found.' }, 404);
   }

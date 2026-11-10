@@ -1061,12 +1061,6 @@
             <div class="game-title">Team Fortress 2</div>
         </a>
 
-        <a href="games/Skate3.html" class="game-card">
-            <div class="img-wrapper">
-                <img loading="lazy" decoding="async" src="/assets/game-thumbnails/skate3.jpg" alt="Skate 3">
-            </div>
-            <div class="game-title">Skate 3</div>
-        </a>
         <!-- 4. NATURAL DISASTER -->
         <a href="games/NaturalD.html" class="game-card">
             <div class="img-wrapper">
@@ -1643,6 +1637,7 @@
             if (dot) themeSwatch.style.background = dot.style.background;
             if (remember) {
                 try { localStorage.setItem(THEME_KEY, name); } catch (error) { /* Storage is optional. */ }
+                document.dispatchEvent(new CustomEvent('dilldoe-theme-change', { detail: { theme: name } }));
             }
         }
 

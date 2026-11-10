@@ -130,12 +130,38 @@
   const note = gate.querySelector('.dd-player-note');
   const defaultTitle = title.textContent;
   const defaultIntro = intro.textContent;
+  const PLAYER_THEMES = new Set(['frutiger', 'pink', 'ps2', 'dark']);
+  const THEME_KEY = 'dilldoe-theme';
+  let playerReady = false;
+  let reportedTheme = '';
+  let themeReportQueue = Promise.resolve();
 
   async function request(url, options = {}) {
     const response = await fetch(url, { credentials: 'same-origin', cache: 'no-store', ...options });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.error || 'Player service is unavailable.');
     return result;
+  }
+
+  function currentTheme() {
+    try {
+      const saved = localStorage.getItem(THEME_KEY);
+      return PLAYER_THEMES.has(saved) ? saved : 'frutiger';
+    } catch (error) {
+      return 'frutiger';
+    }
+  }
+
+  function reportTheme(theme = currentTheme()) {
+    if (!playerReady || !PLAYER_THEMES.has(theme) || theme === reportedTheme) return;
+    reportedTheme = theme;
+    themeReportQueue = themeReportQueue
+      .then(() => request('/api/player/theme', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ theme }),
+      }))
+      .catch(() => { reportedTheme = ''; });
   }
 
   async function loadPlayer() {
@@ -154,6 +180,8 @@
         gate.hidden = true;
         chip.textContent = `Player: ${player.username}`;
         chip.hidden = false;
+        playerReady = true;
+        reportTheme();
         return;
       }
       title.textContent = defaultTitle;
@@ -193,6 +221,8 @@
       note.hidden = true;
       chip.textContent = `Player: ${player.username}`;
       chip.hidden = false;
+      playerReady = true;
+      reportTheme();
     } catch (error) {
       message.textContent = error.message;
     } finally {
@@ -201,6 +231,10 @@
         button.disabled = false;
       }
     }
+  });
+
+  document.addEventListener('dilldoe-theme-change', event => {
+    reportTheme(event.detail?.theme);
   });
 
   loadPlayer();

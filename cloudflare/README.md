@@ -20,7 +20,7 @@ The workflow uses the encrypted repository secret `CLOUDFLARE_API_TOKEN` with Cl
 
 The site asks each browser to choose a unique player name. Players are told to use their real name or a nickname that other people will recognize; names that look like random typing (`asdasd`, `qwerty`, `zxcvbn`, repeated patterns) are rejected. Names are 2–24 letters and spaces; numbers and symbols are not allowed. The name is stored with a random, HttpOnly browser ID in Cloudflare D1. Browsers do not expose a person's computer-account or other service username; clearing this site's cookies or changing browsers creates a new browser profile.
 
-The database also keeps the previous name and a `name_version` flag. After a rules change, every player is asked to enter a name again the next time they visit, including players who already picked one under the new rules. Their old name stays visible to moderators in the admin page and remains searchable there. The Worker adds the columns, creates the small `player_meta` table, and resets all rows automatically the first time it reaches the database; bumping `NAME_VERSION` in `lib/player-registry.mjs` triggers another reset for everyone. The reset files in `migrations/` perform the same reset by hand.
+The database also keeps the previous name, a `name_version` flag, and the last library theme the player selected. After a rules change, every player is asked to enter a name again the next time they visit, including players who already picked one under the new rules. Their old name stays visible to moderators in the admin page and remains searchable there. The Worker adds the columns, creates the small `player_meta` table, and resets all rows automatically the first time it reaches the database; bumping `NAME_VERSION` in `lib/player-registry.mjs` triggers another reset for everyone. The migration files in `migrations/` can apply these changes by hand.
 
 Before publishing the player registry, create its database and apply the schema from this directory:
 
@@ -29,16 +29,17 @@ npx wrangler d1 create dilldoe-players
 npx wrangler d1 execute dilldoe-players --remote --file migrations/0001_player_registry.sql
 ```
 
-To apply the player name reset to an existing database by hand, run:
+To apply the player database updates to an existing database by hand, run:
 
 ```sh
 npx wrangler d1 execute dilldoe-players --remote --file migrations/0002_player_name_reset.sql
 npx wrangler d1 execute dilldoe-players --remote --file migrations/0003_player_name_reset.sql
+npx wrangler d1 execute dilldoe-players --remote --file migrations/0004_player_theme.sql
 ```
 
 In Cloudflare, open **Workers & Pages → dilldoe-games → Settings → Bindings**. Add a production D1 binding named `PLAYER_DB` and select `dilldoe-players`. Under **Settings → Variables and Secrets**, add `PLAYER_ADMIN_PASSWORD` as a secret with a strong, unique password. Save and redeploy so the Worker receives the binding and secret. Do not put the password in GitHub, HTML, or JavaScript.
 
-After the binding is active, visit `/players-admin.html`, sign in with that password, search player names, then use **Ban** or **Unban**. Admin sessions expire after 12 hours; repeated failed sign-ins are temporarily rate-limited. The registry stores the chosen name, the previous name, browser ID, join/last-active times, and ban state. A player can create another browser profile by clearing cookies or switching browsers, so this is site moderation rather than verified real-world identity.
+After the binding is active, visit `/players-admin.html`, sign in with that password, search player names, then use **Ban** or **Unban**. Admin sessions expire after 12 hours; repeated failed sign-ins are temporarily rate-limited. The registry stores the chosen name, the previous name, browser ID, join/last-active times, ban state, and the last library theme the player selected. A player can create another browser profile by clearing cookies or switching browsers, so this is site moderation rather than verified real-world identity.
 
 For local builds, run `npm ci` and `npm run build` inside this directory. The output is `dist`. For a manual deployment, run `npm run deploy` after authenticating with Cloudflare.
 
