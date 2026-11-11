@@ -54,7 +54,21 @@ if(baseline){
  await fs.writeFile(path.join(output,'_redirects'),baseline.redirects);
  staticGames={staticFiles:baseline.report.staticFiles};
  console.log('Reusing '+Object.keys(baseline.gameManifest).length+' existing game assets; no game downloads or rebuild.');
-}else staticGames=await buildStaticGames(output,catalog);
+}else {
+ staticGames=await buildStaticGames(output,catalog);
+ const extraPorts=path.join(project,'extra-game-ports');
+ for(const name of await fs.readdir(extraPorts).catch(()=>[])){
+  if(!/^[a-z0-9-]+$/.test(name))throw new Error('Invalid extra game port name: '+name);
+  const source=path.join(extraPorts,name),target=path.join(path.resolve('dist-games'),'ports',name);
+  const stat=await fs.lstat(source);
+  if(!stat.isDirectory()||stat.isSymbolicLink())throw new Error('Extra game port must be a regular directory: '+name);
+  await fs.cp(source,target,{recursive:true,filter:async file=>{
+   const entry=await fs.lstat(file);
+   if(entry.isSymbolicLink())throw new Error('Extra game port contains a symbolic link: '+file);
+   return true;
+  }});
+ }
+}
 await fs.mkdir(path.join(output,'__migration'),{recursive:true});
 await fs.writeFile(path.join(output,'__migration','health'),JSON.stringify({site:'DillDoe',games:Object.keys(catalog.games),missingSources:catalog.missingSources,staticFiles:staticGames.staticFiles}));
 await finalizeBuild(output,catalog,{baseline});

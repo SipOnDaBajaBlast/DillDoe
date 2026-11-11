@@ -1,11 +1,22 @@
 import fs from 'node:fs/promises';
 import {createHash} from 'node:crypto';
+import path from 'node:path';
 
 export const BASELINE_PATH='/__migration/static-build.json';
 export const STATIC_INPUTS=['package-lock.json','static-games.mjs','lib/game-catalog.json','lib/game-assets.json','lib/game-text.mjs','lib/migration-paths.mjs','lib/gta-static-data.json','lib/gta-static-routing.mjs','lib/static-plan.mjs','lib/feed-pit-loader.mjs','lib/death-note-loader.mjs','lib/worldfox-loader.mjs','public/ports/dumbfire/Build/data-parts.txt'];
 export async function staticFingerprint(){
  const hash=createHash('sha256');
  for(const file of STATIC_INPUTS)hash.update(file+'\0').update((await fs.readFile(file,'utf8')).replace(/\r\n/g,'\n')).update('\0');
+ async function addExtraPorts(directory,relative=''){
+  for(const entry of (await fs.readdir(directory,{withFileTypes:true})).sort((a,b)=>a.name.localeCompare(b.name))){
+   const rel=path.posix.join(relative,entry.name),filename=path.join(directory,entry.name);
+   if(entry.isSymbolicLink())throw new Error('Extra game port contains a symbolic link: '+filename);
+   if(entry.isDirectory())await addExtraPorts(filename,rel);
+   else if(entry.isFile())hash.update(rel+'\0').update(await fs.readFile(filename)).update('\0');
+  }
+ }
+ const extraPorts=path.resolve('extra-game-ports');
+ if(await fs.stat(extraPorts).catch(()=>null))await addExtraPorts(extraPorts);
  return hash.digest('hex');
 }
 export function validateBaseline(value,fingerprint){
