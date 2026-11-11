@@ -193,7 +193,7 @@
   </header>
   <main>
     <div id="stage">
-      <div id="game" aria-label="Cooking Mama game"></div>
+      <div id="game" aria-label="Cooking Mama game" tabindex="0"></div>
       <section id="setup" aria-labelledby="game-title">
         <div class="setup-card">
           <div class="eyebrow">Nintendo DS · Cooking</div>
@@ -208,7 +208,8 @@
           <p id="status" role="status" aria-live="polite">Ready when you are.</p>
           <details>
             <summary>Controls and saves</summary>
-            <p>Use the on-screen touch screen with a mouse or finger. The emulator’s keyboard controls are available under its settings; <strong>A</strong>, <strong>B</strong>, <strong>Start</strong>, and the D-pad work through the usual EmulatorJS mapping.</p>
+            <p><strong>Touch or mouse:</strong> click and drag on the lower DS screen to use the stylus. Click the game once if the controls do not respond.</p>
+            <p><strong>Keyboard:</strong> arrow keys move the D-pad; <strong>Z</strong> is A, <strong>X</strong> is B, <strong>A</strong> is X, <strong>S</strong> is Y, <strong>Enter</strong> is Start, <strong>V</strong> is Select, and <strong>Q</strong>/<strong>E</strong> are L/R.</p>
             <p>Saves and emulator settings are stored by this browser. Clearing site data removes them. The first load downloads the 7.5 MB zip and then starts the DS game.</p>
           </details>
         </div>
@@ -229,6 +230,14 @@
       function setStatus(message, error) {
         status.textContent = message;
         status.className = error ? 'error' : '';
+      }
+
+      function focusGame() {
+        var emulator = window.EJS_emulator;
+        if (!emulator || !emulator.elements || !emulator.elements.parent) return;
+        var parent = emulator.elements.parent;
+        parent.tabIndex = 0;
+        parent.focus();
       }
 
       function boot() {
@@ -260,6 +269,7 @@
             }
           }
           setup.hidden = true;
+          focusGame();
           note.hidden = false;
           note.textContent = 'Click the game to enable sound and controls.';
           setStatus('Game running. Click the game to enable sound and controls.');
@@ -290,6 +300,10 @@
 
       play.addEventListener('click', boot);
       fullscreen.addEventListener('click', toggleFullscreen);
+      stage.addEventListener('pointerdown', function (event) {
+        if (event.target.closest && event.target.closest('button, input, select, textarea, label, a')) return;
+        focusGame();
+      }, true);
       document.addEventListener('fullscreenchange', function () {
         fullscreen.textContent = document.fullscreenElement ? 'Exit fullscreen' : 'Fullscreen';
       });
