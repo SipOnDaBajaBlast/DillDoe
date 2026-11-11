@@ -84,9 +84,16 @@
       background: #000;
       box-shadow: 0 22px 70px rgba(0, 0, 0, 0.52);
     }
+    #stage:focus { outline: none; }
     #stage:fullscreen { width: 100vw; height: 100vh; border: 0; border-radius: 0; }
-    #game { position: absolute; inset: 0; }
-    #game > div { width: 100%; height: 100%; }
+    #player {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      touch-action: none;
+    }
     #setup {
       position: absolute;
       inset: 0;
@@ -192,29 +199,31 @@
     <button id="fullscreen" type="button">Fullscreen</button>
   </header>
   <main>
-    <div id="stage">
-      <div id="game" aria-label="Cooking Mama game" tabindex="0"></div>
+    <div id="stage" tabindex="-1">
+      <desmond-player id="player" aria-label="Cooking Mama game screen"></desmond-player>
       <section id="setup" aria-labelledby="game-title">
         <div class="setup-card">
           <div class="eyebrow">Nintendo DS · Cooking</div>
           <h1 id="game-title">Cooking Mama</h1>
-          <p class="intro">Chop, stir, and cook through Mama’s recipes in the original Nintendo DS game. The emulator runs in this tab and keeps saves in this browser.</p>
+          <p class="intro">Chop, stir, and cook through Mama’s recipes in the original Nintendo DS game. The emulator runs in this tab and keeps your save in this browser.</p>
           <div class="facts">
             <span>33.5 MB ROM</span>
-            <span>Touch or mouse</span>
-            <span>Keyboard supported</span>
+            <span>Stylus or mouse</span>
+            <span>Keyboard &amp; gamepad</span>
           </div>
           <button id="play" type="button">Play game</button>
           <p id="status" role="status" aria-live="polite">Ready when you are.</p>
           <details>
             <summary>Controls and saves</summary>
-            <p><strong>Touch or mouse:</strong> click and drag on the lower DS screen to use the stylus. Click the game once if the controls do not respond.</p>
-            <p><strong>Keyboard:</strong> arrow keys move the D-pad; <strong>Z</strong> is A, <strong>X</strong> is B, <strong>A</strong> is X, <strong>S</strong> is Y, <strong>Enter</strong> is Start, <strong>V</strong> is Select, and <strong>Q</strong>/<strong>E</strong> are L/R.</p>
-            <p>Saves and emulator settings are stored by this browser. Clearing site data removes them. The first load downloads the 7.5 MB zip and then starts the DS game.</p>
+            <p><strong>Stylus:</strong> click and drag on the <strong>lower screen</strong> to touch. The upper screen is display only.</p>
+            <p><strong>Keyboard:</strong> arrow keys are the D-pad, <strong>Enter</strong> is Start, <strong>Shift</strong> is Select, <strong>X</strong> is A, <strong>Z</strong> is B, <strong>S</strong> is X, <strong>A</strong> is Y, <strong>Q</strong>/<strong>W</strong> are L/R, and <strong>Esc</strong> opens the emulator menu.</p>
+            <p><strong>Gamepads</strong> are picked up automatically once connected.</p>
+            <p>Progress is auto-saved into this browser’s storage when the game writes a save. Clearing site data erases it. The first load downloads the 7.5 MB archive and unpacks the 33.5 MB ROM in the page.</p>
+            <p>Emulator: Desmond, an embeddable DeSmuME build. Emulation runs entirely on this device.</p>
           </details>
         </div>
       </section>
-      <p id="note" hidden>Click the game to enable sound and controls.</p>
+      <p id="note" hidden>Drag on the lower screen to use the stylus. Press Enter for Start.</p>
     </div>
   </main>
   <script>
@@ -222,22 +231,204 @@
       var play = document.getElementById('play');
       var setup = document.getElementById('setup');
       var stage = document.getElementById('stage');
+      var player = document.getElementById('player');
       var status = document.getElementById('status');
       var note = document.getElementById('note');
       var fullscreen = document.getElementById('fullscreen');
       var started = false;
+
+      var ZIP_URL = '/assets/cooking-mama/CookingMama.zip';
+      var EMULATOR_URL = '/assets/desmond/desmond.min.js';
 
       function setStatus(message, error) {
         status.textContent = message;
         status.className = error ? 'error' : '';
       }
 
-      function focusGame() {
-        var emulator = window.EJS_emulator;
-        if (!emulator || !emulator.elements || !emulator.elements.parent) return;
-        var parent = emulator.elements.parent;
-        parent.tabIndex = 0;
-        parent.focus();
+      function stylePlayer() {
+        var shadow = player.shadowRoot;
+        if (!shadow) return;
+        var style = shadow.getElementById('dilldoe-player-style');
+        if (!style) {
+          style = document.createElement('style');
+          style.id = 'dilldoe-player-style';
+          shadow.appendChild(style);
+        }
+        style.textContent =
+          '#player{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:#000;}' +
+          'canvas{display:block;background:#000;image-rendering:pixelated;image-rendering:crisp-edges;' +
+          'touch-action:none;-webkit-user-select:none;user-select:none;}';
+        resizeScreens();
+      }
+
+      // Each canvas is given an exact 4:3 pixel box that fits the stage.
+      // Desmond maps the stylus by dividing by the bottom canvas rect, so the
+      // element box must match the picture exactly (no letterboxing inside it).
+      function resizeScreens() {
+        var shadow = player.shadowRoot;
+        if (!shadow) return;
+        var canvases = shadow.querySelectorAll('canvas');
+        if (!canvases.length) return;
+        var gap = 2;
+        var scale = Math.min(stage.clientWidth / 256, (stage.clientHeight - gap) / 384);
+        var width = Math.max(1, Math.floor(256 * scale));
+        var height = Math.max(1, Math.floor(192 * scale));
+        for (var i = 0; i < canvases.length; i += 1) {
+          canvases[i].style.width = width + 'px';
+          canvases[i].style.height = height + 'px';
+        }
+      }
+
+      var emulatorPromise = null;
+      function ensureEmulator() {
+        if (!emulatorPromise) {
+          emulatorPromise = new Promise(function (resolve, reject) {
+            if (typeof player.loadURL === 'function') { resolve(); return; }
+            var script = document.createElement('script');
+            script.src = EMULATOR_URL;
+            script.async = true;
+            script.onload = function () {
+              var startedAt = Date.now();
+              (function waitForRuntime() {
+                if (window.Module && window.Module.calledRun) { resolve(); return; }
+                if (Date.now() - startedAt > 20000) {
+                  reject(new Error('The DS emulator did not start. Reload the page and try again.'));
+                  return;
+                }
+                setTimeout(waitForRuntime, 50);
+              })();
+            };
+            script.onerror = function () {
+              reject(new Error('The DS emulator could not load. Check your connection and try again.'));
+            };
+            document.head.appendChild(script);
+          });
+          emulatorPromise.catch(function () { emulatorPromise = null; });
+        }
+        return emulatorPromise;
+      }
+
+      async function fetchArchive() {
+        var response = await fetch(ZIP_URL);
+        if (!response.ok) throw new Error('The game data could not be downloaded (' + response.status + ').');
+        var total = Number(response.headers.get('content-length')) || 0;
+        if (!response.body || !total) return new Uint8Array(await response.arrayBuffer());
+        var reader = response.body.getReader();
+        var chunks = [];
+        var received = 0;
+        for (;;) {
+          var result = await reader.read();
+          if (result.done) break;
+          chunks.push(result.value);
+          received += result.value.length;
+          setStatus('Downloading game data… ' + Math.min(100, Math.round(received / total * 100)) + '%');
+        }
+        var bytes = new Uint8Array(received);
+        var offset = 0;
+        for (var i = 0; i < chunks.length; i += 1) {
+          bytes.set(chunks[i], offset);
+          offset += chunks[i].length;
+        }
+        return bytes;
+      }
+
+      function readZipEntry(bytes, extension) {
+        var view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+        var end = -1;
+        var limit = Math.max(0, bytes.byteLength - 66000);
+        for (var i = bytes.byteLength - 22; i >= limit; i -= 1) {
+          if (view.getUint32(i, true) === 0x06054b50) { end = i; break; }
+        }
+        if (end < 0) throw new Error('The game archive is damaged.');
+        var count = view.getUint16(end + 10, true);
+        var offset = view.getUint32(end + 16, true);
+        var decoder = new TextDecoder();
+        for (var entry = 0; entry < count; entry += 1) {
+          if (view.getUint32(offset, true) !== 0x02014b50) throw new Error('The game archive is damaged.');
+          var method = view.getUint16(offset + 10, true);
+          var compressedSize = view.getUint32(offset + 20, true);
+          var size = view.getUint32(offset + 24, true);
+          var nameLength = view.getUint16(offset + 28, true);
+          var extraLength = view.getUint16(offset + 30, true);
+          var commentLength = view.getUint16(offset + 32, true);
+          var localOffset = view.getUint32(offset + 42, true);
+          var name = decoder.decode(bytes.subarray(offset + 46, offset + 46 + nameLength));
+          if (name.toLowerCase().slice(-extension.length) === extension) {
+            if (view.getUint32(localOffset, true) !== 0x04034b50) throw new Error('The game archive is damaged.');
+            var localName = view.getUint16(localOffset + 26, true);
+            var localExtra = view.getUint16(localOffset + 28, true);
+            var start = localOffset + 30 + localName + localExtra;
+            return { name: name, method: method, size: size, data: bytes.subarray(start, start + compressedSize) };
+          }
+          offset += 46 + nameLength + extraLength + commentLength;
+        }
+        throw new Error('The game ROM was not found inside the archive.');
+      }
+
+      async function inflateRaw(data) {
+        var stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+        return new Uint8Array(await new Response(stream).arrayBuffer());
+      }
+
+      function waitForFrame(timeout) {
+        return new Promise(function (resolve) {
+          var shadow = player.shadowRoot;
+          var deadline = Date.now() + timeout;
+          (function check() {
+            var canvas = shadow && shadow.getElementById('bottom');
+            if (canvas) {
+              try {
+                var context = canvas.getContext('2d');
+                if (context) {
+                  var data = context.getImageData(0, 0, canvas.width, canvas.height).data;
+                  for (var i = 0; i < data.length; i += 64) {
+                    if (data[i] || data[i + 1] || data[i + 2]) { resolve(true); return; }
+                  }
+                }
+              } catch (error) { /* canvas not readable yet */ }
+            }
+            if (Date.now() > deadline) { resolve(false); return; }
+            setTimeout(check, 100);
+          })();
+        });
+      }
+
+      async function bootAsync() {
+        if (typeof DecompressionStream !== 'function') {
+          throw new Error('This browser cannot unpack the game. Use a current version of Chrome, Edge, Firefox or Safari.');
+        }
+        setStatus('Starting the Nintendo DS emulator…');
+        var emulator = ensureEmulator();
+        var archive = await fetchArchive();
+        await emulator;
+        stylePlayer();
+        setStatus('Unpacking the game ROM…');
+        var entry = readZipEntry(archive, '.nds');
+        var rom = entry.method === 0 ? entry.data : await inflateRaw(entry.data);
+        if (rom.byteLength !== entry.size) throw new Error('The game ROM did not unpack correctly.');
+        var url = URL.createObjectURL(new Blob([rom], { type: 'application/octet-stream' }));
+        setStatus('Booting ' + entry.name.replace(/\.nds$/i, '') + '…');
+        await new Promise(function (resolve, reject) {
+          var timer = setTimeout(function () {
+            reject(new Error('The game did not start. Reload the page and try again.'));
+          }, 120000);
+          try {
+            player.loadURL(url, function () {
+              clearTimeout(timer);
+              resolve();
+            });
+          } catch (error) {
+            clearTimeout(timer);
+            reject(error);
+          }
+        });
+        await waitForFrame(20000);
+        resizeScreens();
+        setup.hidden = true;
+        note.hidden = false;
+        stage.focus();
+        setTimeout(function () { note.hidden = true; }, 5000);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 15000);
       }
 
       function boot() {
@@ -245,51 +436,12 @@
         started = true;
         play.disabled = true;
         play.textContent = 'Loading…';
-        setStatus('Loading the Nintendo DS emulator…');
-
-        window.EJS_player = '#game';
-        window.EJS_core = 'desmume';
-        window.EJS_gameName = 'Cooking Mama (USA)';
-        window.EJS_gameUrl = '/assets/cooking-mama/CookingMama.zip';
-        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/4.2.3/data/';
-        window.EJS_startOnLoaded = true;
-        window.EJS_threads = false;
-        window.EJS_color = '#f6b84b';
-        // DeSmuME's absolute touch mode makes the stylus follow the pointer
-        // instead of using melonDS's relative mouse mode.
-        window.EJS_defaultOptions = {
-          desmume_pointer_mouse: 'enabled',
-          desmume_pointer_type: 'touch',
-          desmume_pointer_colour: 'white'
-        };
-        window.EJS_onGameStart = function () {
-          var emulator = window.EJS_emulator;
-          if (emulator) {
-            emulator.enableMouseLock = false;
-            if (emulator.allSettings && emulator.allSettings.desmume_pointer_type !== 'touch') {
-              emulator.changeSettingOption('desmume_pointer_type', 'touch');
-            }
-          }
-          setup.hidden = true;
-          focusGame();
-          note.hidden = false;
-          note.textContent = 'Click the game to enable sound and controls.';
-          setStatus('Game running. Click the game to enable sound and controls.');
-        };
-        window.EJS_ready = function () {
-          setStatus('Starting Cooking Mama…');
-        };
-
-        var loader = document.createElement('script');
-        loader.src = window.EJS_pathtodata + 'loader.js';
-        loader.async = true;
-        loader.onerror = function () {
+        bootAsync().catch(function (error) {
           started = false;
           play.disabled = false;
           play.textContent = 'Try again';
-          setStatus('The emulator could not load. Check your connection and try again.', true);
-        };
-        document.body.appendChild(loader);
+          setStatus(error && error.message ? error.message : 'The game could not start.', true);
+        });
       }
 
       function toggleFullscreen() {
@@ -298,18 +450,35 @@
         } else if (stage.requestFullscreen) {
           stage.requestFullscreen();
         }
+        fullscreen.blur();
       }
 
       play.addEventListener('click', boot);
       fullscreen.addEventListener('click', toggleFullscreen);
-      stage.addEventListener('pointerdown', function (event) {
-        if (event.target.closest && event.target.closest('button, input, select, textarea, label, a')) return;
-        note.hidden = true;
-        focusGame();
-      }, true);
+      document.addEventListener('pointerdown', function () { note.hidden = true; }, true);
+      document.addEventListener('keydown', function () { note.hidden = true; }, true);
       document.addEventListener('fullscreenchange', function () {
         fullscreen.textContent = document.fullscreenElement ? 'Exit fullscreen' : 'Fullscreen';
+        resizeScreens();
       });
+      if (window.ResizeObserver) new ResizeObserver(resizeScreens).observe(stage);
+      window.addEventListener('resize', resizeScreens);
+
+      // Desmond listens for keys on window and swallows every keypress. Let the
+      // header controls keep normal keyboard behaviour instead.
+      window.addEventListener('keydown', function (event) {
+        var target = event.target;
+        if (target && target.closest && target.closest('button, a, input, select, textarea, summary, [contenteditable]')) {
+          event.stopPropagation();
+        }
+      }, true);
+      // Same for touch, which Desmond also captures on window.
+      document.querySelector('header').addEventListener('touchstart', function (event) {
+        event.stopPropagation();
+      }, true);
+      stage.addEventListener('touchstart', function (event) {
+        if (event.target.closest && event.target.closest('#setup')) event.stopPropagation();
+      }, true);
     })();
   </script>
 </body>
