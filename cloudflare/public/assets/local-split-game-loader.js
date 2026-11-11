@@ -28,7 +28,14 @@
     }
 
     status.textContent = 'Starting game…';
-    frame.src = URL.createObjectURL(new Blob([game], { type: 'text/html;charset=utf-8' }));
+    const html = new TextDecoder().decode(game);
+    const base = `<base href="${new URL('.', location.href).href}">`;
+    const withBase = /<head\b[^>]*>/i.test(html)
+      ? html.replace(/<head\b[^>]*>/i, match => `${match}${base}`)
+      : /<html\b[^>]*>/i.test(html)
+        ? html.replace(/<html\b[^>]*>/i, match => `${match}<head>${base}</head>`)
+        : `${base}${html}`;
+    frame.src = URL.createObjectURL(new Blob([withBase], { type: 'text/html;charset=utf-8' }));
     frame.hidden = false;
     frame.addEventListener('load', () => { status.hidden = true; progress.hidden = true; }, { once: true });
   }
