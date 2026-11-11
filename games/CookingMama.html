@@ -248,24 +248,26 @@
         setStatus('Loading the Nintendo DS emulator…');
 
         window.EJS_player = '#game';
-        window.EJS_core = 'nds';
+        window.EJS_core = 'desmume';
         window.EJS_gameName = 'Cooking Mama (USA)';
         window.EJS_gameUrl = '/assets/cooking-mama/CookingMama.zip';
         window.EJS_pathtodata = 'https://cdn.emulatorjs.org/4.2.3/data/';
         window.EJS_startOnLoaded = true;
         window.EJS_threads = false;
         window.EJS_color = '#f6b84b';
-        // Touch mode makes the DS stylus follow the pointer instead of using
-        // melonDS's relative mouse mode, which can pin it to a corner.
+        // DeSmuME's absolute touch mode makes the stylus follow the pointer
+        // instead of using melonDS's relative mouse mode.
         window.EJS_defaultOptions = {
-          melonds_touch_mode: 'Touch'
+          desmume_pointer_mouse: 'enabled',
+          desmume_pointer_type: 'touch',
+          desmume_pointer_colour: 'white'
         };
         window.EJS_onGameStart = function () {
           var emulator = window.EJS_emulator;
           if (emulator) {
             emulator.enableMouseLock = false;
-            if (emulator.allSettings && emulator.allSettings.melonds_touch_mode !== 'Touch') {
-              emulator.changeSettingOption('melonds_touch_mode', 'Touch');
+            if (emulator.allSettings && emulator.allSettings.desmume_pointer_type !== 'touch') {
+              emulator.changeSettingOption('desmume_pointer_type', 'touch');
             }
           }
           setup.hidden = true;
@@ -302,6 +304,7 @@
       fullscreen.addEventListener('click', toggleFullscreen);
       stage.addEventListener('pointerdown', function (event) {
         if (event.target.closest && event.target.closest('button, input, select, textarea, label, a')) return;
+        note.hidden = true;
         focusGame();
       }, true);
       document.addEventListener('fullscreenchange', function () {
