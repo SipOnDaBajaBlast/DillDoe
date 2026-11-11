@@ -246,7 +246,19 @@
         window.EJS_startOnLoaded = true;
         window.EJS_threads = false;
         window.EJS_color = '#f6b84b';
+        // Touch mode makes the DS stylus follow the pointer instead of using
+        // melonDS's relative mouse mode, which can pin it to a corner.
+        window.EJS_defaultOptions = {
+          melonds_touch_mode: 'Touch'
+        };
         window.EJS_onGameStart = function () {
+          var emulator = window.EJS_emulator;
+          if (emulator) {
+            emulator.enableMouseLock = false;
+            if (emulator.allSettings && emulator.allSettings.melonds_touch_mode !== 'Touch') {
+              emulator.changeSettingOption('melonds_touch_mode', 'Touch');
+            }
+          }
           setup.hidden = true;
           note.hidden = false;
           note.textContent = 'Click the game to enable sound and controls.';
