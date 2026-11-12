@@ -62,3 +62,234 @@ html[data-theme="ps2"] :focus-visible { outline: 2px solid #b7d6ff; outline-offs
   html[data-theme="ps2"] body { background-attachment: scroll; }
   html[data-theme="ps2"] .aero-title { letter-spacing: .04em; }
 }
+
+/* ============================= FLESH THEME =============================
+   Raw, wet tissue: procedural skin texture, meat-textured title, glossy
+   membrane panels. Textures live in /assets/flesh-*.webp.               */
+
+html[data-theme="flesh"] { scrollbar-color: #a63b40 #1c0406; }
+
+html[data-theme="flesh"] body,
+html[data-theme="flesh"] a,
+html[data-theme="flesh"] button,
+html[data-theme="flesh"] input {
+  cursor: url('/assets/flesh-cursor.png') 5 5, auto;
+}
+
+html[data-theme="flesh"] .bg-meme-container,
+html[data-theme="flesh"] #bubbleCanvas,
+html[data-theme="flesh"] .xbox-watermark { display: none; }
+
+html[data-theme="flesh"] body {
+  color: #ffdcd6;
+  background-image:
+    radial-gradient(120% 78% at 50% -14%, rgba(255, 128, 128, .34) 0%, rgba(210, 40, 55, .10) 42%, rgba(0, 0, 0, 0) 70%),
+    radial-gradient(95% 65% at 50% 114%, rgba(52, 0, 6, .92) 0%, rgba(28, 0, 4, .35) 55%, rgba(0, 0, 0, 0) 78%),
+    linear-gradient(180deg, rgba(46, 3, 9, .45) 0%, rgba(16, 1, 4, .78) 100%),
+    url('/assets/flesh-skin.webp');
+  background-size: auto, auto, auto, 620px auto;
+  background-position: center, center, center, center;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+  background-attachment: fixed;
+  text-shadow: 0 1px 2px rgba(20, 0, 2, .65);
+}
+
+html[data-theme="flesh"] header {
+  border-radius: 28px;
+  border: 2px solid rgba(255, 163, 158, .75);
+  background-image:
+    linear-gradient(180deg, rgba(255, 205, 200, .18) 0%, rgba(120, 10, 18, .16) 46%, rgba(30, 0, 4, .62) 100%),
+    url('/assets/flesh-skin.webp');
+  background-size: auto, 560px auto;
+  background-position: center, center 30%;
+  background-repeat: no-repeat, repeat;
+  box-shadow:
+    0 14px 38px rgba(0, 0, 0, .72),
+    0 0 34px rgba(190, 25, 40, .30),
+    inset 0 2px 10px rgba(255, 225, 220, .30),
+    inset 0 -18px 34px rgba(40, 0, 5, .85);
+}
+
+html[data-theme="flesh"] header::before {
+  border-radius: 26px 26px 0 0;
+  background: linear-gradient(180deg, rgba(255, 230, 225, .30) 0%, rgba(255, 160, 160, .06) 55%, rgba(255, 255, 255, 0) 100%);
+}
+
+/* The title is filled with raw steak, so the letters look carved from meat. */
+html[data-theme="flesh"] .aero-title {
+  font-family: 'Impact', 'Haettenschweiler', 'Arial Black', 'Franklin Gothic Heavy', sans-serif;
+  font-size: clamp(2.4rem, 7.2vw, 4.4rem);
+  font-weight: 400;
+  letter-spacing: .055em;
+  line-height: 1.05;
+  color: transparent;
+  background-color: transparent;
+  background-image: url('/assets/flesh-raw-meat.webp');
+  background-size: 115% auto;
+  background-position: center 45%;
+  background-repeat: no-repeat;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1.4px rgba(255, 186, 178, .65);
+  paint-order: stroke fill;
+  filter: contrast(1.25) saturate(1.3) drop-shadow(0 2px 0 #43060c) drop-shadow(0 7px 9px rgba(0, 0, 0, .85));
+}
+
+html[data-theme="flesh"] .back-btn,
+html[data-theme="flesh"] .theme-btn,
+html[data-theme="flesh"] .library-privacy a {
+  color: #fff2ee;
+  background: linear-gradient(180deg, #e2a09a 0%, #c06063 42%, #8d2830 66%, #581016 100%);
+  border: 1.5px solid rgba(255, 205, 196, .85);
+  border-radius: 22px;
+  box-shadow:
+    inset 0 2px 3px rgba(255, 232, 224, .65),
+    inset 0 -4px 8px rgba(50, 0, 5, .70),
+    0 5px 14px rgba(0, 0, 0, .58),
+    0 0 16px rgba(200, 50, 60, .30);
+  text-shadow: 0 1px 2px rgba(40, 0, 3, .90);
+}
+
+html[data-theme="flesh"] .back-btn:hover,
+html[data-theme="flesh"] .theme-btn:hover,
+html[data-theme="flesh"] .library-privacy a:hover {
+  background: linear-gradient(180deg, #f7c3bb 0%, #d1787b 42%, #a2333c 66%, #6b141b 100%);
+  border-color: #ffe0d8;
+  box-shadow:
+    inset 0 2px 4px rgba(255, 240, 235, .75),
+    inset 0 -4px 8px rgba(60, 0, 6, .65),
+    0 8px 22px rgba(0, 0, 0, .60),
+    0 0 26px rgba(255, 70, 80, .45);
+}
+
+html[data-theme="flesh"] .search-bar {
+  background: linear-gradient(180deg, rgba(66, 9, 14, .92) 0%, rgba(24, 2, 5, .96) 100%);
+  border: 2px solid #b04a4d;
+  border-radius: 22px;
+  color: #ffe6e1;
+  text-shadow: none;
+  box-shadow: inset 0 4px 14px rgba(0, 0, 0, .95), inset 0 -1px 0 rgba(255, 160, 150, .18), 0 0 18px rgba(170, 30, 40, .25);
+}
+
+html[data-theme="flesh"] .search-bar::placeholder { color: #d78f8f; }
+
+html[data-theme="flesh"] .search-bar:focus {
+  border-color: #ff958b;
+  box-shadow: inset 0 4px 14px #000, 0 0 26px rgba(255, 60, 70, .55);
+}
+
+html[data-theme="flesh"] .library-count {
+  color: #ffe8e3;
+  background-image: linear-gradient(180deg, rgba(255, 210, 205, .22), rgba(120, 12, 20, .30) 55%, rgba(30, 0, 4, .55)), url('/assets/flesh-skin.webp');
+  background-size: auto, 420px auto;
+  border-color: rgba(255, 180, 172, .70);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .60), inset 0 2px 6px rgba(255, 220, 215, .35), inset 0 -8px 18px rgba(30, 0, 4, .75);
+  text-shadow: 0 1px 2px rgba(25, 0, 3, .9);
+}
+
+html[data-theme="flesh"] .count-orb { color: #ff8b86; text-shadow: 0 0 12px rgba(255, 45, 55, .9); }
+
+html[data-theme="flesh"] .game-card {
+  background-image:
+    linear-gradient(160deg, rgba(255, 176, 168, .14) 0%, rgba(90, 6, 14, .26) 52%, rgba(24, 0, 4, .52) 100%),
+    url('/assets/flesh-skin.webp');
+  background-size: auto, 400px auto;
+  background-position: center, center;
+  background-repeat: no-repeat, repeat;
+  border: 2px solid rgba(255, 150, 145, .55);
+  border-radius: 18px;
+  color: #ffe6e2;
+  box-shadow:
+    inset 0 3px 12px rgba(255, 195, 188, .28),
+    inset 0 -18px 30px rgba(28, 0, 3, .88),
+    0 14px 30px rgba(0, 0, 0, .60),
+    0 0 18px rgba(180, 25, 40, .22);
+}
+
+html[data-theme="flesh"] .game-card::before {
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(180deg, rgba(255, 214, 208, .20) 0%, rgba(255, 170, 165, .05) 60%, rgba(255, 255, 255, 0) 100%);
+}
+
+html[data-theme="flesh"] .game-card:hover,
+html[data-theme="flesh"] .game-card:focus-visible {
+  border-color: #ffd2c9;
+  background-image:
+    linear-gradient(160deg, rgba(255, 198, 190, .26) 0%, rgba(120, 12, 20, .24) 55%, rgba(30, 0, 4, .45) 100%),
+    url('/assets/flesh-skin.webp');
+  box-shadow:
+    inset 0 3px 14px rgba(255, 214, 206, .38),
+    inset 0 -18px 30px rgba(28, 0, 3, .80),
+    0 20px 42px rgba(0, 0, 0, .65),
+    0 0 30px rgba(255, 60, 70, .38);
+}
+
+html[data-theme="flesh"] .img-wrapper {
+  border: 1px solid rgba(255, 160, 150, .45);
+  border-radius: 11px;
+  box-shadow: inset 0 0 20px rgba(40, 0, 4, .92), 0 2px 8px rgba(0, 0, 0, .65);
+}
+
+html[data-theme="flesh"] .img-wrapper::after {
+  background: linear-gradient(135deg, rgba(255, 178, 170, 0) 0%, rgba(255, 178, 170, .30) 50%, rgba(255, 178, 170, 0) 100%);
+}
+
+html[data-theme="flesh"] .game-title,
+html[data-theme="flesh"] .game-card:hover .game-title {
+  color: #ffd9d3;
+  font-weight: 800;
+  text-shadow: 0 2px 0 #4a0509, 0 0 14px rgba(255, 90, 90, .35);
+}
+
+html[data-theme="flesh"] .game-card:hover .game-title { color: #fff6f2; }
+
+html[data-theme="flesh"] .theme-swatch {
+  background: radial-gradient(circle at 32% 28%, #ffc9c2 0%, #c95056 42%, #7d1a20 72%, #3a0408 100%);
+  border-color: rgba(255, 214, 208, .85);
+  box-shadow: 0 0 0 1px rgba(70, 4, 9, .8), 0 0 9px rgba(255, 80, 85, .75);
+}
+
+html[data-theme="flesh"] .theme-dropdown {
+  background-image:
+    linear-gradient(180deg, rgba(58, 7, 12, .97) 0%, rgba(20, 2, 5, .99) 100%),
+    url('/assets/flesh-skin.webp');
+  background-size: auto, 340px auto;
+  border: 2px solid rgba(255, 160, 152, .55);
+  border-radius: 18px;
+  box-shadow:
+    0 24px 50px rgba(0, 0, 0, .85),
+    inset 0 2px 6px rgba(255, 205, 198, .22),
+    0 0 26px rgba(190, 30, 42, .30);
+}
+
+html[data-theme="flesh"] .theme-option {
+  color: #ffe2dc;
+  border-radius: 12px;
+  text-shadow: 0 1px 2px rgba(20, 0, 2, .8);
+}
+
+html[data-theme="flesh"] .theme-option small { opacity: .72; }
+
+html[data-theme="flesh"] .theme-option:hover {
+  background: rgba(200, 62, 70, .30);
+  border-color: rgba(255, 168, 160, .65);
+}
+
+html[data-theme="flesh"] .theme-option.active {
+  background: linear-gradient(180deg, #c04d55 0%, #7a1720 100%);
+  border-color: #ffc0b6;
+  color: #fff6f2;
+  box-shadow: inset 0 2px 3px rgba(255, 220, 214, .40), 0 0 16px rgba(255, 70, 80, .35);
+}
+
+html[data-theme="flesh"] .theme-option .check { color: #ff9c94; }
+html[data-theme="flesh"] .theme-option.active .check { color: #fff3ef; }
+
+html[data-theme="flesh"] .no-results { color: #ffd9d2; }
+html[data-theme="flesh"] :focus-visible { outline: 2px solid #ff9c94; outline-offset: 3px; }
+
+@media(max-width:600px) {
+  html[data-theme="flesh"] body { background-attachment: scroll; }
+  html[data-theme="flesh"] .aero-title { letter-spacing: .03em; background-size: 150% auto; }
+}

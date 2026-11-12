@@ -11,7 +11,7 @@
         (function () {
             try {
                 var saved = localStorage.getItem('dilldoe-theme');
-                if (saved === 'frutiger' || saved === 'pink' || saved === 'ps2' || saved === 'dark') {
+                if (saved === 'frutiger' || saved === 'pink' || saved === 'ps2' || saved === 'dark' || saved === 'flesh') {
                     document.documentElement.setAttribute('data-theme', saved);
                 }
             } catch (error) { /* Storage may be blocked; the default theme still works. */ }
@@ -156,6 +156,8 @@
             align-items: center;
             gap: 12px;
             margin-bottom: 20px;
+            /* Keep the theme dropdown above the game grid, which also uses z-index 3. */
+            z-index: 40;
         }
 
         /* Early 2000s Aqua Capsule Button */
@@ -925,6 +927,11 @@
                     <span class="meta">Xbox 360<small>Pitch black / electric green</small></span>
                     <span class="check" aria-hidden="true">✔</span>
                 </button>
+                <button type="button" class="theme-option" role="menuitemradio" data-theme-option="flesh" aria-checked="false">
+                    <span class="dot" style="background: radial-gradient(circle at 32% 28%, #ffc9c2 0%, #c95056 42%, #7d1a20 72%, #3a0408 100%);" aria-hidden="true"></span>
+                    <span class="meta">Flesh<small>Raw, wet and wrong</small></span>
+                    <span class="check" aria-hidden="true">✔</span>
+                </button>
             </div>
         </div>
     </div>
@@ -1672,6 +1679,10 @@
             dark: {
                 label: 'Xbox 360',
                 bubbles: { highlight: '235, 255, 210', mid: '124, 255, 26', edge: '10, 48, 0' }
+            },
+            flesh: {
+                label: 'Flesh',
+                bubbles: { highlight: '255, 214, 208', mid: '190, 62, 70', edge: '60, 6, 12' }
             }
         };
         const DEFAULT_THEME = 'frutiger';
