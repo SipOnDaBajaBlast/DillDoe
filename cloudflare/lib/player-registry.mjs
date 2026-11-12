@@ -7,7 +7,7 @@ const LOGIN_WINDOW = 15 * 60;
 const MAX_LOGIN_ATTEMPTS = 5;
 // Bump this to ask every player for a name again. Existing rows below it are reset.
 const NAME_VERSION = 3;
-const PLAYER_THEMES = new Set(['frutiger', 'pink', 'ps2', 'dark', 'flesh']);
+const PLAYER_THEMES = new Set(['frutiger', 'pink', 'ps2', 'dark', 'flesh', 'hub']);
 
 function json(body, status = 200, headers = {}) {
   return Response.json(body, {

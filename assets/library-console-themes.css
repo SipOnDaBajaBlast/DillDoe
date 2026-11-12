@@ -294,3 +294,182 @@ html[data-theme="flesh"] :focus-visible { outline: 2px solid #ff9c94; outline-of
   html[data-theme="flesh"] body { background-attachment: scroll; }
   html[data-theme="flesh"] .aero-title { letter-spacing: .03em; background-size: 150% auto; }
 }
+
+/* ============================= THE HUB THEME =============================
+   Strict three-colour palette: black, orange (#ff6a00) and white.        */
+
+html[data-theme="hub"] { scrollbar-color: #ff6a00 #000000; }
+
+html[data-theme="hub"] .bg-meme-container,
+html[data-theme="hub"] #bubbleCanvas,
+html[data-theme="hub"] .xbox-watermark { display: none; }
+
+html[data-theme="hub"] body {
+  color: #ffffff;
+  background-color: #000000;
+  background-image:
+    radial-gradient(110% 70% at 12% -8%, rgba(255, 106, 0, .28) 0%, rgba(0, 0, 0, 0) 58%),
+    radial-gradient(80% 60% at 100% 4%, rgba(255, 106, 0, .12) 0%, rgba(0, 0, 0, 0) 60%),
+    linear-gradient(180deg, #000000 0%, #080402 55%, #000000 100%);
+  background-attachment: fixed;
+  text-shadow: none;
+}
+
+html[data-theme="hub"] header {
+  border-radius: 4px;
+  border: 2px solid #ff6a00;
+  background: linear-gradient(180deg, #1a0d04 0%, #0a0502 55%, #000000 100%);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .9), 0 0 30px rgba(255, 106, 0, .22), inset 0 1px 0 rgba(255, 150, 60, .35);
+}
+
+html[data-theme="hub"] header::before {
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(255, 140, 50, .14) 0%, rgba(255, 106, 0, 0) 60%);
+}
+
+/* Logo: white crown, orange body, black underside. */
+html[data-theme="hub"] .aero-title {
+  font-family: 'Impact', 'Haettenschweiler', 'Arial Black', sans-serif;
+  font-size: clamp(2.5rem, 7vw, 4.4rem);
+  letter-spacing: .06em;
+  line-height: 1.05;
+  color: transparent;
+  background-color: transparent;
+  background-image: linear-gradient(180deg, #ffffff 0%, #ffe9d6 20%, #ff8a2b 46%, #ff6a00 62%, #1c0c02 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, .38);
+  paint-order: stroke fill;
+  filter: drop-shadow(0 2px 0 #000000) drop-shadow(0 0 18px rgba(255, 106, 0, .45));
+}
+
+html[data-theme="hub"] .back-btn,
+html[data-theme="hub"] .theme-btn,
+html[data-theme="hub"] .library-privacy a {
+  color: #ffffff;
+  background: linear-gradient(180deg, #160b03 0%, #000000 100%);
+  border: 1.5px solid #ff6a00;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .8), inset 0 1px 0 rgba(255, 150, 60, .25);
+  text-shadow: none;
+}
+
+html[data-theme="hub"] .back-btn:hover,
+html[data-theme="hub"] .theme-btn:hover,
+html[data-theme="hub"] .library-privacy a:hover {
+  color: #000000;
+  background: #ff6a00;
+  border-color: #ffb066;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .75), 0 0 24px rgba(255, 106, 0, .55);
+}
+
+html[data-theme="hub"] .search-bar {
+  background: #000000;
+  border: 2px solid #ff6a00;
+  border-radius: 6px;
+  color: #ffffff;
+  box-shadow: inset 0 3px 10px #000000, 0 0 16px rgba(255, 106, 0, .18);
+  text-shadow: none;
+}
+
+html[data-theme="hub"] .search-bar::placeholder { color: rgba(255, 255, 255, .55); }
+
+html[data-theme="hub"] .search-bar:focus {
+  border-color: #ffb066;
+  box-shadow: inset 0 3px 10px #000000, 0 0 24px rgba(255, 106, 0, .55);
+}
+
+html[data-theme="hub"] .library-count {
+  color: #ffffff;
+  background: linear-gradient(180deg, #140a04 0%, #000000 100%);
+  border: 1.5px solid #ff6a00;
+  border-radius: 6px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .8), inset 0 1px 0 rgba(255, 150, 60, .25);
+  text-shadow: none;
+}
+
+html[data-theme="hub"] .count-orb { color: #ff6a00; text-shadow: 0 0 10px rgba(255, 106, 0, .8); }
+
+html[data-theme="hub"] .game-card {
+  background: linear-gradient(180deg, #120a04 0%, #000000 100%);
+  border: 2px solid rgba(255, 106, 0, .75);
+  border-radius: 6px;
+  color: #ffffff;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, .85), inset 0 1px 0 rgba(255, 150, 60, .18);
+}
+
+html[data-theme="hub"] .game-card::before {
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg, rgba(255, 140, 50, .12) 0%, rgba(255, 106, 0, 0) 70%);
+}
+
+html[data-theme="hub"] .game-card:hover,
+html[data-theme="hub"] .game-card:focus-visible {
+  background: linear-gradient(180deg, #1e0f04 0%, #050201 100%);
+  border-color: #ffb066;
+  box-shadow: 0 18px 36px rgba(0, 0, 0, .9), 0 0 28px rgba(255, 106, 0, .45), inset 0 1px 0 rgba(255, 170, 90, .3);
+}
+
+html[data-theme="hub"] .img-wrapper {
+  border: 1px solid rgba(255, 106, 0, .5);
+  border-radius: 3px;
+  box-shadow: inset 0 0 14px #000000, 0 2px 8px rgba(0, 0, 0, .8);
+}
+
+html[data-theme="hub"] .img-wrapper::after {
+  background: linear-gradient(135deg, rgba(255, 106, 0, 0) 0%, rgba(255, 140, 50, .35) 50%, rgba(255, 106, 0, 0) 100%);
+}
+
+html[data-theme="hub"] .game-title,
+html[data-theme="hub"] .game-card:hover .game-title {
+  color: #ffffff;
+  font-weight: 700;
+  text-shadow: none;
+}
+
+html[data-theme="hub"] .game-card:hover .game-title { color: #ffb066; }
+
+html[data-theme="hub"] .theme-swatch {
+  background: linear-gradient(135deg, #ffffff 0 33%, #ff6a00 33% 66%, #000000 66% 100%);
+  border-color: #ffffff;
+  box-shadow: 0 0 0 1px #000000, 0 0 9px rgba(255, 106, 0, .8);
+}
+
+html[data-theme="hub"] .theme-dropdown {
+  background: #000000;
+  border: 2px solid #ff6a00;
+  border-radius: 8px;
+  box-shadow: 0 20px 44px rgba(0, 0, 0, .95), 0 0 24px rgba(255, 106, 0, .25);
+}
+
+html[data-theme="hub"] .theme-option {
+  color: #ffffff;
+  border-radius: 4px;
+  text-shadow: none;
+}
+
+html[data-theme="hub"] .theme-option small { opacity: .6; }
+
+html[data-theme="hub"] .theme-option:hover {
+  background: rgba(255, 106, 0, .14);
+  border-color: rgba(255, 106, 0, .6);
+}
+
+html[data-theme="hub"] .theme-option.active {
+  background: #ff6a00;
+  border-color: #ffd0a8;
+  color: #000000;
+  box-shadow: 0 0 16px rgba(255, 106, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .35);
+}
+
+html[data-theme="hub"] .theme-option .check { color: #ff6a00; }
+html[data-theme="hub"] .theme-option.active .check { color: #000000; }
+
+html[data-theme="hub"] .no-results { color: #ffffff; }
+html[data-theme="hub"] :focus-visible { outline: 2px solid #ff6a00; outline-offset: 3px; }
+
+@media(max-width:600px) {
+  html[data-theme="hub"] body { background-attachment: scroll; }
+  html[data-theme="hub"] .aero-title { letter-spacing: .03em; }
+}

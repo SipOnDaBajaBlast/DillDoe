@@ -11,7 +11,7 @@
         (function () {
             try {
                 var saved = localStorage.getItem('dilldoe-theme');
-                if (saved === 'frutiger' || saved === 'pink' || saved === 'ps2' || saved === 'dark' || saved === 'flesh') {
+                if (saved === 'frutiger' || saved === 'pink' || saved === 'ps2' || saved === 'dark' || saved === 'flesh' || saved === 'hub') {
                     document.documentElement.setAttribute('data-theme', saved);
                 }
             } catch (error) { /* Storage may be blocked; the default theme still works. */ }
@@ -932,6 +932,11 @@
                     <span class="meta">Flesh<small>Raw, wet and wrong</small></span>
                     <span class="check" aria-hidden="true">✔</span>
                 </button>
+                <button type="button" class="theme-option" role="menuitemradio" data-theme-option="hub" aria-checked="false">
+                    <span class="dot" style="background: linear-gradient(135deg, #ffffff 0 33%, #ff6a00 33% 66%, #000000 66% 100%);" aria-hidden="true"></span>
+                    <span class="meta">The Hub<small>Black, orange and white</small></span>
+                    <span class="check" aria-hidden="true">✔</span>
+                </button>
             </div>
         </div>
     </div>
@@ -1683,6 +1688,10 @@
             flesh: {
                 label: 'Flesh',
                 bubbles: { highlight: '255, 214, 208', mid: '190, 62, 70', edge: '60, 6, 12' }
+            },
+            hub: {
+                label: 'The Hub',
+                bubbles: { highlight: '255, 255, 255', mid: '255, 106, 0', edge: '12, 5, 0' }
             }
         };
         const DEFAULT_THEME = 'frutiger';

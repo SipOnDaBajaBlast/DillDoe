@@ -130,7 +130,7 @@
   const note = gate.querySelector('.dd-player-note');
   const defaultTitle = title.textContent;
   const defaultIntro = intro.textContent;
-  const PLAYER_THEMES = new Set(['frutiger', 'pink', 'ps2', 'dark', 'flesh']);
+  const PLAYER_THEMES = new Set(['frutiger', 'pink', 'ps2', 'dark', 'flesh', 'hub']);
   const THEME_KEY = 'dilldoe-theme';
   let playerReady = false;
   let reportedTheme = '';
