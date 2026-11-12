@@ -1,0 +1,15 @@
+Flesh theme texture sources
+
+flesh-skin.webp
+  Cropped, resized and colour-adjusted from "Facies inferior linguae.JPG"
+  by Miserlou (English Wikipedia). Released into the public domain.
+  https://commons.wikimedia.org/wiki/File:Facies_inferior_linguae.JPG
+
+flesh-raw-meat.webp
+  Cropped, resized and colour-adjusted from "Raw beef steak, 2011.jpg"
+  by Jellaluna. Licensed CC BY 2.0.
+  https://commons.wikimedia.org/wiki/File:Raw_beef_steak,_2011.jpg
+  https://creativecommons.org/licenses/by/2.0/
+
+flesh-cursor.png
+  Generated for this theme.

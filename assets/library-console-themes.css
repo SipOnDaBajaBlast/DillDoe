@@ -64,8 +64,9 @@ html[data-theme="ps2"] :focus-visible { outline: 2px solid #b7d6ff; outline-offs
 }
 
 /* ============================= FLESH THEME =============================
-   Raw, wet tissue: procedural skin texture, meat-textured title, glossy
-   membrane panels. Textures live in /assets/flesh-*.webp.               */
+   Raw, wet tissue: photographic skin texture, meat-textured title, glossy
+   membrane panels. Photos live in /assets/flesh-*.webp; sources and
+   licenses are listed in /assets/flesh-textures-credits.txt.            */
 
 html[data-theme="flesh"] { scrollbar-color: #a63b40 #1c0406; }
 
@@ -87,9 +88,9 @@ html[data-theme="flesh"] body {
     radial-gradient(95% 65% at 50% 114%, rgba(52, 0, 6, .92) 0%, rgba(28, 0, 4, .35) 55%, rgba(0, 0, 0, 0) 78%),
     linear-gradient(180deg, rgba(46, 3, 9, .45) 0%, rgba(16, 1, 4, .78) 100%),
     url('/assets/flesh-skin.webp');
-  background-size: auto, auto, auto, 620px auto;
-  background-position: center, center, center, center;
-  background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+  background-size: auto, auto, auto, cover;
+  background-position: center;
+  background-repeat: no-repeat;
   background-attachment: fixed;
   text-shadow: 0 1px 2px rgba(20, 0, 2, .65);
 }
@@ -100,9 +101,9 @@ html[data-theme="flesh"] header {
   background-image:
     linear-gradient(180deg, rgba(255, 205, 200, .18) 0%, rgba(120, 10, 18, .16) 46%, rgba(30, 0, 4, .62) 100%),
     url('/assets/flesh-skin.webp');
-  background-size: auto, 560px auto;
+  background-size: auto, cover;
   background-position: center, center 30%;
-  background-repeat: no-repeat, repeat;
+  background-repeat: no-repeat;
   box-shadow:
     0 14px 38px rgba(0, 0, 0, .72),
     0 0 34px rgba(190, 25, 40, .30),
@@ -182,7 +183,7 @@ html[data-theme="flesh"] .search-bar:focus {
 html[data-theme="flesh"] .library-count {
   color: #ffe8e3;
   background-image: linear-gradient(180deg, rgba(255, 210, 205, .22), rgba(120, 12, 20, .30) 55%, rgba(30, 0, 4, .55)), url('/assets/flesh-skin.webp');
-  background-size: auto, 420px auto;
+  background-size: auto, cover;
   border-color: rgba(255, 180, 172, .70);
   box-shadow: 0 8px 22px rgba(0, 0, 0, .60), inset 0 2px 6px rgba(255, 220, 215, .35), inset 0 -8px 18px rgba(30, 0, 4, .75);
   text-shadow: 0 1px 2px rgba(25, 0, 3, .9);
@@ -194,9 +195,9 @@ html[data-theme="flesh"] .game-card {
   background-image:
     linear-gradient(160deg, rgba(255, 176, 168, .14) 0%, rgba(90, 6, 14, .26) 52%, rgba(24, 0, 4, .52) 100%),
     url('/assets/flesh-skin.webp');
-  background-size: auto, 400px auto;
-  background-position: center, center;
-  background-repeat: no-repeat, repeat;
+  background-size: auto, cover;
+  background-position: center;
+  background-repeat: no-repeat;
   border: 2px solid rgba(255, 150, 145, .55);
   border-radius: 18px;
   color: #ffe6e2;
@@ -254,7 +255,7 @@ html[data-theme="flesh"] .theme-dropdown {
   background-image:
     linear-gradient(180deg, rgba(58, 7, 12, .97) 0%, rgba(20, 2, 5, .99) 100%),
     url('/assets/flesh-skin.webp');
-  background-size: auto, 340px auto;
+  background-size: auto, cover;
   border: 2px solid rgba(255, 160, 152, .55);
   border-radius: 18px;
   box-shadow:
