@@ -26,6 +26,10 @@ html, body { width: 100%; height: 100%; padding: 0; margin: 0; overflow: hidden 
 #unity-build-title { float: right; margin-right: 10px; line-height: 38px; font-family: arial; font-size: 18px }
 #unity-fullscreen-button { cursor:pointer; float: right; width: 38px; height: 38px; background: url('TemplateData/fullscreen-button.png') no-repeat center }
 #unity-warning { position: absolute; left: 50%; top: 5%; transform: translate(-50%); background: white; padding: 10px; display: none }
+#first-load-estimate { display: none; position: fixed; z-index: 30; left: 50%; bottom: 18px; transform: translateX(-50%); width: min(560px, calc(100vw - 28px)); padding: 14px 42px 14px 16px; border: 1px solid #ffffff44; border-radius: 10px; color: #fff; background: #101722ed; box-shadow: 0 8px 28px #0009; font: 14px/1.45 Arial, sans-serif }
+#first-load-estimate.visible { display: block }
+#first-load-estimate strong { display: block; margin-bottom: 3px; color: #ffcf11; font-size: 15px }
+#first-load-dismiss { position: absolute; top: 8px; right: 9px; border: 0; color: #fff; background: transparent; font: 20px/1 Arial, sans-serif; cursor: pointer }
 
 </style>
   <style id="recovery-display-controls">
@@ -46,6 +50,12 @@ html, body { width: 100%; height: 100%; padding: 0; margin: 0; overflow: hidden 
         <div id="recovery-loading-status">LOADING...</div>
       </div>
       <div id="unity-warning"> </div>
+      <aside id="first-load-estimate" role="status" aria-live="polite">
+        <button id="first-load-dismiss" type="button" aria-label="Dismiss loading estimate">×</button>
+        <strong>Still black after the port credit?</strong>
+        First launch loads about 883 MB. Allow roughly 2–10 minutes, depending on your connection; later visits are faster. Keep this tab open.
+        <span id="first-load-elapsed"></span>
+      </aside>
       <div id="unity-footer">
         <div id="unity-logo-title-footer"></div>
         <button id="unity-fullscreen-button" type="button" aria-label="Enter fullscreen">Fullscreen</button>
@@ -151,8 +161,20 @@ html, body { width: 100%; height: 100%; padding: 0; margin: 0; overflow: hidden 
       function finishRecoveryLoading() {
         document.querySelector("#unity-loading-bar").style.display = "none";
       }
+      const firstLoadStartedAt = performance.now();
+      const firstLoadEstimate = document.querySelector("#first-load-estimate");
+      const firstLoadElapsed = document.querySelector("#first-load-elapsed");
+      document.querySelector("#first-load-dismiss").addEventListener("click", () => firstLoadEstimate.classList.remove("visible"));
       window.recoveryTitleReady = function () {
         finishRecoveryLoading();
+        firstLoadEstimate.classList.add("visible");
+        const updateFirstLoadElapsed = () => {
+          const seconds = Math.floor((performance.now() - firstLoadStartedAt) / 1000);
+          const minutes = Math.floor(seconds / 60);
+          firstLoadElapsed.textContent = `\nStartup time: ${minutes}:${String(seconds % 60).padStart(2, "0")} elapsed.`;
+        };
+        updateFirstLoadElapsed();
+        window.setInterval(updateFirstLoadElapsed, 1000);
       };
       document.querySelector("#unity-loading-bar").style.display = "flex";
 
