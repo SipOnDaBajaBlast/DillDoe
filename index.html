@@ -315,6 +315,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
+            gap: 26px;
             width: 100%;
         }
 
@@ -396,6 +398,34 @@
             justify-content: space-between;
         }
 
+        .playtime-board {
+            width: min(100%, 520px);
+            padding: 16px 18px;
+            border: 1px solid rgba(255,255,255,.9);
+            border-radius: 16px;
+            color: #073654;
+            background: linear-gradient(135deg, rgba(247,254,255,.9), rgba(207,238,255,.86));
+            box-shadow: 0 8px 22px rgba(0,70,120,.2), inset 0 1px 2px #fff;
+        }
+
+        .playtime-board h2 { margin: 0; color: #056ca4; font-size: 1.25rem; }
+        .playtime-board p { margin: 5px 0 12px; font-size: .88rem; }
+        .playtime-board ol { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+        .playtime-board li {
+            display: grid;
+            grid-template-columns: 2.2rem 1fr auto;
+            gap: 10px;
+            align-items: center;
+            padding: 7px 9px;
+            border: 1px solid rgba(56,142,180,.22);
+            border-radius: 9px;
+            background: rgba(255,255,255,.62);
+        }
+        .playtime-rank { color: #0879b8; font-weight: 800; }
+        .playtime-name { overflow-wrap: anywhere; font-weight: 700; }
+        .playtime-total { color: #35536a; font-variant-numeric: tabular-nums; }
+        .playtime-empty { color: #4b6a7d; }
+
     </style>
 </head>
 <body>
@@ -459,6 +489,11 @@
                         <a href="games.html" class="start-btn" onclick="navigateToPage(event, this.href)">Games</a>
                         <a href="Tools.html" class="start-btn tools-btn" onclick="navigateToPage(event, this.href)">Fun Stuff!!!😊</a>
                     </div>
+                    <section class="playtime-board" aria-labelledby="playtime-title">
+                        <h2 id="playtime-title">Top 10 players</h2>
+                        <p>Ranked by time spent playing games</p>
+                        <ol id="playtime-list" aria-live="polite"><li class="playtime-empty">Loading leaderboard…</li></ol>
+                    </section>
                 </main>
             </div>
 
@@ -478,6 +513,53 @@
     <audio id="sound4" src="my-name-is-cleveland-brown-made-with-Voicemod.mp3" preload="auto"></audio>
 
     <script>
+        function formatPlaytime(seconds) {
+            const minutes = Math.floor(Math.max(0, Number(seconds) || 0) / 60);
+            if (minutes < 60) return `${minutes} min`;
+            const hours = Math.floor(minutes / 60);
+            const remaining = minutes % 60;
+            return remaining ? `${hours} hr ${remaining} min` : `${hours} hr`;
+        }
+
+        async function loadPlaytimeLeaderboard() {
+            const list = document.getElementById('playtime-list');
+            try {
+                const response = await fetch('/api/player/leaderboard', { cache: 'no-store' });
+                if (!response.ok) throw new Error('Leaderboard unavailable');
+                const data = await response.json();
+                list.replaceChildren();
+                if (!data.players?.length) {
+                    const empty = document.createElement('li');
+                    empty.className = 'playtime-empty';
+                    empty.textContent = 'Play a game to start the leaderboard.';
+                    list.append(empty);
+                    return;
+                }
+                data.players.forEach((player, index) => {
+                    const row = document.createElement('li');
+                    const rank = document.createElement('span');
+                    rank.className = 'playtime-rank';
+                    rank.textContent = `#${index + 1}`;
+                    const name = document.createElement('span');
+                    name.className = 'playtime-name';
+                    name.textContent = player.username;
+                    const total = document.createElement('span');
+                    total.className = 'playtime-total';
+                    total.textContent = formatPlaytime(player.seconds);
+                    row.append(rank, name, total);
+                    list.append(row);
+                });
+            } catch {
+                list.replaceChildren();
+                const unavailable = document.createElement('li');
+                unavailable.className = 'playtime-empty';
+                unavailable.textContent = 'Leaderboard is temporarily unavailable.';
+                list.append(unavailable);
+            }
+        }
+
+        loadPlaytimeLeaderboard();
+
         // Loader Transition
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {

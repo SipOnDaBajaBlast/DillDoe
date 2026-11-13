@@ -135,6 +135,9 @@
   let playerReady = false;
   let reportedTheme = '';
   let themeReportQueue = Promise.resolve();
+  const isGamePage = /^\/games\/[^/]+\.html$/i.test(location.pathname);
+  let playtimeTimer = 0;
+  let playtimeQueue = Promise.resolve();
 
   async function request(url, options = {}) {
     const response = await fetch(url, { credentials: 'same-origin', cache: 'no-store', ...options });
@@ -164,6 +167,27 @@
       .catch(() => { reportedTheme = ''; });
   }
 
+  function reportPlaytime(active) {
+    if (!playerReady || !isGamePage) return;
+    playtimeQueue = playtimeQueue.then(() => request('/api/player/playtime', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active }),
+      keepalive: !active,
+    })).catch(() => {});
+  }
+
+  function syncPlaytime() {
+    if (!playerReady || !isGamePage) return;
+    clearInterval(playtimeTimer);
+    if (document.visibilityState === 'visible') {
+      reportPlaytime(true);
+      playtimeTimer = setInterval(() => reportPlaytime(true), 30_000);
+    } else {
+      reportPlaytime(false);
+    }
+  }
+
   async function loadPlayer() {
     input.disabled = true;
     button.disabled = true;
@@ -182,6 +206,7 @@
         chip.hidden = false;
         playerReady = true;
         reportTheme();
+        syncPlaytime();
         return;
       }
       title.textContent = defaultTitle;
@@ -223,6 +248,7 @@
       chip.hidden = false;
       playerReady = true;
       reportTheme();
+      syncPlaytime();
     } catch (error) {
       message.textContent = error.message;
     } finally {
@@ -235,6 +261,12 @@
 
   document.addEventListener('dilldoe-theme-change', event => {
     reportTheme(event.detail?.theme);
+  });
+
+  document.addEventListener('visibilitychange', syncPlaytime);
+  window.addEventListener('pagehide', () => {
+    clearInterval(playtimeTimer);
+    reportPlaytime(false);
   });
 
   loadPlayer();

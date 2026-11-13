@@ -83,6 +83,8 @@ async function migratePlayerSchema(env) {
   if (!columns.has('name_version')) await addColumn(env, 'name_version INTEGER NOT NULL DEFAULT 0');
   if (!columns.has('previous_username')) await addColumn(env, 'previous_username TEXT');
   if (!columns.has('theme')) await addColumn(env, 'theme TEXT');
+  if (!columns.has('playtime_seconds')) await addColumn(env, 'playtime_seconds INTEGER NOT NULL DEFAULT 0');
+  if (!columns.has('last_playtime_at')) await addColumn(env, 'last_playtime_at INTEGER');
   await env.PLAYER_DB.prepare(
     'CREATE TABLE IF NOT EXISTS player_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)'
   ).run();
@@ -119,7 +121,7 @@ async function ensurePlayer(request, env) {
   }
 
   const player = await env.PLAYER_DB.prepare(
-    'SELECT username, name_version, banned_at, last_seen_at FROM players WHERE player_id = ?'
+    'SELECT username, name_version, banned_at, last_seen_at, last_playtime_at FROM players WHERE player_id = ?'
   ).bind(id).first();
   if (player && Date.now() - player.last_seen_at > 60 * 1000) {
     await env.PLAYER_DB.prepare('UPDATE players SET last_seen_at = ? WHERE player_id = ?')
@@ -240,6 +242,35 @@ export async function playerRegistry(request, env) {
   await ensurePlayerSchema(env);
   const url = new URL(request.url);
   if (url.pathname.startsWith('/api/admin/')) return adminApi(request, env, url);
+  if (url.pathname === '/api/player/leaderboard') {
+    if (request.method !== 'GET') return json({ error: 'Method not allowed.' }, 405, { Allow: 'GET' });
+    const rows = await env.PLAYER_DB.prepare(`
+      SELECT username, playtime_seconds AS seconds
+      FROM players
+      WHERE name_version >= ? AND username IS NOT NULL AND username <> '' AND banned_at IS NULL
+      ORDER BY playtime_seconds DESC, username COLLATE NOCASE
+      LIMIT 10
+    `).bind(NAME_VERSION).all();
+    return json({ players: rows.results || [] });
+  }
+  if (url.pathname === '/api/player/playtime') {
+    if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405, { Allow: 'POST' });
+    if (!sameOrigin(request)) return json({ error: 'Request rejected.' }, 403);
+    const body = await bodyJson(request);
+    if (typeof body?.active !== 'boolean') return json({ error: 'Invalid playtime update.' }, 400);
+    const { id, player, headers } = await ensurePlayer(request, env);
+    if (!player || Number(player.name_version) < NAME_VERSION) return json({ error: 'Choose a player name first.' }, 409, headers);
+    if (player.banned_at) return json({ error: 'This player is banned.' }, 403, headers);
+    const now = Date.now();
+    const prior = Number(player.last_playtime_at) || 0;
+    const seconds = prior && now > prior && now - prior <= 90_000 ? Math.floor((now - prior) / 1000) : 0;
+    await env.PLAYER_DB.prepare(`
+      UPDATE players
+      SET playtime_seconds = playtime_seconds + ?, last_playtime_at = ?
+      WHERE player_id = ?
+    `).bind(seconds, body.active ? now : null, id).run();
+    return json({ ok: true }, 200, headers);
+  }
   if (url.pathname === '/api/player/theme') {
     if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405, { Allow: 'POST' });
     if (!sameOrigin(request)) return json({ error: 'Request rejected.' }, 403);
