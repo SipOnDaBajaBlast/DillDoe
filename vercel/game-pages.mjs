@@ -57,7 +57,9 @@ export async function buildGamePages(output) {
 </body></html>`;
         const gatedHtml = html.replace('</body>', '<script src="/assets/player-gate.js" defer></script></body>');
         await fs.writeFile(path.join(output, 'game', game.slug + '.html'), gatedHtml);
-        library = library.replace(`href="${game.sourceHref}" class="game-card"`, `href="${guideRoute}" class="game-card"`);
+        if (game.slug !== 'BloonsTD6') {
+            library = library.replace(`href="${game.sourceHref}" class="game-card"`, `href="${guideRoute}" class="game-card"`);
+        }
         urls.push(guideRoute);
     }
     await fs.writeFile(libraryPath, library);
