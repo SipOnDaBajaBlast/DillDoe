@@ -480,10 +480,17 @@ html[data-theme="hub"] :focus-visible { outline: 2px solid #ff9000; outline-offs
 }
 
 /* ============================ WEEZER BLUE THEME ==========================
-   Weezer Blue (#189bcc): the Blue Album's azure field, white slab-serif
-   lettering and white-outlined panels.                                    */
+   Flat #189bcc and white only: no gradients, no shadows, square corners.
+   Cursor is Rivers (assets/rivers-cursor.png).                            */
 
-html[data-theme="weezer"] { scrollbar-color: #ffffff #0d6e95; }
+html[data-theme="weezer"] { scrollbar-color: #ffffff #189bcc; }
+
+html[data-theme="weezer"] body,
+html[data-theme="weezer"] a,
+html[data-theme="weezer"] button,
+html[data-theme="weezer"] input {
+  cursor: url('/assets/rivers-cursor.png') 12 2, auto;
+}
 
 html[data-theme="weezer"] .bg-meme-container,
 html[data-theme="weezer"] #bubbleCanvas,
@@ -491,34 +498,32 @@ html[data-theme="weezer"] .xbox-watermark { display: none; }
 
 html[data-theme="weezer"] body {
   color: #ffffff;
-  background-color: #189bcc;
-  background-image:
-    radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, .24) 0%, rgba(255, 255, 255, 0) 55%),
-    linear-gradient(180deg, #189bcc 0%, #1289b6 50%, #0c6c92 100%);
-  background-attachment: fixed;
-  text-shadow: 0 1px 0 rgba(8, 62, 82, .3);
+  background: #189bcc;
+  background-image: none;
+  background-attachment: scroll;
+  text-shadow: none;
 }
 
 html[data-theme="weezer"] header {
-  background: linear-gradient(180deg, #1ba7d9, #0f7ea8);
-  border: 2px solid rgba(255, 255, 255, .9);
-  border-radius: 6px;
-  box-shadow: 0 12px 28px rgba(6, 48, 66, .45);
+  background: #189bcc;
+  border: 0;
+  border-bottom: 3px solid #ffffff;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 html[data-theme="weezer"] header::before { background: none; }
 
-/* White slab-serif wordmark, like the album cover lettering. */
 html[data-theme="weezer"] .aero-title {
   font-family: Rockwell, 'Roboto Slab', 'Courier New', Georgia, serif;
   font-weight: 800;
-  letter-spacing: .06em;
+  letter-spacing: .08em;
   color: #ffffff;
   background: none;
   -webkit-text-fill-color: #ffffff;
   -webkit-text-stroke: 0;
   filter: none;
-  text-shadow: 0 3px 0 rgba(10, 84, 108, .55), 0 0 30px rgba(255, 255, 255, .35);
+  text-shadow: none;
 }
 
 html[data-theme="weezer"] .back-btn,
@@ -526,111 +531,114 @@ html[data-theme="weezer"] .theme-btn,
 html[data-theme="weezer"] .library-privacy a {
   color: #0d6e95;
   background: #ffffff;
-  border: 1.5px solid #ffffff;
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(6, 48, 66, .35);
+  border: 2px solid #ffffff;
+  border-radius: 0;
+  box-shadow: none;
   text-shadow: none;
 }
 
 html[data-theme="weezer"] .back-btn:hover,
 html[data-theme="weezer"] .theme-btn:hover,
 html[data-theme="weezer"] .library-privacy a:hover {
-  color: #0a5a7a;
-  background: #eaf9ff;
-  border-color: #eaf9ff;
-  box-shadow: 0 6px 18px rgba(6, 48, 66, .45), 0 0 22px rgba(255, 255, 255, .35);
+  color: #ffffff;
+  background: #0d6e95;
+  border-color: #ffffff;
+  box-shadow: none;
 }
 
 html[data-theme="weezer"] .search-bar {
-  background: rgba(255, 255, 255, .94);
+  background: #ffffff;
   border: 2px solid #ffffff;
-  border-radius: 6px;
+  border-radius: 0;
   color: #0d6e95;
-  box-shadow: 0 6px 18px rgba(6, 48, 66, .3);
-  text-shadow: none;
-}
-
-html[data-theme="weezer"] .search-bar::placeholder { color: #5a9dba; }
-
-html[data-theme="weezer"] .search-bar:focus {
-  border-color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, .55);
-}
-
-html[data-theme="weezer"] .library-count {
-  color: #ffffff;
-  background: rgba(255, 255, 255, .12);
-  border: 1.5px solid rgba(255, 255, 255, .75);
-  border-radius: 6px;
   box-shadow: none;
   text-shadow: none;
 }
 
-html[data-theme="weezer"] .count-orb { color: #ddf6ff; text-shadow: none; }
+html[data-theme="weezer"] .search-bar::placeholder { color: #6ba7bd; }
+
+html[data-theme="weezer"] .search-bar:focus {
+  border-color: #0d6e95;
+  box-shadow: none;
+}
+
+html[data-theme="weezer"] .library-count {
+  color: #ffffff;
+  background: transparent;
+  border: 2px solid #ffffff;
+  border-radius: 0;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+html[data-theme="weezer"] .count-orb { color: #ffffff; text-shadow: none; }
 
 html[data-theme="weezer"] .game-card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, .18), rgba(8, 78, 102, .42));
-  border: 2px solid rgba(255, 255, 255, .55);
-  border-radius: 6px;
-  color: #ffffff;
-  box-shadow: 0 10px 22px rgba(6, 48, 66, .35);
+  background: #ffffff;
+  border: 0;
+  border-radius: 0;
+  color: #0d6e95;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 html[data-theme="weezer"] .game-card::before {
-  border-radius: 4px 4px 0 0;
+  border-radius: 0;
   background: none;
 }
 
 html[data-theme="weezer"] .game-card:hover,
 html[data-theme="weezer"] .game-card:focus-visible {
-  background: linear-gradient(180deg, rgba(255, 255, 255, .3), rgba(10, 90, 118, .5));
-  border-color: #ffffff;
-  box-shadow: 0 14px 30px rgba(6, 48, 66, .45), 0 0 0 1px #ffffff;
-}
-
-html[data-theme="weezer"] .img-wrapper {
-  border: 1px solid rgba(255, 255, 255, .65);
-  border-radius: 4px;
+  background: #eaf9ff;
+  border: 0;
   box-shadow: none;
 }
 
-html[data-theme="weezer"] .img-wrapper::after {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, .3) 50%, rgba(255, 255, 255, 0) 100%);
+html[data-theme="weezer"] .img-wrapper {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
+
+html[data-theme="weezer"] .img-wrapper::after { display: none; }
 
 html[data-theme="weezer"] .game-title,
 html[data-theme="weezer"] .game-card:hover .game-title {
-  color: #ffffff;
+  color: #0d6e95;
   font-weight: 700;
-  text-shadow: 0 2px 0 rgba(8, 62, 82, .35);
+  text-shadow: none;
 }
 
-html[data-theme="weezer"] .game-card:hover .game-title { color: #ddf6ff; }
+html[data-theme="weezer"] .game-card:hover .game-title {
+  color: #0b5a7a;
+  text-decoration: underline;
+}
 
 html[data-theme="weezer"] .theme-swatch {
-  background: linear-gradient(135deg, #a9e9fb 0%, #189bcc 45%, #0c6c92 100%);
-  border-color: #ffffff;
+  background: #189bcc;
+  border: 2px solid #ffffff;
+  border-radius: 0;
   box-shadow: none;
 }
 
 html[data-theme="weezer"] .theme-dropdown {
-  background: #0f7ea8;
-  border: 2px solid rgba(255, 255, 255, .8);
-  border-radius: 6px;
-  box-shadow: 0 18px 40px rgba(4, 40, 56, .7);
+  background: #189bcc;
+  border: 2px solid #ffffff;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 html[data-theme="weezer"] .theme-option {
   color: #ffffff;
-  border-radius: 4px;
+  border-radius: 0;
   text-shadow: none;
 }
 
-html[data-theme="weezer"] .theme-option small { opacity: .72; }
+html[data-theme="weezer"] .theme-option small { opacity: .75; }
 
 html[data-theme="weezer"] .theme-option:hover {
-  background: rgba(255, 255, 255, .16);
-  border-color: rgba(255, 255, 255, .7);
+  background: #0d6e95;
+  border-color: #ffffff;
 }
 
 html[data-theme="weezer"] .theme-option.active {
@@ -640,13 +648,8 @@ html[data-theme="weezer"] .theme-option.active {
   box-shadow: none;
 }
 
-html[data-theme="weezer"] .theme-option .check { color: #ddf6ff; }
+html[data-theme="weezer"] .theme-option .check { color: #ffffff; }
 html[data-theme="weezer"] .theme-option.active .check { color: #0d6e95; }
 
 html[data-theme="weezer"] .no-results { color: #ffffff; }
 html[data-theme="weezer"] :focus-visible { outline: 2px solid #ffffff; outline-offset: 3px; }
-
-@media(max-width:600px) {
-  html[data-theme="weezer"] body { background-attachment: scroll; }
-  html[data-theme="weezer"] .aero-title { letter-spacing: .03em; }
-}
