@@ -136,6 +136,16 @@
   let reportedTheme = '';
   let themeReportQueue = Promise.resolve();
   const isGamePage = /^\/games\/[^/]+\.html$/i.test(location.pathname);
+  // The admin page shows this per game, so send a stable slug plus a readable
+  // title instead of only the total playtime.
+  const gameInfo = (() => {
+    if (!isGamePage) return {};
+    let slug;
+    try { slug = decodeURIComponent(location.pathname.slice('/games/'.length, -'.html'.length)); } catch { return {}; }
+    if (!/^[A-Za-z0-9_-]{1,80}$/.test(slug)) return {};
+    const pageTitle = document.title.replace(/\s*[|·—–-]\s*(?:Play.*|DillDoe).*$/i, '').trim();
+    return { game: slug, gameTitle: (pageTitle || slug).slice(0, 80) };
+  })();
   let playtimeTimer = 0;
   let playtimeQueue = Promise.resolve();
 
@@ -172,7 +182,7 @@
     playtimeQueue = playtimeQueue.then(() => request('/api/player/playtime', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ active }),
+      body: JSON.stringify({ active, ...gameInfo }),
       keepalive: !active,
     })).catch(() => {});
   }

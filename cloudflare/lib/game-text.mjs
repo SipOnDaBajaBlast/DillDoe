@@ -65,6 +65,13 @@ export function transformGameText(text,game,entry,path) {
    if(!text.includes('UnityLoader.instantiate("gameContainer", "Build/tabs.json")'))throw new Error('TABS loader changed; recheck its Unity config path');
    text=text.replace('UnityLoader.instantiate("gameContainer", "Build/tabs.json")','UnityLoader.instantiate("gameContainer", "Build/tabs.txt")');
   }
+  // Buy the Game's cutscenes are ~6 GB of Git LFS video that cannot fit on
+  // Pages, so stream them from this fork instead of copying them at build time.
+  if(game==='buy-the-game-i-have-a-gun'&&path==='index.html'){
+   const streamingAssets=`https://media.githubusercontent.com/media/${entry.repo}/${entry.sha}/StreamingAssets`;
+   if(!text.includes('streamingAssetsUrl: "StreamingAssets"'))throw new Error('Buy the Game loader changed; recheck its streaming assets URL');
+   text=text.replace('streamingAssetsUrl: "StreamingAssets"',`streamingAssetsUrl: ${JSON.stringify(streamingAssets)}`);
+  }
   if(game==='feed-the-pit')text=patchFeedPitHtml(text,entry);
   text=text.replace(/<base\b[^>]*>/gi,'');
   if(entry.files['renpy.wasm'])text=text.replace(/(src=["'])(renpy(?:-pre)?\.js)(["'])/g,'$1$2?paths=2$3');

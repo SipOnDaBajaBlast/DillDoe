@@ -8,7 +8,7 @@
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; padding: 24px; color: #14253a; background: #edf5fb; font: 16px/1.5 system-ui, sans-serif; }
-    main { width: min(100%, 920px); margin: 0 auto; }
+    main { width: min(100%, 1180px); margin: 0 auto; }
     header, .panel { padding: 22px; border: 1px solid #d4e0ea; border-radius: 14px; background: white; box-shadow: 0 8px 28px #17324a0d; }
     header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
     h1, h2, p { margin-top: 0; }
@@ -63,10 +63,10 @@
         </label>
         <button id="refresh" type="button">Refresh</button>
       </div>
-      <p class="note">Players appear here after they choose a name. Players who are waiting for the name prompt stay hidden until they save one. Theme is the last library theme they selected.</p>
+      <p class="note">Players appear here after they choose a name. Players who are waiting for the name prompt stay hidden until they save one. Theme is the last library theme they selected. Last game and most played update while players are in a game; the list refreshes every 30 seconds.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Player</th><th>Theme</th><th>Joined</th><th>Last active</th><th>Status</th><th>Action</th></tr></thead>
+          <thead><tr><th>Player</th><th>Theme</th><th>Last game</th><th>Most played</th><th>Joined</th><th>Last active</th><th>Status</th><th>Action</th></tr></thead>
           <tbody id="players"></tbody>
         </table>
       </div>
@@ -124,6 +124,27 @@
       return value ? new Date(value).toLocaleString() : '—';
     }
 
+    function timeAgo(value) {
+      if (!value) return '';
+      const minutes = Math.max(0, Math.round((Date.now() - Number(value)) / 60000));
+      if (minutes < 1) return 'just now';
+      if (minutes < 60) return `${minutes}m ago`;
+      const hours = Math.round(minutes / 60);
+      if (hours < 24) return `${hours}h ago`;
+      return `${Math.round(hours / 24)}d ago`;
+    }
+
+    function duration(seconds) {
+      const minutes = Math.max(0, Math.round(Number(seconds) / 60));
+      if (minutes < 60) return `${minutes}m`;
+      const hours = Math.floor(minutes / 60);
+      return `${hours}h ${minutes % 60}m`;
+    }
+
+    function gameLabel(title, slug) {
+      return title || slug || '—';
+    }
+
     async function loadPlayers(append = false) {
       const requestId = ++listRequest;
       if (!append) {
@@ -145,6 +166,14 @@
           theme.textContent = THEME_NAMES[player.theme] || '—';
           const joined = document.createElement('td');
           joined.textContent = date(player.created_at);
+          const lastGame = document.createElement('td');
+          lastGame.textContent = player.last_game
+            ? `${gameLabel(player.last_game_title, player.last_game)}${player.last_game_at ? ` · ${timeAgo(player.last_game_at)}` : ''}`
+            : '—';
+          const topGame = document.createElement('td');
+          topGame.textContent = player.top_game
+            ? `${gameLabel(player.top_game_title, player.top_game)}${Number(player.top_game_seconds) > 0 ? ` · ${duration(player.top_game_seconds)}` : ''}`
+            : '—';
           const active = document.createElement('td');
           active.textContent = date(player.last_seen_at);
           const state = document.createElement('td');
@@ -156,7 +185,7 @@
           if (!player.banned_at) action.className = 'danger';
           action.addEventListener('click', () => setBanned(player, !player.banned_at, action));
           actionCell.append(action);
-          row.append(name, theme, joined, active, state, actionCell);
+          row.append(name, theme, lastGame, topGame, joined, active, state, actionCell);
           playerRows.append(row);
         }
         playerOffset += result.players.length;
@@ -215,6 +244,11 @@
       clearTimeout(searchTimer);
       searchTimer = setTimeout(loadPlayers, 200);
     });
+    setInterval(() => {
+      if (playersPanel.hidden || document.visibilityState !== 'visible') return;
+      if (document.activeElement === document.getElementById('search')) return;
+      loadPlayers();
+    }, 30_000);
     loadMore.addEventListener('click', () => loadPlayers(true));
     document.getElementById('refresh').addEventListener('click', loadPlayers);
     logout.addEventListener('click', async () => {

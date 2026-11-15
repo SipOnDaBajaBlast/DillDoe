@@ -56,6 +56,17 @@ async function bodyJson(request) {
   }
 }
 
+function cleanGame(value) {
+  return typeof value === 'string' && /^[A-Za-z0-9_-]{1,80}$/.test(value) ? value : null;
+}
+
+function cleanGameTitle(value) {
+  const title = typeof value === 'string'
+    ? value.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80)
+    : '';
+  return title || null;
+}
+
 function sameOrigin(request) {
   const origin = request.headers.get('Origin');
   if (!origin) return false;
@@ -85,6 +96,19 @@ async function migratePlayerSchema(env) {
   if (!columns.has('theme')) await addColumn(env, 'theme TEXT');
   if (!columns.has('playtime_seconds')) await addColumn(env, 'playtime_seconds INTEGER NOT NULL DEFAULT 0');
   if (!columns.has('last_playtime_at')) await addColumn(env, 'last_playtime_at INTEGER');
+  if (!columns.has('last_game')) await addColumn(env, 'last_game TEXT');
+  if (!columns.has('last_game_title')) await addColumn(env, 'last_game_title TEXT');
+  if (!columns.has('last_game_at')) await addColumn(env, 'last_game_at INTEGER');
+  await env.PLAYER_DB.prepare(`
+    CREATE TABLE IF NOT EXISTS player_game_playtime (
+      player_id TEXT NOT NULL,
+      game TEXT NOT NULL,
+      title TEXT,
+      seconds INTEGER NOT NULL DEFAULT 0,
+      last_played_at INTEGER,
+      PRIMARY KEY (player_id, game)
+    )
+  `).run();
   await env.PLAYER_DB.prepare(
     'CREATE TABLE IF NOT EXISTS player_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)'
   ).run();
@@ -121,7 +145,7 @@ async function ensurePlayer(request, env) {
   }
 
   const player = await env.PLAYER_DB.prepare(
-    'SELECT username, name_version, banned_at, last_seen_at, last_playtime_at FROM players WHERE player_id = ?'
+    'SELECT username, name_version, banned_at, last_seen_at, last_playtime_at, last_game, last_game_title FROM players WHERE player_id = ?'
   ).bind(id).first();
   if (player && Date.now() - player.last_seen_at > 60 * 1000) {
     await env.PLAYER_DB.prepare('UPDATE players SET last_seen_at = ? WHERE player_id = ?')
@@ -210,7 +234,17 @@ async function adminApi(request, env, url) {
     const search = query.toLowerCase();
     const [rows, total] = await Promise.all([
       env.PLAYER_DB.prepare(`
-        SELECT player_id, username, name_version, theme, created_at, last_seen_at, banned_at
+        SELECT player_id, username, name_version, theme, created_at, last_seen_at, banned_at,
+          last_game, last_game_title, last_game_at,
+          (SELECT game FROM player_game_playtime g
+            WHERE g.player_id = players.player_id
+            ORDER BY seconds DESC, last_played_at DESC LIMIT 1) AS top_game,
+          (SELECT COALESCE(NULLIF(title, ''), game) FROM player_game_playtime g
+            WHERE g.player_id = players.player_id
+            ORDER BY seconds DESC, last_played_at DESC LIMIT 1) AS top_game_title,
+          (SELECT seconds FROM player_game_playtime g
+            WHERE g.player_id = players.player_id
+            ORDER BY seconds DESC, last_played_at DESC LIMIT 1) AS top_game_seconds
         FROM players
         WHERE name_version >= ? AND username IS NOT NULL AND username <> '' AND INSTR(LOWER(username), ?) > 0
         ORDER BY username COLLATE NOCASE LIMIT ? OFFSET ?
@@ -261,14 +295,41 @@ export async function playerRegistry(request, env) {
     const { id, player, headers } = await ensurePlayer(request, env);
     if (!player || Number(player.name_version) < NAME_VERSION) return json({ error: 'Choose a player name first.' }, 409, headers);
     if (player.banned_at) return json({ error: 'This player is banned.' }, 403, headers);
+    const game = cleanGame(body.game);
+    const gameTitle = cleanGameTitle(body.gameTitle);
     const now = Date.now();
     const prior = Number(player.last_playtime_at) || 0;
     const seconds = prior && now > prior && now - prior <= 90_000 ? Math.floor((now - prior) / 1000) : 0;
+    // The elapsed time belongs to the game that was open when the last report
+    // was sent, which may differ from the game open right now.
+    const trackedGame = cleanGame(player.last_game) || game;
+    const trackedTitle = cleanGameTitle(player.last_game_title) || gameTitle;
+    if (seconds > 0 && trackedGame) {
+      await env.PLAYER_DB.prepare(`
+        INSERT INTO player_game_playtime (player_id, game, title, seconds, last_played_at)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(player_id, game) DO UPDATE SET
+          title = COALESCE(excluded.title, title),
+          seconds = seconds + excluded.seconds,
+          last_played_at = excluded.last_played_at
+      `).bind(id, trackedGame, trackedTitle, seconds, now).run();
+    }
     await env.PLAYER_DB.prepare(`
       UPDATE players
-      SET playtime_seconds = playtime_seconds + ?, last_playtime_at = ?
+      SET playtime_seconds = playtime_seconds + ?, last_playtime_at = ?,
+          last_game = COALESCE(?, last_game),
+          last_game_title = COALESCE(?, last_game_title),
+          last_game_at = CASE WHEN ? IS NOT NULL THEN ? ELSE last_game_at END
       WHERE player_id = ?
-    `).bind(seconds, body.active ? now : null, id).run();
+    `).bind(
+      seconds,
+      body.active ? now : null,
+      body.active ? game : null,
+      body.active ? gameTitle : null,
+      body.active ? game : null,
+      now,
+      id,
+    ).run();
     return json({ ok: true }, 200, headers);
   }
   if (url.pathname === '/api/player/theme') {
