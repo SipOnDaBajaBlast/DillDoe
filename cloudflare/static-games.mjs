@@ -82,6 +82,8 @@ export async function buildStaticGames(output,catalog){
   await parallel(game.files,8,async file=>{
    const root=isSecondaryGameFile(name,file)?overflow:output;
    if(isSecondaryFile(file))extensions.add(file.split('.').at(-1));
+   // Addressables bundles are kept off the main Pages deployment.
+   if(name==='needy-streamer-overload'&&file.endsWith('.bundle'))extensions.add('bundle');
    let bytes;
    if(entry.files[file]===0)bytes=Buffer.alloc(0);
    else if(source)bytes=await fs.readFile(source(file));
