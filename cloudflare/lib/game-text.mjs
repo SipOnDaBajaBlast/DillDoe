@@ -59,6 +59,12 @@ export function transformGameText(text,game,entry,path) {
    text=text.replace('</div>LOADING...</div>','</div>');
   }
   if(game==='gta5-webport-vercel')text=text.replace(/(src=["'])([^"']+\.js)(["'])/g,(whole,start,url,end)=>/^https?:|^\/\//.test(url)?whole:start+url+'?assets=static-v2'+end);
+  // The JSON redirect for game data would otherwise send Build/tabs.json to
+  // the secondary origin, so TABS reads the same config from a .txt copy.
+  if(game==='tabs'&&path==='index.html'){
+   if(!text.includes('UnityLoader.instantiate("gameContainer", "Build/tabs.json")'))throw new Error('TABS loader changed; recheck its Unity config path');
+   text=text.replace('UnityLoader.instantiate("gameContainer", "Build/tabs.json")','UnityLoader.instantiate("gameContainer", "Build/tabs.txt")');
+  }
   if(game==='feed-the-pit')text=patchFeedPitHtml(text,entry);
   text=text.replace(/<base\b[^>]*>/gi,'');
   if(entry.files['renpy.wasm'])text=text.replace(/(src=["'])(renpy(?:-pre)?\.js)(["'])/g,'$1$2?paths=2$3');

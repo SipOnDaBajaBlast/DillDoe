@@ -100,6 +100,9 @@ export async function buildStaticGames(output,catalog){
    if(!target.startsWith(path.resolve(root)+path.sep))throw new Error('Unsafe game asset path');
    await fs.mkdir(path.dirname(target),{recursive:true});await fs.writeFile(target,bytes);staticFiles++;staticBytes+=bytes.length;
   });
+  // The .json extension redirects to the secondary origin, so keep a .txt
+  // copy of the Unity config next to it for the loader to read.
+  if(name==='tabs')await fs.copyFile(path.join(output,'ports',name,'Build/tabs.json'),path.join(output,'ports',name,'Build/tabs.txt'));
   // Compression can bring large WebAssembly runtimes below Pages' per-file
   // limit without changing the URL or the decoded bytes seen by the browser.
   for(const file of wasmCandidates){
