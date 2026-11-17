@@ -72,21 +72,6 @@ export function transformGameText(text,game,entry,path) {
    if(!text.includes('streamingAssetsUrl: "StreamingAssets"'))throw new Error('Buy the Game loader changed; recheck its streaming assets URL');
    text=text.replace('streamingAssetsUrl: "StreamingAssets"',`streamingAssetsUrl: ${JSON.stringify(streamingAssets)}`);
   }
-  // Casualties Unknown ships a custom launcher that pulls its split Brotli
-  // build from jsDelivr. Serve those files from the pinned fork instead. Pages
-  // already decodes the .br framework and wasm responses, so only decompress
-  // them in the browser when the response was not decoded upstream.
-  if(game==='casualties-unknown'&&path==='casualties-unknown.html'){
-   const cdn='const CDN_BASE = "https://cdn.jsdelivr.net/gh/AlexBoops/casualites-unknown@main/";';
-   if(!text.includes(cdn))throw new Error('Casualties Unknown launcher changed; recheck its asset base URL');
-   text=text.replace(cdn,'const CDN_BASE = "/ports/casualties-unknown/";');
-   const compressed=/const compressed = new Uint8Array\(await res\.arrayBuffer\(\)\);[\s\S]*?const raw = decode\(compressed\);/;
-   text=text.replace(compressed,`const body = new Uint8Array(await res.arrayBuffer());
-      const raw = res.headers.get("content-encoding")
-        ? body
-        : (await getBrotliDecoder())(body);`);
-   if(!text.includes('res.headers.get("content-encoding")'))throw new Error('Casualties Unknown decompression block changed; recheck its launcher');
-  }
   if(game==='feed-the-pit')text=patchFeedPitHtml(text,entry);
   text=text.replace(/<base\b[^>]*>/gi,'');
   if(entry.files['renpy.wasm'])text=text.replace(/(src=["'])(renpy(?:-pre)?\.js)(["'])/g,'$1$2?paths=2$3');
