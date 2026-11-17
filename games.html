@@ -11,7 +11,7 @@
         (function () {
             try {
                 var saved = localStorage.getItem('dilldoe-theme');
-                if (saved === 'frutiger' || saved === 'pink' || saved === 'ps2' || saved === 'dark' || saved === 'flesh' || saved === 'hub' || saved === 'weezer') {
+                if (saved === 'frutiger' || saved === 'pink' || saved === 'ps2' || saved === 'dark' || saved === 'flesh' || saved === 'hub' || saved === 'weezer' || saved === 'modern') {
                     document.documentElement.setAttribute('data-theme', saved);
                 }
             } catch (error) { /* Storage may be blocked; the default theme still works. */ }
@@ -942,6 +942,11 @@
                     <span class="meta">Weezer Blue<small>Flat blue and white</small></span>
                     <span class="check" aria-hidden="true">✔</span>
                 </button>
+                <button type="button" class="theme-option" role="menuitemradio" data-theme-option="modern" aria-checked="false">
+                    <span class="dot" style="background: #111318;" aria-hidden="true"></span>
+                    <span class="meta">Modern<small>Light, quiet and clean</small></span>
+                    <span class="check" aria-hidden="true">✔</span>
+                </button>
             </div>
         </div>
     </div>
@@ -1710,6 +1715,10 @@
             weezer: {
                 label: 'Weezer Blue',
                 bubbles: { highlight: '245, 254, 255', mid: '24, 155, 204', edge: '10, 100, 132' }
+            },
+            modern: {
+                label: 'Modern',
+                bubbles: { highlight: '255, 255, 255', mid: '200, 204, 210', edge: '30, 32, 38' }
             }
         };
         const DEFAULT_THEME = 'frutiger';

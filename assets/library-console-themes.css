@@ -653,3 +653,240 @@ html[data-theme="weezer"] .theme-option.active .check { color: #0d6e95; }
 
 html[data-theme="weezer"] .no-results { color: #ffffff; }
 html[data-theme="weezer"] :focus-visible { outline: 2px solid #ffffff; outline-offset: 3px; }
+
+/* ============================== MODERN THEME ==============================
+   Neutral light UI: white surfaces, hairline borders, system sans, no
+   gradients or glass.                                                     */
+
+html[data-theme="modern"] { scrollbar-color: #c8ccd2 #f5f6f8; }
+
+html[data-theme="modern"] body,
+html[data-theme="modern"] a,
+html[data-theme="modern"] button,
+html[data-theme="modern"] input {
+  cursor: auto;
+}
+
+html[data-theme="modern"] a,
+html[data-theme="modern"] button { cursor: pointer; }
+
+html[data-theme="modern"] .bg-meme-container,
+html[data-theme="modern"] #bubbleCanvas,
+html[data-theme="modern"] .xbox-watermark { display: none; }
+
+html[data-theme="modern"] body {
+  background: #f5f6f8;
+  color: #111318;
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  padding: 32px 24px 72px;
+  text-shadow: none;
+}
+
+html[data-theme="modern"] header {
+  width: 100%;
+  max-width: 1100px;
+  text-align: left;
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  margin-bottom: 24px;
+  overflow: visible;
+}
+
+html[data-theme="modern"] header::before { display: none; }
+
+html[data-theme="modern"] .aero-title {
+  font-family: inherit;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: #111318;
+  background: none;
+  -webkit-text-fill-color: #111318;
+  -webkit-text-stroke: 0;
+  filter: none;
+  text-shadow: none;
+}
+
+html[data-theme="modern"] .back-btn,
+html[data-theme="modern"] .theme-btn,
+html[data-theme="modern"] .library-privacy a {
+  color: #111318;
+  background: #ffffff;
+  border: 1px solid #e4e6eb;
+  border-radius: 10px;
+  box-shadow: none;
+  text-shadow: none;
+  font-weight: 600;
+}
+
+html[data-theme="modern"] .back-btn:hover,
+html[data-theme="modern"] .theme-btn:hover,
+html[data-theme="modern"] .library-privacy a:hover {
+  background: #f0f2f5;
+  border-color: #d8dbe2;
+  transform: none;
+  box-shadow: none;
+}
+
+html[data-theme="modern"] main {
+  width: 100%;
+  max-width: 1100px;
+}
+
+html[data-theme="modern"] .search-container {
+  width: 100%;
+  max-width: 1100px;
+  justify-content: flex-start;
+  margin-bottom: 16px;
+}
+
+html[data-theme="modern"] .search-bar {
+  background: #ffffff;
+  border: 1px solid #e4e6eb;
+  border-radius: 12px;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  color: #111318;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 14px 18px;
+  max-width: 560px;
+  text-align: left;
+  text-shadow: none;
+}
+
+html[data-theme="modern"] .search-bar::placeholder { color: #8a9099; font-weight: 500; }
+
+html[data-theme="modern"] .search-bar:focus {
+  background: #ffffff;
+  border-color: #111318;
+  box-shadow: none;
+  transform: none;
+}
+
+html[data-theme="modern"] .library-count {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  color: #6b7280;
+  font-family: inherit;
+  font-size: .9rem;
+  font-weight: 500;
+  padding: 0;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 0 24px;
+  justify-content: flex-start;
+  text-shadow: none;
+}
+
+html[data-theme="modern"] .count-orb { color: #9aa1ab; }
+html[data-theme="modern"] .count-search { font-weight: 500; }
+
+html[data-theme="modern"] .games-grid {
+  gap: 18px;
+  width: 100%;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+html[data-theme="modern"] .game-card {
+  background: #ffffff;
+  border: 1px solid #e7e9ee;
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  align-items: stretch;
+  color: #111318;
+  max-width: none;
+}
+
+html[data-theme="modern"] .game-card::before { display: none; }
+
+html[data-theme="modern"] .game-card:hover,
+html[data-theme="modern"] .game-card:focus-visible {
+  background: #ffffff;
+  border-color: #d5d8df;
+  box-shadow: 0 8px 24px rgba(17, 19, 24, .08);
+  transform: translateY(-3px);
+}
+
+html[data-theme="modern"] .img-wrapper {
+  height: 150px;
+  border: 0;
+  border-radius: 10px;
+  box-shadow: none;
+  background: #f1f2f4;
+}
+
+html[data-theme="modern"] .img-wrapper::after { display: none; }
+
+html[data-theme="modern"] .game-card img { background-color: #f1f2f4; }
+html[data-theme="modern"] .game-card:hover img { transform: scale(1.04); }
+
+html[data-theme="modern"] .game-title,
+html[data-theme="modern"] .game-card:hover .game-title {
+  font-family: inherit;
+  font-size: .95rem;
+  font-weight: 600;
+  text-align: left;
+  color: #111318;
+  text-shadow: none;
+  margin-top: 10px;
+}
+
+html[data-theme="modern"] .theme-swatch {
+  background: #111318;
+  border: 1px solid #d8dbe2;
+  box-shadow: none;
+}
+
+html[data-theme="modern"] .theme-dropdown {
+  background: #ffffff;
+  border: 1px solid #e4e6eb;
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(17, 19, 24, .12);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 8px;
+  gap: 2px;
+}
+
+html[data-theme="modern"] .theme-option {
+  color: #111318;
+  border: 0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  text-shadow: none;
+}
+
+html[data-theme="modern"] .theme-option small { font-weight: 500; opacity: .6; }
+
+html[data-theme="modern"] .theme-option:hover {
+  background: #f5f6f8;
+  border-color: transparent;
+  transform: none;
+}
+
+html[data-theme="modern"] .theme-option.active {
+  background: #111318;
+  border-color: #111318;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+html[data-theme="modern"] .theme-option .check { color: #111318; }
+html[data-theme="modern"] .theme-option.active .check { color: #ffffff; }
+
+html[data-theme="modern"] .no-results { color: #6b7280; }
+html[data-theme="modern"] :focus-visible { outline: 2px solid #111318; outline-offset: 3px; }
