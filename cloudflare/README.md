@@ -35,11 +35,12 @@ To apply the player database updates to an existing database by hand, run:
 npx wrangler d1 execute dilldoe-players --remote --file migrations/0002_player_name_reset.sql
 npx wrangler d1 execute dilldoe-players --remote --file migrations/0003_player_name_reset.sql
 npx wrangler d1 execute dilldoe-players --remote --file migrations/0004_player_theme.sql
+npx wrangler d1 execute dilldoe-players --remote --file migrations/0005_player_game_activity.sql
 ```
 
 In Cloudflare, open **Workers & Pages → dilldoe-games → Settings → Bindings**. Add a production D1 binding named `PLAYER_DB` and select `dilldoe-players`. Under **Settings → Variables and Secrets**, add `PLAYER_ADMIN_PASSWORD` as a secret with a strong, unique password. Save and redeploy so the Worker receives the binding and secret. Do not put the password in GitHub, HTML, or JavaScript.
 
-After the binding is active, visit `/players-admin.html`, sign in with that password, search player names, then use **Ban** or **Unban**. Admin sessions expire after 12 hours; repeated failed sign-ins are temporarily rate-limited. The registry stores the chosen name, the previous name, browser ID, join/last-active times, ban state, and the last library theme the player selected. A player can create another browser profile by clearing cookies or switching browsers, so this is site moderation rather than verified real-world identity.
+After the binding is active, visit `/players-admin.html`, sign in with that password, search player names, then use **Ban** or **Unban**. Admin sessions expire after 12 hours; repeated failed sign-ins are temporarily rate-limited. The registry stores the chosen name, the previous name, browser ID, join/last-active times, ban state, the last library theme the player selected, the last game they opened, and per-game playtime used for their most-played game. A player can create another browser profile by clearing cookies or switching browsers, so this is site moderation rather than verified real-world identity.
 
 For local builds, run `npm ci` and `npm run build` inside this directory. The output is `dist`. For a manual deployment, run `npm run deploy` after authenticating with Cloudflare.
 

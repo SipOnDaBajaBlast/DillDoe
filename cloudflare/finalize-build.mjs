@@ -30,7 +30,18 @@ export async function finalizeBuild(output=path.resolve('dist'),catalog,{baselin
  await fs.writeFile(path.join(output,'_headers'),headers);
  await fs.writeFile(path.join(output,'website-version.json'),JSON.stringify({commit:process.env.GITHUB_SHA||null,builtAt:new Date().toISOString()}));
  async function inspect(directory){let count=0;for(const file of await fs.readdir(directory,{withFileTypes:true})){const filename=path.join(directory,file.name);if(file.isDirectory())count+=await inspect(filename);else{if((await fs.stat(filename)).size>25*1024*1024)throw new Error('Static asset limit exceeded: '+filename);count++;}}return count;}
- for(const directory of baseline?[output]:[output,overflow]){const count=await inspect(directory);if(count+(baseline?Object.keys(baseline.gameManifest).length:0)>20000)throw new Error('Static file limit exceeded: '+count);console.log(path.basename(directory)+': '+count+' files'+(baseline?' plus retained game assets':''));}
+ if(baseline){
+  // A fast publish merges the uploaded website manifest with the retained
+  // `/ports/` entries. Some fallback pages live under `/ports/` too, so count
+  // the union instead of adding the two totals and double-counting them.
+  const files=[];
+  async function list(directory,relative=''){for(const entry of await fs.readdir(directory,{withFileTypes:true})){const rel=path.posix.join(relative,entry.name);if(entry.isDirectory())await list(path.join(directory,entry.name),rel);else files.push('/'+rel);}}
+  await list(output);
+  const deployed=new Set(Object.keys(baseline.gameManifest));
+  for(const file of files)deployed.add(file);
+  if(deployed.size>20000)throw new Error('Static file limit exceeded: '+deployed.size);
+  console.log('dist: '+files.length+' website files; '+deployed.size+' files after merging retained game assets');
+ }else for(const directory of [output,overflow]){const count=await inspect(directory);if(count>20000)throw new Error('Static file limit exceeded: '+count);console.log(path.basename(directory)+': '+count+' files');}
  console.log('Cloudflare Pages build ready: '+Object.keys(catalog.games).length+' game ports; '+report.staticFiles+' static game files; '+routes.length+' explicit Function routes.');
 }
 if(process.argv.includes('--resume'))await finalizeBuild();

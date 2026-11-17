@@ -7,16 +7,25 @@ import {installGameDownloadGuard} from './lib/migration-paths.mjs';
 import {finalizeBuild} from './finalize-build.mjs';
 import {staticFingerprint,validateBaseline} from './lib/static-build-state.mjs';
 import {needsGameIsolation} from './lib/isolation-page.mjs';
+import {STATIC_ORIGIN} from './lib/static-plan.mjs';
 const project=process.cwd(),output=path.join(project,'dist');
+// These legacy fallback ports are large enough that their files belong on the
+// static-data origin. The main site keeps small redirects so their game URLs
+// and wrappers still work.
+const secondaryPublicPorts=['guns-gore-cannoli','dumbfire'];
+const publicRoot=path.join(project,'public');
 if(path.resolve(output)!==path.resolve(project,'dist')||path.dirname(output)!==project)throw new Error('Unsafe build directory');
 function addPlayerGate(html){
  if(html.includes('/assets/player-gate.js'))return html;
- const script='<script src="/assets/player-gate.js" defer></script>';
+ const script='<script src="/assets/player-gate.js?v=4" defer></script>';
  return /<\/body\s*>/i.test(html)?html.replace(/<\/body\s*>/i,script+'</body>'):html+script;
 }
 await fs.rm(output,{recursive:true,force:true});
 await fs.mkdir(output,{recursive:true});
-await fs.cp(path.join(project,'public'),output,{recursive:true});
+await fs.cp(publicRoot,output,{recursive:true,filter:source=>{
+ const relative=path.relative(publicRoot,source).split(path.sep).join('/');
+ return !secondaryPublicPorts.some(name=>relative===`ports/${name}`||relative.startsWith(`ports/${name}/`));
+}});
 const catalog=JSON.parse(await fs.readFile('lib/game-catalog.json','utf8'));
 const hosts=JSON.parse(await fs.readFile('lib/embed-hosts.json','utf8'));
 const rewrite=text=>text.replace(/https?:\/\/([a-z0-9.-]+\.vercel\.app)\/*/gi,(whole,host)=>catalog.games[hosts[host]]?'/ports/'+hosts[host]+'/':whole).replace(/(["'])\/halo-mobile\//g,'$1/ports/halo-mobile/');
@@ -69,6 +78,19 @@ if(baseline){
   }});
  }
 }
+const overflow=path.resolve('dist-games');
+for(const name of secondaryPublicPorts){
+ const source=path.join(publicRoot,'ports',name),target=path.join(overflow,'ports',name);
+ await fs.mkdir(path.dirname(target),{recursive:true});
+ await fs.cp(source,target,{recursive:true});
+}
+const redirectFile=path.join(output,'_redirects');
+const existingRedirects=await fs.readFile(redirectFile,'utf8');
+const publicRedirects=secondaryPublicPorts.flatMap(name=>[
+ `/ports/${name} ${STATIC_ORIGIN}/ports/${name}/ 302`,
+ `/ports/${name}/* ${STATIC_ORIGIN}/ports/${name}/:splat 302`,
+]);
+await fs.writeFile(redirectFile,publicRedirects.join('\n')+'\n'+existingRedirects);
 await fs.mkdir(path.join(output,'__migration'),{recursive:true});
 await fs.writeFile(path.join(output,'__migration','health'),JSON.stringify({site:'DillDoe',games:Object.keys(catalog.games),missingSources:catalog.missingSources,staticFiles:staticGames.staticFiles}));
 await finalizeBuild(output,catalog,{baseline});

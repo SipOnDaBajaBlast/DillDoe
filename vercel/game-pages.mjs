@@ -55,7 +55,7 @@ export async function buildGamePages(output) {
 <section class="guide-panel guide-panel-wide"><h2>More to explore</h2><ul class="guide-related">${suggestions.map(other => `<li><a href="/game/${encodeURIComponent(other.slug)}.html">${escape(other.title)}</a></li>`).join('')}</ul></section></div>
 </div></main><footer class="guide-footer"><span><a href="/privacy.html">Privacy</a> · <a href="/games">All games</a></span></footer>
 </body></html>`;
-        const gatedHtml = html.replace('</body>', '<script src="/assets/player-gate.js" defer></script></body>');
+        const gatedHtml = html.replace('</body>', '<script src="/assets/player-gate.js?v=4" defer></script></body>');
         await fs.writeFile(path.join(output, 'game', game.slug + '.html'), gatedHtml);
         if (game.slug !== 'BloonsTD6') {
             library = library.replace(`href="${game.sourceHref}" class="game-card"`, `href="${guideRoute}" class="game-card"`);
