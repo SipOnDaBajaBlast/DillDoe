@@ -54,6 +54,12 @@
       color: #7a5300 !important; background: linear-gradient(#fffdf5, #ffefc4);
       box-shadow: inset 0 1px #fff;
     }
+    .dd-player-ban {
+      margin: 0; padding: 18px 20px; border: 1px solid #8fc9df; border-radius: 12px;
+      color: #073654 !important; background: linear-gradient(135deg, #ffffffef, #e6f8ffff);
+      box-shadow: inset 0 1px #fff, 0 2px 8px #0a5c7a1f;
+      font-size: 1.08rem; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere;
+    }
     .dd-player-card label { display: block; margin-bottom: 6px; font-weight: bold; color: #075e88; text-shadow: 0 1px #fff; }
     .dd-player-card input, .dd-player-card button {
       width: 100%; min-height: 46px; border-radius: 10px; font: inherit;
@@ -103,6 +109,7 @@
       <div class="dd-player-content">
         <h1 id="dd-player-title">Choose your player name</h1>
         <p class="dd-player-intro">Other players and games see this name, so use your real name or a nickname people will recognize — like “Alex”, “Apple”, or “Kya”. Use letters and spaces only; random typing such as “asdasd” is not accepted.</p>
+        <p class="dd-player-ban" role="alert" hidden></p>
         <p class="dd-player-note" hidden></p>
         <form>
           <label for="dd-player-name">Real name or nickname</label>
@@ -128,6 +135,7 @@
   const title = gate.querySelector('h1');
   const intro = gate.querySelector('.dd-player-intro');
   const note = gate.querySelector('.dd-player-note');
+  const banCopy = gate.querySelector('.dd-player-ban');
   const defaultTitle = title.textContent;
   const defaultIntro = intro.textContent;
   const PLAYER_THEMES = new Set(['frutiger', 'pink', 'ps2', 'dark', 'flesh', 'hub', 'weezer']);
@@ -208,12 +216,23 @@
     try {
       const player = await request('/api/player/status');
       if (player.banned) {
-        gate.querySelector('h1').textContent = 'This player is banned';
+        // Show only the admin's message. The old form error line lived inside
+        // the form, which is hidden here, so the message was never visible.
+        title.hidden = true;
+        intro.hidden = true;
+        note.hidden = true;
         form.hidden = true;
+        message.textContent = '';
         const banMessage = typeof player.banMessage === 'string' ? player.banMessage.trim() : '';
-        message.textContent = banMessage || 'This browser can no longer use a player name on this site.';
+        banCopy.textContent = banMessage || 'This browser can no longer use a player name on this site.';
+        banCopy.hidden = false;
         return;
       }
+      title.hidden = false;
+      intro.hidden = false;
+      banCopy.hidden = true;
+      banCopy.textContent = '';
+      form.hidden = false;
       if (player.registered) {
         gate.hidden = true;
         chip.textContent = `Player: ${player.username}`;
