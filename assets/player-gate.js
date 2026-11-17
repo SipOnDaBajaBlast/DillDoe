@@ -210,7 +210,8 @@
       if (player.banned) {
         gate.querySelector('h1').textContent = 'This player is banned';
         form.hidden = true;
-        message.textContent = 'This browser can no longer use a player name on this site.';
+        const banMessage = typeof player.banMessage === 'string' ? player.banMessage.trim() : '';
+        message.textContent = banMessage || 'This browser can no longer use a player name on this site.';
         return;
       }
       if (player.registered) {

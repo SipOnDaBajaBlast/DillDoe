@@ -67,6 +67,13 @@ function cleanGameTitle(value) {
   return title || null;
 }
 
+function cleanBanMessage(value) {
+  const message = typeof value === 'string'
+    ? value.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 240)
+    : '';
+  return message || null;
+}
+
 function sameOrigin(request) {
   const origin = request.headers.get('Origin');
   if (!origin) return false;
@@ -99,6 +106,7 @@ async function migratePlayerSchema(env) {
   if (!columns.has('last_game')) await addColumn(env, 'last_game TEXT');
   if (!columns.has('last_game_title')) await addColumn(env, 'last_game_title TEXT');
   if (!columns.has('last_game_at')) await addColumn(env, 'last_game_at INTEGER');
+  if (!columns.has('ban_message')) await addColumn(env, 'ban_message TEXT');
   await env.PLAYER_DB.prepare(`
     CREATE TABLE IF NOT EXISTS player_game_playtime (
       player_id TEXT NOT NULL,
@@ -145,7 +153,7 @@ async function ensurePlayer(request, env) {
   }
 
   const player = await env.PLAYER_DB.prepare(
-    'SELECT username, name_version, banned_at, last_seen_at, last_playtime_at, last_game, last_game_title FROM players WHERE player_id = ?'
+    'SELECT username, name_version, banned_at, ban_message, last_seen_at, last_playtime_at, last_game, last_game_title FROM players WHERE player_id = ?'
   ).bind(id).first();
   if (player && Date.now() - player.last_seen_at > 60 * 1000) {
     await env.PLAYER_DB.prepare('UPDATE players SET last_seen_at = ? WHERE player_id = ?')
@@ -234,7 +242,7 @@ async function adminApi(request, env, url) {
     const search = query.toLowerCase();
     const [rows, total] = await Promise.all([
       env.PLAYER_DB.prepare(`
-        SELECT player_id, username, name_version, theme, created_at, last_seen_at, banned_at,
+        SELECT player_id, username, name_version, theme, created_at, last_seen_at, banned_at, ban_message,
           last_game, last_game_title, last_game_at,
           (SELECT game FROM player_game_playtime g
             WHERE g.player_id = players.player_id
@@ -262,11 +270,15 @@ async function adminApi(request, env, url) {
     if (typeof body?.playerId !== 'string' || !/^[0-9a-f-]{36}$/i.test(body.playerId) || typeof body.banned !== 'boolean') {
       return json({ error: 'Choose a valid player.' }, 400);
     }
+    if (body.message !== undefined && typeof body.message !== 'string') {
+      return json({ error: 'Choose a valid ban message.' }, 400);
+    }
+    const banMessage = body.banned ? cleanBanMessage(body.message) : null;
     const result = await env.PLAYER_DB.prepare(
-      'UPDATE players SET banned_at = ? WHERE player_id = ?'
-    ).bind(body.banned ? Date.now() : null, body.playerId).run();
+      'UPDATE players SET banned_at = CASE WHEN ? THEN COALESCE(banned_at, ?) ELSE NULL END, ban_message = ? WHERE player_id = ?'
+    ).bind(body.banned ? 1 : 0, Date.now(), banMessage, body.playerId).run();
     if (!result.meta.changes) return json({ error: 'Player not found.' }, 404);
-    return json({ ok: true });
+    return json({ ok: true, banMessage });
   }
   return json({ error: 'Not found.' }, 404);
 }
@@ -350,7 +362,7 @@ export async function playerRegistry(request, env) {
   if (request.method === 'GET' && url.pathname === '/api/player/status') {
     const { player, headers } = await ensurePlayer(request, env);
     if (!player) return json({ registered: false }, 200, headers);
-    if (player.banned_at) return json({ registered: true, banned: true }, 200, headers);
+    if (player.banned_at) return json({ registered: true, banned: true, banMessage: player.ban_message || null }, 200, headers);
     if (Number(player.name_version) < NAME_VERSION) {
       return json({ registered: false, reset: true }, 200, headers);
     }

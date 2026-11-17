@@ -32,6 +32,9 @@
     .state-banned { color: #a51f1f; font-weight: 650; }
     .state-pending { color: #9a6400; font-weight: 650; }
     .state-active { color: #15794a; }
+    .ban-message { max-width: 240px; white-space: normal; color: #536b7f; font-size: .88rem; }
+    td.actions { white-space: nowrap; }
+    td.actions button + button { margin-left: 6px; }
     .note { margin: 12px 0 0; color: #536b7f; font-size: .9rem; }
     @media (max-width: 560px) {
       body { padding: 12px; }
@@ -66,7 +69,7 @@
       <p class="note">Players appear here after they choose a name. Players who are waiting for the name prompt stay hidden until they save one. Theme is the last library theme they selected. Last game and most played update while players are in a game; the list refreshes every 30 seconds.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Player</th><th>Theme</th><th>Last game</th><th>Most played</th><th>Joined</th><th>Last active</th><th>Status</th><th>Action</th></tr></thead>
+          <thead><tr><th>Player</th><th>Theme</th><th>Last game</th><th>Most played</th><th>Joined</th><th>Last active</th><th>Status</th><th>Ban message</th><th>Action</th></tr></thead>
           <tbody id="players"></tbody>
         </table>
       </div>
@@ -179,13 +182,27 @@
           const state = document.createElement('td');
           state.textContent = player.banned_at ? 'Banned' : 'Active';
           state.className = player.banned_at ? 'state-banned' : 'state-active';
+          const banMessage = document.createElement('td');
+          banMessage.className = 'ban-message';
+          banMessage.textContent = player.ban_message || '—';
           const actionCell = document.createElement('td');
-          const action = document.createElement('button');
-          action.textContent = player.banned_at ? 'Unban' : 'Ban';
-          if (!player.banned_at) action.className = 'danger';
-          action.addEventListener('click', () => setBanned(player, !player.banned_at, action));
-          actionCell.append(action);
-          row.append(name, theme, lastGame, topGame, joined, active, state, actionCell);
+          actionCell.className = 'actions';
+          if (player.banned_at) {
+            const unban = document.createElement('button');
+            unban.textContent = 'Unban';
+            unban.addEventListener('click', () => setBanned(player, false, unban));
+            const editMessage = document.createElement('button');
+            editMessage.textContent = 'Edit message';
+            editMessage.addEventListener('click', () => editBanMessage(player, editMessage));
+            actionCell.append(unban, editMessage);
+          } else {
+            const ban = document.createElement('button');
+            ban.textContent = 'Ban';
+            ban.className = 'danger';
+            ban.addEventListener('click', () => banPlayer(player, ban));
+            actionCell.append(ban);
+          }
+          row.append(name, theme, lastGame, topGame, joined, active, state, banMessage, actionCell);
           playerRows.append(row);
         }
         playerOffset += result.players.length;
@@ -202,13 +219,13 @@
       }
     }
 
-    async function setBanned(player, banned, button) {
+    async function updateBan(player, banned, message, button) {
       button.disabled = true;
       try {
         await api('/api/admin/ban', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ playerId: player.player_id, banned }),
+          body: JSON.stringify({ playerId: player.player_id, banned, message }),
         });
         await loadPlayers();
       } catch (error) {
@@ -217,6 +234,34 @@
         status.textContent = error.message;
         button.disabled = false;
       }
+    }
+
+    function requestBanMessage(player) {
+      const entered = window.prompt(`Ban message for ${player.username} (optional, 240 characters max):`, player.ban_message || '');
+      if (entered === null) return null;
+      const message = entered.trim();
+      if (message.length > 240) {
+        status.classList.add('error');
+        status.textContent = 'Ban messages can be at most 240 characters.';
+        return null;
+      }
+      return message;
+    }
+
+    async function banPlayer(player, button) {
+      const message = requestBanMessage(player);
+      if (message === null) return;
+      await updateBan(player, true, message, button);
+    }
+
+    async function editBanMessage(player, button) {
+      const message = requestBanMessage(player);
+      if (message === null) return;
+      await updateBan(player, true, message, button);
+    }
+
+    async function setBanned(player, banned, button) {
+      await updateBan(player, banned, '', button);
     }
 
     document.getElementById('login-form').addEventListener('submit', async event => {

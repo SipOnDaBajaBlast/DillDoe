@@ -11,7 +11,7 @@ const project=process.cwd(),output=path.join(project,'dist');
 if(path.resolve(output)!==path.resolve(project,'dist')||path.dirname(output)!==project)throw new Error('Unsafe build directory');
 function addPlayerGate(html){
  if(html.includes('/assets/player-gate.js'))return html;
- const script='<script src="/assets/player-gate.js?v=2" defer></script>';
+ const script='<script src="/assets/player-gate.js?v=3" defer></script>';
  return /<\/body\s*>/i.test(html)?html.replace(/<\/body\s*>/i,script+'</body>'):html+script;
 }
 await fs.rm(output,{recursive:true,force:true});
