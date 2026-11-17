@@ -135,13 +135,16 @@
   let playerReady = false;
   let reportedTheme = '';
   let themeReportQueue = Promise.resolve();
-  const isGamePage = /^\/games\/[^/]+\.html$/i.test(location.pathname);
+  // Cloudflare Pages redirects /games/name.html to /games/name, so accept
+  // both forms; otherwise the playtime reports never carry a game.
+  const gameMatch = location.pathname.match(/^\/games\/([^/]+?)(?:\.html)?$/i);
+  const isGamePage = Boolean(gameMatch);
   // The admin page shows this per game, so send a stable slug plus a readable
   // title instead of only the total playtime.
   const gameInfo = (() => {
-    if (!isGamePage) return {};
+    if (!gameMatch) return {};
     let slug;
-    try { slug = decodeURIComponent(location.pathname.slice('/games/'.length, -'.html'.length)); } catch { return {}; }
+    try { slug = decodeURIComponent(gameMatch[1]); } catch { return {}; }
     if (!/^[A-Za-z0-9_-]{1,80}$/.test(slug)) return {};
     const pageTitle = document.title.replace(/\s*[|·—–-]\s*(?:Play.*|DillDoe).*$/i, '').trim();
     return { game: slug, gameTitle: (pageTitle || slug).slice(0, 80) };
