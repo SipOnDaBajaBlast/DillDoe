@@ -7,6 +7,7 @@ export const isSecondaryFile=file=>/\.(?:wgsl|json|xml|meta)$/i.test(file);
 export const isSecondaryGameFile=(game,file)=>game==='roblox-march-2007'?false:game==='worldfox'||(game==='needy-streamer-overload'&&/\.bundle$/i.test(file))||(isSecondaryFile(file)&&!(game==='tabs'&&file==='Build/tabs.json'))||(game==='omori'&&file.startsWith('audio/')&&file.endsWith('.m4a'))||(game==='gta5-webport-vercel'&&file.startsWith('data/')&&Object.hasOwn(gtaStatic.hashes,file.slice(5)));
 export const specialRoutes=[
  '/api/*',
+ '/relay/*',
  '/halo-mobile/*',
  '/ports/gta5-webport-vercel/data/*','/ports/gta5-webport-vercel/deployment-status.json',
  '/ports/master-quest-browser/api/*','/ports/persona3-browser/api/*','/ports/ghost-sparta-browser/api/*',
