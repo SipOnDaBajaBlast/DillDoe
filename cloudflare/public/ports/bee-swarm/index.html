@@ -95,14 +95,32 @@
 
       loadingBar.style.display = "block";
 
+      // Each chunk is about 20 MB, so a single dropped connection used to
+      // abort the whole load. Retry a chunk before giving up.
+      const PART_ATTEMPTS = 4;
+
+      async function fetchPart(url) {
+        let lastError = null;
+        for (let attempt = 1; attempt <= PART_ATTEMPTS; attempt++) {
+          try {
+            const response = await fetch(url);
+            if (!response.ok) {
+              throw new Error(`Failed to load ${url} (HTTP ${response.status})`);
+            }
+            return await response.arrayBuffer();
+          } catch (error) {
+            lastError = error;
+            if (attempt === PART_ATTEMPTS) break;
+            await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
+          }
+        }
+        throw lastError || new Error(`Failed to load ${url}`);
+      }
+
       async function fetchMergedDataUrl() {
         const buffers = [];
         for (let i = 0; i < PART_COUNT; i++) {
-          const response = await fetch(`${baseDataUrl}.part${i}`);
-          if (!response.ok) {
-            throw new Error(`Failed to load data chunk part${i} (HTTP ${response.status})`);
-          }
-          buffers.push(await response.arrayBuffer());
+          buffers.push(await fetchPart(`${baseDataUrl}.part${i}`));
           // First 50% of progress bar tracks chunk downloads
           progressBarFull.style.width = `${((i + 1) / PART_COUNT) * 50}%`;
         }
@@ -121,7 +139,11 @@
           loadingBar.style.display = "none";
           URL.revokeObjectURL(config.dataUrl);
         } catch (err) {
-          unityShowBanner(err.message || String(err), "error");
+          loadingBar.style.display = "none";
+          unityShowBanner(
+            `${err.message || String(err)}<br><a href="" style="color:#fff;font-weight:bold">Retry</a>`,
+            "error"
+          );
         }
       };
       script.onerror = () => {

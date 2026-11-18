@@ -21,22 +21,35 @@ export const POLLING_RELAY_CLIENT = String.raw`(function () {
     catch (_) { return false; }
   }
 
+  function useWindowFetch() {
+    relayFetchImpl = function (input, init) { return window.fetch(input, init); };
+    relayAbortFactory = function () { return new AbortController(); };
+    return relayFetchImpl;
+  }
+
   function ensureRelayFetch() {
     if (relayFetchImpl) return relayFetchImpl;
-    if (typeof window.fetch === 'function' && isNative(window.fetch)) {
-      relayFetchImpl = window.fetch.bind(window);
-      relayAbortFactory = function () { return new AbortController(); };
+    if (typeof window.fetch === 'function' && isNative(window.fetch)) return useWindowFetch();
+    // A hidden frame normally gives us an unpatched fetch, but a page CSP that
+    // blocks frame-src (or a browser that refuses about:blank frames) makes
+    // that impossible. Fall back to window.fetch: the relay URLs are absolute,
+    // and the port only remaps root-relative paths, so they still reach us.
+    try {
+      var frame = document.createElement('iframe');
+      frame.setAttribute('aria-hidden', 'true');
+      frame.tabIndex = -1;
+      frame.style.cssText = 'position:absolute;width:0;height:0;border:0;visibility:hidden';
+      frame.src = 'about:blank';
+      (document.body || document.documentElement).appendChild(frame);
+      var frameWindow = frame.contentWindow;
+      if (!frameWindow || typeof frameWindow.fetch !== 'function') throw new Error('No frame fetch');
+      var frameFetch = frameWindow.fetch.bind(frameWindow);
+      relayFetchImpl = frameFetch;
+      relayAbortFactory = function () { return new frameWindow.AbortController(); };
       return relayFetchImpl;
+    } catch (_) {
+      return useWindowFetch();
     }
-    var frame = document.createElement('iframe');
-    frame.setAttribute('aria-hidden', 'true');
-    frame.tabIndex = -1;
-    frame.style.cssText = 'position:absolute;width:0;height:0;border:0;visibility:hidden';
-    frame.src = 'about:blank';
-    (document.body || document.documentElement).appendChild(frame);
-    relayFetchImpl = frame.contentWindow.fetch.bind(frame.contentWindow);
-    relayAbortFactory = function () { return new frame.contentWindow.AbortController(); };
-    return relayFetchImpl;
   }
 
   function newRelayAbortController() {
@@ -145,37 +158,57 @@ export const POLLING_RELAY_CLIENT = String.raw`(function () {
 
   PollingSocket.prototype._connect = async function () {
     if (this._closed) return;
-    try {
-      var response = await ensureRelayFetch()(this._base + '/session', {
-        method: 'POST',
-        cache: 'no-store',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mode: this._mode,
-          name: this._name,
-          place: this._place,
-          room: this._roomCode
-        })
-      });
-      var data = await response.json();
-      if (this._closed) return;
-      if (!response.ok || !data || data.t !== 'welcome') {
-        this._emitError(data && data.error || ('Relay HTTP ' + response.status));
-        this._shutdown(1008);
+    // One dropped request should not end the session. Retry transport errors
+    // and 5xx answers; a real 4xx (room not found, room full) is final.
+    var attempts = 3;
+    for (var attempt = 1; attempt <= attempts; attempt++) {
+      try {
+        var response = await ensureRelayFetch()(this._base + '/session', {
+          method: 'POST',
+          cache: 'no-store',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mode: this._mode,
+            name: this._name,
+            place: this._place,
+            room: this._roomCode
+          })
+        });
+        var data = null;
+        try { data = await response.json(); } catch (_) { data = null; }
+        if (this._closed) return;
+        if (!response.ok) {
+          if (response.status >= 500 && attempt < attempts) {
+            await sleep(350 * attempt);
+            continue;
+          }
+          this._emitError(data && data.error || ('Relay HTTP ' + response.status));
+          this._shutdown(1008);
+          return;
+        }
+        if (!data || data.t !== 'welcome') {
+          this._emitError(data && data.error || 'Unexpected relay response');
+          this._shutdown(1008);
+          return;
+        }
+        this._token = String(data.token || '');
+        this._self = String(data.self || '');
+        this._host = String(data.host || '');
+        this.readyState = OPEN;
+        this._fire('open', {});
+        this._lastRoster = JSON.stringify(data.players || []);
+        this._emit(data);
+        this._poll();
         return;
+      } catch (error) {
+        if (this._closed) return;
+        if (attempt < attempts) {
+          await sleep(350 * attempt);
+          continue;
+        }
+        this._emitError(error && error.message || 'Could not reach the relay');
+        this._shutdown(1006);
       }
-      this._token = String(data.token || '');
-      this._self = String(data.self || '');
-      this._host = String(data.host || '');
-      this.readyState = OPEN;
-      this._fire('open', {});
-      this._lastRoster = JSON.stringify(data.players || []);
-      this._emit(data);
-      this._poll();
-    } catch (error) {
-      if (this._closed) return;
-      this._emitError(error && error.message || 'Could not reach the relay');
-      this._shutdown(1006);
     }
   };
 
