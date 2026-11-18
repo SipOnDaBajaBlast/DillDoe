@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {build} from 'esbuild';
 import {staticPlan} from './lib/static-plan.mjs';
+import {isRetiredAsset,retiredAssetPaths} from './lib/static-build-state.mjs';
 
 export async function finalizeBuild(output=path.resolve('dist'),catalog,{baseline=null}={}){
  if(path.resolve(output)!==path.resolve('dist'))throw new Error('Unsafe build output');
@@ -14,6 +15,9 @@ export async function finalizeBuild(output=path.resolve('dist'),catalog,{baselin
  // which returns the original bytes with a valid WebAssembly content type.
  const compressed=new Set(report.compressedFiles);
  const routes=staticPlan(catalog).routes;
+ // These are Worker endpoints, not static game files, so they are added here
+ // without changing the static-game build fingerprint.
+ for(const route of ['/relay/*','/ports/roblox-march-2007/*'])if(!routes.includes(route))routes.push(route);
  report.compressedFiles=[];
  report.remainingFunctionRoutes=routes.length;
  await fs.writeFile(path.join(output,'static-game-report.json'),JSON.stringify(report,null,2));
@@ -39,9 +43,13 @@ export async function finalizeBuild(output=path.resolve('dist'),catalog,{baselin
   await list(output);
   const deployed=new Set(Object.keys(baseline.gameManifest));
   for(const file of files)deployed.add(file);
+  for(const file of deployed)if(isRetiredAsset(file))deployed.delete(file);
   if(deployed.size>20000)throw new Error('Static file limit exceeded: '+deployed.size);
   console.log('dist: '+files.length+' website files; '+deployed.size+' files after merging retained game assets');
- }else for(const directory of [output,overflow]){const count=await inspect(directory);if(count>20000)throw new Error('Static file limit exceeded: '+count);console.log(path.basename(directory)+': '+count+' files');}
+ }else{
+  for(const directory of [output,overflow])for(const asset of retiredAssetPaths)await fs.rm(path.join(directory,asset.slice(1)),{force:true});
+  for(const directory of [output,overflow]){const count=await inspect(directory);if(count>20000)throw new Error('Static file limit exceeded: '+count);console.log(path.basename(directory)+': '+count+' files');}
+ }
  console.log('Cloudflare Pages build ready: '+Object.keys(catalog.games).length+' game ports; '+report.staticFiles+' static game files; '+routes.length+' explicit Function routes.');
 }
 if(process.argv.includes('--resume'))await finalizeBuild();

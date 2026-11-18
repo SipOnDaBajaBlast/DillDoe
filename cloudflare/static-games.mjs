@@ -14,12 +14,6 @@ import gtaStaticData from './lib/gta-static-data.json' with {type:'json'};
 const cache=path.resolve(process.env.GAME_ASSET_CACHE||'.asset-cache');
 const packBase='https://github.com/MagiczLunchly/gta5-webport-vercel/releases/download/dilldoe-game-assets-v1/';
 const textFile=/\.(html|js|mjs|css|json)$/;
-function patchRobloxRelay(file,text){
- if(file==='web/js/netconfig.js'){
-  text=text.replace(/window\.RBLX_RELAY_URL\s*=\s*['"][^'"]*['"];/,"window.RBLX_RELAY_URL = location.origin + '/relay';");
- }
- return text.replaceAll('https://desktop-33lh8ah.tail4210dd.ts.net','https://dilldoe-games.pages.dev').replaceAll('wss://desktop-33lh8ah.tail4210dd.ts.net','wss://dilldoe-games.pages.dev');
-}
 const exists=async(file,size)=>{const stat=await fs.stat(file).catch(()=>null);return stat?.isFile()&&(size===undefined||stat.size===size);};
 async function download(url,file,size,sha){
  if(await exists(file,size)){
@@ -100,11 +94,7 @@ export async function buildStaticGames(output,catalog){
    }
    if(bytes.length!==entry.files[file])throw new Error('Pinned asset size mismatch '+name+'/'+file);
    if(name==='gta5-webport-vercel'&&file.startsWith('data/')&&gtaStaticData.hashes[file.slice(5)]&&createHash('sha256').update(bytes).digest('hex')!==gtaStaticData.hashes[file.slice(5)])throw new Error('GTA static data differs from the verified dataset: '+file);
-   if(textFile.test(file)){
-    let text=transformGameText(bytes.toString('utf8'),name,entry,file);
-    if(name==='roblox-march-2007')text=patchRobloxRelay(file,text);
-    bytes=Buffer.from(text);
-   }
+   if(textFile.test(file))bytes=Buffer.from(transformGameText(bytes.toString('utf8'),name,entry,file));
    if(bytes.length>25*1024*1024)throw new Error('Transformed static asset is too large '+name+'/'+file);
    const target=path.resolve(root,'ports',name,file);
    if(!target.startsWith(path.resolve(root)+path.sep))throw new Error('Unsafe game asset path');

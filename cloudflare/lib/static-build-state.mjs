@@ -3,6 +3,31 @@ import {createHash} from 'node:crypto';
 import path from 'node:path';
 
 export const BASELINE_PATH='/__migration/static-build.json';
+// Non-runtime documentation, source symbols, and build notes. Pages counts
+// every one of these against the 20,000-file deployment limit, so keep the
+// playable files and drop the packaging clutter.
+export const retiredAssetPaths=new Set([
+ '/ports/class-of-09/index.html.symbols',
+ '/ports/class-of-09/renpy.wasm.map',
+ '/ports/class-of-09-the-flip-side/index.html.symbols',
+ '/ports/daybreak-web/index.html.symbols',
+ '/ports/ddkk-vercel-split/runtime-notes.md',
+ '/ports/fearme-web/README-DEPLOY.txt',
+ '/ports/fearme-web/index.html.symbols',
+ '/ports/fnfgame/CHANGELOG.md',
+ '/ports/fnfgame/do NOT readme.txt',
+ '/ports/fnfgame/assets/fonts/fonts-go-here.txt',
+ '/ports/fnfgame/assets/tutorial/tutorial_stuff_here.txt',
+ '/ports/fnfgame/assets/videos/videos/encoding_info.txt',
+ '/ports/fnfgame/assets/videos/videos/subtitle_info.txt',
+ '/ports/gta5-webport-vercel/robots.txt',
+ '/ports/smg-webport/README.md',
+ '/ports/sms-siteisoinclude/sms-game.js.symbols',
+ '/ports/sms-siteisoinclude/sms.js.symbols',
+ '/ports/undertale/change.txt',
+ '/ports/undertale/error.txt',
+]);
+export const isRetiredAsset=file=>retiredAssetPaths.has(file);
 export const STATIC_INPUTS=['package-lock.json','static-games.mjs','lib/game-catalog.json','lib/game-assets.json','lib/game-text.mjs','lib/migration-paths.mjs','lib/gta-static-data.json','lib/gta-static-routing.mjs','lib/static-plan.mjs','lib/feed-pit-loader.mjs','lib/death-note-loader.mjs','lib/worldfox-loader.mjs','public/ports/dumbfire/Build/data-parts.txt'];
 export async function staticFingerprint(){
  const hash=createHash('sha256');
@@ -27,7 +52,8 @@ export function validateBaseline(value,fingerprint){
  return value;
 }
 export function mergeManifest(baseline,website){
- const manifest={...baseline.gameManifest,...website};
+ const retained=Object.fromEntries(Object.entries(baseline.gameManifest).filter(([file])=>!isRetiredAsset(file)));
+ const manifest={...retained,...website};
  if(Object.keys(manifest).length>20000)throw new Error('Cloudflare static file limit exceeded');
  return manifest;
 }
