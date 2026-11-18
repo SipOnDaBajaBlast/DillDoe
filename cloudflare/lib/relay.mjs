@@ -197,6 +197,17 @@ function acceptPlay(request) {
   return new Response(null, {status: 101, webSocket: client});
 }
 
+export class RelayRoom {
+  constructor() {
+    this.rooms = rooms;
+    this.sessions = sessions;
+  }
+
+  async fetch(request) {
+    return handleRelay(request);
+  }
+}
+
 export async function handleRelay(request) {
   const url = new URL(request.url);
   if (url.pathname === '/relay/rooms') {

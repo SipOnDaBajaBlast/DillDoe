@@ -30,7 +30,10 @@ async function serveRoblox(request,env){
 
 export default {async fetch(request,env){
  const path=new URL(request.url).pathname;
- if(path==='/relay'||path.startsWith('/relay/'))return handleRelay(request);
+ if(path==='/relay'||path.startsWith('/relay/')){
+  if(env.RELAY_ROOM)return env.RELAY_ROOM.get(env.RELAY_ROOM.idFromName('global')).fetch(request);
+  return handleRelay(request);
+ }
  // Roblox's source files live in the retained game manifest, so rewrite them
  // before the migration router resolves the static asset.
  if(path.startsWith(ROBLOX_PREFIX))return serveRoblox(request,env);

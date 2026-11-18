@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "dilldoe-roblox-relay",
+  "main": "relay-do.mjs",
+  "compatibility_date": "2026-11-18",
+  "durable_objects": {
+    "bindings": [
+      {"name": "RELAY_ROOM", "class_name": "RelayRoom"}
+    ]
+  },
+  "migrations": [
+    {"tag": "v1", "new_sqlite_classes": ["RelayRoom"]}
+  ]
+}
