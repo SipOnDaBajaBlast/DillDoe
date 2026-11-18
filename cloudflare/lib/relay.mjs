@@ -53,6 +53,22 @@ function cleanName(value, fallback) {
   return (name || fallback || 'Player').slice(0, 20);
 }
 
+/* Display names are unique inside a room, so two players who both accepted
+ * the default name are still distinguishable in the player list and chat. */
+export function uniqueRoomName(name, existing) {
+  const base = cleanName(name, 'Player');
+  const taken = new Set();
+  for (const value of existing || []) taken.add(String(value || '').toLowerCase());
+  if (!taken.has(base.toLowerCase())) return base;
+  for (let suffix = 2; suffix <= MAX_PLAYERS; suffix++) {
+    const tail = String(suffix);
+    const stem = base.slice(0, Math.max(1, 20 - tail.length)).replace(/ +$/, '');
+    const candidate = stem + tail;
+    if (!taken.has(candidate.toLowerCase())) return candidate;
+  }
+  return (base.slice(0, 16).replace(/ +$/, '') || 'Player') + randomCode(4);
+}
+
 function cleanPlace(value) {
   return String(value == null ? '' : value).replace(/[^\x20-\x7E]/g, '').trim().slice(0, 80);
 }
@@ -225,7 +241,7 @@ async function handleSession(request, env) {
   if (!body || typeof body !== 'object') return jsonResponse({ error: 'Invalid session request.' }, 400);
   const mode = body.mode === 'host' ? 'host' : body.mode === 'join' ? 'join' : '';
   const place = cleanPlace(body.place);
-  const name = cleanName(body.name, mode === 'host' ? 'Host' : 'Player');
+  let name = cleanName(body.name, mode === 'host' ? 'Host' : 'Player');
   if (!mode || !place) return jsonResponse({ error: 'Invalid session parameters.' }, 400);
 
   const now = Date.now();
@@ -255,6 +271,10 @@ async function handleSession(request, env) {
     if (Number(count && count.n) >= Math.min(MAX_PLAYERS, Number(room.max) || MAX_PLAYERS)) {
       return jsonResponse({ error: 'Room is full.' }, 409);
     }
+    const active = await db.prepare(
+      'SELECT name FROM relay_players WHERE room_id = ? AND seen_at >= ?'
+    ).bind(roomId, now - ROOM_STALE_MS).all();
+    name = uniqueRoomName(name, (active.results || []).map(player => player.name));
     playerId = randomCode(12);
     token = randomToken();
     const hash = await tokenHash(token);

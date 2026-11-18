@@ -254,12 +254,14 @@ export const POLLING_RELAY_CLIENT = String.raw`(function () {
         if (timer) clearTimeout(timer);
         if (this._closed) return;
         this._failures++;
-        if (this._failures >= 3) {
+        // A short network hiccup should freeze the room, not end it. Give the
+        // relay roughly half a minute of retries before dropping the session.
+        if (this._failures >= 12) {
           this._emitError(error && error.message || 'Relay disconnected');
           this._shutdown(1006);
           return;
         }
-        await sleep(500);
+        await sleep(Math.min(4000, 400 * this._failures));
       } finally {
         this._pollAbort = null;
       }
