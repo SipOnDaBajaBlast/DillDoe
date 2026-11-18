@@ -20,8 +20,11 @@ export const POLLING_RELAY_CLIENT = String.raw`(function () {
   }
 
   function relayHttpBase(url) {
+    // The game page carries a <base> tag, so every relay request needs an
+    // absolute origin. A relative '/relay/...' fetch would resolve under the
+    // port's directory and hit a static 405 instead of the relay worker.
     var parsed = new URL(url, location.href);
-    return parsed.origin + '/relay';
+    return parsed.origin.replace(/^ws/, 'http') + '/relay';
   }
 
   function PollingSocket(url) {
