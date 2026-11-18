@@ -8,9 +8,20 @@ const OLD_SOCKET='wss://desktop-33lh8ah.tail4210dd.ts.net';
 const NEW_ORIGIN='https://dilldoe-games.pages.dev';
 const NEW_SOCKET='wss://dilldoe-games.pages.dev';
 
-function patchRobloxText(text){
+/* The server browser used to turn the first slow or failed room-list request
+ * into "relay is offline". It polls every couple of seconds, so give the
+ * relay more time and only call it offline after repeated failures. */
+export function patchRobloxText(text){
  return text
   .replace(/window\.RBLX_RELAY_URL\s*=\s*['"][^'"]*['"];/,"window.RBLX_RELAY_URL = location.origin + '/relay';")
+  .replace('setTimeout(function () { controller.abort(); }, 5000)',
+           'setTimeout(function () { controller.abort(); }, 12000)')
+  .replace("setStatus(els.sbStatus, '');", "state.roomFails = 0; setStatus(els.sbStatus, '');")
+  .replace("setStatus(els.sbStatus, 'Multiplayer relay is offline. Play Solo still works.');",
+           "state.roomFails = (state.roomFails || 0) + 1;\n" +
+           "          setStatus(els.sbStatus, state.roomFails >= 4\n" +
+           "            ? 'Multiplayer relay is offline. Play Solo still works.'\n" +
+           "            : 'Relay is not responding. Retrying…');")
   .replace('<script src="js/netconfig.js"></script>','<script src="js/polling-relay.js"></script>\n<script src="js/netconfig.js"></script>')
   .replaceAll(OLD_SOCKET,NEW_SOCKET)
   .replaceAll(OLD_ORIGIN,NEW_ORIGIN);
