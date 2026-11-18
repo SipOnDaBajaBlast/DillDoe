@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 616 353" role="img" aria-labelledby="title desc">
+  <title id="title">Bee Swarm Simulator</title>
+  <desc id="desc">A golden honeycomb and bee illustration.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#12325c"/>
+      <stop offset="1" stop-color="#081426"/>
+    </linearGradient>
+    <linearGradient id="honey" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe066"/>
+      <stop offset="1" stop-color="#f5a623"/>
+    </linearGradient>
+    <pattern id="comb" width="64" height="56" patternUnits="userSpaceOnUse">
+      <path d="M32 1 60 17v32L32 65 4 49V17Z" fill="none" stroke="#f5b82e" stroke-opacity=".18" stroke-width="2"/>
+    </pattern>
+  </defs>
+  <rect width="616" height="353" fill="url(#sky)"/>
+  <rect width="616" height="353" fill="url(#comb)"/>
+  <circle cx="520" cy="54" r="78" fill="#ffd23f" opacity=".09"/>
+  <circle cx="84" cy="300" r="92" fill="#ffd23f" opacity=".07"/>
+  <g transform="translate(130 78)">
+    <path d="M86 0 172 49v98l-86 49L0 147V49Z" fill="url(#honey)" stroke="#ffe89a" stroke-width="6"/>
+    <path d="m86 22 68 39v78l-68 39-68-39V61Z" fill="#b86f12" opacity=".55"/>
+    <path d="M86 42 142 74v62l-56 32-56-32V74Z" fill="#ffe98b"/>
+    <text x="86" y="108" text-anchor="middle" fill="#6b3d08" font-family="Arial Black, Arial, sans-serif" font-size="34" font-weight="900">BSS</text>
+  </g>
+  <g transform="translate(335 178)">
+    <ellipse cx="0" cy="0" rx="58" ry="40" fill="#ffd23f" stroke="#2b1a04" stroke-width="5"/>
+    <path d="M-22-38v76M10-40v80M42-28v56" stroke="#2b1a04" stroke-width="13"/>
+    <circle cx="-58" cy="-8" r="25" fill="#2b1a04"/>
+    <path d="M-80-18-112-34M-80 2-114 10" stroke="#2b1a04" stroke-width="4" stroke-linecap="round"/>
+    <ellipse cx="-24" cy="-30" rx="30" ry="14" transform="rotate(-20 -24 -30)" fill="#fff" opacity=".85"/>
+    <ellipse cx="18" cy="-34" rx="28" ry="13" transform="rotate(18 18 -34)" fill="#fff" opacity=".7"/>
+  </g>
+  <path d="M292 160c24-30 44-43 66-43" fill="none" stroke="#ffe89a" stroke-width="3" stroke-dasharray="4 8" opacity=".7"/>
+  <text x="46" y="322" fill="#fff" font-family="Arial, sans-serif" font-size="30" font-weight="800" letter-spacing="1">BEE SWARM</text>
+  <text x="47" y="344" fill="#f5c542" font-family="Arial, sans-serif" font-size="13" letter-spacing="4">UNITY · WEBGL · NO INSTALL</text>
+</svg>

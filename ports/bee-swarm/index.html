@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes">
+    <title>Bee Swarm Simulator</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #0b132b;
+      }
+      #unity-container {
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        inset: 0;
+      }
+      #unity-canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
+      }
+      #unity-footer {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"></div>
+    </div>
+
+    <script>
+      const canvas = document.querySelector("#unity-canvas");
+      const loadingBar = document.querySelector("#unity-loading-bar");
+      const progressBarFull = document.querySelector("#unity-progress-bar-full");
+
+      function unityShowBanner(msg, type) {
+        const warningBanner = document.querySelector("#unity-warning");
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? "block" : "none";
+        }
+        const div = document.createElement("div");
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type === "error") {
+          div.style = "background: #d92626; color: #fff; padding: 10px; font-family: sans-serif;";
+        } else {
+          if (type === "warning") {
+            div.style = "background: #facc15; color: #111; padding: 10px; font-family: sans-serif;";
+          }
+          setTimeout(() => {
+            if (div.parentNode === warningBanner) warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      const buildUrl = "Build";
+      const PART_COUNT = 5; // part0 through part4
+      const baseDataUrl = buildUrl + "/Bee Swarm Simulator.data.unityweb";
+      const loaderUrl = buildUrl + "/Bee Swarm Simulator.loader.js";
+
+      const config = {
+        arguments: [],
+        dataUrl: "",
+        frameworkUrl: buildUrl + "/Bee Swarm Simulator.framework.js.unityweb",
+        codeUrl: buildUrl + "/Bee Swarm Simulator.wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "BSSPort",
+        productName: "Bee Swarm Simulator",
+        productVersion: "0.1.0",
+        showBanner: unityShowBanner,
+      };
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        document.querySelector("#unity-container").className = "unity-mobile";
+        canvas.className = "unity-mobile";
+      }
+
+      loadingBar.style.display = "block";
+
+      async function fetchMergedDataUrl() {
+        const buffers = [];
+        for (let i = 0; i < PART_COUNT; i++) {
+          const response = await fetch(`${baseDataUrl}.part${i}`);
+          if (!response.ok) {
+            throw new Error(`Failed to load data chunk part${i} (HTTP ${response.status})`);
+          }
+          buffers.push(await response.arrayBuffer());
+          // First 50% of progress bar tracks chunk downloads
+          progressBarFull.style.width = `${((i + 1) / PART_COUNT) * 50}%`;
+        }
+        const mergedBlob = new Blob(buffers, { type: "application/octet-stream" });
+        return URL.createObjectURL(mergedBlob);
+      }
+
+      const script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = async () => {
+        try {
+          config.dataUrl = await fetchMergedDataUrl();
+          const unityInstance = await createUnityInstance(canvas, config, (progress) => {
+            progressBarFull.style.width = `${50 + progress * 50}%`;
+          });
+          loadingBar.style.display = "none";
+          URL.revokeObjectURL(config.dataUrl);
+        } catch (err) {
+          unityShowBanner(err.message || String(err), "error");
+        }
+      };
+      script.onerror = () => {
+        unityShowBanner("Failed to load Unity loader script.", "error");
+      };
+
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>
