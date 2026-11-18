@@ -27,22 +27,47 @@ export function patchRobloxText(text){
   .replaceAll(OLD_ORIGIN,NEW_ORIGIN);
 }
 
-async function serveRoblox(request,env){
+const PATCHABLE=/text|javascript|json|xml|html|css/i;
+
+/* The game files are patched after the static asset is read, so the asset's
+ * own ETag describes the unpatched bytes. Reusing it let a browser revalidate
+ * against the old file, get a 304 and keep running a stale script. Tag the
+ * patched text ourselves and answer conditional requests from that tag. */
+function textTag(text){
+ let hash=0x811c9dc5;
+ for(let i=0;i<text.length;i++){
+  hash^=text.charCodeAt(i);
+  hash=Math.imul(hash,0x01000193);
+ }
+ return 'W/"'+(hash>>>0).toString(16)+'-'+text.length.toString(16)+'"';
+}
+
+export async function serveRoblox(request,env){
  const path=new URL(request.url).pathname;
  if(path===ROBLOX_PREFIX+'web/js/polling-relay.js'){
   return new Response(POLLING_RELAY_CLIENT,{headers:{'content-type':'text/javascript; charset=utf-8','cache-control':'no-cache'}});
  }
- const response=await env.ASSETS.fetch(request);
+ if(request.method!=='GET')return env.ASSETS.fetch(request);
+ const headers=new Headers(request.headers);
+ headers.delete('if-none-match');
+ headers.delete('if-modified-since');
+ const response=await env.ASSETS.fetch(new Request(request,{headers}));
  const type=response.headers.get('content-type')||'';
- if(request.method!=='GET'||!(/text|javascript|json|xml|html|css/i.test(type)||/\.(?:js|html|json|css|txt|xml)$/i.test(new URL(request.url).pathname)))return response;
- const headers=new Headers(response.headers);
+ if(!(PATCHABLE.test(type)||/\.(?:js|html|json|css|txt|xml)$/i.test(path)))return response;
  const text=patchRobloxText(await response.text());
- headers.delete('content-length');
- headers.delete('content-encoding');
- headers.set('cache-control','no-cache');
- const csp=headers.get('content-security-policy');
- if(csp)headers.set('content-security-policy',patchRobloxText(csp));
- return new Response(text,{status:response.status,statusText:response.statusText,headers});
+ const tag=textTag(text);
+ const out=new Headers(response.headers);
+ out.delete('content-length');
+ out.delete('content-encoding');
+ out.delete('last-modified');
+ out.set('cache-control','no-cache');
+ out.set('etag',tag);
+ const csp=out.get('content-security-policy');
+ if(csp)out.set('content-security-policy',patchRobloxText(csp));
+ if(response.status===200&&request.headers.get('if-none-match')===tag){
+  return new Response(null,{status:304,statusText:'Not Modified',headers:out});
+ }
+ return new Response(text,{status:response.status,statusText:response.statusText,headers:out});
 }
 
 export default {async fetch(request,env){
