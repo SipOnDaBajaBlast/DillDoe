@@ -10,8 +10,8 @@
  * host, and only the host may publish state. No player addresses are shared.
  */
 const MAX_PLAYERS = 16;
-const ROOM_STALE_MS = 20000;
-const MESSAGE_TTL_MS = 120000;
+const ROOM_STALE_MS = 90000;
+const MESSAGE_TTL_MS = 180000;
 const MAX_BODY = 256 * 1024;
 const MAX_BATCH = 64;
 const MAX_MESSAGE = 128 * 1024;
