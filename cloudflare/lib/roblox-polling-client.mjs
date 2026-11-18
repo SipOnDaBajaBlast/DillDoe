@@ -10,6 +10,40 @@ export const POLLING_RELAY_CLIENT = String.raw`(function () {
   var Native = window.WebSocket;
   if (!Native) return;
 
+  // The port patches window.fetch to remap its virtual asset paths, which also
+  // rewrites /relay requests. Use a blank same-origin frame's untouched fetch
+  // (or the untouched window.fetch when it is still native).
+  var relayFetchImpl = null;
+  var relayAbortFactory = null;
+
+  function isNative(fn) {
+    try { return /\{\s*\[native code\]\s*\}/.test(Function.prototype.toString.call(fn)); }
+    catch (_) { return false; }
+  }
+
+  function ensureRelayFetch() {
+    if (relayFetchImpl) return relayFetchImpl;
+    if (typeof window.fetch === 'function' && isNative(window.fetch)) {
+      relayFetchImpl = window.fetch.bind(window);
+      relayAbortFactory = function () { return new AbortController(); };
+      return relayFetchImpl;
+    }
+    var frame = document.createElement('iframe');
+    frame.setAttribute('aria-hidden', 'true');
+    frame.tabIndex = -1;
+    frame.style.cssText = 'position:absolute;width:0;height:0;border:0;visibility:hidden';
+    frame.src = 'about:blank';
+    (document.body || document.documentElement).appendChild(frame);
+    relayFetchImpl = frame.contentWindow.fetch.bind(frame.contentWindow);
+    relayAbortFactory = function () { return new frame.contentWindow.AbortController(); };
+    return relayFetchImpl;
+  }
+
+  function newRelayAbortController() {
+    ensureRelayFetch();
+    return relayAbortFactory();
+  }
+
   var OPEN = 1;
   var CONNECTING = 0;
   var CLOSING = 2;
@@ -112,7 +146,7 @@ export const POLLING_RELAY_CLIENT = String.raw`(function () {
   PollingSocket.prototype._connect = async function () {
     if (this._closed) return;
     try {
-      var response = await fetch(this._base + '/session', {
+      var response = await ensureRelayFetch()(this._base + '/session', {
         method: 'POST',
         cache: 'no-store',
         headers: { 'Content-Type': 'application/json' },
@@ -150,11 +184,11 @@ export const POLLING_RELAY_CLIENT = String.raw`(function () {
       var response;
       var timer = null;
       try {
-        this._pollAbort = new AbortController();
+        this._pollAbort = newRelayAbortController();
         timer = setTimeout(function () {
           try { this._pollAbort.abort(); } catch (_) { /* already done */ }
         }.bind(this), 12000);
-        response = await fetch(
+        response = await ensureRelayFetch()(
           this._base + '/poll?token=' + encodeURIComponent(this._token) +
             '&after=' + encodeURIComponent(String(this._lastSeq)),
           { cache: 'no-store', signal: this._pollAbort.signal }
@@ -241,7 +275,7 @@ export const POLLING_RELAY_CLIENT = String.raw`(function () {
       return;
     }
     try {
-      var response = await fetch(this._base + '/send', {
+      var response = await ensureRelayFetch()(this._base + '/send', {
         method: 'POST',
         cache: 'no-store',
         headers: { 'Content-Type': 'application/json' },
@@ -282,7 +316,7 @@ export const POLLING_RELAY_CLIENT = String.raw`(function () {
       } else if (navigator.sendBeacon) {
         var blob = new Blob([payload], { type: 'application/json' });
         if (!navigator.sendBeacon(this._base + '/leave', blob)) {
-          fetch(this._base + '/leave', {
+          ensureRelayFetch()(this._base + '/leave', {
             method: 'POST',
             keepalive: true,
             headers: { 'Content-Type': 'application/json' },
