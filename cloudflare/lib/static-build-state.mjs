@@ -26,6 +26,18 @@ export const retiredAssetPaths=new Set([
  '/ports/sms-siteisoinclude/sms.js.symbols',
  '/ports/undertale/change.txt',
  '/ports/undertale/error.txt',
+ // Licences and readmes are not loaded by any game. Keep the deployable file
+ // count below Pages' limit as new games are added.
+ '/ports/class-of-09-the-flip-side/LICENSE',
+ '/ports/class-of-09-the-flip-side/index.html.symbols',
+ '/ports/ddkk-vercel-split/ENGINE-LICENSE.txt',
+ '/ports/ddkk-vercel-split/ORIGINAL-ENGINE-LICENSE.txt',
+ '/ports/ddkk-vercel-split/ORIGINAL-LICENSES.txt',
+ '/ports/ddkk-vercel-split/SCREENPACK-LICENSE.txt',
+ '/ports/fnfgame/LICENSE.md',
+ '/ports/halo-mobile/fonts/README.md',
+ '/ports/smg-webport/README.md',
+ '/ports/tf2-web/LICENSE',
 ]);
 export const isRetiredAsset=file=>retiredAssetPaths.has(file);
 export const STATIC_INPUTS=['package-lock.json','static-games.mjs','lib/game-catalog.json','lib/game-assets.json','lib/game-text.mjs','lib/migration-paths.mjs','lib/gta-static-data.json','lib/gta-static-routing.mjs','lib/static-plan.mjs','lib/feed-pit-loader.mjs','lib/death-note-loader.mjs','lib/worldfox-loader.mjs','public/ports/dumbfire/Build/data-parts.txt'];

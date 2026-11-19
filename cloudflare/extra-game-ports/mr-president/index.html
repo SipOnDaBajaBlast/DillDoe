@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Mr. President!</title>
+    <link rel="icon" href="data:,">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <style>
+      html, body { width:100%; height:100%; margin:0; padding:0; overflow:hidden; background:#000; }
+      #unity-container, #unity-container.unity-desktop, #unity-container.unity-mobile {
+        position:fixed; inset:0; width:100%; height:100%; transform:none;
+      }
+      #unity-canvas { display:block; width:100% !important; height:100% !important; border:0; outline:0; background:#000; touch-action:none; user-select:none; -webkit-user-select:none; }
+      #unity-container:fullscreen { width:100vw; height:100vh; background:#000; }
+      #unity-loading-bar { display:none; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:min(460px, calc(100vw - 48px)); color:#eee; font:14px/1.5 system-ui,sans-serif; }
+      #unity-progress-bar-empty { width:100%; height:4px; background:#333; }
+      #unity-progress-bar-full { width:0; height:100%; background:#eee; }
+      #loading-stage { font-size:18px; font-weight:600; margin-bottom:10px; }
+      #loading-bytes { font-variant-numeric:tabular-nums; color:#cbd0d7; margin:8px 0 12px; }
+      #loading-files { color:#9da6b2; font-size:12px; }
+      .loading-file { display:flex; justify-content:space-between; gap:16px; margin:3px 0; font-variant-numeric:tabular-nums; }
+      #unity-warning { display:none; position:absolute; left:50%; top:5%; transform:translateX(-50%); padding:10px; font:14px sans-serif; }
+    </style>
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width=1280 height=720 tabindex="-1"></canvas>
+      <div id="unity-loading-bar" role="status" aria-live="polite">
+        <div id="loading-stage">Loading launcher…</div>
+        <div id="loading-bytes">0.0 / 0.0 MB</div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+        <div id="loading-files"></div>
+      </div>
+      <div id="unity-warning"> </div>
+    </div>
+    <script src="package-loader.js?v=afd6f81c76f3"></script>
+    <script>
+      var canvas = document.querySelector("#unity-canvas");
+      var gameReady = false;
+      var fullscreenRequestPending = false;
+      document.addEventListener("fullscreenchange", function () {
+        if (gameReady) canvas.focus({ preventScroll:true });
+      });
+
+      // Enter once per click when needed; a second click never toggles it off.
+      canvas.addEventListener("click", function (event) {
+        if (event.button !== 0 || !gameReady || document.fullscreenElement || fullscreenRequestPending) return;
+        var container = document.querySelector("#unity-container");
+        if (!container.requestFullscreen) return;
+        fullscreenRequestPending = true;
+        container.requestFullscreen({ navigationUI: "hide" }).catch(function () {
+          // The game still fills the browser if fullscreen is unavailable.
+        }).finally(function () { fullscreenRequestPending = false; });
+      });
+      canvas.addEventListener("dblclick", function (event) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }, true);
+      canvas.addEventListener("contextmenu", function (event) { event.preventDefault(); });
+
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+        var warningBanner = document.querySelector("#unity-warning");
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+
+      var loadingFiles = {"loaderUrl":{"label":"Launcher","total":26021,"loaded":0,"finished":false},"dataUrl":{"label":"Game data (maps, textures & audio)","total":942587671,"loaded":0,"finished":false},"codeUrl":{"label":"Game engine","total":106436222,"loaded":0,"finished":false},"frameworkUrl":{"label":"Runtime","total":554155,"loaded":0,"finished":false}};
+      function mb(value) { return (value / 1000000).toLocaleString("en-US", {minimumFractionDigits:1, maximumFractionDigits:1}); }
+      function renderLoading() {
+        var files=Object.values(loadingFiles);
+        var loaded=files.reduce(function(sum,file){return sum+file.loaded;},0);
+        var total=files.reduce(function(sum,file){return sum+file.total;},0);
+        var active=files.filter(function(file){return !file.finished && file.started;});
+        var allDone=files.every(function(file){return file.finished;});
+        document.querySelector("#loading-stage").textContent=allDone ? "Starting game…" : active.length ? "Loading "+active.map(function(file){return file.label.split(" (")[0].toLowerCase();}).join(" + ")+"…" : "Loading launcher…";
+        document.querySelector("#loading-bytes").textContent=mb(loaded)+" / "+mb(total)+" MB";
+        document.querySelector("#unity-progress-bar-full").style.width=(total ? loaded/total*100 : 0)+"%";
+        document.querySelector("#loading-files").replaceChildren();
+        ["dataUrl","codeUrl","frameworkUrl"].forEach(function(key){
+          var file=loadingFiles[key];var row=document.createElement("div");row.className="loading-file";
+          var label=document.createElement("span");label.textContent=file.label;
+          var amount=document.createElement("span");amount.textContent=mb(file.loaded)+" / "+mb(file.total)+" MB";
+          row.append(label,amount);document.querySelector("#loading-files").append(row);
+        });
+      }
+      var loadingRenderPending=false;
+      function updateDownloadProgress(key, progress) {
+        var file=loadingFiles[key];if(!file) return;
+        file.started=true;
+        if(progress.lengthComputable && progress.total>0) file.total=progress.total;
+        file.loaded=Math.max(file.loaded, Math.min(file.total,progress.loaded||0));
+        if(progress.finished){file.finished=true;file.loaded=file.total;}
+        if(!loadingRenderPending){loadingRenderPending=true;requestAnimationFrame(function(){loadingRenderPending=false;renderLoading();});}
+      }
+      renderLoading();
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/web.loader.js?v=afd6f81c76f3";
+      var config = {
+        arguments: [],
+        autoSyncPersistentDataPath: true,
+        dataUrl: buildUrl + "/web.data?v=afd6f81c76f3",
+        frameworkUrl: buildUrl + "/web.framework.js?v=afd6f81c76f3",
+        codeUrl: buildUrl + "/web.wasm?v=afd6f81c76f3",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Mr. President",
+        productName: "Mr. President!",
+        productVersion: "1.0",
+        showBanner: unityShowBanner,
+        onDownloadProgress: updateDownloadProgress,
+        // errorHandler: function(err, url, line) {
+        //    alert("error " + err + " occurred at line " + line);
+        //    // Return 'true' if you handled this error and don't want Unity
+        //    // to process it further, 'false' otherwise.
+        //    return true;
+        // },
+      };
+
+      configurePortPackage(config, updateDownloadProgress, loadingFiles);
+      renderLoading();
+
+      // By default, Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      // If you would like all file writes inside Unity Application.persistentDataPath
+      // directory to automatically persist so that the contents are remembered when
+      // the user revisits the site the next time, uncomment the following line:
+      // config.autoSyncPersistentDataPath = true;
+      // This autosyncing is currently not the default behavior to avoid regressing
+      // existing user projects that might rely on the earlier manual
+      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
+      // expected to change.
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        document.querySelector("#unity-container").className = "unity-mobile";
+        canvas.className = "unity-mobile";
+
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
+
+
+      } else {
+        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+      }
+
+      document.querySelector("#unity-loading-bar").style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        updateDownloadProgress("loaderUrl", { loaded:loadingFiles.loaderUrl.total, finished:true });
+        createUnityInstance(canvas, config, (progress) => {
+          if (progress >= 0.9) renderLoading();
+              }).then((unityInstance) => {
+                document.querySelector("#unity-loading-bar").style.display = "none";
+                gameReady = true;
+
+              }).catch((message) => {
+                alert(message);
+              });
+            };
+
+      document.body.appendChild(script);
+
+    </script>
+  </body>
+</html>
