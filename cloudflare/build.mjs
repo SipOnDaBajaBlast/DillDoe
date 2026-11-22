@@ -12,7 +12,7 @@ const project=process.cwd(),output=path.join(project,'dist');
 // These legacy fallback ports are large enough that their files belong on the
 // static-data origin. The main site keeps small redirects so their game URLs
 // and wrappers still work.
-const secondaryPublicPorts=['guns-gore-cannoli','dumbfire'];
+const secondaryPublicPorts=['guns-gore-cannoli','dumbfire','rocket-league','ragdoll'];
 const publicRoot=path.join(project,'public');
 if(path.resolve(output)!==path.resolve(project,'dist')||path.dirname(output)!==project)throw new Error('Unsafe build directory');
 function addPlayerGate(html){

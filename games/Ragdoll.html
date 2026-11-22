@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ragdoll · DillDoe</title>
+<style>
+ html,body{margin:0;height:100%;background:#0b0b0d;color:#eee;font:15px system-ui,sans-serif;overflow:hidden}
+ #unity-canvas{display:block;position:absolute;inset:0;width:100%;height:100%;background:#000;outline:none}
+ #loading{position:fixed;inset:0;z-index:5;display:grid;place-content:center;gap:14px;text-align:center;padding:24px;background:#0b0b0d}
+ #loading h1{margin:0;font-size:clamp(20px,3vw,32px);letter-spacing:.02em}
+ #loading p{margin:0 auto;color:#b9b9c4;max-width:38em}
+ progress{width:min(360px,80vw);height:10px;accent-color:#e0a33a;justify-self:center}
+ #error{color:#ffb4b4;white-space:pre-wrap;max-width:56em;text-align:left;font:13px ui-monospace,Consolas,monospace}
+</style>
+</head><body>
+<canvas id="unity-canvas" tabindex="-1"></canvas>
+<div id="loading">
+  <h1>Ragdoll</h1>
+  <p id="status" role="status" aria-live="polite">Downloading game files…</p>
+  <progress id="progress" max="1" value="0" aria-label="Game download progress"></progress>
+  <p id="note">First play downloads about 136 MB. The browser caches it for later visits, so leave the tab open until it finishes.</p>
+  <div id="error" hidden></div>
+</div>
+<script>
+(() => {
+  "use strict";
+  const query = new URLSearchParams(location.search);
+  const BASE = (query.get("builds") || "/ports/ragdoll/Build/").replace(/\/?$/, "/");
+  const DATA = ["ragdolls.data.part1","ragdolls.data.part2","ragdolls.data.part3","ragdolls.data.part4","ragdolls.data.part5"];
+  const CODE = ["ragdolls.wasm.part1","ragdolls.wasm.part2"];
+  const TOTAL = 19922944 * 4 + 19802554 + 19922944 + 16579127;
+  const status = document.getElementById("status"), progress = document.getElementById("progress"),
+        note = document.getElementById("note"), panel = document.getElementById("loading"),
+        canvas = document.getElementById("unity-canvas"), errorBox = document.getElementById("error");
+  let got = 0;
+  const bump = () => {
+    progress.value = Math.min(1, got / TOTAL);
+    status.textContent = "Downloading game files… " + Math.round(got / TOTAL * 100) + "%";
+  };
+  async function part(name) {
+    const response = await fetch(BASE + name);
+    if (!response.ok) throw new Error("Could not download " + name + " (HTTP " + response.status + ")");
+    const reader = response.body.getReader(), chunks = [];
+    for (;;) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      got += value.length;
+      bump();
+    }
+    return new Blob(chunks, {type: /\.wasm\.part\d+$/.test(name) ? "application/wasm" : "application/octet-stream"});
+  }
+  async function downloadAll(names) {
+    const out = new Array(names.length);
+    let next = 0;
+    await Promise.all(Array.from({length: Math.min(3, names.length)}, async () => {
+      while (next < names.length) {
+        const index = next++;
+        out[index] = await part(names[index]);
+      }
+    }));
+    return out;
+  }
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = () => reject(new Error("Could not load " + src));
+      document.body.appendChild(script);
+    });
+  }
+  async function start() {
+    if (!("WebGL2RenderingContext" in window)) throw new Error("This browser has no WebGL 2, which the game needs. Use a current desktop browser.");
+    const [dataParts, codeParts] = await Promise.all([downloadAll(DATA), downloadAll(CODE)]);
+    const dataUrl = URL.createObjectURL(new Blob(dataParts, {type: "application/octet-stream"}));
+    const codeUrl = URL.createObjectURL(new Blob(codeParts, {type: "application/wasm"}));
+    status.textContent = "Starting game…";
+    note.textContent = "";
+    await loadScript(BASE + "ragdolls.loader.js");
+    const config = {
+      dataUrl,
+      codeUrl,
+      frameworkUrl: BASE + "ragdolls.framework.js",
+      streamingAssetsUrl: BASE,
+      companyName: "Ragdoll",
+      productName: "Ragdoll",
+      devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+    };
+    window.unityInstance = await createUnityInstance(canvas, config, value => {
+      progress.value = value;
+      status.textContent = "Preparing game… " + Math.round(value * 100) + "%";
+    });
+    panel.remove();
+    canvas.focus();
+  }
+  start().catch(error => {
+    console.error(error);
+    status.textContent = "The game could not start";
+    errorBox.hidden = false;
+    errorBox.textContent = error.message;
+    note.textContent = "Check your connection and try again. A current desktop browser with WebGL 2 is recommended.";
+  });
+  canvas.addEventListener("pointerdown", () => canvas.focus());
+})();
+</script>
+</body></html>
