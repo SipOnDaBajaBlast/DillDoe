@@ -13,6 +13,10 @@ const project=process.cwd(),output=path.join(project,'dist');
 // static-data origin. The main site keeps small redirects so their game URLs
 // and wrappers still work.
 const secondaryPublicPorts=['guns-gore-cannoli','dumbfire','rocket-league','ragdoll'];
+// The Rocket League runtime starts its pthread workers from its own script URL, and a worker script
+// has to be same-origin as the page, so game.js stays on the site and only the rest of the port
+// lives on the static-data origin.
+const sameOriginPortFiles=new Set(['ports/rocket-league/game.js']);
 const publicRoot=path.join(project,'public');
 if(path.resolve(output)!==path.resolve(project,'dist')||path.dirname(output)!==project)throw new Error('Unsafe build directory');
 function addPlayerGate(html){
@@ -24,7 +28,11 @@ await fs.rm(output,{recursive:true,force:true});
 await fs.mkdir(output,{recursive:true});
 await fs.cp(publicRoot,output,{recursive:true,filter:source=>{
  const relative=path.relative(publicRoot,source).split(path.sep).join('/');
- return !secondaryPublicPorts.some(name=>relative===`ports/${name}`||relative.startsWith(`ports/${name}/`));
+ if(sameOriginPortFiles.has(relative))return true;
+ const name=secondaryPublicPorts.find(port=>relative===`ports/${port}`||relative.startsWith(`ports/${port}/`));
+ if(!name)return true;
+ // copy a port directory that holds a same-origin file so the filter can reach that file
+ return relative===`ports/${name}`&&[...sameOriginPortFiles].some(file=>file.startsWith(`ports/${name}/`));
 }});
 const catalog=JSON.parse(await fs.readFile('lib/game-catalog.json','utf8'));
 const hosts=JSON.parse(await fs.readFile('lib/embed-hosts.json','utf8'));
@@ -86,10 +94,18 @@ for(const name of secondaryPublicPorts){
 }
 const redirectFile=path.join(output,'_redirects');
 const existingRedirects=await fs.readFile(redirectFile,'utf8');
-const publicRedirects=secondaryPublicPorts.flatMap(name=>[
- `/ports/${name} ${STATIC_ORIGIN}/ports/${name}/ 302`,
- `/ports/${name}/* ${STATIC_ORIGIN}/ports/${name}/:splat 302`,
-]);
+const publicRedirects=(await Promise.all(secondaryPublicPorts.map(async name=>{
+ const rules=[`/ports/${name} ${STATIC_ORIGIN}/ports/${name}/ 302`];
+ const entries=await fs.readdir(path.join(publicRoot,'ports',name),{withFileTypes:true}).catch(()=>[]);
+ const files=entries.filter(entry=>entry.isFile()).map(entry=>entry.name);
+ for(const file of files){
+  if(sameOriginPortFiles.has(`ports/${name}/${file}`))continue;
+  rules.push(`/ports/${name}/${file} ${STATIC_ORIGIN}/ports/${name}/${file} 302`);
+ }
+ // a port with a same-origin file needs its files listed one by one; a wildcard would move that file too
+ if(!files.some(file=>sameOriginPortFiles.has(`ports/${name}/${file}`)))rules.push(`/ports/${name}/* ${STATIC_ORIGIN}/ports/${name}/:splat 302`);
+ return rules;
+}))).flat();
 await fs.writeFile(redirectFile,publicRedirects.join('\n')+'\n'+existingRedirects);
 await fs.mkdir(path.join(output,'__migration'),{recursive:true});
 await fs.writeFile(path.join(output,'__migration','health'),JSON.stringify({site:'DillDoe',games:Object.keys(catalog.games),missingSources:catalog.missingSources,staticFiles:staticGames.staticFiles}));

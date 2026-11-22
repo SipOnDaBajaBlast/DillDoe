@@ -99,7 +99,9 @@
         window.Module.uewUserId = id;
         box.remove();
         const game = document.createElement("script");
-        game.src = GAME_FILES + "/ports/rocket-league/game.js?v=1";
+        // same origin as this page: the runtime starts its pthread workers from this script's URL, and a
+        // worker script cannot be cross-origin
+        game.src = "/ports/rocket-league/game.js?v=1";
         document.body.appendChild(game);
         document.getElementById("canvas").focus();
       });

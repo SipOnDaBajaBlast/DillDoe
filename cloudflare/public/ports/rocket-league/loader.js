@@ -1,4 +1,6 @@
-/* The Page stays small; all large game objects resolve to the R2-backed route. */
+/* The Page stays small; all large game objects resolve to the R2-backed route. This file is served
+   cross-origin (scripts only), but game.js is served from the site itself: the runtime's pthread
+   workers are created from its own script URL, and worker scripts have to be same-origin. */
 (() => {
   "use strict";
 
