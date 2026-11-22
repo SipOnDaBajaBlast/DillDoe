@@ -57,8 +57,9 @@
   }
 
   // gzip-compressed code parts (327 MB of code, ThinLTO -O3 build, is ~61 MB on the wire); each part is decompressed as it arrives
-  // c4 is the cooperative-thread build the single-file distribution uses; the v19 parts stop after runtime init
-  const wasmParts = Array.from({ length: 14 }, (_, index) => `game.wasm.${index}.c4.gz`);
+  // v19 is the build this game.js was generated with: the c4 parts also import __asyncjs__uew_js_sleep, which this
+  // runtime's import table does not have, so instantiation fails on them
+  const wasmParts = Array.from({ length: 14 }, (_, index) => `game.wasm.${index}.v19.gz`);
   window.Module = {
     canvas,
     arguments: [
