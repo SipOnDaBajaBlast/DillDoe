@@ -8,7 +8,9 @@ let baseline;
 // port changed, those hashes would silently serve the old build instead.
 let changedGameFiles=false;
 try{
- const changed=execFileSync('git',['diff','--name-only','HEAD^','HEAD','--','cloudflare/public/ports/'],{encoding:'utf8'});
+ // the workflow runs this from cloudflare/, so ask git for the repository root before matching the root-relative path
+ const root=execFileSync('git',['rev-parse','--show-toplevel'],{encoding:'utf8'}).trim();
+ const changed=execFileSync('git',['diff','--name-only','HEAD^','HEAD','--','cloudflare/public/ports/'],{encoding:'utf8',cwd:root});
  changedGameFiles=changed.trim().length>0;
 }catch{
  // A shallow checkout without a parent cannot prove that assets are unchanged.

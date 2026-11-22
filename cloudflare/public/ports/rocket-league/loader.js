@@ -55,6 +55,7 @@
   }
 
   // gzip-compressed code parts (327 MB of code, ThinLTO -O3 build, is ~61 MB on the wire); each part is decompressed as it arrives
+  // c4 is the cooperative-thread build the single-file distribution uses; the v19 parts stop after runtime init
   const wasmParts = Array.from({ length: 14 }, (_, index) => `game.wasm.${index}.c4.gz`);
   window.Module = {
     canvas,
