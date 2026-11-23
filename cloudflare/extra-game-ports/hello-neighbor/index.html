@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hello Neighbor Alpha 1</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  canvas { position: absolute; inset: 0; margin: auto; max-width: 100%; max-height: 100%; aspect-ratio: 1280 / 720;
+           width: 100%; height: auto; outline: none; }
+  @media (min-aspect-ratio: 1280 / 720) { canvas { width: auto; height: 100%; } }
+  #status { position: fixed; left: 16px; bottom: 12px; font: 13px system-ui, sans-serif; color: #9a9a9a; pointer-events: none; }
+  #credit { position: fixed; right: 12px; bottom: 12px; font: 13px system-ui, sans-serif; color: #9a9a9a; pointer-events: none; }
+  #fps { position: fixed; left: 8px; top: 6px; font: 600 13px ui-monospace, Consolas, monospace; color: #e8e8e8; background: #000a;
+         padding: 2px 6px; border-radius: 4px; pointer-events: none; display: none; }
+</style>
+</head>
+<body>
+<canvas id="canvas" width="1280" height="720" tabindex="0"></canvas>
+<div id="status">Loading…</div>
+<div id="fps"></div>
+<div id="credit">Ported by ThatMilkdud</div>
+<script>
+  // frame counter: Ctrl+Shift+F toggles it (remembered), ?fps=1 or ?fps=0 in the address overrides
+  (() => {
+    const el = document.getElementById("fps");
+    let on = false;
+    try { const v = localStorage.getItem("uewFps"); if (v !== null) on = v === "1"; } catch (e) {}
+    const q = new URLSearchParams(location.search).get("fps");
+    if (q !== null) on = q !== "0";
+    const show = () => { el.style.display = on ? "block" : "none"; };
+    show();
+    addEventListener("keydown", e => {
+      if (e.ctrlKey && e.shiftKey && e.code === "KeyF") {
+        on = !on; show();
+        try { localStorage.setItem("uewFps", on ? "1" : "0"); } catch (err) {}
+        e.preventDefault(); e.stopImmediatePropagation();
+      }
+    }, true);
+    let last = performance.now(), frames = 0, worst = 0, prev = 0, prevT = last;
+    const tick = now => {
+      const n = (window.Module && Module.uewPresents) || 0;
+      if (n !== prev) { worst = Math.max(worst, now - prevT); prev = n; prevT = now; }
+      if (now - last >= 500) {
+        const fps = (n - frames) * 1000 / (now - last);
+        if (on) el.textContent = `${fps.toFixed(0)} FPS  ${fps ? (1000 / fps).toFixed(1) : "-"} ms  worst ${worst.toFixed(0)} ms`;
+        frames = n; last = now; worst = 0;
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  })();
+</script>
+<script>
+  const status = document.getElementById("status");
+  // The port's data and split wasm build stay on its upstream GitHub Pages origin.
+  const REMOTE = "https://iordbeerus.github.io/hello-neighbor-Alpha-1-Port/";
+  const parts = ["game.wasm.0", "game.wasm.1", "game.wasm.2", "game.wasm.3", "game.wasm.4", "game.wasm.5", "game.wasm.6", "game.wasm.7", "game.wasm.8", "game.wasm.9"].map(file => REMOTE + file);
+  var Module = {
+    canvas: document.getElementById("canvas"),
+    arguments: ["--image", "/image.bin", "--root", "/game", "--save", "/save/HelloNeighborReborn-Win64-Shipping", "--exe", "HelloNeighborReborn/Binaries/Win64/HelloNeighborReborn-Win64-Shipping.exe", "-dx11"].concat(new URLSearchParams(location.search).getAll("arg")),
+    uewSave: "/save/HelloNeighborReborn-Win64-Shipping",
+    uewSeed: {},
+    uewAsyncShaders: true,
+    uewDebugPanel: true,
+    uewNetPlaceholders: false,
+    uewCacheMB: 1700,
+    uewGpuMB: 5530,
+    // Loads data/index.txt and 1 MB file blocks on demand from the upstream origin.
+    uewDataUrl: REMOTE + "data/",
+    print: t => console.log(t),
+    printErr: t => console.log(t),
+    setStatus: t => { if (t) status.textContent = t; },
+    onRuntimeInitialized: () => { status.textContent = ""; },
+  };
+  // Default is the low render size and effects through the runtime's Module.uewSeed (marked blocks in the Unreal config); ?perf=high skips them
+  if (new URLSearchParams(location.search).get("perf") !== "high") {
+    const nl = "\n";
+    const engine = "[/SystemSettings]" + nl + [
+      "r.ScreenPercentage=60", "r.MotionBlurQuality=0", "r.PostProcessAAQuality=0", "r.ShadowQuality=0",
+      "r.Shadow.MaxResolution=256", "r.ViewDistanceScale=0.6", "r.SSR.Quality=0", "r.AmbientOcclusionLevels=0",
+      "r.LightFunctionQuality=0", "r.ParticleLightQuality=0", "r.MaxAnisotropy=1", "r.DepthOfFieldQuality=0",
+      "r.BloomQuality=0"].join(nl) + nl;
+    const user = "[ScalabilityGroups]" + nl + [
+      "sg.ResolutionQuality=60", "sg.ViewDistanceQuality=0", "sg.AntiAliasingQuality=0", "sg.ShadowQuality=0",
+      "sg.PostProcessQuality=0", "sg.TextureQuality=2", "sg.EffectsQuality=0", "sg.FoliageQuality=0"].join(nl) + nl;
+    const dir = "Users/Player/AppData/Local/HelloNeighborReborn/Saved/Config/";
+    for (const plat of ["WindowsNoEditor", "Windows"]) {
+      Module.uewSeed[dir + plat + "/Engine.ini"] = engine;
+      Module.uewSeed[dir + plat + "/GameUserSettings.ini"] = user;
+    }
+  }
+  if (parts.length) {
+    // the parts download together and are fed in order to a streaming compile, which runs while they arrive
+    Module.instantiateWasm = (imports, done) => {
+      let got = 0;
+      const res = parts.map(u => fetch(u));
+      const body = new ReadableStream({
+        async start(ctl) {
+          for (let i = 0; i < res.length; i++) {
+            const r = await res[i];
+            if (!r.ok) throw new Error(`HTTP ${r.status} for ${parts[i]}`);
+            const rd = r.body.getReader();
+            for (;;) {
+              const { done: end, value } = await rd.read();
+              if (end) break;
+              got += value.length;
+              status.textContent = `Loading code ${Math.round(got / 1048576)} MB`;
+              ctl.enqueue(value);
+            }
+          }
+          status.textContent = "Compiling…";
+          ctl.close();
+        }
+      });
+      WebAssembly.instantiateStreaming(new Response(body, { headers: { "Content-Type": "application/wasm" } }), imports)
+        .then(r => done(r.instance, r.module))
+        .catch(e => { status.textContent = "Failed to load: " + e.message; });
+      return {};
+    };
+  }
+</script>
+<script>
+  // This page is served with COOP/COEP by the game-files origin; the player page
+  // supplies the cross-origin-isolated permission, so real wasm threads are on.
+  if (!self.crossOriginIsolated) {
+    status.textContent = "This game needs cross-origin isolation; open it from the DillDoe player page.";
+  } else {
+    const s = document.createElement("script");
+    s.src = "game.js";
+    s.onerror = () => { status.textContent = "Failed to load the game loader."; };
+    document.body.appendChild(s);
+  }
+</script>
+</body>
+</html>
