@@ -3,6 +3,7 @@ import path from 'node:path';
 import {build} from 'esbuild';
 import {staticPlan} from './lib/static-plan.mjs';
 import {isRetiredAsset,retiredAssetPaths} from './lib/static-build-state.mjs';
+import {WEBBLOX_ROUTES} from './lib/wisp.mjs';
 
 export async function finalizeBuild(output=path.resolve('dist'),catalog,{baseline=null}={}){
  if(path.resolve(output)!==path.resolve('dist'))throw new Error('Unsafe build output');
@@ -17,11 +18,11 @@ export async function finalizeBuild(output=path.resolve('dist'),catalog,{baselin
  const routes=staticPlan(catalog).routes;
  // These are Worker endpoints, not static game files, so they are added here
  // without changing the static-game build fingerprint.
- for(const route of ['/relay/*','/ports/roblox-march-2007/*'])if(!routes.includes(route))routes.push(route);
+ for(const route of ['/relay/*','/ports/roblox-march-2007/*',...WEBBLOX_ROUTES])if(!routes.includes(route))routes.push(route);
  report.compressedFiles=[];
  report.remainingFunctionRoutes=routes.length;
  await fs.writeFile(path.join(output,'static-game-report.json'),JSON.stringify(report,null,2));
- await build({entryPoints:['worker.mjs'],outfile:path.join(output,'_worker.js'),bundle:true,format:'esm',platform:'browser',target:'es2022',minify:true});
+ await build({entryPoints:['worker.mjs'],outfile:path.join(output,'_worker.js'),bundle:true,format:'esm',platform:'browser',target:'es2022',minify:true,external:['cloudflare:sockets']});
  await fs.writeFile(path.join(output,'_routes.json'),JSON.stringify({version:1,include:routes,exclude:[]},null,2));
  let headers='/*\n  X-Content-Type-Options: nosniff\n';
  // A trailing wildcard covers both /games/Name and /games/Name.html, keeping

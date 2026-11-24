@@ -1,6 +1,7 @@
 import {migrationRouter} from './lib/migration-router.mjs';
 import {handleRelay} from './lib/relay.mjs';
 import {POLLING_RELAY_CLIENT} from './lib/roblox-polling-client.mjs';
+import {handleWisp,isolateWebbloxPage,WEBBLOX_PAGES,WISP_PATH} from './lib/wisp.mjs';
 
 const ROBLOX_PREFIX='/ports/roblox-march-2007/';
 const OLD_ORIGIN='https://desktop-33lh8ah.tail4210dd.ts.net';
@@ -73,6 +74,10 @@ export async function serveRoblox(request,env){
 export default {async fetch(request,env){
  const path=new URL(request.url).pathname;
  if(path==='/relay'||path.startsWith('/relay/'))return handleRelay(request,env);
+ // Webblox (/blox/) reaches Roblox's APIs through this Roblox-only Wisp relay.
+ // cloudflare:sockets is loaded lazily so Node tests can still import this file.
+ if(path===WISP_PATH.slice(0,-1)||path.startsWith(WISP_PATH))return handleWisp(request,(await import('cloudflare:sockets')).connect);
+ if(WEBBLOX_PAGES.has(path))return isolateWebbloxPage(await env.ASSETS.fetch(request));
  // Roblox's source files live in the retained game manifest, so rewrite them
  // before the migration router resolves the static asset.
  if(path.startsWith(ROBLOX_PREFIX))return serveRoblox(request,env);

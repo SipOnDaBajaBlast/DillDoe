@@ -20,3 +20,13 @@ The site has no advertising placements or AdSense scripts. `privacy.html` descri
 `vercel/game-pages.mjs` generates game start pages from the game cards in root `games.html` during every Cloudflare build. Edit game notes in `vercel/game-guides.mjs`. The build checks that every linked game page exists and produces `sitemap.xml` and `robots.txt`.
 
 Game start pages use the Frutiger Aero theme in `assets/game-guide.css` with `assets/frutiger-aero-ocean.webp`. The glass window, green Play button, and information panels adapt to phones.
+
+## Webblox
+
+`games/Webblox.html` embeds `/blox/`, Roblox's official browser client (WebClientApp) hosted with [webblox](https://github.com/x8rr/webblox-built). The files in `blox/` are webblox's host page plus the unmodified [epoxy-transport](https://github.com/MercuryWorkshop/epoxy-transport) 3.0.1 bundle (AGPL-3.0). DillDoe's changes:
+
+- The Roblox engine is not stored here. `blox/host.js` asks Roblox for the live engine version and `blox/sw.js` streams `/blox/engine/<version>/…` straight from `setup.rbxcdn.com`, so engine downloads use no Function requests.
+- Roblox API calls go through the Wisp relay at `/wisp/` in the Cloudflare Worker (`cloudflare/lib/wisp.mjs`, adapted from [webblox.js](https://github.com/hiwa1do/webblox.js)). It only connects to Roblox hosts on port 443 and only accepts pages from this site. TLS runs in the player's browser, so the relay never sees a Roblox session.
+- The Worker adds the cross-origin isolation headers to `/blox/` and `/games/Webblox` only, because the `_headers` file is at its 100-rule limit.
+
+Joining a game needs a Roblox account: players paste their `.ROBLOSECURITY` cookie, which stays in their browser's storage. Chrome or Edge on a computer works best.

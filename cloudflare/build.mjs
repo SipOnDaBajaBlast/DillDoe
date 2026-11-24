@@ -44,7 +44,9 @@ if(await fs.stat(path.join(repository,'games.html')).catch(()=>null)){
   if(file.endsWith('.html')){
    let text=rewrite(await fs.readFile(path.join(repository,file),'utf8'));
    if(file.startsWith('games/'))text=text.replace(/<head\b[^>]*>/i,head=>head+'<script src="/assets/game-download-guard.js?v=1"></script>');
-   if(file!=='players-admin.html')text=addPlayerGate(text);
+   // /blox/ is Webblox's engine host, embedded by games/Webblox.html (which
+   // keeps the gate), like the /ports/ game files.
+   if(file!=='players-admin.html'&&!file.startsWith('blox/'))text=addPlayerGate(text);
    if(needsGameIsolation(file,text)){
     if(!catalog.mainIsolation.includes(file))catalog.mainIsolation.push(file);
     text=text.replace(/<iframe\b([^>]*)>/gi,(whole,attrs)=>/\ballow=/.test(attrs)?whole:'<iframe'+attrs+' allow="cross-origin-isolated; fullscreen; autoplay; gamepad" allowfullscreen>');
