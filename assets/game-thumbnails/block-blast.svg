@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-label="Block Blast">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1220"/>
+      <stop offset="1" stop-color="#1b2b47"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7dd3fc"/><stop offset="1" stop-color="#2f8fd6"/>
+    </linearGradient>
+    <linearGradient id="shadow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#000000" stop-opacity=".28"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#38bdf8" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#38bdf8" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="34" height="34" patternUnits="userSpaceOnUse">
+      <rect width="34" height="34" fill="none" stroke="#ffffff" stroke-opacity=".05"/>
+    </pattern>
+  </defs>
+
+  <rect width="640" height="360" rx="18" fill="url(#bg)"/>
+  <ellipse cx="320" cy="180" rx="250" ry="180" fill="url(#glow)"/>
+
+  <!-- board -->
+  <rect x="184" y="44" width="272" height="272" rx="10" fill="#0f1b2e" stroke="#ffffff" stroke-opacity=".12"/>
+  <rect x="184" y="44" width="272" height="272" rx="10" fill="url(#grid)"/>
+
+  <!-- cleared row hint -->
+  <rect x="186" y="290" width="268" height="24" rx="6" fill="#ffffff" opacity=".10"/>
+
+  <!-- blocks: 34px cells, 28px blocks -->
+  <g>
+    <!-- yellow 3x3 -->
+    <g fill="#fbbf24">
+      <rect x="221" y="81" width="28" height="28" rx="7"/><rect x="255" y="81" width="28" height="28" rx="7"/><rect x="289" y="81" width="28" height="28" rx="7"/>
+      <rect x="221" y="115" width="28" height="28" rx="7"/><rect x="255" y="115" width="28" height="28" rx="7"/><rect x="289" y="115" width="28" height="28" rx="7"/>
+      <rect x="221" y="149" width="28" height="28" rx="7"/><rect x="255" y="149" width="28" height="28" rx="7"/><rect x="289" y="149" width="28" height="28" rx="7"/>
+    </g>
+    <!-- red 2x2 -->
+    <g fill="#f87171">
+      <rect x="357" y="81" width="28" height="28" rx="7"/><rect x="391" y="81" width="28" height="28" rx="7"/>
+      <rect x="357" y="115" width="28" height="28" rx="7"/><rect x="391" y="115" width="28" height="28" rx="7"/>
+    </g>
+    <!-- cyan L -->
+    <g fill="url(#blue)">
+      <rect x="187" y="149" width="28" height="28" rx="7"/><rect x="187" y="183" width="28" height="28" rx="7"/>
+      <rect x="187" y="217" width="28" height="28" rx="7"/><rect x="221" y="217" width="28" height="28" rx="7"/>
+    </g>
+    <!-- green line -->
+    <g fill="#34d399">
+      <rect x="255" y="251" width="28" height="28" rx="7"/><rect x="289" y="251" width="28" height="28" rx="7"/>
+      <rect x="323" y="251" width="28" height="28" rx="7"/><rect x="357" y="251" width="28" height="28" rx="7"/>
+    </g>
+    <!-- purple pair -->
+    <g fill="#c084fc">
+      <rect x="391" y="183" width="28" height="28" rx="7"/><rect x="391" y="217" width="28" height="28" rx="7"/>
+    </g>
+  </g>
+
+  <!-- glass highlight -->
+  <rect x="184" y="44" width="272" height="272" rx="10" fill="url(#shadow)" opacity=".18"/>
+
+  <!-- title -->
+  <text x="34" y="70" font-family="Trebuchet MS, Segoe UI, sans-serif" font-size="30" font-weight="700" fill="#eef4ff">BLOCK</text>
+  <text x="34" y="104" font-family="Trebuchet MS, Segoe UI, sans-serif" font-size="30" font-weight="700" fill="#7dd3fc">BLAST</text>
+
+  <!-- tray pieces -->
+  <rect x="30" y="272" width="46" height="46" rx="8" fill="#fbbf24" opacity=".9"/>
+  <rect x="82" y="272" width="46" height="46" rx="8" fill="#f87171" opacity=".9"/>
+  <rect x="30" y="324" width="46" height="46" rx="8" fill="#34d399" opacity=".9"/>
+  <rect x="82" y="324" width="46" height="46" rx="8" fill="#34d399" opacity=".9"/>
+
+  <text x="512" y="330" font-family="Trebuchet MS, Segoe UI, sans-serif" font-size="14" fill="#94a8c6">8 × 8</text>
+</svg>
