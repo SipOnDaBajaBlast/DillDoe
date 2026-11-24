@@ -3,6 +3,9 @@ import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {BASELINE_PATH,staticFingerprint,validateBaseline,createBaseline,mergeManifest,deploymentForm} from './lib/static-build-state.mjs';
 
+// Surface failures as a check-run annotation, which stays readable without
+// signed-in access to the workflow logs.
+process.on('uncaughtException',error=>{console.error('::error title=Website publish failed::'+String(error?.message??error).replace(/\s+/g,' '));process.exit(1);});
 const account=process.env.CLOUDFLARE_ACCOUNT_ID,token=process.env.CLOUDFLARE_API_TOKEN;
 if(!account||!token)throw new Error('Existing Cloudflare deployment credentials are required');
 const base='https://api.cloudflare.com/client/v4/accounts/'+account+'/pages/projects/dilldoe-games';
@@ -37,7 +40,14 @@ if(Object.keys(manifest).length>20000)throw new Error('Cloudflare static file li
 const files=Object.fromEntries(await Promise.all(['_headers','_redirects','_routes.json','_worker.js'].map(async name=>[name,await fs.readFile('dist/'+name)])));
 // Cloudflare's documented Direct Upload API preserves unchanged content hashes.
 // The single bundled ESM Worker is submitted with its documented _worker.js field.
-const response=await fetch(base+'/deployments',{method:'POST',headers:authorization,body:deploymentForm(manifest,files,process.env.GITHUB_SHA),signal:AbortSignal.timeout(120000)});
-const result=await response.json();
+let response,result;
+for(let attempt=1;attempt<=2;attempt++){
+ response=await fetch(base+'/deployments',{method:'POST',headers:authorization,body:deploymentForm(manifest,files,process.env.GITHUB_SHA),signal:AbortSignal.timeout(120000)});
+ result=await response.json().catch(()=>({}));
+ if(response.ok&&result.success)break;
+ console.error('Deployment attempt '+attempt+' failed: HTTP '+response.status+' '+JSON.stringify(result.errors??result).slice(0,500));
+ if(attempt===2||(response.status>=400&&response.status<500))break;
+ await new Promise(resolve=>setTimeout(resolve,15000));
+}
 if(!response.ok||!result.success)throw new Error('Cloudflare deployment failed: '+JSON.stringify(result.errors));
 console.log('Website deployment submitted: '+result.result.url+' ('+plan.mode+' update; '+Object.keys(baseline.gameManifest).length+' game files retained).');
