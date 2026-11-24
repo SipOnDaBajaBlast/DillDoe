@@ -13,11 +13,13 @@
     iframe { display: block; width: 100%; height: 100%; border: 0; }
     #options { position: fixed; z-index: 5; top: 10px; right: 10px; display: flex; gap: 8px; }
     #options a, #options button { border: 1px solid #ffffff66; border-radius: 8px; padding: 8px 12px; color: white; background: #101722dd; font: 14px system-ui,sans-serif; text-decoration: none; cursor: pointer; }
+    #note { position: fixed; z-index: 4; left: 12px; bottom: 12px; max-width: 32em; margin: 0; padding: 8px 12px; border-radius: 8px; background: #101722cc; color: #d5dbe6; font: 13px/1.4 system-ui,sans-serif; }
   </style>
 </head>
 <body>
   <main id="stage" aria-label="Windowkill"><iframe src="/ports/windowkill/" title="Windowkill" allow="cross-origin-isolated; fullscreen; autoplay; gamepad" allowfullscreen></iframe></main>
+  <p id="note" role="status">First load downloads about 70 MB of engine and game files. Leave the tab open until the game window appears.</p>
   <nav id="options" aria-label="Game options"><a href="/games">Game library</a><a href="/ports/windowkill/" target="_blank" rel="noopener">Open separately</a><button id="fullscreen" type="button">Fullscreen</button></nav>
-  <script>document.getElementById('fullscreen').addEventListener('click',()=>document.getElementById('stage').requestFullscreen?.());</script>
+  <script>document.getElementById('fullscreen').addEventListener('click',()=>document.getElementById('stage').requestFullscreen?.());setTimeout(()=>document.getElementById('note')?.remove(),12000);</script>
 </body>
 </html>
