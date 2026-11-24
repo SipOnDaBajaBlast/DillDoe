@@ -38,6 +38,21 @@ export const retiredAssetPaths=new Set([
  '/ports/halo-mobile/fonts/README.md',
  '/ports/smg-webport/README.md',
  '/ports/tf2-web/LICENSE',
+ // Attribution files for engines and fonts. No game fetches these at runtime;
+ // retiring them keeps room under the 20,000-file deployment limit.
+ '/ports/kisakcodfork1/LICENSE.txt',
+ '/ports/ruffle/LICENSE_APACHE',
+ '/ports/ruffle/LICENSE_MIT',
+ '/ports/smm2/LICENSE-LASRecomp.txt',
+ '/ports/smm2/LICENSE.txt',
+ '/ports/smm2/THIRD-PARTY.txt',
+ '/ports/smo-webport/LICENSE.txt',
+ '/ports/smo-webport/NOTICE.txt',
+ '/ports/smo-webport/OFL-Hind.txt',
+ '/ports/trombone-champ/LICENSE',
+ '/ports/granule/LICENSES/Pixeloid-OFL.txt',
+ '/ports/granule/LICENSES/Tiny5-OFL.txt',
+ '/ports/granule/LICENSES/rapier2d.txt',
 ]);
 export const isRetiredAsset=file=>retiredAssetPaths.has(file);
 export const STATIC_INPUTS=['package-lock.json','static-games.mjs','lib/game-catalog.json','lib/game-assets.json','lib/game-text.mjs','lib/migration-paths.mjs','lib/gta-static-data.json','lib/gta-static-routing.mjs','lib/static-plan.mjs','lib/feed-pit-loader.mjs','lib/death-note-loader.mjs','lib/worldfox-loader.mjs','public/ports/dumbfire/Build/data-parts.txt'];

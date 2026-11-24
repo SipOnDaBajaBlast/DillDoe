@@ -33,7 +33,7 @@ const repository=path.resolve(project,'..');
 if(await fs.stat(path.join(repository,'games.html')).catch(()=>null)){
  const tracked=execFileSync('git',['ls-files','-z'],{cwd:repository,encoding:'utf8'}).split('\0').filter(Boolean);
  // Read the editable website from the repository root on every build.
- const siteFiles=tracked.filter(file=>!file.split('/').some(part=>part.startsWith('.'))&&!file.startsWith('cloudflare/')&&!/^(README[^/]*|vercel\.json)$/.test(file)&&!file.endsWith('.test.mjs')&&(file==='ads.txt'||/\.(html|css|m?js|json|svg|png|jpe?g|webp|gif|ico|swf|woff2?|ttf|mp[34]|ogg|wav|webm|glb|gltf|bin|wasm|txt)$/i.test(file)));
+ const siteFiles=tracked.filter(file=>!file.split('/').some(part=>part.startsWith('.'))&&!file.startsWith('cloudflare/')&&!/^(README[^/]*|vercel\.json)$/.test(file)&&!file.endsWith('.test.mjs')&&(file==='ads.txt'||/\.(html|css|m?js|json|svg|png|jpe?g|webp|gif|ico|swf|woff2?|ttf|mp[34]|ogg|wav|webm|glb|gltf|bin|wasm|pck|txt)$/i.test(file)));
  for(const file of catalog.main){
   if(siteFiles.includes(file))continue;
   const target=path.resolve(output,file);if(!target.startsWith(output+path.sep))throw new Error('Unsafe website path');

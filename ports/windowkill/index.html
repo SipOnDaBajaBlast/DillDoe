@@ -110,6 +110,7 @@ body {
 // The engine module is stored as three parts so every published file stays
 // below Cloudflare Pages' 25 MiB limit. Reassemble it as one streamed
 // response, with the wasm type the engine needs for streaming compilation.
+// The .bin suffix keeps the parts on the website build's copied-file list.
 (() => {
 	const originalFetch = window.fetch.bind(window);
 	const ASSETS = {
@@ -131,7 +132,7 @@ body {
 					controller.close();
 					return;
 				}
-				const part = `parts/${filename}.part${String(index).padStart(3, '0')}`;
+				const part = `parts/${filename}.part${String(index).padStart(3, '0')}.bin`;
 				try {
 					const response = await originalFetch(new URL(part, location.href));
 					if (!response.ok) throw new Error(`${part}: HTTP ${response.status}`);
