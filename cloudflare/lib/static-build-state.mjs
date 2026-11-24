@@ -53,6 +53,9 @@ export const retiredAssetPaths=new Set([
  '/ports/granule/LICENSES/Pixeloid-OFL.txt',
  '/ports/granule/LICENSES/Tiny5-OFL.txt',
  '/ports/granule/LICENSES/rapier2d.txt',
+ '/ports/ddkk-vercel-split/version.txt',
+ '/ports/fnfgame/assets/fonts/OFL.txt',
+ '/ports/poppyplaytime/Build/bb1.config.txt',
 ]);
 export const isRetiredAsset=file=>retiredAssetPaths.has(file);
 export const STATIC_INPUTS=['package-lock.json','static-games.mjs','lib/game-catalog.json','lib/game-assets.json','lib/game-text.mjs','lib/migration-paths.mjs','lib/gta-static-data.json','lib/gta-static-routing.mjs','lib/static-plan.mjs','lib/feed-pit-loader.mjs','lib/death-note-loader.mjs','lib/worldfox-loader.mjs','public/ports/dumbfire/Build/data-parts.txt'];

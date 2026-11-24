@@ -107,14 +107,14 @@ body {
 		</div>
 
 		<script>
-// The engine module is stored as three parts so every published file stays
+// The engine module is stored as two parts so every published file stays
 // below Cloudflare Pages' 25 MiB limit. Reassemble it as one streamed
 // response, with the wasm type the engine needs for streaming compilation.
 // The .bin suffix keeps the parts on the website build's copied-file list.
 (() => {
 	const originalFetch = window.fetch.bind(window);
 	const ASSETS = {
-		'index.wasm': { count: 3, size: 48954223, type: 'application/wasm' }
+		'index.wasm': { count: 2, size: 48954223, type: 'application/wasm' }
 	};
 
 	window.fetch = function(input, init) {
@@ -153,7 +153,6 @@ body {
 	};
 })();
 		</script>
-		<script src="coi-serviceworker.js"></script>
 		<script src="index.js"></script>
 		<script>
 const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":10308784,"index.wasm":48954223},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
