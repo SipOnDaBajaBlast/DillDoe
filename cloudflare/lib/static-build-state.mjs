@@ -81,7 +81,8 @@ export function validateBaseline(value,fingerprint){
 export function mergeManifest(baseline,website){
  const retained=Object.fromEntries(Object.entries(baseline.gameManifest).filter(([file])=>!isRetiredAsset(file)));
  const manifest={...retained,...website};
- if(Object.keys(manifest).length>20000)throw new Error('Cloudflare static file limit exceeded');
+ const manifestSize=Object.keys(manifest).length;
+ if(manifestSize>20000)throw new Error('Cloudflare static file limit exceeded: '+manifestSize+' files ('+Object.keys(retained).length+' retained, '+Object.keys(website).length+' website)');
  return manifest;
 }
 export async function createBaseline(manifest,output='dist',overflow='dist-games'){

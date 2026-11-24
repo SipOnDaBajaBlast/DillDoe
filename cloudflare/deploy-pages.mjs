@@ -36,7 +36,7 @@ if(plan.mode==='full'){
  await fs.writeFile(directory+BASELINE_PATH,JSON.stringify(baseline));
  manifest={...manifest,...await upload(directory,'.static-build/baseline-manifest.json')};
 }else manifest=mergeManifest(baseline,manifest);
-if(Object.keys(manifest).length>20000)throw new Error('Cloudflare static file limit exceeded');
+if(Object.keys(manifest).length>20000)throw new Error('Cloudflare static file limit exceeded: '+Object.keys(manifest).length+' files');
 const files=Object.fromEntries(await Promise.all(['_headers','_redirects','_routes.json','_worker.js'].map(async name=>[name,await fs.readFile('dist/'+name)])));
 // Cloudflare's documented Direct Upload API preserves unchanged content hashes.
 // The single bundled ESM Worker is submitted with its documented _worker.js field.
