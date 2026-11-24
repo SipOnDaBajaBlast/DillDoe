@@ -28,7 +28,10 @@ export async function finalizeBuild(output=path.resolve('dist'),catalog,{baselin
  // the Pages _headers rule count below its 100-rule limit as games are added.
  const isolatedRoutes=new Set(catalog.mainIsolation.map(file=>'/'+file.replace(/\.html$/,'')+'*').map(encodeURI));
  for(const route of isolatedRoutes)headers+=`\n${route}\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp\n  Cross-Origin-Resource-Policy: same-origin\n`;
- headers+='\n/__migration/health\n  Content-Type: application/json\n  Cache-Control: no-store\n\n'+(baseline?baseline.staticHeaders:await fs.readFile(path.join(overflow,'_headers'),'utf8'));
+ // No gzip variants are published on this origin, so their Content-Encoding
+ // blocks only consume the 100-rule budget.
+ const dropDeadCompressed=text=>text.split(/\n{2,}/).filter(block=>!['/ports/*.gz','/ports/*.wasm.gz','/ports/*.js.gz'].includes(block.split('\n')[0].trim())).join('\n\n');
+ headers+='\n/__migration/health\n  Content-Type: application/json\n  Cache-Control: no-store\n\n'+dropDeadCompressed(baseline?baseline.staticHeaders:await fs.readFile(path.join(overflow,'_headers'),'utf8'));
  if(compressed.size)console.log('Serving '+compressed.size+' large WebAssembly runtimes through the game router.');
  if(headers.split('\n').filter(line=>line.startsWith('/')).length>100)throw new Error('Static header rule limit exceeded');
  await fs.writeFile(path.join(output,'_headers'),headers);
