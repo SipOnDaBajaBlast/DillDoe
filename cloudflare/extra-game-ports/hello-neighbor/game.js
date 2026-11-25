@@ -31,7 +31,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: runtime/web/uew_files.js
+// include: D:\BetterNeighbor\UEWASM\runtime\web\uew_files.js
 // Game files fetched on demand in 1 MB blocks (host_remote.c). data/index.txt lists every file;
 // data/<id> is its first part and data/<id>.<n> the rest.
 ((() => {
@@ -41,7 +41,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
   const F = Module.uewFiles = {
     base: Module.uewDataUrl || "data/",
     part: 16 << 20,
-    cacheMax: (Module.uewCacheMB || 640) << 20,
+    cacheMax: (+new URLSearchParams(location.search).get("cachemb") || Module.uewCacheMB || 640) << 20,
     files: [],
     byPath: new Map,
     dirs: new Map,
@@ -111,20 +111,52 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
     for (const [name, e] of d) s += `${name}\t${e.dir ? 1 : 0}\t${e.size || 0}\t${e.mtime || 0}\n`;
     return s;
   };
+  // blocks the packager found all zeros (size 0 in the index: stripped texture mips, padding) are never downloaded,
+  // stored or inflated: every read of one gets a view of this one zero block
+  const ZERO = new Uint8Array(1 << 20);
+  const zeroBlock = (f, b) => {
+    if (!f || !f.z) return null;
+    const e = layout(f)[b];
+    return e && e.len === 0 ? ZERO.subarray(0, Math.min(1 << 20, f.size - b * (1 << 20))) : null;
+  };
   const get = k => {
     const v = F.cache.get(k);
     if (v) {
       F.cache.delete(k);
       F.cache.set(k, v);
+      return v;
     }
-    return v;
+    return zeroBlock(F.files[Math.floor(k / 1048576)], k % 1048576) || undefined;
   };
+  F.seen = new Set;
+  F.refetched = 0;
+  // ?cachetrace=1: every block the game reads (its key) and every block that arrives (-key-1), in order, to replay
+  // against other cache sizes and policies offline
+  const TR = F.trace = new URLSearchParams(location.search).get("cachetrace") ? [] : null;
   const put = (k, buf) => {
     if (F.cache.has(k)) return;
+    if (TR) TR.push(-k - 1);
+    // a block downloaded before and evicted since: what a too-small cache costs
+    if (F.seen.has(k)) F.refetched += buf.byteLength; else F.seen.add(k);
     F.cache.set(k, buf);
     F.cacheBytes += buf.byteLength;
-    while (F.cacheBytes > F.cacheMax) {
-      const [k0, v0] = F.cache.entries().next().value;
+    evict();
+  };
+  // blocks a waiting read still needs are pinned (F.start until its readCached): a read bigger than the memory cache
+  // (the 86 MB game image against a low-memory device's 64 MB) otherwise evicted its own first blocks as the last ones
+  // arrived and never completed
+  F.pins = new Map;
+  const pin = (id, b0, b1, d) => {
+    for (let b = b0; b <= b1; b++) {
+      const k = key(id, b), n = (F.pins.get(k) || 0) + d;
+      if (n > 0) F.pins.set(k, n); else F.pins.delete(k);
+    }
+  };
+  const evict = () => {
+    if (F.cacheBytes <= F.cacheMax) return;
+    for (const [k0, v0] of F.cache) {
+      if (F.cacheBytes <= F.cacheMax) break;
+      if (F.pins.has(k0)) continue;
       F.cache.delete(k0);
       F.cacheBytes -= v0.byteLength;
     }
@@ -153,6 +185,68 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
       buf: new Uint8Array(await r.arrayBuffer())
     };
   };
+  // ---- request scheduler. The game's own reads (a thread is blocked on them) always start next; prefetching (boot
+  // plan, read-ahead, background fill) keeps to a few connections, and to one while the game waits on a read, so a
+  // slow host's bandwidth goes to what the game needs right now instead of to what it may need later.
+  const HI = 1, LO = 0;
+  // at most 4 requests at once: an HTTP/1.1 host gets 6 connections per page, and the other 2 stay free for everything
+  // else (the code download, a reload, a navigation), which otherwise waited behind the file downloads
+  const Q = F.q = {
+    run: 0,
+    runHi: 0,
+    runLo: 0,
+    hi: [],
+    lo: [],
+    max: 4,
+    maxLo: 3
+  };
+  const drain = () => {
+    while (Q.run < Q.max) {
+      let j = Q.hi.shift();
+      if (!j) {
+        if (!Q.lo.length || Q.runLo >= (Q.runHi || F.hiWant.size ? 1 : Q.maxLo)) break;
+        j = Q.lo.shift();
+      }
+      j.started = true;
+      Q.run++;
+      if (j.prio) Q.runHi++; else Q.runLo++;
+      j.go();
+    }
+  };
+  const queued = (prio, fn) => {
+    const j = {
+      prio,
+      started: false
+    };
+    j.p = new Promise((ok, no) => {
+      j.go = () => fn().then(ok, no).finally(() => {
+        Q.run--;
+        if (j.prio) Q.runHi--; else Q.runLo--;
+        drain();
+      });
+    });
+    j.p.catch(() => {});
+    (prio ? Q.hi : Q.lo).push(j);
+    drain();
+    return j;
+  };
+  // the game now waits on a block a prefetch job holds: that job goes to the front (or counts as the game's if running)
+  const promote = j => {
+    if (!j || j.prio) return;
+    if (j.started) {
+      Q.runLo--;
+      Q.runHi++;
+      j.prio = HI;
+      return;
+    }
+    const i = Q.lo.indexOf(j);
+    if (i >= 0) Q.lo.splice(i, 1);
+    j.prio = HI;
+    Q.hi.push(j);
+    drain();
+  };
+  F.jobOf = new Map;
+  F.hiWant = new Set;
   // where each block of a file sits: raw files are plain slices, deflated ones follow the size list in the index
   const layout = f => {
     if (f.L) return f.L;
@@ -227,55 +321,165 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
       }
     }
   }
+  // ---- persistent block store (Cache Storage): every block downloaded once is kept on disk, so later launches read
+  // the game's files locally instead of over the network. Keyed by the build's file list, so a rebuild starts clean.
+  F.store = null;
+  F.storeHits = 0;
+  F.storeMs = 0;
+  const storeOff = /[?&]nostore=1/.test(location.search) || E || typeof caches == "undefined" || !self.isSecureContext;
+  const storeUrl = (id, b) => `${location.origin}/__uew_block/${id}/${b}`;
+  const storeGet = async (id, b) => {
+    try {
+      const r = await F.store.match(storeUrl(id, b));
+      return r ? new Uint8Array(await r.arrayBuffer()) : null;
+    } catch (e) {
+      return null;
+    }
+  };
+  const storePut = (id, b, buf) => {
+    if (!F.store || F.files[id].stub) return;
+    F.store.put(storeUrl(id, b), new Response(buf, {
+      headers: {
+        "Content-Type": "application/octet-stream"
+      }
+    })).catch(() => {});
+  };
+  F.openStore = sig => {
+    if (storeOff) return Promise.resolve(null);
+    const prefix = "uew-data:" + location.pathname + ":", name = prefix + sig;
+    return caches.open(name).then(c => {
+      F.store = c;
+      // with the disk store behind it, the in-memory copy only has to hold what the game is reading now: keep it
+      // small (a re-read comes back from disk in a millisecond), smallest on low-memory devices
+      // (8 GB and up: room to run the boot plan far ahead, since disk reads only complete when the page's thread,
+      // which also runs the game's render thread, gets a moment)
+      const dm = navigator.deviceMemory || 8, want = (dm <= 2 ? 48 : dm <= 4 ? 96 : dm < 8 ? 256 : 512) << 20;
+      if (!/[?&]cachemb=/.test(location.search)) F.cacheMax = Math.min(F.cacheMax, want);
+      // older builds of this page: their blocks no longer match the files
+      caches.keys().then(ks => ks.forEach(k => {
+        if (k.startsWith(prefix) && k != name) caches.delete(k);
+      })).catch(() => {});
+      if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+      return c;
+    }).catch(() => null);
+  };
   const block = (id, b) => {
     const k = key(id, b);
     const hit = get(k);
     if (hit) return hit;
-    let p = F.pending.get(k);
-    if (!p) {
-      p = download(F.files[id], b).then(buf => {
-        F.pending.delete(k);
-        F.failed.delete(k);
-        put(k, buf);
-        Module.uewWake();
-        return buf;
-      }, e => {
-        F.pending.delete(k);
-        F.failed.add(k);
-        Module.uewWake();
-        throw e;
-      });
-      F.pending.set(k, p);
-    }
-    return p;
+    blocks(id, b, b, HI);
+    const p = F.pending.get(k);
+    return p || get(k);
   };
-  // several neighbouring blocks in one request (browsers allow only 6 at a time per server, so fewer, bigger ones win)
-  const blocks = (id, b0, b1) => {
+  // several neighbouring blocks: those in the persistent store come from disk, the rest in as few requests as possible
+  // (browsers allow only 6 at a time per server, so fewer, bigger ones win). prio HI: the game is waiting on them.
+  const blocks = (id, b0, b1, prio = LO) => {
     const f = F.files[id];
-    if (f.stub || b1 <= b0) {
-      for (let b = b0; b <= b1; b++) {
-        const r = block(id, b);
-        if (r instanceof Promise) r.catch(() => {});
+    const want = [];
+    for (let b = b0; b <= b1; b++) {
+      const k = key(id, b);
+      if (F.cache.has(k) || zeroBlock(f, b)) continue;
+      if (prio) F.hiWant.add(k);
+      if (F.pending.has(k)) {
+        if (prio) promote(F.jobOf.get(k));
+        continue;
       }
+      want.push(b);
+    }
+    if (!want.length) return;
+    const defs = new Map;
+    for (const b of want) {
+      let ok, no;
+      const p = new Promise((a, c) => {
+        ok = a;
+        no = c;
+      });
+      p.catch(() => {});
+      defs.set(b, {
+        ok,
+        no
+      });
+      F.pending.set(key(id, b), p);
+    }
+    const done = k => {
+      F.pending.delete(k);
+      F.jobOf.delete(k);
+      F.hiWant.delete(k);
+    };
+    const finish = (b, v) => {
+      const k = key(id, b);
+      done(k);
+      F.failed.delete(k);
+      put(k, v);
+      Module.uewWake();
+      defs.get(b).ok(v);
+    };
+    const fail = (b, e) => {
+      const k = key(id, b);
+      done(k);
+      F.failed.add(k);
+      Module.uewWake();
+      defs.get(b).no(e);
+    };
+    if (f.stub) {
+      for (const b of want) finish(b, new Uint8Array(Math.min(BLOCK, f.size - b * BLOCK)));
       return;
     }
-    const L = layout(f);
-    if (L.length == 1) {
-      const r = block(id, b0);
-      if (r instanceof Promise) r.catch(() => {});
-      return;
-    }
-    let run = [];
-    const go = () => {
-      if (!run.length) return;
-      const bs = run;
-      run = [];
-      if (bs.length == 1) {
-        block(id, bs[0]).catch(() => {});
+    ((async () => {
+      let miss = want;
+      if (F.store) {
+        const t0 = performance.now();
+        const got = await Promise.all(want.map(b => storeGet(id, b)));
+        F.storeMs += performance.now() - t0;
+        miss = [];
+        want.forEach((b, i) => {
+          if (got[i]) {
+            F.storeHits++;
+            finish(b, got[i]);
+          } else miss.push(b);
+        });
+      }
+      if (!miss.length) return;
+      const L = layout(f);
+      if (L.length == 1) {
+        const b = miss[0], j = queued(prio || F.hiWant.has(key(id, b)) ? HI : LO, () => download(f, b));
+        F.jobOf.set(key(id, b), j);
+        j.p.then(v => {
+          finish(b, v);
+          storePut(id, b, v);
+        }, e => fail(b, e));
         return;
       }
+      // contiguous runs inside one part
+      let run = [];
+      const go = () => {
+        if (!run.length) return;
+        const bs = run;
+        run = [];
+        // the game may have asked for one of these while the store was being checked
+        const j = netRun(id, bs, prio || bs.some(b => F.hiWant.has(key(id, b))) ? HI : LO);
+        for (const b of bs) F.jobOf.set(key(id, b), j);
+        j.vals.then(vs => bs.forEach((b, i) => {
+          finish(b, vs[i]);
+          storePut(id, b, vs[i]);
+        }), e => bs.forEach(b => fail(b, e)));
+      };
+      for (const b of miss) {
+        const r = run[run.length - 1];
+        if (run.length && (r + 1 != b || L[run[0]].part != L[b].part)) go();
+        run.push(b);
+      }
+      go();
+    }))().catch(e => {
+      for (const b of want) if (F.pending.has(key(id, b))) fail(b, e);
+    });
+  };
+  // one request for consecutive blocks of one part, through the scheduler; job.vals resolves to each block's bytes
+  const netRun = (id, bs, prio) => {
+    const f = F.files[id], L = layout(f);
+    {
       const first = L[bs[0]], lastE = L[bs[bs.length - 1]], from = first.off, to = lastE.off + lastE.len;
-      const all = ((async () => {
+      const j = queued(prio, async () => {
         for (let attempt = 0; ;attempt++) {
           try {
             const t0 = performance.now();
@@ -304,35 +508,14 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
             await new Promise(r => setTimeout(r, 500 << attempt));
           }
         }
-      }))();
-      for (const b of bs) {
-        const k = key(id, b), e = L[b];
-        const pr = all.then(buf => unpack(f, b, buf.slice(e.off - from, e.off - from + e.len))).then(v => {
-          F.pending.delete(k);
-          F.failed.delete(k);
-          put(k, v);
-          Module.uewWake();
-          return v;
-        }, e => {
-          F.pending.delete(k);
-          F.failed.add(k);
-          Module.uewWake();
-          throw e;
-        });
-        pr.catch(() => {});
-        F.pending.set(k, pr);
-      }
-    };
-    for (let b = b0; b <= b1; b++) {
-      const k = key(id, b);
-      if (F.cache.has(k) || F.pending.has(k)) {
-        go();
-        continue;
-      }
-      if (run.length && L[run[0]].part != L[b].part) go();
-      run.push(b);
+      });
+      j.vals = j.p.then(buf => Promise.all(bs.map(b => {
+        const e = L[b];
+        return unpack(f, b, buf.slice(e.off - from, e.off - from + e.len));
+      })));
+      j.vals.catch(() => {});
+      return j;
     }
-    go();
   };
   const ahead = (id, off, len) => {
     const f = F.files[id], end = off + len;
@@ -355,7 +538,9 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
     qset: new Set
   };
   const pump = () => {
-    while (T.pos < T.plan.length && T.q.length < 160) {
+    // ahead of the game by at most half the memory cache, so prefetched blocks aren't evicted before they are read
+    const win = Math.max(16, Math.min(320, (F.cacheMax / BLOCK) >> 1));
+    while (T.pos < T.plan.length && T.q.length < win) {
       const [id, b0, n] = T.plan[T.pos++];
       if (!F.files[id]) continue;
       const last = Math.floor((F.files[id].size - 1) / BLOCK), b1 = Math.min(last, b0 + n - 1);
@@ -372,6 +557,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
   const touch = (id, b0, b1) => {
     for (let b = b0; b <= b1; b++) {
       const k = key(id, b);
+      if (TR) TR.push(k);
       // the game reached a planned block: everything planned before it is behind us too
       if (T.qset.has(k)) {
         let x;
@@ -385,6 +571,10 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
         T.seen.add(k);
         T.order.push(k);
       }
+    }
+    if (T.ff == null && (Module.uewPresents | 0) > 0) {
+      T.ff = T.order.length;
+      console.log(`[files] first frame after ${T.ff} distinct MB of game files read, ${(F.fetched / 1048576).toFixed(0)} MB downloaded, ${F.storeHits} blocks from this device`);
     }
     if (T.rec && T.order.length > 2e4) save();
   };
@@ -411,12 +601,52 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
     if (img && !saved) blocks(img.id, 0, Math.floor((img.size - 1) / BLOCK));
     T.plan = saved && !E ? saved.split(",").map(r => r.split(":").map(Number)) : [];
     pump();
+    // no plan recorded in this browser yet: use the one shipped in data/boot.plan (the blocks an earlier session read
+    // up to gameplay). It goes out at once, while the game is still starting, so a first visit boots at full speed.
+    if (!T.plan.length && !E) {
+      fetch(F.base + "boot.plan").then(r => (r.ok ? r.text() : "")).then(t => {
+        t = t.trim();
+        if (!t || T.plan.length || T.order.length) return;
+        T.plan = t.split(",").map(r => r.split(":").map(Number));
+        try {
+          localStorage.setItem(T.key, t);
+        } catch (e) {}
+        pump();
+      }).catch(() => {});
+    }
     const t = setInterval(() => {
       if ((Module.uewPresents | 0) >= 300) {
         clearInterval(t);
         save();
       }
     }, 1e3);
+    // once the game is drawing, the rest of its files trickle into the disk store in the background (one request at a
+    // time, and only while the game isn't waiting on a read), so later areas and launches don't wait on the host
+    // the big memory cache is for running the boot plan ahead; once the game is drawing it only needs to hold what is
+    // being read now (the rest is on disk), so give the memory back
+    const play = (Module.uewPlayCacheMB | 0) << 20;
+    if (play && F.store && !/[?&]cachemb=/.test(location.search)) {
+      const t3 = setInterval(() => {
+        if ((Module.uewPresents | 0) < 60) return;
+        clearInterval(t3);
+        if (F.cacheMax <= play) return;
+        F.cacheMax = play;
+        evict();
+        console.log(`[files] memory cache trimmed to ${play >> 20} MB now that the game is running`);
+      }, 1e3);
+    }
+    // not on weak devices (Module.uewNoFill, set by the page's low and mid profiles): there the background downloads and
+    // decompression compete with the game for the one thread it runs on - at a Chromebook's speed the game dropped from
+    // ~12 to ~5 fps once it started, and the page eventually stopped responding. Blocks the game reads are stored anyway.
+    const nofill = /[?&]nofill=1/.test(location.search) || Module.uewNoFill || (navigator.connection && navigator.connection.saveData);
+    if (!nofill) {
+      const t2 = setInterval(() => {
+        if ((Module.uewPresents | 0) >= 60) {
+          clearInterval(t2);
+          F.fill();
+        }
+      }, 1e3);
+    }
   };
   const copy = (bufs, b0, off, len, dst) => {
     let done = 0;
@@ -428,7 +658,6 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
     return done;
   };
   F.readCached = (id, off, len, dst) => {
-    dst >>>= 0;
     if (!len) return 0;
     const b0 = Math.floor(off / BLOCK), b1 = Math.floor((off + len - 1) / BLOCK), bufs = [];
     for (let b = b0; b <= b1; b++) {
@@ -436,6 +665,8 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
       if (!v) return -1;
       bufs.push(v);
     }
+    if (F.pins.size) pin(id, b0, b1, -1);
+    // the read this F.start began is done with them (no-op if none pinned)
     touch(id, b0, b1);
     ahead(id, off, len);
     return copy(bufs, b0, off, len, dst);
@@ -445,19 +676,46 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
   F.start = (id, off, len) => {
     const b0 = Math.floor(off / BLOCK), b1 = Math.floor((off + len - 1) / BLOCK);
     // a miss in a big file (pak reads hop around): the blocks after it usually follow soon, fetch them in the same request
-    const last = Math.floor((F.files[id].size - 1) / BLOCK);
-    blocks(id, b0, Math.min(last, b1 + 7));
+    // only what the game waits on: pak reads hop around, and a blanket 7 MB read-ahead on every miss spent most of a slow
+    // host's bandwidth on blocks never read. Sequential reads still get read-ahead (ahead() below), and the boot plan
+    // covers the rest.
+    pin(id, b0, b1, 1);
+    blocks(id, b0, b1, HI);
     touch(id, b0, b1);
     ahead(id, off, len);
   };
   F.ready = (id, off, len) => {
     const b0 = Math.floor(off / BLOCK), b1 = Math.floor((off + len - 1) / BLOCK);
+    let ok = 1;
     for (let b = b0; b <= b1; b++) {
       const k = key(id, b);
       if (F.failed.has(k)) return 1;
-      if (!get(k)) return 0;
+      if (get(k)) continue;
+      // arrived and was pushed out of the (small) memory cache before the game copied it: ask again, the game is
+      // waiting on it (from the disk store this takes a millisecond); without this the read never finished
+      if (!F.pending.has(k)) blocks(id, b, b, HI);
+      ok = 0;
     }
-    return 1;
+    return ok;
+  };
+  // how far the boot has got, for the page's loading bar: distinct blocks the game has read against how many the boot
+  // plan says it reads before its first frame (0 when no plan is known yet)
+  F.progress = () => {
+    if (!T.planTotal) T.planTotal = T.plan.reduce((a, r) => a + (r[2] || 0), 0);
+    return T.planTotal ? Math.min(1, T.order.length / T.planTotal) : 0;
+  };
+  // bytes the boot plan has to come over the network (what is stored as it would be downloaded; zero blocks cost
+  // nothing), for the loading screen's time estimate on a first visit. 0 until the plan is known.
+  F.planBytes = () => {
+    if (T.planBytes || !T.plan.length) return T.planBytes || 0;
+    let n = 0;
+    for (const [id, b0, c] of T.plan) {
+      const f = F.files[id];
+      if (!f || f.stub) continue;
+      const L = layout(f);
+      for (let b = b0; b < b0 + c && b < L.length; b++) n += L[b].len;
+    }
+    return (T.planBytes = n);
   };
   // debug: which files were downloaded most, and how often blocks came down again after leaving the cache
   F.report = () => {
@@ -465,8 +723,47 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
     for (const [p, f] of F.byPath) paths.set(f.id, p);
     return [ `boot plan ${T.plan.length} runs, at ${T.pos}, ${T.q.length} ahead, recorded ${T.order.length} blocks (${T.rec ? "still recording" : "saved"})`, `${F.requests} requests, ${(F.fetchMs / F.requests).toFixed(1)} ms each on average, up to ${F.maxInflight} at once` ].concat([ ...(F.per || []) ].sort((x, y) => y[1].bytes - x[1].bytes).slice(0, 15).map(([id, e]) => `${(e.bytes / 1048576).toFixed(0)} MB in ${e.n} (${e.uniq.size} distinct blocks of ${Math.ceil(F.files[id].size / BLOCK)}) ${paths.get(id)}`)).join("\n");
   };
+  F.fill = async () => {
+    if (!F.store || F.filling) return;
+    F.filling = true;
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    let have;
+    try {
+      have = new Set((await F.store.keys()).map(r => r.url));
+    } catch (e) {
+      return;
+    }
+    const t0 = performance.now();
+    let got = 0;
+    for (const f of F.files) {
+      if (f.stub || !f.size) continue;
+      const L = layout(f), n = L.length;
+      const missing = b => !have.has(storeUrl(f.id, b)) && !F.pending.has(key(f.id, b)) && !zeroBlock(f, b);
+      for (let b = 0; b < n; ) {
+        if (!missing(b)) {
+          b++;
+          continue;
+        }
+        const bs = [];
+        while (b < n && bs.length < 4 && missing(b) && (!bs.length || L[bs[0]].part == L[b].part)) bs.push(b++);
+        // the game comes first: wait while it is reading, or while other prefetching is queued
+        while (Q.hi.length || Q.runHi || F.hiWant.size || Q.lo.length) await sleep(200);
+        try {
+          const vs = await netRun(f.id, bs, LO).vals;
+          bs.forEach((b, i) => {
+            storePut(f.id, b, vs[i]);
+            have.add(storeUrl(f.id, b));
+          });
+          got += vs.reduce((a, v) => a + v.length, 0);
+        } catch (e) {
+          await sleep(3e3);
+        }
+      }
+    }
+    F.filled = true;
+    console.log(`[files] every game file is now stored on this device (${(got / 1048576).toFixed(0)} MB fetched in the background in ${((performance.now() - t0) / 1e3).toFixed(0)} s)`);
+  };
   F.read = async (id, off, len, dst) => {
-    dst >>>= 0;
     const b0 = Math.floor(off / BLOCK), b1 = Math.floor((off + len - 1) / BLOCK), want = [];
     for (let b = b0; b <= b1; b++) want.push(block(id, b));
     touch(id, b0, b1);
@@ -480,10 +777,15 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
   };
   // the index (and the boot plan's downloads) start now, alongside the wasm download and compile
   const index = (E ? Promise.resolve(E.index) : fetch(F.base + "index.txt").then(r => r.ok ? r.text() : null)).then(t => {
-    if (t) {
-      F.load(t);
-      F.boot();
-    } else err("[files] no data/index.txt, game files unavailable");
+    if (!t) {
+      err("[files] no data/index.txt, game files unavailable");
+      return;
+    }
+    F.load(t);
+    // the store is named after the exact file list (sizes and dates), so a rebuilt game never reads stale blocks
+    let h = 0;
+    for (let i = 0; i < t.length; i++) h = (Math.imul(h, 31) + t.charCodeAt(i)) | 0;
+    return F.openStore((h >>> 0).toString(36) + "-" + t.length).then(() => F.boot());
   }).catch(e => err(`[files] ${e.message}`));
   Module.preRun = [].concat(Module.preRun || []);
   Module.preRun.push(() => {
@@ -492,8 +794,8 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
   });
 }))();
 
-// end include: runtime/web/uew_files.js
-// include: runtime/web/uew_save.js
+// end include: D:\BetterNeighbor\UEWASM\runtime\web\uew_files.js
+// include: D:\BetterNeighbor\UEWASM\runtime\web\uew_save.js
 // The save folder lives in IndexedDB so progress and settings survive reloads.
 ((() => {
   if (typeof ENVIRONMENT_IS_PTHREAD != "undefined" && ENVIRONMENT_IS_PTHREAD) return;
@@ -549,211 +851,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
   });
 }))();
 
-// end include: runtime/web/uew_save.js
-// include: runtime/web/uew_debug.js
-// Debug panel: \ or Insert shows it. Live numbers, switches that apply on reload, and tools that save a log, dump the
-// green threads or capture a frame to a file.
-((() => {
-  if (typeof ENVIRONMENT_IS_PTHREAD != "undefined" && ENVIRONMENT_IS_PTHREAD) return;
-  // page-side only; worker threads skip it
-  if (typeof window === "undefined" || typeof document === "undefined") return;
-  const q = new URLSearchParams(location.search);
-  if (q.get("capture") === "1") window.uewCaptureFrame = 1 << 30;
-  // every console line, so the whole session can be saved even when the console drops or truncates it
-  const lines = [];
-  const keep = args => {
-    lines.push(`${(performance.now() / 1e3).toFixed(1)} ${Array.from(args).map(a => typeof a === "string" ? a : String(a)).join(" ")}`);
-    if (lines.length > 2e5) lines.splice(0, 5e4);
-  };
-  for (const k of [ "log", "warn", "error" ]) {
-    const orig = console[k].bind(console);
-    console[k] = (...a) => {
-      keep(a);
-      orig(...a);
-    };
-  }
-  // first JS RangeError (wasm stack overflow surfaces as "Maximum call stack size exceeded"): log its stack once
-  let rangeLogged = false;
-  const logRange = e => {
-    const err = e && (e.error || e.reason);
-    if (rangeLogged || !err || err.name !== "RangeError") return;
-    rangeLogged = true;
-    console.error("[stack] first RangeError: " + err.message + "\n" + (err.stack || "(no stack)"));
-  };
-  addEventListener("error", logRange, true);
-  addEventListener("unhandledrejection", logRange, true);
-  const save = (name, text, type) => {
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([ text ], {
-      type
-    }));
-    a.download = name;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 5e3);
-  };
-  const stamp = () => (new Date).toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  const SWITCHES = [ [ "swvideo", "Software video decoding" ], [ "syncshaders", "Compile shaders when first drawn" ], [ "skipshaders", "Drop draws while shaders compile (can lose effects)" ], [ "syncreadback", "Wait for every GPU readback" ], [ "noresolve", "Skip ResolveSubresource" ], [ "capture", "Enable frame capture" ] ];
-  let panel = null, timer = 0;
-  // UE developer console: the runtime attaches UE's own console to the game viewport once the engine is up, so it retries
-  // until then. The result line comes from the runtime log.
-  const conAuto = () => {
-    try {
-      return localStorage.getItem("uewConsole") === "1";
-    } catch (e) {
-      return false;
-    }
-  };
-  let conTimer = 0;
-  const console_on = say => {
-    if (conTimer) return;
-    let tries = 0;
-    const go = () => {
-      if (!window.Module || !Module._uew_ue_console) return;
-      const ok = Module._uew_ue_console();
-      const last = lines.filter(l => l.includes("[ue console]")).pop() || "";
-      say && say(last.replace(/.*\[ue console\] /, "UE console: "));
-      if (ok || ++tries > 60) {
-        clearInterval(conTimer);
-        conTimer = 0;
-      }
-    };
-    conTimer = setInterval(go, 3e3);
-    go();
-  };
-  // after a reload the panel may never be opened: start it from here when asked to
-  if (conAuto()) setTimeout(() => console_on(null), 5e3);
-  const css = `#uewdbg{position:fixed;right:8px;top:8px;z-index:10;width:360px;max-height:calc(100% - 16px);overflow:auto;\n    background:#101418ee;color:#dde;border:1px solid #3a4652;border-radius:6px;font:12px ui-monospace,Consolas,monospace;padding:10px}\n    #uewdbg h3{margin:0 0 6px;font:600 13px system-ui,sans-serif;color:#9fd}#uewdbg button{font:12px system-ui,sans-serif;margin:2px 4px 2px 0;\n    padding:4px 8px;background:#243040;color:#dde;border:1px solid #3a4652;border-radius:4px;cursor:pointer}#uewdbg button:hover{background:#2e3e52}\n    #uewdbg label{display:block;margin:2px 0;cursor:pointer}#uewdbg pre{white-space:pre-wrap;margin:4px 0;color:#bbc;font-size:11px}\n    #uewdbg .sec{margin-top:8px;border-top:1px solid #2a343e;padding-top:6px}`;
-  const build = () => {
-    const st = document.createElement("style");
-    st.textContent = css;
-    document.head.appendChild(st);
-    panel = document.createElement("div");
-    panel.id = "uewdbg";
-    panel.innerHTML = `<h3>UEWASM debug <span style="color:#778;font-weight:400">(\\ or Insert closes)</span></h3>\n      <pre id="uewdbg-live">…</pre>\n      <div class="sec"><b>Game speed</b> (sound is muted above 1x)<br>\n        ${[ 1, 2, 4, 8 ].map(v => `<button data-speed="${v}">${v}x</button>`).join("")}</div>\n      <div class="sec"><b>Unreal Engine</b><br>\n        <button id="uewdbg-con">Enable UE dev console</button>\n        <label><input type="checkbox" id="uewdbg-conauto"> Enable it on every launch</label></div>\n      <div class="sec"><b>Switches</b> (apply on reload)\n        ${SWITCHES.map(([k, t]) => `<label><input type="checkbox" data-k="${k}" ${q.get(k) === "1" ? "checked" : ""}> ${t}</label>`).join("")}\n        <button id="uewdbg-reload">Reload with these</button></div>\n      <div class="sec"><b>Tools</b><br>\n        <button id="uewdbg-log">Save log</button><button id="uewdbg-thr">Dump threads</button><button id="uewdbg-cap">Capture frame</button>\n        <br><button id="uewdbg-sexp">Export saves</button><button id="uewdbg-simp">Import saves</button>\n        <input id="uewdbg-sfile" type="file" accept=".json" style="display:none">\n        <pre id="uewdbg-msg"></pre></div>\n      <div class="sec"><b>Recent hitches</b><pre id="uewdbg-hitch"></pre></div>`;
-    document.body.appendChild(panel);
-    for (const ev of [ "mousedown", "mouseup", "click", "keydown", "keyup", "wheel" ]) panel.addEventListener(ev, e => e.stopPropagation());
-    const msg = t => {
-      panel.querySelector("#uewdbg-msg").textContent = t;
-    };
-    for (const b of panel.querySelectorAll("button[data-speed]")) b.onclick = () => {
-      if (!window.Module || !Module._uew_set_speed) return msg("game not running yet");
-      Module._uew_set_speed(+b.dataset.speed);
-      window.uewSpeed = +b.dataset.speed;
-      msg(`game speed ${b.dataset.speed}x`);
-    };
-    const auto = panel.querySelector("#uewdbg-conauto");
-    auto.checked = conAuto();
-    auto.onchange = () => {
-      try {
-        localStorage.setItem("uewConsole", auto.checked ? "1" : "");
-      } catch (e) {}
-      if (auto.checked) console_on(msg);
-    };
-    panel.querySelector("#uewdbg-con").onclick = () => console_on(msg);
-    panel.querySelector("#uewdbg-reload").onclick = () => {
-      const p = new URLSearchParams(location.search);
-      for (const box of panel.querySelectorAll("input[data-k]")) box.checked ? p.set(box.dataset.k, "1") : p.delete(box.dataset.k);
-      location.search = p.toString();
-    };
-    panel.querySelector("#uewdbg-log").onclick = () => {
-      save(`uewasm-log-${stamp()}.txt`, lines.join("\n"), "text/plain");
-      msg(`saved ${lines.length} lines`);
-    };
-    panel.querySelector("#uewdbg-thr").onclick = () => {
-      if (!window.Module || !Module._uew_threads) return msg("game not running yet");
-      Module._uew_threads();
-      msg("thread list written to the log (Save log to keep it)");
-    };
-    // the whole save folder (game saves and settings) as one JSON file, and back
-    panel.querySelector("#uewdbg-sexp").onclick = () => {
-      const root = window.Module && Module.uewSave;
-      if (!root || typeof FS === "undefined") return msg("no save folder");
-      const out = {};
-      const walk = d => {
-        for (const n of FS.readdir(d)) {
-          if (n === "." || n === "..") continue;
-          const p = d + "/" + n;
-          if (FS.isDir(FS.stat(p).mode)) walk(p); else {
-            const b = FS.readFile(p);
-            let s = "";
-            for (let i = 0; i < b.length; i += 32768) s += String.fromCharCode.apply(null, b.subarray(i, i + 32768));
-            out[p.slice(root.length + 1)] = btoa(s);
-          }
-        }
-      };
-      walk(root);
-      save(`uewasm-saves-${stamp()}.json`, JSON.stringify(out), "application/json");
-      msg(`exported ${Object.keys(out).length} files`);
-    };
-    const pick = panel.querySelector("#uewdbg-sfile");
-    panel.querySelector("#uewdbg-simp").onclick = () => pick.click();
-    pick.onchange = async () => {
-      const f = pick.files[0];
-      if (!f) return;
-      const root = Module.uewSave, files = JSON.parse(await f.text());
-      for (const [rel, b64] of Object.entries(files)) {
-        const p = root + "/" + rel, bin = atob(b64), a = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i);
-        FS.mkdirTree(p.slice(0, p.lastIndexOf("/")));
-        FS.writeFile(p, a);
-      }
-      msg(`imported ${Object.keys(files).length} files; reloading`);
-      FS.syncfs(false, () => location.reload());
-    };
-    panel.querySelector("#uewdbg-cap").onclick = () => {
-      const g = window.Module && Module.uewg;
-      if (!g) return msg("game not running yet");
-      if (q.get("capture") !== "1") return msg("tick 'Enable frame capture' and reload first");
-      Module.uewgCaptured = null;
-      window.uewCaptureFrame = g.frames + 3;
-      msg("capturing…");
-      const wait = setInterval(() => {
-        if (!Module.uewgCaptured) return;
-        clearInterval(wait);
-        save(`uewasm-frame-${stamp()}.json`, JSON.stringify(Module.uewgCaptured), "application/json");
-        msg("frame saved");
-      }, 250);
-    };
-  };
-  let lastN = 0, lastT = performance.now();
-  const refresh = () => {
-    if (!panel || panel.style.display === "none") return;
-    const now = performance.now(), n = (window.Module && Module.uewPresents) || 0;
-    const fps = (n - lastN) * 1e3 / Math.max(1, now - lastT);
-    lastN = n;
-    lastT = now;
-    const g = window.Module && Module.uewg, V = window.Module && Module.uewVpx;
-    const gpu = (lines.find(l => l.includes("[webgpu] GPU:")) || "").replace(/.*GPU: /, "").replace(/;.*/, "") || "?";
-    const heap = typeof HEAPU8 !== "undefined" ? (HEAPU8.length / 1048576).toFixed(0) + " MB" : "?";
-    panel.querySelector("#uewdbg-live").textContent = `FPS ${fps.toFixed(0)}   frames ${n}\nGPU ${gpu}\nshaders compiling ${g ? g.pendingPipes || 0 : 0}   draws skipped ${g && g.skip ? g.skip.nopipe : 0}\n` + `speed ${window.uewSpeed || 1}x\n` + `video ${V ? `hardware, ${V.s.size} open stream(s)` : q.get("swvideo") === "1" ? "software (switch)" : "software"}\nwasm memory ${heap}`;
-    panel.querySelector("#uewdbg-hitch").textContent = lines.filter(l => l.includes("[hitch]") || l.includes("[watchdog]")).slice(-6).join("\n") || "none";
-  };
-  const toggle = () => {
-    if (!panel) build(); else panel.style.display = panel.style.display === "none" ? "" : "none";
-    clearInterval(timer);
-    if (panel.style.display !== "none") {
-      refresh();
-      timer = setInterval(refresh, 500);
-    }
-  };
-  addEventListener("keydown", e => {
-    if (window.Module && Module.uewDebugPanel === false) return;
-    if (e.code === "Backslash" || e.code === "Insert") {
-      toggle();
-      e.preventDefault();
-      e.stopImmediatePropagation();
-    }
-  }, true);
-  addEventListener("keyup", e => {
-    if (window.Module && Module.uewDebugPanel === false) return;
-    if (e.code === "Backslash" || e.code === "Insert") {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-    }
-  }, true);
-}))();
-
-// end include: runtime/web/uew_debug.js
+// end include: D:\BetterNeighbor\UEWASM\runtime\web\uew_save.js
 var programArgs = [];
 
 var thisProgram = "./this.program";
@@ -4625,38 +4723,76 @@ function _clock_time_get(clk_id, ignored_precision, ptime) {
   return 0;
 }
 
-/** @type {!Float64Array} */ var HEAPF64;
+var jsStackTrace = () => (new Error).stack.toString();
 
-var readEmAsmArgsArray = [];
-
-var readEmAsmArgs = (sigPtr, buf) => {
-  readEmAsmArgsArray.length = 0;
-  var ch;
-  // Most arguments are i32s, so shift the buffer pointer so it is a plain
-  // index into HEAP32.
-  while (ch = HEAPU8[sigPtr++ >>> 0]) {
-    // Floats are always passed as doubles, so all types except for 'i'
-    // are 8 bytes and require alignment.
-    var wide = (ch != 105);
-    wide &= (ch != 112);
-    buf += wide && (buf % 8) ? 4 : 0;
-    readEmAsmArgsArray.push(// Special case for pointers under wasm64 or CAN_ADDRESS_2GB mode.
-    ch == 112 ? HEAPU32[((buf) >>> 2) >>> 0] : ch == 106 ? HEAP64[((buf) >>> 3) >>> 0] : ch == 105 ? HEAP32[((buf) >>> 2) >>> 0] : HEAPF64[((buf) >>> 3) >>> 0]);
-    buf += wide ? 8 : 4;
+/** @param {number=} flags */ var getCallstack = flags => {
+  var callstack = jsStackTrace();
+  // Process all lines:
+  var lines = callstack.split("\n");
+  callstack = "";
+  // Extract components of form:
+  // '       Object._main@http://server.com:4324:12'
+  var firefoxRe = new RegExp("\\s*(.*?)@(.*?):([0-9]+):([0-9]+)");
+  // Extract components of form:
+  // '    at Object._main (http://server.com/file.html:4324:12)'
+  var chromeRe = new RegExp("\\s*at (.*?) \\((.*):(.*):(.*)\\)");
+  for (var line of lines) {
+    var symbolName = "";
+    var file = "";
+    var lineno = 0;
+    var column = 0;
+    var parts = chromeRe.exec(line);
+    if (parts?.length == 5) {
+      symbolName = parts[1];
+      file = parts[2];
+      lineno = parts[3];
+      column = parts[4];
+    } else {
+      parts = firefoxRe.exec(line);
+      if (parts?.length >= 4) {
+        symbolName = parts[1];
+        file = parts[2];
+        lineno = parts[3];
+        // Old Firefox doesn't carry column information, but in new FF30, it
+        // is present. See https://bugzil.la/762556
+        column = parts[4] | 0;
+      } else {
+        // Was not able to extract this line for demangling/sourcemapping
+        // purposes. Output it as-is.
+        callstack += line + "\n";
+        continue;
+      }
+    }
+    // Find the symbols in the callstack that corresponds to the functions that
+    // report callstack information, and remove everything up to these from the
+    // output.
+    if (symbolName == "_emscripten_log" || symbolName == "_emscripten_get_callstack") {
+      callstack = "";
+      continue;
+    }
+    if ((flags & 24)) {
+      if (flags & 64) {
+        file = file.substring(file.replace(/\\/g, "/").lastIndexOf("/") + 1);
+      }
+      callstack += `    at ${symbolName} (${file}:${lineno}:${column})\n`;
+    }
   }
-  return readEmAsmArgsArray;
+  // Trim extra whitespace at the end of the output.
+  callstack = callstack.replace(/\s+$/, "");
+  return callstack;
 };
 
-var runEmAsmFunction = (code, sigPtr, argbuf) => {
-  var args = readEmAsmArgs(sigPtr, argbuf);
-  return ASM_CONSTS[code](...args);
-};
-
-function _emscripten_asm_const_int(code, sigPtr, argbuf) {
-  code >>>= 0;
-  sigPtr >>>= 0;
-  argbuf >>>= 0;
-  return runEmAsmFunction(code, sigPtr, argbuf);
+function _emscripten_get_callstack(flags, str, maxbytes) {
+  str >>>= 0;
+  var callstack = getCallstack(flags);
+  // User can query the required amount of bytes to hold the callstack.
+  if (!str || maxbytes <= 0) {
+    return lengthBytesUTF8(callstack) + 1;
+  }
+  // Output callstack string as C string to HEAP.
+  var bytesWrittenExcludingNull = stringToUTF8(callstack, str, maxbytes);
+  // Return number of bytes written, including null.
+  return bytesWrittenExcludingNull + 1;
 }
 
 var maybeCStringToJsString = cString => cString > 2 ? UTF8ToString(cString) : cString;
@@ -4742,15 +4878,6 @@ function _emscripten_resize_heap(requestedSize) {
     }
   }
   return false;
-}
-
-function _emscripten_set_canvas_element_size(target, width, height) {
-  target >>>= 0;
-  var canvas = findCanvasEventTarget(target);
-  if (!canvas) return -4;
-  canvas.width = width;
-  canvas.height = height;
-  return 0;
 }
 
 var GLctx;
@@ -5263,8 +5390,6 @@ function _emscripten_glBufferSubData(target, offset, size, data) {
   data >>>= 0;
   return webglBufferSubData(target, offset, size, data);
 }
-
-var _emscripten_glCheckFramebufferStatus = x0 => GLctx.checkFramebufferStatus(x0);
 
 var _emscripten_glClearBufferfi = (x0, x1, x2, x3) => GLctx.clearBufferfi(x0, x1, x2, x3);
 
@@ -5871,6 +5996,9 @@ var stringToNewUTF8 = str => {
 };
 
 var _host_gamepad = function(index, buttons, triggers, sticks) {
+  buttons >>>= 0;
+  triggers >>>= 0;
+  sticks >>>= 0;
   const pads = typeof navigator !== "undefined" && navigator.getGamepads ? navigator.getGamepads() : [];
   const p = Array.from(pads).filter(x => x && x.connected)[index];
   if (!p) return 0;
@@ -5878,17 +6006,17 @@ var _host_gamepad = function(index, buttons, triggers, sticks) {
   const bits = [ [ 12, 1 ], [ 13, 2 ], [ 14, 4 ], [ 15, 8 ], [ 9, 16 ], [ 8, 32 ], [ 10, 64 ], [ 11, 128 ], [ 4, 256 ], [ 5, 512 ], [ 16, 1024 ], [ 0, 4096 ], [ 1, 8192 ], [ 2, 16384 ], [ 3, 32768 ] ];
   let m = 0;
   for (const [i, bit] of bits) if (on(i)) m |= bit;
-  HEAPU16[buttons >>> 1 >>> 0] = m;
-  HEAPU8[triggers >>> 0 >>> 0] = Math.round((b[6] ? b[6].value : 0) * 255);
-  HEAPU8[(triggers >>> 0) + 1 >>> 0] = Math.round((b[7] ? b[7].value : 0) * 255);
+  HEAPU16[buttons / 2 >>> 0] = m;
+  HEAPU8[triggers >>> 0] = Math.round((b[6] ? b[6].value : 0) * 255);
+  HEAPU8[triggers + 1 >>> 0] = Math.round((b[7] ? b[7].value : 0) * 255);
   const ax = (i, flip) => {
     const v = (p.axes[i] || 0) * (flip ? -1 : 1);
     return Math.max(-32768, Math.min(32767, Math.round(v * 32767)));
   };
-  HEAP16[sticks >>> 1 >>> 0] = ax(0);
-  HEAP16[(sticks >>> 1) + 1 >>> 0] = ax(1, true);
-  HEAP16[(sticks >>> 1) + 2 >>> 0] = ax(2);
-  HEAP16[(sticks >>> 1) + 3 >>> 0] = ax(3, true);
+  HEAP16[sticks / 2 >>> 0] = ax(0);
+  HEAP16[sticks / 2 + 1 >>> 0] = ax(1, true);
+  HEAP16[sticks / 2 + 2 >>> 0] = ax(2);
+  HEAP16[sticks / 2 + 3 >>> 0] = ax(3, true);
   return 1;
 };
 
@@ -5902,34 +6030,51 @@ var _host_lock_pointer = function(lock) {
     // the browser refuses a lock right after the user left one (Esc); the next click asks again
     c.addEventListener("click", () => {
       if (!Module.uewWantLock || document.pointerLockElement === c) return;
+      // raw movement (unadjustedMovement): skips the system's pointer acceleration and smoothing, which lags behind
+      // the hand (ChromeOS's especially). Browsers that refuse it get an ordinary lock.
+      const plain = () => {
+        try {
+          const q = c.requestPointerLock();
+          if (q && q.catch) q.catch(() => {});
+        } catch (e) {}
+      };
       try {
-        const p = c.requestPointerLock();
-        if (p && p.catch) p.catch(() => {});
-      } catch (e) {}
+        const p = c.requestPointerLock({
+          unadjustedMovement: true
+        });
+        if (p && p.catch) p.catch(e => {
+          if (!e || e.name !== "SecurityError") plain();
+        }); else if (!p) {}
+      } catch (e) {
+        plain();
+      }
     });
   }
 };
 
 function _host_page_int(name) {
-  const v = typeof Module !== "undefined" ? Module[UTF8ToString(name >>> 0)] : 0;
+  name >>>= 0;
+  const v = typeof Module !== "undefined" ? Module[UTF8ToString(name)] : 0;
   return v ? v | 0 : 0;
 }
 
 function _host_query_flag(name) {
+  name >>>= 0;
   if (typeof location === "undefined") return 0;
-  return new RegExp("[?&]" + UTF8ToString(name >>> 0) + "=1(&|$)").test(location.search) ? 1 : 0;
+  return new RegExp("[?&]" + UTF8ToString(name) + "=1(&|$)").test(location.search) ? 1 : 0;
 }
 
 function _host_query_hex(name) {
   name >>>= 0;
   if (typeof location === "undefined") return 0;
-  const m = new RegExp("[?&]" + UTF8ToString(name >>> 0) + "=([0-9a-fA-F]+)(&|$)").exec(location.search);
+  const m = new RegExp("[?&]" + UTF8ToString(name) + "=([0-9a-fA-F]+)(&|$)").exec(location.search);
   return m ? parseInt(m[1], 16) : 0;
 }
 
 function _host_query_int(name) {
+  name >>>= 0;
   if (typeof location === "undefined") return 0;
-  const m = new RegExp("[?&]" + UTF8ToString(name >>> 0) + "=(\\d+)").exec(location.search);
+  const m = new RegExp("[?&]" + UTF8ToString(name) + "=(\\d+)").exec(location.search);
   return m ? +m[1] : 0;
 }
 
@@ -5950,19 +6095,26 @@ function _host_show_cursor(show) {
 }
 
 function _inet_claims(host) {
+  host >>>= 0;
   const n = Module.uewNet;
-  return n && n.http && (!n.claim || n.claim(UTF8ToString(host >>> 0))) ? 1 : 0;
+  return n && n.http && (!n.claim || n.claim(UTF8ToString(host))) ? 1 : 0;
 }
 
 function _inet_request(method, url, headers, body, len, status, hlen) {
+  method >>>= 0;
+  url >>>= 0;
+  headers >>>= 0;
+  body >>>= 0;
+  status >>>= 0;
+  hlen >>>= 0;
   const n = Module.uewNet;
   let r;
   try {
     r = n.http({
-      method: UTF8ToString(method >>> 0),
-      url: UTF8ToString(url >>> 0),
-      headers: UTF8ToString(headers >>> 0),
-      body: HEAPU8.slice(body >>> 0, (body >>> 0) + len)
+      method: UTF8ToString(method),
+      url: UTF8ToString(url),
+      headers: UTF8ToString(headers),
+      body: HEAPU8.slice(body, body + len)
     });
   } catch (e) {
     console.log("[net] handler failed: " + e);
@@ -5989,15 +6141,17 @@ function _inet_request(method, url, headers, body, len, status, hlen) {
     h: (new TextEncoder).encode(h),
     b
   };
-  HEAP32[(status >>> 0) >>> 2] = r.status || 200;
-  HEAP32[(hlen >>> 0) >>> 2] = n.last.h.length;
+  HEAP32[status / 4 >>> 0] = r.status || 200;
+  HEAP32[hlen / 4 >>> 0] = n.last.h.length;
   return b.length;
 }
 
 function _inet_take(headers, body) {
+  headers >>>= 0;
+  body >>>= 0;
   const l = Module.uewNet.last;
-  HEAPU8.set(l.h, headers >>> 0 >>> 0);
-  HEAPU8.set(l.b, body >>> 0 >>> 0);
+  HEAPU8.set(l.h, headers >>> 0);
+  HEAPU8.set(l.b, body >>> 0);
   Module.uewNet.last = null;
 }
 
@@ -6063,9 +6217,10 @@ function _js_audio_restart() {
 }
 
 function _js_audio_write(frames, count) {
+  frames >>>= 0;
   const A = Module.uewAudio;
   if (!A) return;
-  const src = HEAPF32.subarray((frames >>> 2) >>> 0, (frames >>> 2) + count * 2 >>> 0);
+  const src = HEAPF32.subarray(frames / 4 >>> 0, frames / 4 + count * 2 >>> 0);
   // loudest recent sample (every 8th), for tests that check sound is really produced
   for (let i = 0; i < src.length; i += 8) {
     const v = Math.abs(src[i]);
@@ -6088,9 +6243,10 @@ function _net_avail(id) {
 }
 
 function _net_claim(name) {
+  name >>>= 0;
   const n = Module.uewNet;
   if (!n || !n.claim) return 0;
-  const s = UTF8ToString(name >>> 0);
+  const s = UTF8ToString(name);
   if (!n.claim(s)) return 0;
   n.names = n.names || [ "" ];
   let i = n.names.indexOf(s);
@@ -6132,13 +6288,14 @@ var _net_open = function(route, port) {
 };
 
 function _net_recv(id, p, cap) {
+  p >>>= 0;
   const c = Module.uewNet.conns[id];
   if (!c) return -1;
   if (!c.qlen) return c.closed ? -1 : 0;
   let n = 0;
   while (n < cap && c.q.length) {
     const d = c.q[0], k = Math.min(cap - n, d.length);
-    HEAPU8.set(d.subarray(0, k), (p >>> 0) + n >>> 0);
+    HEAPU8.set(d.subarray(0, k), p + n >>> 0);
     n += k;
     if (k == d.length) c.q.shift(); else c.q[0] = d.subarray(k);
   }
@@ -6147,11 +6304,13 @@ function _net_recv(id, p, cap) {
 }
 
 function _net_send(id, p, n) {
+  p >>>= 0;
   const c = Module.uewNet.conns[id];
-  if (c && c.send) c.send(HEAPU8.slice(p >>> 0, (p >>> 0) + n));
+  if (c && c.send) c.send(HEAPU8.slice(p, p + n));
 }
 
 var _uew_js_frame_request = function(seq) {
+  seq >>>= 0;
   if (!Module.uewWatchdog && typeof setInterval !== "undefined" && typeof document !== "undefined") {
     // a game that stops presenting while the page is visible: log what every thread is doing, once per stall
     let last = -1, since = performance.now(), dumped = false;
@@ -6163,21 +6322,29 @@ var _uew_js_frame_request = function(seq) {
         dumped = false;
         return;
       }
-      if (!dumped && n > 600 && now - since > 8e3 && Module._uew_threads) {
+      // no frame for a while: say whether the page's event loop is still running.  If this line never appears, the
+      // main thread is stuck inside wasm and no JS timer can run; if it does, the guest is idle-blocked instead.
+      if (!dumped && n > 0 && now - since > 8e3) {
         dumped = true;
-        console.log("[watchdog] no frame for 8 s; threads:");
-        Module._uew_threads();
+        console.log(`[watchdog] page alive, no frame for ${((now - since) / 1e3).toFixed(0)} s: presents ${n}, ` + `frame pending ${Module.uewFramePending || 0}, frame seq ${Module.uewFrameSeq || 0}`);
+        if (Module._uew_threads) {
+          try {
+            Module._uew_threads();
+          } catch (e) {
+            console.log("[watchdog] thread dump failed: " + e);
+          }
+        }
       }
     }, 1e3);
   }
-  Module.uewFrameSeqPtr = seq >>> 0;
+  Module.uewFrameSeqPtr = seq;
   if (Module.uewFramePending) return;
   Module.uewFramePending = 1;
   const go = () => {
     Module.uewFramePending = 0;
     Module.uewFrameSeq = (Module.uewFrameSeq | 0) + 1;
     // the count lives in wasm memory, so threads on every core see it
-    HEAP32[Module.uewFrameSeqPtr >>> 2 >>> 0] = Module.uewFrameSeq;
+    HEAP32[Module.uewFrameSeqPtr / 4 >>> 0] = Module.uewFrameSeq;
     const w = Module.uewIdleWake;
     if (w) {
       Module.uewIdleWake = null;
@@ -6187,20 +6354,27 @@ var _uew_js_frame_request = function(seq) {
   (typeof requestAnimationFrame !== "undefined" ? requestAnimationFrame : setTimeout)(go);
 };
 
+/** @type {!Float64Array} */ var HEAPF64;
+
 function _uew_rf_find(path, size, mtime) {
-  const f = Module.uewFiles && Module.uewFiles.lookup(UTF8ToString(path >>> 0));
+  path >>>= 0;
+  size >>>= 0;
+  mtime >>>= 0;
+  const f = Module.uewFiles && Module.uewFiles.lookup(UTF8ToString(path));
   if (!f) return -2;
-  HEAPF64[size >>> 3 >>> 0] = f.size || 0;
-  HEAPF64[mtime >>> 3 >>> 0] = f.mtime || 0;
+  HEAPF64[size / 8 >>> 0] = f.size || 0;
+  HEAPF64[mtime / 8 >>> 0] = f.mtime || 0;
   return f.dir ? -1 : f.id;
 }
 
 function _uew_rf_list(path) {
-  const s = Module.uewFiles && Module.uewFiles.list(UTF8ToString(path >>> 0));
+  path >>>= 0;
+  const s = Module.uewFiles && Module.uewFiles.list(UTF8ToString(path));
   return s == null ? 0 : stringToNewUTF8(s);
 }
 
 function _uew_rf_read_cached(id, off, len, dst) {
+  dst >>>= 0;
   return Module.uewFiles.readCached(id, off, len, dst);
 }
 
@@ -6228,6 +6402,7 @@ function _uew_vpx_close(id) {
 }
 
 function _uew_vpx_decode(id, p, n, key) {
+  p >>>= 0;
   const s = Module.uewVpx.s.get(id);
   if (!s || s.err) return -1;
   try {
@@ -6239,7 +6414,6 @@ function _uew_vpx_decode(id, p, n, key) {
         hardwareAcceleration: "prefer-hardware"
       });
     }
-    p >>>= 0;
     s.dec.decode(new EncodedVideoChunk({
       type: key ? "key" : "delta",
       timestamp: ++s.ts,
@@ -6253,9 +6427,10 @@ function _uew_vpx_decode(id, p, n, key) {
 }
 
 function _uew_vpx_info(id, out) {
+  out >>>= 0;
   const s = Module.uewVpx.s.get(id), f = s && s.ready[0];
   if (!f) return 0;
-  out >>>= 2;
+  out /= 4;
   HEAP32[out >>> 0] = f.w;
   HEAP32[out + 1 >>> 0] = f.h;
   HEAP32[out + 2 >>> 0] = f.matrix === "bt709" ? 2 : f.matrix === "bt470bg" ? 1 : f.matrix === "smpte170m" ? 3 : f.matrix === "smpte240m" ? 4 : f.matrix.startsWith("bt2020") ? 5 : f.matrix === "rgb" ? 7 : 0;
@@ -6339,12 +6514,12 @@ function _uew_vpx_poll(id) {
 }
 
 function _uew_vpx_take(id, y, ys, u, us, v, vs) {
-  const s = Module.uewVpx.s.get(id), f = s && s.ready.shift();
-  if (!f) return;
-  const L = f.layout, b = f.buf, w = f.w, h = f.h, cw = (w + 1) >> 1, ch = (h + 1) >> 1, H = HEAPU8;
   y >>>= 0;
   u >>>= 0;
   v >>>= 0;
+  const s = Module.uewVpx.s.get(id), f = s && s.ready.shift();
+  if (!f) return;
+  const L = f.layout, b = f.buf, w = f.w, h = f.h, cw = (w + 1) >> 1, ch = (h + 1) >> 1, H = HEAPU8;
   for (let r = 0; r < h; r++) H.set(b.subarray(L[0].offset + r * L[0].stride, L[0].offset + r * L[0].stride + w), y + r * ys);
   if (f.fmt === "I420") {
     for (let r = 0; r < ch; r++) {
@@ -6363,10 +6538,11 @@ function _uew_vpx_take(id, y, ys, u, us, v, vs) {
 }
 
 var _uewg_begin_pass = function(jsonPtr) {
+  jsonPtr >>>= 0;
   const g = Module.uewg;
   g.passBudget();
   g.endPass(true);
-  const d = JSON.parse(UTF8ToString(jsonPtr >>> 0));
+  const d = JSON.parse(Module.uewg.str(jsonPtr));
   const colorAttachments = d.color.map(c => c ? {
     view: g.o[c.view],
     loadOp: "load",
@@ -6442,6 +6618,7 @@ var _uewg_begin_pass = function(jsonPtr) {
 };
 
 function _uewg_bindgroup_bin(layoutId, group, ptr, n) {
+  ptr >>>= 0;
   const g = Module.uewg;
   g.stat.bg++;
   const layout = layoutId < 0 ? g.emptyLayout : g.o[layoutId].bgls[group];
@@ -6457,7 +6634,7 @@ function _uewg_bindgroup_bin(layoutId, group, ptr, n) {
   const rets = [ "float", "sint", "uint", "depth" ];
   const dummies = [ null, null, null, "buf", "sbuf", "stex" ];
   const entries = [];
-  for (let i = 0, p = ptr >>> 2; i < n; i++, p += 7) {
+  for (let i = 0, p = ptr / 4; i < n; i++, p += 7) {
     const b = HEAP32[p >>> 0], kind = HEAP32[p + 1 >>> 0], id = HEAP32[p + 2 >>> 0];
     if (kind == 0) entries.push({
       binding: b,
@@ -6484,7 +6661,7 @@ function _uewg_bindgroup_bin(layoutId, group, ptr, n) {
       layout,
       entries
     });
-    if (g.capFrame) bg.__r = entries.map((e, i) => e.resource && e.resource.__tex ? e.resource.__tex.__id : e.resource && e.resource.buffer ? (HEAP32[(ptr >>> 2) + 7 * i + 1 >>> 0] == 1 ? `b${HEAP32[(ptr >>> 2) + 7 * i + 2 >>> 0]}@${e.resource.offset}+${e.resource.size}` : "b") : e.resource instanceof GPUSampler ? "s" : "?");
+    if (g.capFrame) bg.__r = entries.map((e, i) => e.resource && e.resource.__tex ? e.resource.__tex.__id : e.resource && e.resource.buffer ? (HEAP32[ptr / 4 + 7 * i + 1 >>> 0] == 1 ? `b${HEAP32[ptr / 4 + 7 * i + 2 >>> 0]}@${e.resource.offset}+${e.resource.size}` : "b") : e.resource instanceof GPUSampler ? "s" : "?");
     return g.add(bg);
   } catch (e) {
     if (g.errors++ < 40) console.log("[webgpu] bind group " + e.message);
@@ -6493,11 +6670,12 @@ function _uewg_bindgroup_bin(layoutId, group, ptr, n) {
 }
 
 var _uewg_bindgroup_create = function(layoutId, group, jsonPtr) {
+  jsonPtr >>>= 0;
   const g = Module.uewg;
   if (window.uewLogCreates > 1) console.log(`[create] bindgroup`);
   g.stat.bg++;
   const layout = layoutId < 0 ? g.emptyLayout : g.o[layoutId].bgls[group];
-  const entries = JSON.parse(UTF8ToString(jsonPtr >>> 0)).map(e => {
+  const entries = JSON.parse(Module.uewg.str(jsonPtr)).map(e => {
     if (e.ring) return {
       binding: e.b,
       resource: {
@@ -6533,9 +6711,9 @@ var _uewg_bindgroup_create = function(layoutId, group, jsonPtr) {
       layout,
       entries
     });
-    if (g.capFrame) bg.__sz = JSON.parse(UTF8ToString(jsonPtr >>> 0)).filter(e => e.ring).map(e => [ e.b, e.off || -1, e.size ]);
+    if (g.capFrame) bg.__sz = JSON.parse(Module.uewg.str(jsonPtr)).filter(e => e.ring).map(e => [ e.b, e.off || -1, e.size ]);
     if (g.capFrame) {
-      const js = JSON.parse(UTF8ToString(jsonPtr >>> 0));
+      const js = JSON.parse(Module.uewg.str(jsonPtr));
       bg.__r = entries.map((e, i) => e.resource && e.resource.__tex ? e.resource.__tex.__id : e.resource && e.resource.buffer ? (js[i].buf !== undefined ? `b${js[i].buf}@${js[i].off || 0}+${js[i].size || 0}` : "b") : e.resource instanceof GPUSampler ? "s" : "?");
     }
     return g.add(bg);
@@ -6598,9 +6776,10 @@ function _uewg_buffer_write(id, offset, ptr, size) {
 }
 
 function _uewg_clear(jsonPtr, ringUsed) {
+  jsonPtr >>>= 0;
   const g = Module.uewg;
   g.endPass(true);
-  const d = JSON.parse(UTF8ToString(jsonPtr >>> 0));
+  const d = JSON.parse(Module.uewg.str(jsonPtr));
   g.capEvent({
     clear: JSON.parse(JSON.stringify(d))
   });
@@ -6733,9 +6912,10 @@ var _uewg_copy_texture = function(src, smip, slayer, sx, sy, sz, dst, dmip, dlay
 };
 
 var _uewg_dispatch = function(p) {
+  p >>>= 0;
   Module.uewg.guard("dispatch", () => {
     const g = Module.uewg, I = HEAP32;
-    let i = p >>> 2;
+    let i = p / 4;
     const pipe = g.o[I[i++]];
     const cb = I[i++], ndyn = I[i++];
     const dyn0 = i;
@@ -6748,7 +6928,7 @@ var _uewg_dispatch = function(p) {
     cp.setPipeline(pipe);
     if (g.prof && g.prof.cur) {
       g.prof.cur.draws++;
-      g.prof.cur.pipes.set(I[p >>> 2], 1);
+      g.prof.cur.pipes.set(I[p / 4], 1);
     }
     cp.setBindGroup(0, g.o[cb], HEAPU32, dyn0, ndyn);
     cp.setBindGroup(1, g.o[res]);
@@ -6763,6 +6943,7 @@ var _uewg_dispatch = function(p) {
 };
 
 function _uewg_draw(p) {
+  p >>>= 0;
   try {
     const g = Module.uewg;
     // a copy or dispatch since the last draw ended the pass: carry on with the same targets
@@ -6776,7 +6957,7 @@ function _uewg_draw(p) {
       return;
     }
     const I = HEAP32, F = HEAPF32;
-    let i = p >>> 2;
+    let i = p / 4;
     const pipeId = I[i++], pipe = g.o[pipeId];
     if (!pipe) {
       g.skip.nopipe++;
@@ -6843,12 +7024,15 @@ function _uewg_draw(p) {
     }
     if (st.vp[0] !== F[i] || st.vp[1] !== F[i + 1] || st.vp[2] !== F[i + 2] || st.vp[3] !== F[i + 3] || st.vp[4] !== F[i + 4] || st.vp[5] !== F[i + 5]) {
       pass.setViewport(F[i], F[i + 1], F[i + 2], F[i + 3], F[i + 4], F[i + 5]);
-      st.vp.set(F.subarray(i, i + 6));
+      for (let k = 0; k < 6; k++) st.vp[k] = F[i + k];
     }
     i += 6;
     if (st.sc[0] !== I[i] || st.sc[1] !== I[i + 1] || st.sc[2] !== I[i + 2] || st.sc[3] !== I[i + 3]) {
       pass.setScissorRect(I[i], I[i + 1], I[i + 2], I[i + 3]);
-      st.sc.set(I.subarray(i, i + 4));
+      st.sc[0] = I[i];
+      st.sc[1] = I[i + 1];
+      st.sc[2] = I[i + 2];
+      st.sc[3] = I[i + 3];
     }
     i += 4;
     const sref = I[i] >>> 0;
@@ -6875,7 +7059,7 @@ function _uewg_draw(p) {
     if (g.cap && g.cap.cur && g.cap.cur.draws.length < 3e3) {
       const pd = pipe.__d || {};
       const groups = [], cbs = {};
-      for (let k = 0, j = (p >>> 2) + 2; k < ngroups; k++) {
+      for (let k = 0, j = p / 4 + 2; k < ngroups; k++) {
         const bg = g.o[I[j]], nd = I[j + 1];
         groups.push(bg && bg.__r);
         // constant buffer contents straight from the ring (first draws of a pass only)
@@ -6883,7 +7067,7 @@ function _uewg_draw(p) {
           let d = 0;
           for (const [b, off, size] of bg.__sz) {
             const o = off >= 0 ? off : HEAPU32[j + 2 + d++ >>> 0];
-            cbs[`${k}:${b}`] = Array.from(HEAPF32.subarray((g.ringPtr + o) >>> 2 >>> 0, (g.ringPtr + o + size) >>> 2 >>> 0)).map(x => +x.toPrecision(5));
+            cbs[`${k}:${b}`] = Array.from(HEAPF32.subarray((g.ringPtr + o) / 4 >>> 0, (g.ringPtr + o + size) / 4 >>> 0)).map(x => +x.toPrecision(5));
           }
         }
         j += 2 + nd;
@@ -7109,9 +7293,10 @@ var _uewg_gen_mips = function(id) {
 };
 
 var _uewg_gs = function(p) {
+  p >>>= 0;
   Module.uewg.guard("gs", () => {
     const g = Module.uewg, I = HEAP32, F = HEAPF32;
-    let i = p >>> 2;
+    let i = p / 4;
     const cpipe = g.o[I[i++]], wx = I[i++], wy = I[i++], nl = I[i++], cap = I[i++], args = g.o[I[i++]];
     const groups = () => {
       const r = [];
@@ -7232,11 +7417,11 @@ var _uewg_gs = function(p) {
 };
 
 function _uewg_has_feature(name) {
+  name >>>= 0;
   return Module.uewg.features.has(UTF8ToString(name)) ? 1 : 0;
 }
 
 async function _uewg_init(canvasW, canvasH, ringPtr, ringSize) {
-  // pointers above 2 GB arrive as negative numbers
   ringPtr >>>= 0;
   if (!navigator.gpu) return 0;
   const adapter = await navigator.gpu.requestAdapter({
@@ -7244,9 +7429,11 @@ async function _uewg_init(canvasW, canvasH, ringPtr, ringSize) {
   });
   if (!adapter) return 0;
   const want = [ "texture-compression-bc", "texture-compression-bc-sliced-3d", "float32-filterable", "float32-blendable", "rg11b10ufloat-renderable", "depth32float-stencil8", "depth-clip-control", "indirect-first-instance", "texture-formats-tier1", "texture-formats-tier2", "texture-component-swizzle", "bgra8unorm-storage", "dual-source-blending" ];
-  // debug: window.uewGpuProfile = 1 times every pass on the GPU and logs the slowest ones
-  if (typeof window !== "undefined" && window.uewGpuProfile) want.push("timestamp-query");
-  const features = want.filter(f => adapter.features.has(f));
+  // debug: ?gpuprof=1 (or window.uewGpuProfile = 1 before the game starts) times every pass on the GPU and logs the slowest ones
+  if (typeof window !== "undefined" && (window.uewGpuProfile || (typeof location !== "undefined" && /[?&]gpuprof=1(&|$)/.test(location.search)))) want.push("timestamp-query");
+  // testing: ?nofeat=a,b leaves those optional features off, to see what a GPU without them (Chromebooks, phones) gets
+  const nofeat = typeof location !== "undefined" ? (new URLSearchParams(location.search).get("nofeat") || "").split(",").filter(x => x) : [];
+  const features = want.filter(f => adapter.features.has(f) && !nofeat.includes(f));
   const L = adapter.limits, req = {};
   for (const k of [ "maxSampledTexturesPerShaderStage", "maxSamplersPerShaderStage", "maxStorageBuffersPerShaderStage", "maxStorageTexturesPerShaderStage", "maxUniformBuffersPerShaderStage", "maxBindingsPerBindGroup", "maxInterStageShaderVariables", "maxColorAttachmentBytesPerSample", "maxBufferSize", "maxStorageBufferBindingSize", "maxDynamicUniformBuffersPerPipelineLayout", "maxComputeWorkgroupStorageSize", "maxComputeInvocationsPerWorkgroup", "maxTextureArrayLayers", "maxTextureDimension2D", "maxVertexAttributes", "maxVertexBuffers", "maxComputeWorkgroupSizeX", "maxComputeWorkgroupSizeY", "maxComputeWorkgroupSizeZ", "maxComputeWorkgroupsPerDimension", "maxTextureDimension3D", "maxTextureDimension1D", "maxBindGroups" ]) if (k in L) req[k] = L[k];
   let device;
@@ -7290,6 +7477,186 @@ async function _uewg_init(canvasW, canvasH, ringPtr, ringSize) {
     dummies: new Map
   };
   g.errKinds = new Map;
+  // C strings (the JSON descriptors of passes, views, bind groups, pipelines and shader sources) read with the
+  // native indexOf and TextDecoder: UTF8ToString finds the end with a byte loop in JS, and begin_pass alone runs
+  // ~40 times a frame. Shared memory (real threads) can't be decoded in place, so it is copied first there.
+  {
+    const td = new TextDecoder;
+    g.str = p => {
+      p = typeof p == "bigint" ? Number(p) : p >>> 0;
+      const H = HEAPU8;
+      let e = H.indexOf(0, p);
+      if (e < 0) e = H.length;
+      const v = H.subarray(p, e);
+      return td.decode(H.buffer instanceof ArrayBuffer ? v : v.slice());
+    };
+  }
+  // ---- pipeline warm-up. Every render pipeline the game makes is recorded (its WGSL, layout and state) and kept on
+  // this device; the next launch compiles them all in the background while it loads, so when the game asks for one it
+  // is ready instead of compiling mid-game (the "new object appears a moment later" stutter). Pipelines match by
+  // content: an identical descriptor is the same pipeline, whatever ids the game's objects have this time.
+  {
+    const fnv = s => {
+      let h = 2166136261;
+      for (let i = 0; i < s.length; i++) {
+        h ^= s.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return (h >>> 0).toString(36) + "." + s.length.toString(36);
+    };
+    const P = g.pw = {
+      fnv,
+      shHash: new Map,
+      shCode: new Map,
+      layJson: new Map,
+      warm: new Map,
+      rec: new Map,
+      dirty: false,
+      hits: 0,
+      warmed: 0
+    };
+    const off = typeof location !== "undefined" && /[?&]nowarm=1/.test(location.search);
+    const URLK = typeof location !== "undefined" ? new URL("__uew_pipes.json", location.href).href : "";
+    const store = () => (typeof caches !== "undefined" && self.isSecureContext) ? caches.open("uew-pipes") : Promise.reject();
+    P.save = () => {
+      if (!P.dirty || off) return;
+      P.dirty = false;
+      const shaders = {}, pipes = [];
+      for (const [k, r] of P.rec) {
+        pipes.push(r);
+        shaders[r.vs] = P.shCode.get(r.vs);
+        if (r.ps) shaders[r.ps] = P.shCode.get(r.ps);
+      }
+      store().then(c => c.put(URLK, new Response(JSON.stringify({
+        v: 1,
+        shaders,
+        pipes
+      }), {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }))).catch(() => {});
+    };
+    // development (uewasm serve --log): Module.uewSavePipes() hands this session's list to the server as pipes.json,
+    // which a build ships so a first visit warms up too
+    Module.uewSavePipes = () => {
+      const shaders = {}, pipes = [];
+      for (const [, r] of P.rec) {
+        pipes.push(r);
+        shaders[r.vs] = P.shCode.get(r.vs);
+        if (r.ps) shaders[r.ps] = P.shCode.get(r.ps);
+      }
+      return fetch("/__uewsave/pipes.json", {
+        method: "POST",
+        body: JSON.stringify({
+          v: 1,
+          shaders,
+          pipes
+        })
+      }).then(r => r.status + " " + pipes.length + " pipelines");
+    };
+    if (!off) {
+      setInterval(P.save, 15e3);
+      addEventListener("pagehide", P.save);
+      // the last session's pipelines (or, on a first visit, the set the build ships in pipes.json, recorded from a play
+      // session), compiled a few at a time so the game's own compiles aren't starved
+      const shipped = () => fetch((Module.uewDataUrl || "data/") + "pipes.json").then(r => r.ok ? r.json() : null).catch(() => null);
+      store().then(c => c.match(URLK)).catch(() => null).then(r => r ? r.json() : shipped()).then(j => {
+        if (!j || j.v !== 1 || !Array.isArray(j.pipes)) return;
+        // the build recorded them on a GPU that renders rg11b10ufloat; here those textures are rgba16float (res_create)
+        if (!g.features.has("rg11b10ufloat-renderable")) for (const r of j.pipes) if (r.d.includes('"rg11b10ufloat"')) {
+          r.d = r.d.replace(/"rg11b10ufloat"/g, '"rgba16float"');
+          r.key = P.fnv(r.vs + "|" + (r.ps || "") + "|" + r.layout + "|" + r.d);
+        }
+        const mods = new Map, lays = new Map, queue = j.pipes.slice();
+        for (const r of j.pipes) {
+          P.rec.set(r.key, r);
+        }
+        for (const h in j.shaders) if (j.shaders[h]) P.shCode.set(h, j.shaders[h]);
+        const mod = h => {
+          let m = mods.get(h);
+          if (!m) {
+            m = device.createShaderModule({
+              code: j.shaders[h]
+            });
+            mods.set(h, m);
+          }
+          return m;
+        };
+        const lay = s => {
+          let l = lays.get(s);
+          if (!l) {
+            const groups = JSON.parse(s);
+            l = device.createPipelineLayout({
+              bindGroupLayouts: groups.map(e => device.createBindGroupLayout({
+                entries: e
+              }))
+            });
+            lays.set(s, l);
+          }
+          return l;
+        };
+        let running = 0;
+        const next = () => {
+          while (running < 4 && queue.length) {
+            const r = queue.shift();
+            if (P.warm.has(r.key) || !j.shaders[r.vs] || (r.ps && !j.shaders[r.ps])) continue;
+            const d = JSON.parse(r.d);
+            let p;
+            try {
+              p = device.createRenderPipelineAsync({
+                layout: lay(r.layout),
+                vertex: {
+                  module: mod(r.vs),
+                  entryPoint: "main",
+                  buffers: d.buffers
+                },
+                fragment: r.ps ? {
+                  module: mod(r.ps),
+                  entryPoint: "main",
+                  targets: d.targets
+                } : undefined,
+                primitive: d.primitive,
+                depthStencil: d.depth,
+                multisample: {
+                  mask: d.sampleMask >>> 0
+                }
+              });
+            } catch (e) {
+              continue;
+            }
+            const w = {
+              pipe: null,
+              p
+            };
+            P.warm.set(r.key, w);
+            running++;
+            p.then(x => {
+              w.pipe = x;
+              P.warmed++;
+            }, () => P.warm.delete(r.key)).finally(() => {
+              running--;
+              next();
+            });
+          }
+          if (!queue.length && !running) console.log(`[webgpu] pipeline warm-up: ${P.warmed} of ${j.pipes.length} pipelines from the last session compiled ahead`);
+        };
+        next();
+      }).catch(() => {});
+    }
+  }
+  // a lost device (driver reset, Windows' GPU watchdog after a ~2 s frame, GPU process crash) leaves the canvas black
+  // for good while the game keeps running: say so in the log and on the page instead of failing silently
+  device.lost.then(info => {
+    if (info.reason === "destroyed") return;
+    g.lost = info;
+    console.log(`[webgpu] DEVICE LOST (${info.reason}): ${info.message}. The picture stays black until the page is reloaded; ` + "see docs/RENDERING.md, 'Black after it was working'.");
+    const s = typeof document !== "undefined" && document.getElementById("status");
+    if (s) {
+      s.textContent = "The graphics device was lost (GPU reset or driver crash). Reload the page to continue.";
+      s.style.color = "#f88";
+    }
+  });
   device.addEventListener("uncapturederror", e => {
     const m = e.error.message;
     if (g.errors++ < 40) console.log("[webgpu] " + m.split("\n").slice(0, 3).join(" | "));
@@ -7466,14 +7833,19 @@ async function _uewg_init(canvasW, canvasH, ringPtr, ringSize) {
   // ring data written since the last upload
   g.flush = used => {
     g.endPass();
-    if (!used && Module.uewRingUsedPtr) used = HEAPU32[Module.uewRingUsedPtr >>> 2 >>> 0];
+    if (!used && Module.uewRingUsedPtr) used = HEAPU32[Module.uewRingUsedPtr / 4 >>> 0];
     used = (used + 3) & ~3;
     if (used < g.ringDone) g.ringDone = 0;
     if (used > g.ringDone) g.queue.writeBuffer(g.ring, g.ringDone, HEAPU8, g.ringPtr + g.ringDone, used - g.ringDone);
     g.ringDone = used;
     if (g.enc) {
-      g.queue.submit([ g.enc.finish() ]);
+      const e = g.enc, mk = Module.uewMk, mkT = mk ? performance.now() : 0;
       g.enc = null;
+      g.queue.submit([ e.finish() ]);
+      if (mk) {
+        mk.t.sub += performance.now() - mkT;
+        mk.n.sub++;
+      }
     }
     g.passesInCb = 0;
     g.queuedBytes = 0;
@@ -7545,6 +7917,22 @@ async function _uewg_init(canvasW, canvasH, ringPtr, ringSize) {
     req: 0,
     fms: 0,
     logged: 0
+  };
+  Module.uewMk = {
+    t: {
+      tex: 0,
+      twr: 0,
+      sh: 0,
+      pipe: 0,
+      sub: 0
+    },
+    n: {
+      tex: 0,
+      twr: 0,
+      sh: 0,
+      pipe: 0,
+      sub: 0
+    }
   };
   // debug: window.uewCaptureFrame = N reads back every render target of frame N into Module.uewgCaptured
   g.capFrame = (typeof window != "undefined" && window.uewCaptureFrame) | 0;
@@ -8037,15 +8425,17 @@ async function _uewg_init(canvasW, canvasH, ringPtr, ringSize) {
     g.queueLimit = 8 << 20;
     console.log("[webgpu] this may be the integrated GPU: Windows Settings > System > Display > Graphics, set your browser to High performance");
   }
-  // bit 1: 24-bit depth can be stored as 32-bit float (more precise, and readable by copies)
-  return 1 | (g.features.has("depth32float-stencil8") ? 2 : 0);
+  // bit 1: 24-bit depth can be stored as 32-bit float (more precise, and readable by copies). The optional features
+  // the texture code adapts to come back here too (bits 2-4), so game threads never have to ask the page later
+  return 1 | (g.features.has("depth32float-stencil8") ? 2 : 0) | (g.features.has("texture-compression-bc") ? 4 : 0) | (g.features.has("rg11b10ufloat-renderable") ? 8 : 0) | (g.features.has("float32-filterable") ? 16 : 0);
 }
 
 _uewg_init.isAsync = true;
 
 var _uewg_layout_create = function(jsonPtr) {
+  jsonPtr >>>= 0;
   const g = Module.uewg;
-  const groups = JSON.parse(UTF8ToString(jsonPtr >>> 0));
+  const json = Module.uewg.str(jsonPtr), groups = JSON.parse(json);
   const bgls = groups.map(entries => entries.length ? g.device.createBindGroupLayout({
     entries
   }) : g.emptyLayout);
@@ -8053,7 +8443,8 @@ var _uewg_layout_create = function(jsonPtr) {
     pl: g.device.createPipelineLayout({
       bindGroupLayouts: bgls
     }),
-    bgls
+    bgls,
+    json
   });
 };
 
@@ -8067,7 +8458,9 @@ function _uewg_max_storage() {
 
 function _uewg_pipe_ready(id) {
   const g = Module.uewg;
-  return g.skipPending || !g.pending.has(id) ? 1 : 0;
+  if (g.skipPending || !g.pending.has(id)) return 1;
+  if (g.alwaysWait == null) g.alwaysWait = typeof location != "undefined" && /[?&]syncshaders=1/.test(location.search);
+  return !g.alwaysWait && (Module.uewPresents | 0) > 300 ? 1 : 0;
 }
 
 function _uewg_present(view, ringUsed) {
@@ -8076,8 +8469,10 @@ function _uewg_present(view, ringUsed) {
   if (g.prof) g.prof.frameEnd();
   // long frames: what happened in them (new shaders and pipelines, file downloads)
   const now = performance.now(), h = g.hitch, F = Module.uewFiles || {};
-  if (h.last && now - h.last > 100 && g.frames > 60 && h.logged < 300) {
+  // over 500 ms always, slower-than-100 ms frames at most every 2 s (on a slow device that's every frame)
+  if (h.last && now - h.last > 100 && g.frames > 60 && h.logged < 300 && (now - h.last > 500 || now - (h.said || 0) > 2e3)) {
     h.logged++;
+    h.said = now;
     console.log(`[hitch] ${(now - h.last).toFixed(0)} ms frame: ${h.sh + h.psh} new shaders, ${h.pipe + h.ppipe} new pipelines (this frame and the one before), ${h.rb} GPU readbacks, ` + `${(((F.fetched || 0) - h.bytes) / 1048576).toFixed(1)} MB in ${(F.requests || 0) - h.req} downloads (${((F.fetchMs || 0) - h.fms).toFixed(0)} ms waiting)`);
   }
   h.last = now;
@@ -8166,7 +8561,11 @@ function _uewg_present(view, ringUsed) {
     h.upBytes = 0;
     g.queue.onSubmittedWorkDone().then(() => {
       const ms = performance.now() - t0;
-      if (ms > 150 && (h.gpuLogged = (h.gpuLogged || 0) + 1) < 100) console.log(`[hitch] GPU took ${ms.toFixed(0)} ms for a frame: ${info}`);
+      const t = performance.now();
+      if (ms > 150 && (ms > 500 || t - (h.gpuSaid || 0) > 2e3) && (h.gpuLogged = (h.gpuLogged || 0) + 1) < 100) {
+        h.gpuSaid = t;
+        console.log(`[hitch] GPU took ${ms.toFixed(0)} ms for a frame: ${info}`);
+      }
     });
   }
   g.frames++;
@@ -8209,6 +8608,15 @@ function _uewg_present(view, ringUsed) {
       draws: 0,
       by: (Module.uewgStats || (typeof window != "undefined" && window.uewStats)) ? new Map : null
     };
+    const M = Module.uewMk;
+    if (M) {
+      if (g.frames <= 3) console.log(`[boot] frame ${g.frames} main split: texture create ${M.t.tex.toFixed(0)} ms (${M.n.tex}), ` + `upload ${M.t.twr.toFixed(0)} ms (${M.n.twr}), shader modules ${M.t.sh.toFixed(0)} ms (${M.n.sh}), ` + `pipelines ${M.t.pipe.toFixed(0)} ms (${M.n.pipe}), submit ${M.t.sub.toFixed(0)} ms (${M.n.sub})`);
+      for (const k in M.t) {
+        M.t[k] = 0;
+        M.n[k] = 0;
+      }
+      Module.uewMk = null;
+    }
   }
 }
 
@@ -8230,6 +8638,7 @@ function _uewg_readback_finish(n) {
 }
 
 function _uewg_readback_latest(kind, id, mip, layer, w, h, d, ptr, pitch, slice, rowbytes, rows) {
+  ptr >>>= 0;
   const g = Module.uewg, src = g.o[id];
   if (!src || (typeof location !== "undefined" && /[?&]syncreadback=1/.test(location.search))) return 0;
   g.rbl = g.rbl || new Map;
@@ -8244,7 +8653,6 @@ function _uewg_readback_latest(kind, id, mip, layer, w, h, d, ptr, pitch, slice,
   }
   let got = 0;
   if (e.data) {
-    ptr >>>= 0;
     const bpr = kind ? (rowbytes + 255) & ~255 : 0;
     if (!kind) HEAPU8.set(e.data.subarray(0, w), ptr >>> 0); else for (let z = 0; z < d; z++) for (let y = 0; y < rows; y++) HEAPU8.set(e.data.subarray((z * rows + y) * bpr, (z * rows + y) * bpr + Math.min(rowbytes, pitch)), ptr + z * slice + y * pitch >>> 0);
     got = 1;
@@ -8287,6 +8695,7 @@ function _uewg_readback_latest(kind, id, mip, layer, w, h, d, ptr, pitch, slice,
 }
 
 function _uewg_readback_start(kind, id, mip, layer, w, h, d, ptr, pitch, slice, rowbytes, rows) {
+  ptr >>>= 0;
   const g = Module.uewg, src = g.o[id];
   if (!src) return 0;
   g.flush(0);
@@ -8320,7 +8729,7 @@ function _uewg_readback_start(kind, id, mip, layer, w, h, d, ptr, pitch, slice, 
     rows,
     bpr,
     rowbytes,
-    ptr: ptr >>> 0,
+    ptr,
     pitch,
     slice,
     tmp,
@@ -8354,9 +8763,10 @@ function _uewg_release(id) {
 }
 
 function _uewg_render_pipeline_create(jsonPtr) {
+  jsonPtr >>>= 0;
   const g = Module.uewg;
-  const d = JSON.parse(UTF8ToString(jsonPtr >>> 0));
-  if (Module.uewgDebug) console.log("[webgpu] pipeline " + UTF8ToString(jsonPtr >>> 0));
+  const d = JSON.parse(Module.uewg.str(jsonPtr));
+  if (Module.uewgDebug) console.log("[webgpu] pipeline " + Module.uewg.str(jsonPtr));
   g.hitch.pipe++;
   if (window.uewLogCreates) console.log(`[create] pipeline vs ${d.vs} ps ${d.ps}`);
   const desc = {
@@ -8383,6 +8793,51 @@ function _uewg_render_pipeline_create(jsonPtr) {
     p.__ps = d.ps;
     return p;
   };
+  // pipeline warm-up: the same pipeline compiled ahead from the last session (by content), or record this one
+  const P = g.pw;
+  if (P && g.o[d.layout] && g.o[d.layout].json) {
+    const vs = P.shHash.get(d.vs), ps = d.ps ? P.shHash.get(d.ps) : "";
+    if (vs && (ps || !d.ps)) {
+      const rest = JSON.stringify({
+        buffers: d.buffers,
+        targets: d.targets,
+        primitive: d.primitive,
+        depth: d.depth,
+        sampleMask: d.sampleMask
+      });
+      const lj = g.o[d.layout].json, key = P.fnv(vs + "|" + ps + "|" + lj + "|" + rest);
+      if (!P.rec.has(key)) {
+        P.rec.set(key, {
+          key,
+          vs,
+          ps: ps || null,
+          layout: lj,
+          d: rest
+        });
+        P.dirty = true;
+      }
+      const w = P.warm.get(key);
+      if (w && w.pipe) {
+        P.hits++;
+        return g.add(done(w.pipe));
+      }
+      if (w && g.asyncShaders()) {
+        // still compiling from the warm-up: wait for that one instead of starting it again
+        P.hits++;
+        const id = g.add(null);
+        g.pendingPipes++;
+        g.pending.add(id);
+        w.p.then(p => {
+          g.o[id] = done(p);
+        }, () => {}).finally(() => {
+          g.pendingPipes--;
+          g.pending.delete(id);
+          Module.uewWake && Module.uewWake();
+        });
+        return id;
+      }
+    }
+  }
   if (g.asyncShaders()) {
     // compiled on the browser's worker threads; draws that need it are skipped until it is ready
     const id = g.add(null);
@@ -8402,7 +8857,13 @@ function _uewg_render_pipeline_create(jsonPtr) {
     return id;
   }
   try {
-    return g.add(done(g.device.createRenderPipeline(desc)));
+    const mk = Module.uewMk, mkT = mk ? performance.now() : 0;
+    const p = g.device.createRenderPipeline(desc);
+    if (mk) {
+      mk.t.pipe += performance.now() - mkT;
+      mk.n.pipe++;
+    }
+    return g.add(done(p));
   } catch (e) {
     if (g.errors++ < 40) console.log("[webgpu] pipeline " + e.message);
     return 0;
@@ -8423,24 +8884,32 @@ function _uewg_ring_reset() {
 }
 
 function _uewg_ring_used_at(p) {
-  Module.uewRingUsedPtr = p >>> 0;
+  p >>>= 0;
+  Module.uewRingUsedPtr = p;
 }
 
 function _uewg_sampler_create(jsonPtr) {
+  jsonPtr >>>= 0;
   const g = Module.uewg;
-  return g.add(g.device.createSampler(JSON.parse(UTF8ToString(jsonPtr >>> 0))));
+  return g.add(g.device.createSampler(JSON.parse(Module.uewg.str(jsonPtr))));
 }
 
 function _uewg_shader_create(srcPtr) {
+  srcPtr >>>= 0;
   const g = Module.uewg;
-  let code = UTF8ToString(srcPtr >>> 0);
+  let code = Module.uewg.str(srcPtr);
   // debug: window.uewShaderPatch(code) may return a replacement source
   if (window.uewShaderPatch) code = window.uewShaderPatch(code) || code;
   g.hitch.sh++;
   if (window.uewLogCreates) console.log(`[create] shader ${code.length} chars`);
+  const mk = Module.uewMk, mkT = mk ? performance.now() : 0;
   const m = g.device.createShaderModule({
     code
   });
+  if (mk) {
+    mk.t.sh += performance.now() - mkT;
+    mk.n.sh++;
+  }
   if (Module.uewgDebug) console.log("[webgpu] shader " + code);
   m.getCompilationInfo().then(info => {
     for (const x of info.messages) if (x.type === "error" && g.errors++ < 40) console.log(`[webgpu] shader ${x.lineNum}:${x.linePos} ${x.message}`);
@@ -8448,6 +8917,11 @@ function _uewg_shader_create(srcPtr) {
   const id = g.add(m);
   if (g.capFrame) g.capShaders[id] = code;
   if (g.prof) g.prof.shaders.set(id, code);
+  if (g.pw) {
+    const h = g.pw.fnv(code);
+    g.pw.shHash.set(id, h);
+    if (!g.pw.shCode.has(h)) g.pw.shCode.set(h, code);
+  }
   return id;
 }
 
@@ -8481,12 +8955,15 @@ function _uewg_texture_copy_ring(ringOff, id, mip, x, y, z, w, h, d, bpr, rows) 
 }
 
 function _uewg_texture_create(jsonPtr) {
+  jsonPtr >>>= 0;
   const g = Module.uewg;
-  const d = JSON.parse(UTF8ToString(jsonPtr >>> 0));
+  const d = JSON.parse(Module.uewg.str(jsonPtr));
   let usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC;
   if (d.rt) usage |= GPUTextureUsage.RENDER_ATTACHMENT;
   if (d.uav) usage |= GPUTextureUsage.STORAGE_BINDING;
   try {
+    const mk = Module.uewMk, mkT = mk ? performance.now() : 0;
+    // where the boot frame's seconds go
     const t = g.device.createTexture({
       size: [ d.w, d.h, d.d ],
       mipLevelCount: d.mips,
@@ -8495,6 +8972,10 @@ function _uewg_texture_create(jsonPtr) {
       usage,
       viewFormats: d.viewFormats || []
     });
+    if (mk) {
+      mk.t.tex += performance.now() - mkT;
+      mk.n.tex++;
+    }
     g.hitch.tex++;
     g.hitch.texPx += d.w * d.h * d.d;
     const id = g.add(t);
@@ -8517,6 +8998,7 @@ function _uewg_texture_write(id, mip, x, y, z, w, h, d, ptr, bpr, rows, size) {
   }
   g.stat.texWrite++;
   g.hitch.upBytes += bpr * rows * d;
+  const mk = Module.uewMk, mkT = mk ? performance.now() : 0;
   try {
     g.queue.writeTexture({
       texture: t,
@@ -8530,6 +9012,10 @@ function _uewg_texture_write(id, mip, x, y, z, w, h, d, ptr, bpr, rows, size) {
     g.queued(bpr * rows * d);
   } catch (e) {
     if (g.errors++ < 40) console.log("[webgpu] upload " + e.message);
+  }
+  if (mk) {
+    mk.t.twr += performance.now() - mkT;
+    mk.n.twr++;
   }
 }
 
@@ -8549,19 +9035,21 @@ var _uewg_timestamp = function() {
 };
 
 function _uewg_timestamp_get(t, out) {
+  out >>>= 0;
   const g = Module.uewg, v = g.ts ? g.ts.get(t) : undefined;
   if (v === undefined) {
-    HEAPF64[out >>> 3 >>> 0] = performance.now();
+    HEAPF64[out / 8 >>> 0] = performance.now();
     return 1;
   }
   if (v < 0) return 0;
-  HEAPF64[out >>> 3 >>> 0] = v;
+  HEAPF64[out / 8 >>> 0] = v;
   return 1;
 }
 
 function _uewg_view_create(jsonPtr) {
+  jsonPtr >>>= 0;
   const g = Module.uewg;
-  const d = JSON.parse(UTF8ToString(jsonPtr >>> 0));
+  const d = JSON.parse(Module.uewg.str(jsonPtr));
   const t = g.o[d.tex];
   if (!t) return 0;
   const desc = {
@@ -8693,10 +9181,11 @@ function _web_input_init() {
 }
 
 function _web_next_event(out) {
+  out >>>= 0;
   const q = Module.uewInput;
   if (!q || !q.length) return 0;
   const e = q.shift();
-  for (let i = 0; i < 5; i++) HEAP32[(out >>> 2) + i >>> 0] = e[i];
+  for (let i = 0; i < 5; i++) HEAP32[out / 4 + i >>> 0] = e[i];
   return 1;
 }
 
@@ -8827,8 +9316,6 @@ var _glBlitFramebuffer = _emscripten_glBlitFramebuffer;
 var _glBufferData = _emscripten_glBufferData;
 
 var _glBufferSubData = _emscripten_glBufferSubData;
-
-var _glCheckFramebufferStatus = _emscripten_glCheckFramebufferStatus;
 
 var _glClearBufferfi = _emscripten_glClearBufferfi;
 
@@ -8988,7 +9475,7 @@ if (typeof addEventListener == "function") addEventListener("unhandledrejection"
   if (e.reason == "unwind" || (e.reason && e.reason.name == "ExitStatus")) e.preventDefault();
 });
 
-if (typeof ENVIRONMENT_IS_PTHREAD != "undefined" && ENVIRONMENT_IS_PTHREAD && typeof self != "undefined") self.addEventListener("error", e => {
+if (typeof ENVIRONMENT_IS_PTHREAD != "undefined" && ENVIRONMENT_IS_PTHREAD && typeof self != "undefined" && typeof self.addEventListener == "function") self.addEventListener("error", e => {
   if (e.error && e.error.stack) err("[worker crash] " + e.error.stack);
 });
 
@@ -9036,17 +9523,10 @@ Module["FS_createLazyFile"] = FS_createLazyFile;
 // Begin JS library exports
 // End JS library exports
 // end include: postlibrary.js
-var ASM_CONSTS = {
-  3347637: () => {
-    const F = Module.uewFiles;
-    if (!F) {
-      console.log("[lockdiag] files: no uewFiles");
-      return;
-    }
-    console.log("[lockdiag] files: pending " + F.pending.size + ", cacheBytes " + F.cacheBytes + ", fetched " + F.fetched + ", requests " + F.requests + ", failed " + F.failed.size);
-    if (F.report) for (const line of F.report()) console.log("[lockdiag] files: " + line);
-  }
-};
+function uewg_no_bc() {
+  var g = Module.uewg;
+  return (g && g.features && !g.features.has("texture-compression-bc")) ? 1 : 0;
+}
 
 function __asyncjs__uew_js_switch(from, to, target) {
   return Asyncify.handleAsync(async () => {
@@ -9105,8 +9585,9 @@ function __asyncjs__uew_js_idle(ms, wake) {
           r();
         }
       };
-      if (wake && typeof SharedArrayBuffer != "undefined" && HEAP32.buffer instanceof SharedArrayBuffer) {
-        const w = Atomics.waitAsync(HEAP32, wake >>> 2, Atomics.load(HEAP32, wake >>> 2), ms);
+      const wp = typeof wake == "bigint" ? Number(wake) : wake >>> 0;
+      if (wp && typeof SharedArrayBuffer != "undefined" && HEAP32.buffer instanceof SharedArrayBuffer) {
+        const w = Atomics.waitAsync(HEAP32, wp / 4, Atomics.load(HEAP32, wp / 4), ms);
         if (w.async) w.value.then(fin);
       }
       Module.uewIdleWake = fin;
@@ -9126,7 +9607,7 @@ function __asyncjs__uew_js_idle(ms, wake) {
 __asyncjs__uew_js_idle.sig = "vdi";
 
 function __asyncjs__uew_rf_read(id, off, len, dst) {
-  return Asyncify.handleAsync(async () => await Module.uewFiles.read(id, off, len, dst));
+  return Asyncify.handleAsync(async () => await Module.uewFiles.read(id, off, len, typeof dst == "bigint" ? Number(dst) : dst >>> 0));
 }
 
 __asyncjs__uew_rf_read.sig = "iidii";
@@ -9138,16 +9619,13 @@ function __asyncjs__host_frame_yield() {
 }
 
 // Imports from the Wasm binary.
-var _malloc, _fflush, _uew_ue_console, _uew_set_speed, _uew_ctx_start, _main, _uew_set_trace, _uew_threads, ___funcs_on_exit, __emscripten_stack_alloc, memory, __indirect_function_table, wasmMemory;
+var _malloc, _fflush, _uew_ctx_start, _main, _uew_threads, ___funcs_on_exit, __emscripten_stack_alloc, memory, __indirect_function_table, wasmMemory;
 
 function assignWasmExports(wasmExports) {
   _malloc = wasmExports["malloc"];
   _fflush = wasmExports["fflush"];
-  _uew_ue_console = Module["_uew_ue_console"] = wasmExports["uew_ue_console"];
-  _uew_set_speed = Module["_uew_set_speed"] = wasmExports["uew_set_speed"];
   _uew_ctx_start = Module["_uew_ctx_start"] = wasmExports["uew_ctx_start"];
   _main = Module["_main"] = wasmExports["__main_argc_argv"];
-  _uew_set_trace = Module["_uew_set_trace"] = wasmExports["uew_set_trace"];
   _uew_threads = Module["_uew_threads"] = wasmExports["uew_threads"];
   ___funcs_on_exit = wasmExports["__funcs_on_exit"];
   __emscripten_stack_alloc = wasmExports["_emscripten_stack_alloc"];
@@ -9178,11 +9656,11 @@ var wasmImports = {
   /** @export */ _timegm_js: __timegm_js,
   /** @export */ _tzset_js: __tzset_js,
   /** @export */ clock_time_get: _clock_time_get,
-  /** @export */ emscripten_asm_const_int: _emscripten_asm_const_int,
+  /** @export */ emscripten_date_now: _emscripten_date_now,
+  /** @export */ emscripten_get_callstack: _emscripten_get_callstack,
   /** @export */ emscripten_get_canvas_element_size: _emscripten_get_canvas_element_size,
   /** @export */ emscripten_get_now: _emscripten_get_now,
   /** @export */ emscripten_resize_heap: _emscripten_resize_heap,
-  /** @export */ emscripten_set_canvas_element_size: _emscripten_set_canvas_element_size,
   /** @export */ emscripten_webgl_create_context: _emscripten_webgl_create_context,
   /** @export */ emscripten_webgl_enable_extension: _emscripten_webgl_enable_extension,
   /** @export */ emscripten_webgl_make_context_current: _emscripten_webgl_make_context_current,
@@ -9207,7 +9685,6 @@ var wasmImports = {
   /** @export */ glBlitFramebuffer: _glBlitFramebuffer,
   /** @export */ glBufferData: _glBufferData,
   /** @export */ glBufferSubData: _glBufferSubData,
-  /** @export */ glCheckFramebufferStatus: _glCheckFramebufferStatus,
   /** @export */ glClearBufferfi: _glClearBufferfi,
   /** @export */ glClearBufferfv: _glClearBufferfv,
   /** @export */ glClearBufferiv: _glClearBufferiv,

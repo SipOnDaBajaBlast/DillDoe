@@ -3,24 +3,277 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hello Neighbor Alpha 1</title>
+<title>HelloNeighbour-Win64-Shipping</title>
 <style>
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
   canvas { position: absolute; inset: 0; margin: auto; max-width: 100%; max-height: 100%; aspect-ratio: 1280 / 720;
            width: 100%; height: auto; outline: none; }
   @media (min-aspect-ratio: 1280 / 720) { canvas { width: auto; height: 100%; } }
-  #status { position: fixed; left: 16px; bottom: 12px; font: 13px system-ui, sans-serif; color: #9a9a9a; pointer-events: none; }
-  #credit { position: fixed; right: 12px; bottom: 12px; font: 13px system-ui, sans-serif; color: #9a9a9a; pointer-events: none; }
+  /* loading screen: plain, just placed over the game until its first frame */
+  #boot { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+          background: #000; color: #fff; z-index: 5; }
   #fps { position: fixed; left: 8px; top: 6px; font: 600 13px ui-monospace, Consolas, monospace; color: #e8e8e8; background: #000a;
          padding: 2px 6px; border-radius: 4px; pointer-events: none; display: none; }
 </style>
 </head>
 <body>
+<script>
+  // Crash log. A tab the browser kills (out of memory, a hung page, a GPU crash) takes its console with it, so the page
+  // keeps its last lines on the device: everything it logs, plus a heartbeat every few seconds (frames, memory). Open the
+  // page with ?lastlog=1 after a crash to read the previous session's log instead of starting the game.
+  (() => {
+    const KEY = "uewLastLog:" + location.pathname;
+    if (/[?&]lastlog=1/.test(location.search)) {
+      let t = "";
+      try { t = localStorage.getItem(KEY) || ""; } catch (e) {}
+      document.title = "Last session log";
+      document.body.innerHTML = "";
+      const pre = document.createElement("pre");
+      pre.style.cssText = "white-space:pre-wrap;font:12px monospace;color:#ddd;background:#000;margin:0;padding:8px";
+      pre.textContent = t || "No log saved on this device yet.";
+      document.body.appendChild(pre);
+      window.stop();
+      return;
+    }
+    const lines = [], t0 = performance.now();
+    const add = s => { lines.push(((performance.now() - t0) / 1000).toFixed(1) + " " + String(s).slice(0, 400)); if (lines.length > 1500) lines.splice(0, lines.length - 1500); };
+    for (const k of ["log", "warn", "error"]) {
+      const orig = console[k].bind(console);
+      console[k] = (...a) => { try { add((k == "log" ? "" : "[" + k + "] ") + a.map(x => typeof x == "string" ? x : (x && x.stack) || String(x)).join(" ")); } catch (e) {} orig(...a); };
+    }
+    addEventListener("error", e => add("[page error] " + e.message + " at " + e.filename + ":" + e.lineno));
+    addEventListener("unhandledrejection", e => add("[unhandled rejection] " + ((e.reason && e.reason.stack) || e.reason)));
+    const n = navigator;
+    add(`[device] ${n.userAgent} | ${n.hardwareConcurrency} cores, ${n.deviceMemory || "?"} GB, screen ${screen.width}x${screen.height} @${devicePixelRatio}`);
+    const save = () => { try { localStorage.setItem(KEY, lines.join("\n")); } catch (e) {} };
+    setInterval(() => {
+      const M = window.Module || {}, pm = performance.memory;
+      add(`[heartbeat] frames ${M.uewPresents | 0}, wasm memory ${M.HEAPU8 ? (M.HEAPU8.buffer.byteLength / 1048576).toFixed(0) : (typeof HEAPU8 != "undefined" ? (HEAPU8.buffer.byteLength / 1048576).toFixed(0) : "?")} MB` +
+          (pm ? `, JS heap ${(pm.usedJSHeapSize / 1048576).toFixed(0)} MB` : "") + (M.uewFiles ? `, file cache ${(M.uewFiles.cacheBytes / 1048576).toFixed(0)} MB` : ""));
+      save();
+    }, 3000);
+    addEventListener("pagehide", save);
+  })();
+</script>
+<script>
+  // GAME FILES HOST: where the game's files (the game.wasm.* code parts and the data/ folder) are served from.
+  // Empty means "next to this page", which is all a normal web server or static host needs: no headers, no CORS,
+  // no Range support. Opened straight from disk (file://) a page may not read local files at all, so that case
+  // falls back to the game's local server; put its address here if it runs somewhere else.
+  window.uewDataHost = location.protocol === "file:" ? "http://localhost:8100/" : "";
+</script>
 <canvas id="canvas" width="1280" height="720" tabindex="0"></canvas>
-<div id="status">Loading…</div>
+<script>
+  // render size, read once by the game at start: "native" (--resolution native, or ?res=native) draws at the window's own
+  // pixel count instead of a fixed size the page scales up, so text and UI stay sharp; ?res=WxH picks a size, and
+  // ?quality=low|high overrides the device check below
+  (() => {
+    const c = document.getElementById("canvas");
+    const qs = new URLSearchParams(location.search);
+    const want = qs.get("res") || "";
+    // device profile, read before anything loads: "low" (Chromebooks, phone/tablet GPUs, software rendering, small
+    // machines), "mid" (integrated graphics, 4 cores or 4 GB) or "high". It sets the render size, the engine's
+    // scalability settings and how much memory the game, its file cache and its video memory may take.
+    // ?quality=low|medium|high overrides it.
+    const qq = (qs.get("quality") || "").toLowerCase();
+    let gpuName = "";
+    const tier = qq === "low" ? 0 : (qq === "medium" || qq === "mid") ? 1 : qq === "high" ? 2 : (() => {
+      try {
+        const g = document.createElement("canvas").getContext("webgl") || document.createElement("canvas").getContext("experimental-webgl");
+        const d = g && g.getExtension("WEBGL_debug_renderer_info");
+        gpuName = (d ? g.getParameter(d.UNMASKED_RENDERER_WEBGL) : g ? g.getParameter(g.RENDERER) : "") || "";
+        const lose = g && g.getExtension("WEBGL_lose_context");
+        if (lose) lose.loseContext();          // done with it: don't keep a second GPU context alive
+      } catch (e) {}
+      const cores = navigator.hardwareConcurrency || 8, mem = navigator.deviceMemory || 8;
+      const ua = navigator.userAgent + " " + ((navigator.userAgentData && navigator.userAgentData.platform) || "");
+      if (/CrOS|Chrome OS|ChromeOS|Android/i.test(ua)) return 0;
+      if (/mali|adreno|powervr|videocore|tegra|imagination|swiftshader|llvmpipe|software|basic render|microsoft basic/i.test(gpuName)) return 0;
+      if (mem <= 2 || (mem <= 4 && cores <= 4)) return 0;
+      if (/intel|hd graphics|uhd graphics|iris|radeon\(tm\) graphics|radeon graphics|vega \d+ graphics/i.test(gpuName) || cores <= 4 || mem <= 4) return 1;
+      return 2;
+    })();
+    const P = window.uewProfile = [
+      // (no forced texture pool size: one too small for the scene keeps the streamer loading and dropping mips, which
+      // tripled the engine's start-up work)
+      // Chromebooks and the like: speed over looks, all the way. The window is 960x540, the smallest the game accepts
+      // ("The current resolution is too low" below it), and the 3D is drawn at 40% of that (384x216) and scaled up,
+      // no shadows (lights do shine through walls), no post effects, lowest materials, the simplest models from close
+      // up, blurrier textures, a short view distance and no detail meshes or foliage
+      { name: "low", w: 960, h: 540, guestMB: 1024, gpuMB: 512, cacheMB: 96, playCacheMB: 32,
+        cmds: "sg.ViewDistanceQuality 0,sg.ShadowQuality 0,sg.PostProcessQuality 0,sg.TextureQuality 0,sg.EffectsQuality 0," +
+              "sg.AntiAliasingQuality 0,r.ShadowQuality 0,r.ScreenPercentage 40,r.MaxAnisotropy 0,r.MipMapLODBias 1," +
+              "r.ViewDistanceScale 0.3,r.StaticMeshLODDistanceScale 4,r.SkeletalMeshLODBias 2,r.ParticleLODBias 2,r.DetailMode 0," +
+              "r.MaterialQualityLevel 0,r.AmbientOcclusionLevels 0,r.SSR.Quality 0,r.BloomQuality 0,r.LightShaftQuality 0," +
+              "r.DepthOfFieldQuality 0,r.MotionBlurQuality 0,r.LensFlareQuality 0,r.SceneColorFringeQuality 0,r.Tonemapper.Quality 0," +
+              "r.PostProcessAAQuality 0,r.TranslucencyLightingVolumeDim 4,r.LightFunctionQuality 0,r.RefractionQuality 0," +
+              "r.SeparateTranslucency 0,r.CustomDepth 0,foliage.DensityScale 0,grass.DensityScale 0" },
+      { name: "mid", w: 960, h: 540, guestMB: 1536, gpuMB: 1024, cacheMB: 192, playCacheMB: 96,
+        cmds: "sg.ViewDistanceQuality 1,sg.ShadowQuality 1,sg.PostProcessQuality 1,sg.TextureQuality 1,sg.EffectsQuality 1," +
+              "sg.AntiAliasingQuality 1,r.Shadow.MaxResolution 1024,r.ScreenPercentage 85" },
+      { name: "high", w: 0, h: 0, guestMB: 2048, gpuMB: 1536, cacheMB: 512, playCacheMB: 128, cmds: "" },
+    ][tier];
+    // 4 GB or less (most Chromebooks): the game peaks near 700 MB, so 1 GB of guest memory is enough, and every MB
+    // reserved past that is one the browser may kill the tab for
+    if ((navigator.deviceMemory || 8) <= 4) P.guestMB = Math.min(P.guestMB, 1024);
+    // testing overrides: ?guestmb=N (guest memory), ?cmds=0 (none of the profile's engine settings)
+    if (+qs.get("guestmb")) P.guestMB = +qs.get("guestmb");
+    if (qs.get("cmds") === "0") P.cmds = "";
+    // The profile's quality, put in the game's settings files (Module.uewSeed below). -ExecCmds alone did nothing: the
+    // game applies its saved scalability levels at start, which set every cvar they own again (r.ScreenPercentage is
+    // sg.ResolutionQuality's). Level 0 is redefined for "low" so the engine's own apply turns everything down.
+    const SG = {
+      low: { ResolutionQuality: 40, ViewDistanceQuality: 0, AntiAliasingQuality: 0, ShadowQuality: 0, PostProcessQuality: 0, TextureQuality: 0, EffectsQuality: 0, FoliageQuality: 0 },
+      mid: { ResolutionQuality: 85, ViewDistanceQuality: 1, AntiAliasingQuality: 1, ShadowQuality: 1, PostProcessQuality: 1, TextureQuality: 1, EffectsQuality: 1, FoliageQuality: 1 },
+    }[P.name];
+    if (SG) P.gus = "[ScalabilityGroups]\n" + Object.entries(SG).map(([k, v]) => `sg.${k}=${v}\n`).join("");
+    // Mouse latency, every profile. Unreal smooths the mouse over the last frames (on by default): at a low frame rate
+    // that window is long and the view trails the hand. And the render thread normally runs a frame behind the game
+    // thread so the two overlap on separate cores; with every game thread on one browser thread nothing overlaps, so it
+    // was only a frame of extra delay.
+    P.input = "[/Script/Engine.InputSettings]\nbEnableMouseSmoothing=False\nbEnableFOVScaling=False\n";
+    P.engine = "[SystemSettings]\nr.OneFrameThreadLag=0\n";
+    if (P.name === "low") P.scal = [
+      "[ViewDistanceQuality@0]", "r.ViewDistanceScale=0.3", "r.SkeletalMeshLODBias=2", "r.StaticMeshLODDistanceScale=4", "r.ParticleLODBias=2",
+      "[ShadowQuality@0]", "r.ShadowQuality=0", "r.Shadow.MaxResolution=128", "r.Shadow.CSM.MaxCascades=1", "r.LightFunctionQuality=0",
+      "r.DistanceFieldShadowing=0", "r.DistanceFieldAO=0",
+      "[PostProcessQuality@0]", "r.AmbientOcclusionLevels=0", "r.SSR.Quality=0", "r.BloomQuality=0", "r.LightShaftQuality=0",
+      "r.DepthOfFieldQuality=0", "r.MotionBlurQuality=0", "r.LensFlareQuality=0", "r.SceneColorFringeQuality=0", "r.Tonemapper.Quality=0",
+      "r.SeparateTranslucency=0", "r.TranslucencyLightingVolumeDim=4", "r.RefractionQuality=0", "r.EyeAdaptationQuality=2",
+      "[TextureQuality@0]", "r.MipMapLODBias=1", "r.MaxAnisotropy=0", "r.Streaming.PoolSize=200",
+      "[EffectsQuality@0]", "r.MaterialQualityLevel=0", "r.DetailMode=0", "r.SSS.Scale=0", "r.TranslucencyVolumeBlur=0",
+      "[AntiAliasingQuality@0]", "r.PostProcessAAQuality=0",
+      "[FoliageQuality@0]", "foliage.DensityScale=0", "grass.DensityScale=0",
+    ].join("\n") + "\n";
+    console.log(`[profile] ${P.name} (${gpuName || "gpu unknown"}, ${navigator.hardwareConcurrency || "?"} cores, ${navigator.deviceMemory || "?"} GB)${qq ? " by ?quality" : ""}`);
+    const weak = tier < 2;
+    let w = 0, h = 0;
+    if (want === "native") {
+      const d = Math.min(window.devicePixelRatio || 1, 3);
+      // a page loading in a hidden or not yet laid out view reads a 0x0 window: the screen stands in
+      w = (innerWidth || screen.availWidth || 1280) * d; h = (innerHeight || screen.availHeight || 720) * d;
+      const s = Math.min(1, 3840 / w, 2160 / h);
+      w = Math.round(w * s); h = Math.round(h * s);
+    } else {
+      const m = /^(\d{3,5})x(\d{3,5})$/.exec(want);
+      if (m) { w = +m[1]; h = +m[2]; }
+    }
+    // no size asked for: the game has to render exactly the canvas, or its own resolution (an engine that reads its
+    // settings file draws 1680x1050 into a 1280x720 canvas) leaves the picture letterboxed and the crosshair off
+    // centre. A weak device starts at 960x540: games refuse anything smaller ("The current resolution is too low").
+    if (!w || !h) { w = P.w ? Math.min(c.width, P.w) : c.width; h = P.h ? Math.min(c.height, P.h) : c.height; }
+    if (w >= 320 && h >= 200) {
+      // multiples of 8: Unreal Engine 3 rounds its depth buffer up to 8 pixels, and D3D11 draws to a smaller back
+      // buffer with it while WebGPU wants attachments of one size (at 1600x900 every frame failed: depth 1600x904)
+      w &= ~7; h &= ~7;
+      c.width = w; c.height = h; c.style.aspectRatio = `${w} / ${h}`;
+      // the page's canvas is the game window's client area, so the engine renders 1:1 to it
+      window.uewResArgs = [`-ResX=${w}`, `-ResY=${h}`];
+      if (P.cmds) window.uewResArgs.push("-ExecCmds=" + P.cmds);
+    }
+  })();
+</script>
+<div id="boot"><progress id="bootbar" max="100" value="0"></progress><div><span id="bootpct">0%</span> <span id="status">Loading…</span></div></div>
+<script>
+  // The loading bar and the time left. A boot is mostly the engine starting up, and the game files it reads are only
+  // part of that: after its last big read it still works for seconds with nothing to measure. So every launch that
+  // didn't have to download anything keeps its own timeline here (seconds in, against how much of the boot plan the
+  // game had read), and the next one places itself on it: the bar moves with real time, never past where the reads
+  // say this boot is, and the time left is scaled by how fast this boot runs compared with the last. A first visit has
+  // no timeline: it goes by bytes downloaded and the download speed so far.
+  (() => {
+    const box = document.getElementById("boot"), bar = document.getElementById("bootbar");
+    const pct = document.getElementById("bootpct"), stat = document.getElementById("status");
+    const KEY = "uewBootTime:" + location.pathname;
+    let H = null;
+    try { H = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+    if (!H || !(H.T > 0) || !Array.isArray(H.s)) H = null;
+    const t0 = performance.now(), samples = [];
+    let tSat = 0, lastSample = -1, shown = 0, te = 0, lastT = 0;
+    const secs = s => s >= 90 ? `about ${Math.round(s / 60)} min left` : s >= 1.5 ? `about ${Math.round(s)} s left` : "almost done";
+    // timeline time at which the last boot had read fraction f (and the next time it read more than that)
+    const at = f => {
+      const S = H.s;
+      for (let i = 0; i < S.length; i++) if (S[i][1] >= f) {
+        const a = S[i - 1] || [0, 0], b = S[i];
+        const k = b[1] > a[1] ? (f - a[1]) / (b[1] - a[1]) : 1;
+        let next = H.sat;
+        for (let j = i; j < S.length; j++) if (S[j][1] > f + 1e-4) { next = S[j][0]; break; }
+        return [a[0] + (b[0] - a[0]) * k, next];
+      }
+      return [H.sat, H.T];
+    };
+    const tick = () => {
+      const M = window.Module || {}, F = M.uewFiles, t = (performance.now() - t0) / 1000, dt = t - lastT;
+      lastT = t;
+      const f = F && F.progress ? F.progress() : 0;
+      const cached = !!window.uewCodeCached;
+      if ((M.uewPresents | 0) > 0) {
+        // keep this timeline for the next launch: only a boot that downloaded (next to) nothing is a fair measure
+        if (cached && F && F.fetched < (8 << 20) && samples.length > 4)
+          try { localStorage.setItem(KEY, JSON.stringify({ T: +t.toFixed(2), sat: +(tSat || t).toFixed(2), s: samples })); } catch (e) {}
+        box.remove();
+        clearInterval(iv);
+        return;
+      }
+      if (f >= 0.999 && !tSat) tSat = t;
+      if (t - lastSample >= 0.25 && samples.length < 2400) { lastSample = t; samples.push([+t.toFixed(2), +f.toFixed(4)]); }
+      let p, left, what;
+      if (H && cached) {
+        // on the last boot's timeline: real time moves it, the reads cap it. Reading the files can go at another pace
+        // than last time (disk instead of network); the engine's start-up work after the last read is CPU work, so
+        // that stage is expected to take as long as it did last time.
+        const postLast = Math.max(1, H.T - H.sat);
+        if (!tSat) {
+          const [tf, cap] = at(f);
+          te = Math.min(Math.max(te + dt, tf), cap);
+          const sp = te > 3 ? Math.min(3, Math.max(0.5, t / te)) : 1;   // this boot's reading pace against last time's
+          left = Math.max(0, H.sat - te) * sp + postLast;
+          what = "Loading the game…";
+        } else {
+          left = Math.max(0, postLast - (t - tSat));
+          what = "Starting the game…";
+        }
+        // elapsed against elapsed plus what is left: the bar and the time left always agree
+        p = left > 0 ? t / (t + left) : 0.97 + 0.02 * (1 - Math.exp(-(t - tSat - postLast) / 5));
+      } else {
+        // first visit (or no timeline yet): downloads are most of it
+        const codeTot = cached ? 0 : (window.uewCodeTotal || 0), codeGot = cached ? 0 : (window.uewCodeGot || 0);
+        const need = codeTot + (F && F.planBytes ? F.planBytes() : 0), got = codeGot + (F ? F.fetched : 0);
+        const rate = t > 1 ? got / t : 0;
+        const d = need ? Math.min(1, got / need) : 0;
+        // after its last read the engine still works about as long again (0.9x the time to that point, measured)
+        // before the first frame; the bar gives that stage its share instead of waiting at the end
+        const POST = 0.9;
+        if (!tSat) {
+          const dl = !cached || got > (4 << 20);
+          const dlLeft = dl && rate > 0 && need ? Math.max(0, need - got) / rate : null;
+          // reads done at (now + downloads left), then the start-up work after them
+          const total = dlLeft == null ? null : (t + dlLeft) * (1 + POST);
+          p = total ? t / total : 0.5 * Math.max(d, f);
+          left = total ? total - t : null;
+          what = dl && need && d < 0.999 ? `Downloading ${(got / 1048576).toFixed(0)} / ${(need / 1048576).toFixed(0)} MB` : "Loading the game…";
+        } else {
+          const post = t - tSat, est = Math.max(3, POST * tSat), total = tSat + est;
+          p = post < est ? t / total : 0.97 + 0.02 * (1 - Math.exp(-(post - est) / 5));
+          left = Math.max(0, est - post);
+          what = "Starting the game…";
+        }
+      }
+      p = Math.min(0.99, Math.max(0, p));
+      shown = Math.max(shown, p);              // never goes backwards
+      bar.value = shown * 100;
+      pct.textContent = Math.floor(shown * 100) + "%";
+      stat.textContent = left == null ? what : `${what} (${secs(left)})`;
+    };
+    // a timer, not animation frames: those stop while the page's thread is busy starting the game or the window is in
+    // the background, which froze the bar and the time left
+    const iv = setInterval(tick, 250);
+    tick();
+  })();
+</script>
 <div id="fps"></div>
-<div id="credit">Ported by ThatMilkdud</div>
 <script>
   // frame counter: Ctrl+Shift+F toggles it (remembered), ?fps=1 or ?fps=0 in the address overrides
   (() => {
@@ -32,7 +285,9 @@
     const show = () => { el.style.display = on ? "block" : "none"; };
     show();
     addEventListener("keydown", e => {
-      if (e.ctrlKey && e.shiftKey && e.code === "KeyF") {
+      // F3 (or Ctrl+Shift+F) shows or hides it; the browser's own F3 (find next) is kept from firing
+      if ((e.code === "F3" && !e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey) || (e.ctrlKey && e.shiftKey && e.code === "KeyF")) {
+        if (e.repeat) { e.preventDefault(); e.stopImmediatePropagation(); return; }
         on = !on; show();
         try { localStorage.setItem("uewFps", on ? "1" : "0"); } catch (err) {}
         e.preventDefault(); e.stopImmediatePropagation();
@@ -54,53 +309,134 @@
 </script>
 <script>
   const status = document.getElementById("status");
-  // The port's data and split wasm build stay on its upstream GitHub Pages origin.
-  const REMOTE = "https://iordbeerus.github.io/hello-neighbor-Alpha-1-Port/";
-  const parts = ["game.wasm.0", "game.wasm.1", "game.wasm.2", "game.wasm.3", "game.wasm.4", "game.wasm.5", "game.wasm.6", "game.wasm.7", "game.wasm.8", "game.wasm.9"].map(file => REMOTE + file);
+  const parts = [];
+  // where the code parts and the game files are fetched from: window.uewDataHost, or this page's own folder
+  const GAME_BASE = (() => {
+    let h = String(window.uewDataHost || "").trim().replace(/\/+$/, "");
+    if (!h) return "";
+    if (/\/data$/i.test(h)) h = h.slice(0, -5);   // ".../data" given: the parts sit one folder up
+    return h + "/";
+  })();
   var Module = {
     canvas: document.getElementById("canvas"),
-    arguments: ["--image", "/image.bin", "--root", "/game", "--save", "/save/HelloNeighborReborn-Win64-Shipping", "--exe", "HelloNeighborReborn/Binaries/Win64/HelloNeighborReborn-Win64-Shipping.exe", "-dx11"].concat(new URLSearchParams(location.search).getAll("arg")),
-    uewSave: "/save/HelloNeighborReborn-Win64-Shipping",
-    uewSeed: {},
+    arguments: ["--image", "/image.bin", "--root", "/game", "--save", "/save/HelloNeighbour-Win64-Shipping", "--exe", "HelloNeighbour/Binaries/Win64/HelloNeighbour-Win64-Shipping.exe"].concat(window.uewResArgs || [], new URLSearchParams(location.search).getAll("arg")),
+    uewSave: "/save/HelloNeighbour-Win64-Shipping",
+    // the build's settings files plus the device profile's (its scalability levels, and for "low" what level 0
+    // means): written into the game's own settings files, where Unreal's startup apply keeps them
+    uewSeed: ((s, P) => {
+      s = Object.assign({}, s);
+      const dirs = [...new Set(Object.keys(s).map(k => k.slice(0, k.lastIndexOf("/"))))];
+      for (const d of dirs) {
+        if (P && P.gus) s[d + "/GameUserSettings.ini"] = (s[d + "/GameUserSettings.ini"] || "") + P.gus;
+        if (P && P.scal) s[d + "/Scalability.ini"] = (s[d + "/Scalability.ini"] || "") + P.scal;
+        if (P && P.input) s[d + "/Input.ini"] = (s[d + "/Input.ini"] || "") + P.input;
+        if (P && P.engine) s[d + "/Engine.ini"] = (s[d + "/Engine.ini"] || "") + P.engine;
+      }
+      return s;
+    })({"Users/Player/AppData/Local/HelloNeighbour/Saved/Config/Windows/GameUserSettings.ini": "[ScalabilityGroups]\nsg.ShadowQuality=1\nsg.PostProcessQuality=1\nsg.EffectsQuality=1\nsg.FoliageQuality=1\nsg.ViewDistanceQuality=1\nsg.AntiAliasingQuality=1\nsg.ReflectionQuality=1\nsg.GlobalIlluminationQuality=1\nsg.ShadingQuality=1\nsg.LandscapeQuality=1\n", "Users/Player/AppData/Local/HelloNeighbour/Saved/Config/WindowsNoEditor/GameUserSettings.ini": "[ScalabilityGroups]\nsg.ShadowQuality=1\nsg.PostProcessQuality=1\nsg.EffectsQuality=1\nsg.FoliageQuality=1\nsg.ViewDistanceQuality=1\nsg.AntiAliasingQuality=1\nsg.ReflectionQuality=1\nsg.GlobalIlluminationQuality=1\nsg.ShadingQuality=1\nsg.LandscapeQuality=1\n", "Users/Player/AppData/Local/HelloNeighbour/Saved/Config/Windows/Scalability.ini": "[PostProcessQuality@0]\nr.EyeAdaptationQuality=2\nr.Tonemapper.Quality=5\n[PostProcessQuality@1]\nr.EyeAdaptationQuality=2\nr.Tonemapper.Quality=5\n", "Users/Player/AppData/Local/HelloNeighbour/Saved/Config/WindowsNoEditor/Scalability.ini": "[PostProcessQuality@0]\nr.EyeAdaptationQuality=2\nr.Tonemapper.Quality=5\n[PostProcessQuality@1]\nr.EyeAdaptationQuality=2\nr.Tonemapper.Quality=5\n"}, window.uewProfile),
+    // the game files live in data/ under the host set above
+    uewDataUrl: (GAME_BASE || "./"),
     uewAsyncShaders: true,
-    uewDebugPanel: true,
+    uewDebugPanel: false,
     uewNetPlaceholders: false,
-    uewCacheMB: 1700,
-    uewGpuMB: 5530,
-    // Loads data/index.txt and 1 MB file blocks on demand from the upstream origin.
-    uewDataUrl: REMOTE + "data/",
+    uewCacheMB: Math.min(682, (window.uewProfile || {}).cacheMB || 682),
+    // video memory the game is told it has: on low-memory devices a smaller budget makes Unreal keep a smaller
+    // texture pool instead of filling RAM the browser and the game need
+    uewGpuMB: Math.min(3738, (window.uewProfile || {}).gpuMB || 3738),
+    // guest memory is reserved whole at start: the profile's size, not the build's (the game peaks well below it)
+    uewGuestMB: (window.uewProfile || {}).guestMB || 0,
+    uewPlayCacheMB: (window.uewProfile || {}).playCacheMB || 0,
+    // weak devices skip the background download of the rest of the game files (uew_files.js: it starved the game)
+    uewNoFill: (window.uewProfile || {}).name !== "high" && !/[?&]fill=1/.test(location.search),
     print: t => console.log(t),
     printErr: t => console.log(t),
-    setStatus: t => { if (t) status.textContent = t; },
-    onRuntimeInitialized: () => { status.textContent = ""; },
+    setStatus: () => {},   // the loading screen writes the status line itself
+    onRuntimeInitialized: () => {},   // the loading screen keeps its own status line
   };
-  // Default is the low render size and effects through the runtime's Module.uewSeed (marked blocks in the Unreal config); ?perf=high skips them
-  if (new URLSearchParams(location.search).get("perf") !== "high") {
-    const nl = "\n";
-    const engine = "[/SystemSettings]" + nl + [
-      "r.ScreenPercentage=60", "r.MotionBlurQuality=0", "r.PostProcessAAQuality=0", "r.ShadowQuality=0",
-      "r.Shadow.MaxResolution=256", "r.ViewDistanceScale=0.6", "r.SSR.Quality=0", "r.AmbientOcclusionLevels=0",
-      "r.LightFunctionQuality=0", "r.ParticleLightQuality=0", "r.MaxAnisotropy=1", "r.DepthOfFieldQuality=0",
-      "r.BloomQuality=0"].join(nl) + nl;
-    const user = "[ScalabilityGroups]" + nl + [
-      "sg.ResolutionQuality=60", "sg.ViewDistanceQuality=0", "sg.AntiAliasingQuality=0", "sg.ShadowQuality=0",
-      "sg.PostProcessQuality=0", "sg.TextureQuality=2", "sg.EffectsQuality=0", "sg.FoliageQuality=0"].join(nl) + nl;
-    const dir = "Users/Player/AppData/Local/HelloNeighborReborn/Saved/Config/";
-    for (const plat of ["WindowsNoEditor", "Windows"]) {
-      Module.uewSeed[dir + plat + "/Engine.ini"] = engine;
-      Module.uewSeed[dir + plat + "/GameUserSettings.ini"] = user;
-    }
-  }
-  if (parts.length) {
+  if (!parts.length) {
+    // one game.wasm, handed straight from fetch() to the streaming compile: the browser can then keep the optimised
+    // machine code in its code cache, so later launches skip compiling (reading the body ourselves would lose that)
+    // The code is shipped gzipped (a fifth of the size, for slow hosts) and decompressed as it streams into the
+    // compiler; the decompressed module is kept in Cache Storage, and later launches compile from there, where the
+    // browser also keeps the compiled machine code. A rebuild has a new code id, so it never runs stale code.
+    const CODE_ID = "ad9099601a88", CODE_GZ = true, CODE_PARTS = ["game.wasm.gz.0", "game.wasm.gz.1", "game.wasm.gz.2"];
+    const codeResponse = async (noStore) => {
+      const wasmType = { headers: { "Content-Type": "application/wasm" } };
+      const prefix = "uew-code:" + location.pathname + ":", url = new URL("__uew_code/" + CODE_ID + "/game.wasm", location.href).href;
+      let c = null;
+      try {
+        c = await caches.open(prefix + CODE_ID);
+        const hit = await c.match(url);
+        if (hit) { console.log("[boot] code from this device's cache"); window.uewCodeCached = true; window.uewCodeProgress = 1; return hit; }
+      } catch (e) { c = null; }
+      if (!CODE_GZ) return fetch(GAME_BASE + "game.wasm", { credentials: "same-origin" });
+      // the gzipped code may be in parts (hosts with a file size cap): all are requested at once and read in order
+      const names = CODE_PARTS.length ? CODE_PARTS : ["game.wasm.gz"];
+      const reqs = names.map(n => fetch(GAME_BASE + n + "?v=" + CODE_ID, { credentials: "same-origin" }));
+      reqs.forEach(p => p.catch(() => {}));
+      const joined = new ReadableStream({
+        async start(ctl) {
+          try {
+            for (let i = 0; i < reqs.length; i++) {
+              const x = await reqs[i];
+              if (!x.ok) throw new Error(`HTTP ${x.status} for ${GAME_BASE}${names[i]}`);
+              const rd = x.body.getReader();
+              for (;;) { const { done, value } = await rd.read(); if (done) break; ctl.enqueue(value); }
+            }
+            ctl.close();
+          } catch (e) { ctl.error(e); }
+        }
+      });
+      const r = { body: joined };
+      const total = 46811946;
+      let got = 0;
+      const count = new TransformStream({ transform(ch, ctl) {
+        got += ch.length;
+        window.uewCodeGot = got; window.uewCodeTotal = total;   // the loading screen shows these
+        window.uewCodeProgress = Math.min(1, got / total);
+        ctl.enqueue(ch);
+      } });
+      // hosts that serve .gz files with Content-Encoding: gzip have the browser unpack it already: look at the bytes
+      const rd = r.body.pipeThrough(count).getReader(), first = await rd.read();
+      const gz = first.value && first.value[0] == 0x1f && first.value[1] == 0x8b;
+      let body = new ReadableStream({
+        start(ctl) { if (first.done) ctl.close(); else ctl.enqueue(first.value); },
+        async pull(ctl) { const { done, value } = await rd.read(); if (done) ctl.close(); else ctl.enqueue(value); },
+      });
+      if (gz) body = body.pipeThrough(new DecompressionStream("gzip"));
+      if (c && !noStore) {
+        // into this device's cache first (written to disk as it streams in), then compiled from there. Splitting the
+        // stream to do both at once (tee) held whatever one side was behind in memory - up to the whole 220 MB, more
+        // than once - and a 4 GB Chromebook's tab was killed for it. Compiling waits for the download this way, but it
+        // is mostly deferred to first use anyway.
+        try {
+          await c.put(url, new Response(body, wasmType));
+          caches.keys().then(ks => ks.forEach(k => { if (k.startsWith(prefix) && k != prefix + CODE_ID) caches.delete(k); })).catch(() => {});
+          const hit = await c.match(url);
+          if (hit) return hit;
+        } catch (e) {}
+        return codeResponse(true);   // the cache refused it (full, private mode): download again and compile directly
+      }
+      return new Response(body, wasmType);
+    };
+    Module.instantiateWasm = (imports, done) => {
+      status.textContent = "Loading code…";
+      const t0 = performance.now();
+      WebAssembly.instantiateStreaming(codeResponse(), imports)
+        .then(r => { console.log(`[boot] code ready in ${((performance.now() - t0) / 1000).toFixed(1)} s`); window.uewCodeProgress = 1; done(r.instance, r.module); })
+        .catch(e => { status.textContent = "Failed to load: " + e.message; });
+      return {};
+    };
+  } else {
     // the parts download together and are fed in order to a streaming compile, which runs while they arrive
     Module.instantiateWasm = (imports, done) => {
       let got = 0;
-      const res = parts.map(u => fetch(u));
+      const res = parts.map(u => fetch(GAME_BASE + u));
       const body = new ReadableStream({
         async start(ctl) {
           for (let i = 0; i < res.length; i++) {
             const r = await res[i];
-            if (!r.ok) throw new Error(`HTTP ${r.status} for ${parts[i]}`);
+            if (!r.ok) throw new Error(`HTTP ${r.status} for ${GAME_BASE}${parts[i]}`);
             const rd = r.body.getReader();
             for (;;) {
               const { done: end, value } = await rd.read();
@@ -121,17 +457,6 @@
     };
   }
 </script>
-<script>
-  // This page is served with COOP/COEP by the game-files origin; the player page
-  // supplies the cross-origin-isolated permission, so real wasm threads are on.
-  if (!self.crossOriginIsolated) {
-    status.textContent = "This game needs cross-origin isolation; open it from the DillDoe player page.";
-  } else {
-    const s = document.createElement("script");
-    s.src = "game.js";
-    s.onerror = () => { status.textContent = "Failed to load the game loader."; };
-    document.body.appendChild(s);
-  }
-</script>
+<script src="game.js"></script>
 </body>
 </html>
